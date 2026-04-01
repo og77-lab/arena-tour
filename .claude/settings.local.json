@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm create:*)",
+      "Bash(cp _tmp/arena-tour/package.json .)",
+      "Bash(cp _tmp/arena-tour/vite.config.js .)",
+      "Bash(cp _tmp/arena-tour/index.html .)",
+      "Bash(cp -r _tmp/arena-tour/src .)",
+      "Bash(cp -r _tmp/arena-tour/public .)",
+      "Bash(rm -rf _tmp/arena-tour)",
+      "Bash(rmdir _tmp)",
+      "Bash(npm install:*)"
+    ]
+  }
+}
