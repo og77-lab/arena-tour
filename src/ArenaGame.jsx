@@ -1,5 +1,5 @@
 import * as React from "react";
-import { syncAchievements } from "./firebase";
+import { syncAchievements, saveGameToCloud, loadGameFromCloud } from "./firebase";
 const { useState, useEffect, useRef } = React;
 
 /* ═══ CONSTANTS ═══ */
@@ -440,10 +440,17 @@ export default function Arena(props) {
   useEffect(function () {
     var done = false;
     function fin(d) { if (done) return; done = true; if (d && d.player) { setS(d); setScr("hub"); } else setScr("title"); }
-    fin(sGet());
+    if (userId) {
+      loadGameFromCloud(userId).then(function(cloud) {
+        if (cloud && cloud.player) { fin(cloud); sSet(cloud); }
+        else fin(sGet());
+      }).catch(function() { fin(sGet()); });
+    } else {
+      fin(sGet());
+    }
   }, []);
 
-  function save(s) { setS(s); sSet(s); }
+  function save(s) { setS(s); sSet(s); if (userId) saveGameToCloud(userId, s).catch(function(e){ console.error("Cloud save failed:", e); }); }
   function exportSave() { if (!S) return; var b = new Blob([JSON.stringify(S)],{type:"application/json"}); var u = URL.createObjectURL(b); var a = document.createElement("a"); a.href = u; a.download = "arena-"+S.pName+"-s"+S.sNum+".json"; a.click(); URL.revokeObjectURL(u); }
   function importSave(e) { var f = e.target.files && e.target.files[0]; if (!f) return; var r = new FileReader(); r.onload = function(ev){ try { var d = JSON.parse(ev.target.result); if (d && d.player) { save(d); setScr("hub"); } } catch(err){} }; r.readAsText(f); }
   var _syncing = useState(false), syncing = _syncing[0], setSyncing = _syncing[1];
@@ -461,7 +468,7 @@ export default function Arena(props) {
 
   function newSeason() { save(mkSeason(inp, 1, null)); setScr("hub"); }
   function nextSeason() { if (!S) return; doSync(S); save(mkSeason(S.pName, (S.sNum||1)+1, S)); setScr("hub"); }
-  function newGame() { if (confirm("Start a brand new game? Your current save will be erased.")) { sSet(null); setS(null); setTS(null); setFS(null); setScr("title"); } }
+  function newGame() { if (confirm("Start a brand new game? Your current save will be erased.")) { sSet(null); if (userId) saveGameToCloud(userId, null).catch(function(){}); setS(null); setTS(null); setFS(null); setScr("title"); } }
 
   function doTrain(stat) {
     if (!S) return;

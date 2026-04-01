@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
-import { getFirestore, doc, setDoc, getDocs, collection, query, orderBy } from "firebase/firestore";
+import { getFirestore, doc, setDoc, getDoc, getDocs, collection, query, orderBy } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: "AIzaSyD0tGmRezXlQUlzLJ586zPYv28lle2tDAw",
@@ -51,6 +51,28 @@ export async function syncAchievements(userId, playerName, avatar, seasonData) {
     finalsWins: best.finals || 0,
     updatedAt: new Date()
   });
+}
+
+// Firestore: save full game state to cloud
+export async function saveGameToCloud(userId, gameState) {
+  if (!userId) return;
+  if (!gameState) {
+    await setDoc(doc(db, "saves", userId), { gameState: null, updatedAt: new Date() });
+    return;
+  }
+  await setDoc(doc(db, "saves", userId), {
+    gameState: JSON.stringify(gameState),
+    updatedAt: new Date()
+  });
+}
+
+// Firestore: load full game state from cloud
+export async function loadGameFromCloud(userId) {
+  if (!userId) return null;
+  const snap = await getDoc(doc(db, "saves", userId));
+  if (!snap.exists()) return null;
+  const data = snap.data();
+  return data.gameState ? JSON.parse(data.gameState) : null;
 }
 
 // Firestore: get global leaderboard

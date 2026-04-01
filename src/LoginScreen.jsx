@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { registerUser, loginUser } from './firebase'
 
-export default function LoginScreen() {
+export default function LoginScreen({ onGuest }) {
   const [mode, setMode] = useState('login') // 'login' or 'register'
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -102,6 +102,17 @@ export default function LoginScreen() {
             </button>
           </form>
         </div>
+
+        <button onClick={onGuest}
+          style={{
+            width: '100%', padding: '12px 0', borderRadius: 8, border: '1px solid #334155',
+            background: 'transparent', color: '#64748b',
+            fontSize: 13, fontWeight: 700, cursor: 'pointer',
+            marginTop: 12, letterSpacing: 0.5
+          }}
+        >
+          Play as Guest (local save only)
+        </button>
       </div>
     </div>
   )

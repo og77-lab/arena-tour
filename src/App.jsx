@@ -6,10 +6,14 @@ import { onAuthChange, logoutUser } from './firebase'
 
 function App() {
   const [user, setUser] = useState(undefined) // undefined = loading, null = not logged in
+  const [guest, setGuest] = useState(false)
   const [view, setView] = useState('game') // 'game' or 'leaderboard'
 
   useEffect(() => {
-    return onAuthChange((u) => setUser(u || null))
+    return onAuthChange((u) => {
+      setUser(u || null)
+      if (u) setGuest(false) // if they log in, exit guest mode
+    })
   }, [])
 
   // Loading state
@@ -24,15 +28,41 @@ function App() {
     )
   }
 
-  // Not logged in
-  if (!user) {
-    return <LoginScreen />
+  // Not logged in and not guest — show login
+  if (!user && !guest) {
+    return <LoginScreen onGuest={() => setGuest(true)} />
+  }
+
+  // Guest mode — game only, with a small "Sign In" bar
+  if (guest && !user) {
+    return (
+      <div>
+        <div style={{
+          position: 'sticky', top: 0, zIndex: 999,
+          background: 'rgba(8,8,16,0.95)', borderBottom: '1px solid #1e293b',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '6px 12px', fontFamily: "'Trebuchet MS',sans-serif"
+        }}>
+          <span style={{ color: '#475569', fontSize: 11 }}>Playing as Guest (local save only)</span>
+          <button
+            onClick={() => setGuest(false)}
+            style={{
+              background: '#1e40af', color: '#fff', border: 'none',
+              padding: '4px 12px', borderRadius: 6, fontSize: 11, fontWeight: 700,
+              cursor: 'pointer'
+            }}
+          >
+            Sign In
+          </button>
+        </div>
+        <Arena />
+      </div>
+    )
   }
 
   // Logged in — show game or leaderboard
   return (
     <div>
-      {/* Top nav bar */}
       <div style={{
         position: 'sticky', top: 0, zIndex: 999,
         background: 'rgba(8,8,16,0.95)', borderBottom: '1px solid #1e293b',
