@@ -102,7 +102,7 @@ function nW(a, b) {
   var sB = Math.min(95, 55 + ((b.skill||50)+bB) * 0.4);
   return (sA + Math.random() * 14 - 5) >= (sB + Math.random() * 14 - 5) ? a : b;
 }
-function trainCost(lv) { return (lv + 1) * 25 + Math.max(0, lv - 5) * 20; }
+function trainCost(lv) { return (lv + 1) * 15 + Math.max(0, lv - 8) * 15; }
 
 function sSet(v) { try { if (v === null) { localStorage.removeItem(SK); } else { localStorage.setItem(SK, JSON.stringify(v)); } } catch(e){} }
 function sGet() { try { var r = localStorage.getItem(SK); return r ? JSON.parse(r) : null; } catch(e){ return null; } }
@@ -584,7 +584,7 @@ export default function Arena(props) {
     if (newSP > (pb.peakS||0)) pb.peakS = newSP;
     var newRes = (S.player.res || [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]).slice();
     newRes[S.calIdx] = pp;
-    var newP = Object.assign({}, S.player, { sp: newSP, ap: (S.player.ap||0)+pp, tr: Object.assign({}, S.player.tr, { tp: (S.player.tr.tp||0) + Math.round(pp/8) + 5 }), best: pb, res: newRes });
+    var newP = Object.assign({}, S.player, { sp: newSP, ap: (S.player.ap||0)+pp, tr: Object.assign({}, S.player.tr, { tp: (S.player.tr.tp||0) + Math.floor(pp/4) + 15 }), best: pb, res: newRes });
     /* Update NPC peak ranks */
     var tempS = Object.assign({}, S, { player: newP, npcs: newNpcs });
     var ranked = getRanked(tempS);
