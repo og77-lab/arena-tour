@@ -1,5 +1,6 @@
 import * as React from "react";
 import { syncAchievements, saveGameToCloud, loadGameFromCloud } from "./firebase";
+import { playStrike, playVictory, playDefeat, isMuted, setMuted } from "./sounds";
 const { useState, useEffect, useRef } = React;
 
 /* ═══ CONSTANTS ═══ */
@@ -142,12 +143,14 @@ function PowerBar(props) {
     var oBase = Math.min(95, 55 + effSkill * 0.4);
     var osc = Math.min(99, oBase + (Math.random() * 14 - 5));
     setFx(sc > 75 ? "hit" : "miss"); setTimeout(function () { setFx(""); }, 350);
+    playStrike(sc);
     var nm = myH.concat([sc]), no = opH.concat([osc]);
     setMyH(nm); setOpH(no);
     var nc = cnt + 1; setCnt(nc);
     if (nc >= 3) {
       var ap = (nm[0]+nm[1]+nm[2])/3, ao = (no[0]+no[1]+no[2])/3;
       var w = ap >= ao; setRes({ w: w, pa: ap, oa: ao, myStrikes: nm, opStrikes: no }); setPh("done");
+      setTimeout(function(){ w ? playVictory() : playDefeat(); }, 250);
       /* NO auto-advance — player must click Continue */
     } else { setPos(0); dir.current = 1; spd.current += accel; setPh("wait"); setTimeout(function () { setPh("go"); }, 250); }
   }
@@ -455,6 +458,8 @@ export default function Arena(props) {
   function importSave(e) { var f = e.target.files && e.target.files[0]; if (!f) return; var r = new FileReader(); r.onload = function(ev){ try { var d = JSON.parse(ev.target.result); if (d && d.player) { save(d); setScr("hub"); } } catch(err){} }; r.readAsText(f); }
   var _syncing = useState(false), syncing = _syncing[0], setSyncing = _syncing[1];
   var _syncMsg = useState(""), syncMsg = _syncMsg[0], setSyncMsg = _syncMsg[1];
+  var _mutedState = useState(isMuted()), mutedState = _mutedState[0], setMutedState = _mutedState[1];
+  function toggleMute() { var n = !mutedState; setMuted(n); setMutedState(n); }
 
   function doSync(seasonData) {
     if (!userId || !seasonData) return;
@@ -1002,6 +1007,10 @@ export default function Arena(props) {
               <button onClick={function(){setHelp(true)}} style={Object.assign({},rowStyle,{border:"1px solid rgba(250,204,21,0.2)"})}>
                 <div><div style={labelStyle}>❓ How to Play</div><div style={hintStyle}>Game rules & strike mechanic</div></div>
                 <span style={{color:"#facc15",fontSize:18}}>›</span>
+              </button>
+              <button onClick={toggleMute} style={rowStyle}>
+                <div><div style={labelStyle}>{mutedState?"🔇":"🔊"} Sound Effects</div><div style={hintStyle}>Strike hits, victory & defeat tones</div></div>
+                <span style={{color:mutedState?"#ef4444":"#22c55e",fontSize:14,fontWeight:800,letterSpacing:0.5}}>{mutedState?"OFF":"ON"}</span>
               </button>
               {userId && (
                 <button onClick={function(){doSync(S)}} disabled={syncing} style={Object.assign({},rowStyle,{border:"1px solid rgba(34,197,94,0.2)",opacity:syncing?0.6:1})}>

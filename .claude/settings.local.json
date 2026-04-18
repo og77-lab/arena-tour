@@ -9,7 +9,9 @@
       "Bash(cp -r _tmp/arena-tour/public .)",
       "Bash(rm -rf _tmp/arena-tour)",
       "Bash(rmdir _tmp)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(gh --version)",
+      "Bash(npx vite *)"
     ]
   }
 }
