@@ -479,6 +479,25 @@ export default function Arena(props) {
     save(Object.assign({}, S, { player: Object.assign({}, S.player, { tr: t }) }));
   }
 
+  /* ─── Play current event (used by calendar cell click and Next Event button) ─── */
+  function playCurrent() {
+    if (!S || S.calIdx >= S.cal.length) return;
+    var ev = S.cal[S.calIdx];
+    if (!ev) return;
+    if (ev.type === "gs") {
+      if (pRankOf(S) <= 64) {
+        startTourney(5);
+      } else {
+        var cal = S.cal.slice();
+        cal[S.calIdx].done = true;
+        cal[S.calIdx].result = { pPts: 0, defending: 0, net: 0, pRound: 0, parallel: [] };
+        save(Object.assign({}, S, { cal: cal, calIdx: S.calIdx + 1 }));
+      }
+    } else {
+      setPicking(true);
+    }
+  }
+
   /* ─── Available tiers for player ─── */
   function availableTiers(S) {
     var rank = pRankOf(S);
@@ -884,22 +903,35 @@ export default function Arena(props) {
 
         {tab === "calendar" && (
           <div style={{background:"rgba(0,0,0,0.2)",borderRadius:8,padding:6,border:"1px solid rgba(255,255,255,0.04)"}}>
-            <div style={{display:"grid",gridTemplateColumns:"repeat(5, 1fr)",gap:3}}>
+            {!seasonDone && curEvent && !picking && (
+              <div style={{fontSize:11,color:"#facc15",fontWeight:700,textAlign:"center",marginBottom:6,letterSpacing:0.5}}>
+                {curEvent.type==="gs"
+                  ? (pRank<=64 ? "👑 TAP THE HIGHLIGHTED CELL TO ENTER GRAND SLAM" : "👑 TAP TO SKIP (NOT QUALIFIED, #"+pRank+")")
+                  : "▶ TAP THE HIGHLIGHTED CELL TO PLAY WEEK "+curEvent.block+"."+curEvent.week}
+              </div>
+            )}
+            <div style={{display:"grid",gridTemplateColumns:"repeat(5, 1fr)",gap:4}}>
               {S.cal.map(function(ev, idx){
                 var isCur = idx === S.calIdx && !seasonDone;
                 var isGS = ev.type === "gs";
                 var tier = ev.tier != null ? TIERS[ev.tier] : null;
                 var def = (S.player.def && S.player.def[idx]) || 0;
                 var net = ev.result ? ev.result.net : null;
-                var blockEnd = (idx % 5) === 4;
-                var bg = isCur ? "rgba(250,204,21,0.15)" : ev.done ? (isGS ? "rgba(250,204,21,0.06)" : "rgba(34,197,94,0.06)") : "rgba(255,255,255,0.02)";
-                var bord = isCur ? "1px solid #facc15" : isGS ? "1px solid rgba(250,204,21,0.3)" : ev.done ? "1px solid rgba(34,197,94,0.12)" : "1px solid rgba(255,255,255,0.04)";
+                var bg = isCur ? "rgba(250,204,21,0.22)" : ev.done ? (isGS ? "rgba(250,204,21,0.06)" : "rgba(34,197,94,0.06)") : "rgba(255,255,255,0.02)";
+                var bord = isCur ? "2px solid #facc15" : isGS ? "1px solid rgba(250,204,21,0.3)" : ev.done ? "1px solid rgba(34,197,94,0.12)" : "1px solid rgba(255,255,255,0.04)";
                 return (
-                  <div key={idx} style={{background:bg,border:bord,borderRadius:4,padding:"4px 2px",textAlign:"center",minWidth:0,marginRight:blockEnd&&idx<19?0:0,animation:isCur?"pulse 2s ease infinite":"none"}}>
-                    <div style={{fontSize:12,fontWeight:700,color:isGS?"#facc15":isCur?"#facc15":ev.done?(tier?tier.col:"#94a3b8"):"#475569",lineHeight:1.2}}>
-                      {ev.done && tier ? tier.short : isGS ? "👑" : isCur ? "▶" : "—"}
+                  <div key={idx}
+                    onClick={isCur ? playCurrent : undefined}
+                    style={{background:bg,border:bord,borderRadius:6,padding:isCur?"8px 2px":"5px 2px",textAlign:"center",minWidth:0,cursor:isCur?"pointer":"default",animation:isCur?"pulse 1.5s ease infinite":"none",boxShadow:isCur?"0 0 12px rgba(250,204,21,0.35)":"none"}}>
+                    <div style={{fontSize:isCur?13:12,fontWeight:800,color:isGS?"#facc15":isCur?"#facc15":ev.done?(tier?tier.col:"#94a3b8"):"#475569",lineHeight:1.2}}>
+                      {isCur ? (isGS ? (pRank<=64 ? "👑▶" : "👑⏭") : "▶") : ev.done && tier ? tier.short : isGS ? "👑" : "—"}
                     </div>
-                    {ev.done && ev.result ? (
+                    {isCur ? (
+                      <div style={{fontSize:11,color:"#e2e8f0",fontWeight:700,marginTop:2}}>
+                        {isGS ? "GS "+ev.gsNum : "Wk "+ev.block+"."+ev.week}
+                        {def>0&&(<div style={{fontSize:10,color:"#f59e0b",marginTop:1}}>def:{def}</div>)}
+                      </div>
+                    ) : ev.done && ev.result ? (
                       <div style={{fontSize:12,color:"#e2e8f0",fontWeight:600,lineHeight:1.1,marginTop:1}}>
                         {ev.result.pPts}
                         {net!=null&&net!==0&&(<span style={{color:net>0?"#22c55e":"#ef4444",fontWeight:700,marginLeft:2,fontSize:11}}>{net>0?"+":""}{net}</span>)}
@@ -911,7 +943,7 @@ export default function Arena(props) {
                 );
               })}
             </div>
-            <div style={{display:"flex",justifyContent:"space-between",marginTop:6,fontSize:12,color:"#64748b"}}>
+            <div style={{display:"flex",justifyContent:"space-between",marginTop:8,fontSize:11,color:"#64748b"}}>
               <span>{S.calIdx}/{TOTAL_EVENTS} played</span>
               <span>{seasonDone?"→ Finals":"Next: "+(S.cal[S.calIdx]?S.cal[S.calIdx].type==="gs"?"GS "+S.cal[S.calIdx].gsNum:"Wk "+(S.cal[S.calIdx].block||"")+"."+((S.cal[S.calIdx].week||"")):"")}</span>
             </div>
