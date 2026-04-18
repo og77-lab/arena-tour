@@ -80,7 +80,7 @@ function mkSeason(name, num, prev) {
 }
 
 function sh(n) { return (n || "?").split(" the ")[0]; }
-function bs(bg, c) { return { background: bg, color: c, border: "none", padding: "10px 18px", borderRadius: 8, fontSize: 13, fontWeight: 800, cursor: "pointer", letterSpacing: 1, textTransform: "uppercase" }; }
+function bs(bg, c) { return { background: bg, color: c, border: "none", padding: "10px 18px", borderRadius: 8, fontSize: 15, fontWeight: 800, cursor: "pointer", letterSpacing: 1, textTransform: "uppercase" }; }
 
 function getRanked(S) {
   var all = [Object.assign({}, S.player, { name: S.pName })].concat(S.npcs);
@@ -159,7 +159,7 @@ function PowerBar(props) {
         <div>
           <div style={{ display: "flex", justifyContent: "center", gap: 12, marginBottom: 8 }}>
             {[{ a: myH, l: "YOU", c: "#facc15" }, { a: opH, l: "OPP", c: "#94a3b8" }].map(function (s, si) {
-              return (<div key={si}>{[0,1,2].map(function (i) { var v = s.a[i]; return (<span key={i} style={{ display: "inline-block", width: 26, height: 26, borderRadius: "50%", margin: "0 2px", background: v != null ? (v > 75 ? "#22c55e" : v > 50 ? "#eab308" : "#ef4444") : "rgba(255,255,255,0.08)", border: "2px solid rgba(255,255,255,0.12)", lineHeight: "26px", fontSize: 12, color: "#fff", fontWeight: 700, textAlign: "center" }}>{v != null ? Math.round(v) : ""}</span>); })}<div style={{ color: s.c, marginTop: 2, fontSize: 11, fontWeight: 700 }}>{s.l}</div></div>);
+              return (<div key={si}>{[0,1,2].map(function (i) { var v = s.a[i]; return (<span key={i} style={{ display: "inline-block", width: 26, height: 26, borderRadius: "50%", margin: "0 2px", background: v != null ? (v > 75 ? "#22c55e" : v > 50 ? "#eab308" : "#ef4444") : "rgba(255,255,255,0.08)", border: "2px solid rgba(255,255,255,0.12)", lineHeight: "26px", fontSize: 14, color: "#fff", fontWeight: 700, textAlign: "center" }}>{v != null ? Math.round(v) : ""}</span>); })}<div style={{ color: s.c, marginTop: 2, fontSize: 13, fontWeight: 700 }}>{s.l}</div></div>);
             })}
           </div>
           <div style={{ position: "relative", height: 30, background: "linear-gradient(90deg,#1e293b,#334155,#1e293b)", borderRadius: 15, overflow: "hidden", margin: "0 auto", maxWidth: 300, border: "1px solid #475569" }}>
@@ -172,7 +172,7 @@ function PowerBar(props) {
       <div style={{ marginTop: 10 }}>
         {ph === "ready" && (<button onClick={function(){setPh("go")}} style={bs("#facc15","#000")}>⚔️ Strike {cnt+1}/3</button>)}
         {ph === "go" && (<button onClick={doStrike} style={Object.assign({},bs("#ef4444","#fff"),{animation:"pulse 0.5s ease infinite"})}>⚡ STRIKE!</button>)}
-        {ph === "wait" && (<span style={{ color: "#64748b", fontSize: 12 }}>Next strike...</span>)}
+        {ph === "wait" && (<span style={{ color: "#64748b", fontSize: 14 }}>Next strike...</span>)}
         {ph === "done" && res && (
           <div>
             <div style={{ fontSize: 20, fontWeight: 900, color: res.w ? "#facc15" : "#ef4444", marginBottom: 8 }}>
@@ -185,24 +185,24 @@ function PowerBar(props) {
                 var won = my >= op;
                 return (
                   <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "4px 8px", background: i % 2 === 0 ? "rgba(255,255,255,0.02)" : "transparent", borderRadius: 4 }}>
-                    <span style={{ fontSize: 12, color: "#64748b", width: 50 }}>Strike {i+1}</span>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: won ? "#22c55e" : "#ef4444", width: 36, textAlign: "right" }}>{Math.round(my)}</span>
-                    <span style={{ fontSize: 11, color: "#475569", width: 20, textAlign: "center" }}>vs</span>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: won ? "#64748b" : "#e2e8f0", width: 36 }}>{Math.round(op)}</span>
-                    <span style={{ fontSize: 11, width: 20, textAlign: "right" }}>{won ? "✓" : "✗"}</span>
+                    <span style={{ fontSize: 14, color: "#64748b", width: 50 }}>Strike {i+1}</span>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: won ? "#22c55e" : "#ef4444", width: 36, textAlign: "right" }}>{Math.round(my)}</span>
+                    <span style={{ fontSize: 13, color: "#475569", width: 20, textAlign: "center" }}>vs</span>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: won ? "#64748b" : "#e2e8f0", width: 36 }}>{Math.round(op)}</span>
+                    <span style={{ fontSize: 13, width: 20, textAlign: "right" }}>{won ? "✓" : "✗"}</span>
                   </div>
                 );
               })}
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "6px 8px", borderTop: "1px solid rgba(255,255,255,0.08)", marginTop: 4 }}>
-                <span style={{ fontSize: 12, color: "#94a3b8", fontWeight: 700, width: 50 }}>Average</span>
-                <span style={{ fontSize: 13, fontWeight: 900, color: res.w ? "#22c55e" : "#ef4444", width: 36, textAlign: "right" }}>{Math.round(res.pa)}</span>
-                <span style={{ fontSize: 11, color: "#475569", width: 20, textAlign: "center" }}>vs</span>
-                <span style={{ fontSize: 13, fontWeight: 900, color: res.w ? "#64748b" : "#e2e8f0", width: 36 }}>{Math.round(res.oa)}</span>
-                <span style={{ fontSize: 12, width: 20, textAlign: "right" }}>{res.w ? "🏆" : "💀"}</span>
+                <span style={{ fontSize: 14, color: "#94a3b8", fontWeight: 700, width: 50 }}>Average</span>
+                <span style={{ fontSize: 15, fontWeight: 900, color: res.w ? "#22c55e" : "#ef4444", width: 36, textAlign: "right" }}>{Math.round(res.pa)}</span>
+                <span style={{ fontSize: 13, color: "#475569", width: 20, textAlign: "center" }}>vs</span>
+                <span style={{ fontSize: 15, fontWeight: 900, color: res.w ? "#64748b" : "#e2e8f0", width: 36 }}>{Math.round(res.oa)}</span>
+                <span style={{ fontSize: 14, width: 20, textAlign: "right" }}>{res.w ? "🏆" : "💀"}</span>
               </div>
             </div>
             {/* Why you won/lost */}
-            <div style={{ fontSize: 12, color: "#94a3b8", marginBottom: 8, maxWidth: 260, margin: "0 auto 8px", lineHeight: 1.4 }}>
+            <div style={{ fontSize: 14, color: "#94a3b8", marginBottom: 8, maxWidth: 260, margin: "0 auto 8px", lineHeight: 1.4 }}>
               {(function() {
                 var diff = Math.round(res.pa - res.oa);
                 var badStrikes = res.myStrikes.filter(function(s){return s < 60;}).length;
@@ -218,7 +218,7 @@ function PowerBar(props) {
                 }
               })()}
             </div>
-            <button onClick={function(){props.onDone(res.w)}} style={Object.assign({}, bs(res.w ? "#22c55e" : "#475569", res.w ? "#000" : "#e2e8f0"), { fontSize: 12 })}>
+            <button onClick={function(){props.onDone(res.w)}} style={Object.assign({}, bs(res.w ? "#22c55e" : "#475569", res.w ? "#000" : "#e2e8f0"), { fontSize: 14 })}>
               {res.w ? "→ Next Match" : "→ Continue"}
             </button>
           </div>
@@ -250,19 +250,19 @@ function Profile(props) {
             { l: "Season Prize $", v: "$"+(function(m){return m>=1000000?(m/1000000).toFixed(1)+"M":m>=1000?Math.round(m/1000)+"K":m})(p.isP?(p.seasonMoney||0):(Math.round((p.sp||0)*3))), c: "#22c55e" },
             { l: "Career Prize $", v: "$"+(function(m){return m>=1000000?(m/1000000).toFixed(1)+"M":m>=1000?Math.round(m/1000)+"K":m})(p.isP?(p.money||0):((b.careerMoney||0))), c: "#4ade80" }
           ].map(function (s, i) {
-            return (<div key={i} style={{ background: "rgba(0,0,0,0.3)", borderRadius: 6, padding: "6px 8px" }}><div style={{ fontSize: 11, color: "#64748b", marginBottom: 1 }}>{s.l}</div><div style={{ fontSize: 14, fontWeight: 800, color: s.c }}>{s.v}</div></div>);
+            return (<div key={i} style={{ background: "rgba(0,0,0,0.3)", borderRadius: 6, padding: "6px 8px" }}><div style={{ fontSize: 13, color: "#64748b", marginBottom: 1 }}>{s.l}</div><div style={{ fontSize: 16, fontWeight: 800, color: s.c }}>{s.v}</div></div>);
           })}
         </div>
         {/* Skill + Potential bar for NPCs */}
         {!p.isP && (
           <div style={{ marginBottom: 10, padding: 8, background: "rgba(0,0,0,0.2)", borderRadius: 6 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 4 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14, marginBottom: 4 }}>
               <span style={{ color: "#94a3b8", fontWeight: 700 }}>Natural Talent</span>
-              <span style={{ fontSize: 12 }}>
+              <span style={{ fontSize: 14 }}>
                 <span style={{ color: "#e2e8f0", fontWeight: 800 }}>{Math.round(p.skill||0)}</span>
                 <span style={{ color: "#475569" }}> / </span>
                 <span style={{ color: "#f59e0b", fontWeight: 700 }}>{p.pot||92}</span>
-                <span style={{ color: "#475569", fontSize: 11, marginLeft: 3 }}>potential</span>
+                <span style={{ color: "#475569", fontSize: 13, marginLeft: 3 }}>potential</span>
               </span>
             </div>
             <div style={{ position: "relative", height: 10, background: "rgba(255,255,255,0.06)", borderRadius: 5, overflow: "hidden" }}>
@@ -271,10 +271,10 @@ function Profile(props) {
               {/* Current skill fill */}
               <div style={{ position: "absolute", top: 0, bottom: 0, left: 0, width: Math.round((p.skill||0)/95*100) + "%", borderRadius: 5, background: (p.skill||0) > 80 ? "linear-gradient(90deg,#ef4444,#f59e0b)" : (p.skill||0) > 60 ? "linear-gradient(90deg,#f59e0b,#facc15)" : (p.skill||0) > 40 ? "linear-gradient(90deg,#22d3ee,#818cf8)" : "#94a3b8" }} />
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "#475569", marginTop: 2 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "#475569", marginTop: 2 }}>
               <span>Developing</span><span>Average</span><span>Strong</span><span>Elite</span>
             </div>
-            <div style={{ fontSize: 11, color: "#64748b", marginTop: 4 }}>
+            <div style={{ fontSize: 13, color: "#64748b", marginTop: 4 }}>
               {Math.round(p.skill||0) >= (p.pot||92) - 1 ? (
                 <span style={{color:"#f59e0b"}}>⚡ At peak potential — this warrior has maxed out their natural talent.</span>
               ) : (
@@ -286,22 +286,22 @@ function Profile(props) {
         {/* Training + training total */}
         <div style={{ marginBottom: 10 }}>
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-            <span style={{ fontSize: 12, color: "#64748b", fontWeight: 700 }}>TRAINING LEVELS</span>
-            <span style={{ fontSize: 11, color: "#a78bfa", fontWeight: 700 }}>{totalTr}/100</span>
+            <span style={{ fontSize: 14, color: "#64748b", fontWeight: 700 }}>TRAINING LEVELS</span>
+            <span style={{ fontSize: 13, color: "#a78bfa", fontWeight: 700 }}>{totalTr}/100</span>
           </div>
           {[{k:"r",i:"⚡",l:"Reflexes",c:"#22d3ee"},{k:"p",i:"💪",l:"Power",c:"#f472b6"},{k:"f",i:"🎯",l:"Focus",c:"#4ade80"},{k:"s",i:"🫀",l:"Stamina",c:"#fb923c"},{k:"g",i:"🛡️",l:"Grit",c:"#a78bfa"}].map(function(s){
             var lv = t[s.k]||0;
-            return (<div key={s.k} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}><span style={{ color: s.c, fontSize: 11, width: 70 }}>{s.i} {s.l}</span><div style={{ flex: 1, display: "flex", gap: 1 }}>{Array.from({length:20}).map(function(_,i){return (<div key={i} style={{flex:1,height:5,borderRadius:2,background:i<lv?s.c:"rgba(255,255,255,0.06)"}}/>);})}</div><span style={{fontSize:12,color:"#94a3b8",width:20,textAlign:"right"}}>{lv}</span></div>);
+            return (<div key={s.k} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}><span style={{ color: s.c, fontSize: 13, width: 70 }}>{s.i} {s.l}</span><div style={{ flex: 1, display: "flex", gap: 1 }}>{Array.from({length:20}).map(function(_,i){return (<div key={i} style={{flex:1,height:5,borderRadius:2,background:i<lv?s.c:"rgba(255,255,255,0.06)"}}/>);})}</div><span style={{fontSize:14,color:"#94a3b8",width:20,textAlign:"right"}}>{lv}</span></div>);
           })}
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 6 }}>
           {[{ l: "🏆 Titles", v: b.titles||0 }, { l: "👑 GS Titles", v: b.gsTitles||0 }, { l: "⭐ Finals", v: b.finals||0 }].map(function(s,i){
-            return (<div key={i} style={{ background: "rgba(0,0,0,0.3)", borderRadius: 6, padding: "6px 8px", textAlign: "center" }}><div style={{ fontSize: 14, fontWeight: 800, color: "#facc15" }}>{s.v}</div><div style={{ fontSize: 11, color: "#64748b" }}>{s.l}</div></div>);
+            return (<div key={i} style={{ background: "rgba(0,0,0,0.3)", borderRadius: 6, padding: "6px 8px", textAlign: "center" }}><div style={{ fontSize: 16, fontWeight: 800, color: "#facc15" }}>{s.v}</div><div style={{ fontSize: 13, color: "#64748b" }}>{s.l}</div></div>);
           })}
         </div>
         {!p.isP && (
           <div style={{ marginTop: 8, padding: 6, background: "rgba(99,102,241,0.05)", borderRadius: 6, border: "1px solid rgba(129,140,248,0.08)" }}>
-            <div style={{ fontSize: 11, color: "#c7d2fe", lineHeight: 1.5 }}>
+            <div style={{ fontSize: 13, color: "#c7d2fe", lineHeight: 1.5 }}>
               <b style={{color:"#818cf8"}}>Talent</b> = innate combat rating. <b style={{color:"#f59e0b"}}>Potential</b> = their personal ceiling (the orange marker). Talent grows slowly through experience but can never exceed potential. <b style={{color:"#a78bfa"}}>Training</b> stacks on top — a low-talent warrior with elite training can beat a naturally gifted one.
             </div>
           </div>
@@ -322,8 +322,8 @@ function HelpScreen(props) {
         </div>
 
         <div style={{ marginBottom: 14 }}>
-          <div style={{ fontSize: 11, color: "#facc15", fontWeight: 700, marginBottom: 6 }}>THE STRIKE SYSTEM</div>
-          <div style={{ fontSize: 12, color: "#c7d2fe", lineHeight: 1.6, marginBottom: 8 }}>
+          <div style={{ fontSize: 13, color: "#facc15", fontWeight: 700, marginBottom: 6 }}>THE STRIKE SYSTEM</div>
+          <div style={{ fontSize: 14, color: "#c7d2fe", lineHeight: 1.6, marginBottom: 8 }}>
             Each match is <b style={{color:"#e2e8f0"}}>3 strikes</b>. A white cursor bounces left-right across the power bar. Tap <b style={{color:"#ef4444"}}>STRIKE</b> to stop it. Your score depends on where it lands:
           </div>
           {/* Visual bar explanation */}
@@ -332,7 +332,7 @@ function HelpScreen(props) {
               <div style={{ position: "absolute", top: 2, bottom: 2, left: "62%", width: "16%", background: "rgba(250,204,21,0.3)", borderRadius: 8, border: "1px solid rgba(250,204,21,0.4)" }} />
               <div style={{ position: "absolute", top: 0, bottom: 0, width: 3, left: "70%", background: "#facc15", borderRadius: 2 }} />
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginBottom: 4 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 4 }}>
               <span style={{ color: "#ef4444" }}>← Far miss</span>
               <span style={{ color: "#eab308" }}>Near →</span>
               <span style={{ color: "#facc15", fontWeight: 700 }}>GOLD ZONE</span>
@@ -345,21 +345,21 @@ function HelpScreen(props) {
             ].map(function(r, i) {
               return (
                 <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "3px 0", borderBottom: i < 3 ? "1px solid rgba(255,255,255,0.04)" : "none" }}>
-                  <span style={{ fontSize: 11, color: "#94a3b8", flex: 1 }}>{r.zone}</span>
-                  <span style={{ fontSize: 12, color: r.col, fontWeight: 700, width: 60, textAlign: "center" }}>{r.score}</span>
-                  <span style={{ fontSize: 11, color: "#475569", width: 70, textAlign: "right" }}>{r.desc}</span>
+                  <span style={{ fontSize: 13, color: "#94a3b8", flex: 1 }}>{r.zone}</span>
+                  <span style={{ fontSize: 14, color: r.col, fontWeight: 700, width: 60, textAlign: "center" }}>{r.score}</span>
+                  <span style={{ fontSize: 13, color: "#475569", width: 70, textAlign: "right" }}>{r.desc}</span>
                 </div>
               );
             })}
           </div>
-          <div style={{ fontSize: 12, color: "#94a3b8", lineHeight: 1.5 }}>
+          <div style={{ fontSize: 14, color: "#94a3b8", lineHeight: 1.5 }}>
             After 3 strikes, your <b style={{color:"#e2e8f0"}}>average</b> is compared to the NPC's average. <b style={{color:"#22c55e"}}>Higher average wins.</b>
           </div>
         </div>
 
         <div style={{ marginBottom: 14 }}>
-          <div style={{ fontSize: 11, color: "#22d3ee", fontWeight: 700, marginBottom: 4 }}>NPC SCORES</div>
-          <div style={{ fontSize: 12, color: "#94a3b8", lineHeight: 1.5 }}>
+          <div style={{ fontSize: 13, color: "#22d3ee", fontWeight: 700, marginBottom: 4 }}>NPC SCORES</div>
+          <div style={{ fontSize: 14, color: "#94a3b8", lineHeight: 1.5 }}>
             NPCs auto-generate scores based on their <b style={{color:"#e2e8f0"}}>natural talent</b> + <b style={{color:"#a78bfa"}}>training</b>. You never see their bar — just their final scores.
           </div>
           <div style={{ background: "rgba(0,0,0,0.3)", borderRadius: 6, padding: 6, marginTop: 6 }}>
@@ -371,13 +371,13 @@ function HelpScreen(props) {
               { tier: "Masters", range: "78 — 92", col: "#f472b6" },
               { tier: "Grand Slam", range: "78 — 95", col: "#facc15" }
             ].map(function(r, i) {
-              return (<div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "2px 4px", fontSize: 11 }}><span style={{ color: r.col, fontWeight: 600 }}>{r.tier}</span><span style={{ color: "#e2e8f0" }}>{r.range}</span></div>);
+              return (<div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "2px 4px", fontSize: 13 }}><span style={{ color: r.col, fontWeight: 600 }}>{r.tier}</span><span style={{ color: "#e2e8f0" }}>{r.range}</span></div>);
             })}
           </div>
         </div>
 
         <div style={{ marginBottom: 14 }}>
-          <div style={{ fontSize: 11, color: "#f472b6", fontWeight: 700, marginBottom: 4 }}>WHAT GETS HARDER</div>
+          <div style={{ fontSize: 13, color: "#f472b6", fontWeight: 700, marginBottom: 4 }}>WHAT GETS HARDER</div>
           <div style={{ background: "rgba(0,0,0,0.3)", borderRadius: 6, padding: 6 }}>
             {[
               { what: "Bar speed", desc: "Cursor moves faster → harder to time", icon: "⚡" },
@@ -385,14 +385,14 @@ function HelpScreen(props) {
               { what: "NPC scores", desc: "Higher tier = stronger opponents", icon: "💀" },
               { what: "Acceleration", desc: "Bar speeds up between strikes 1→2→3", icon: "📈" }
             ].map(function(r, i) {
-              return (<div key={i} style={{ display: "flex", gap: 6, padding: "3px 0", fontSize: 11 }}><span>{r.icon}</span><span><b style={{color:"#e2e8f0"}}>{r.what}</b><span style={{color:"#94a3b8"}}> — {r.desc}</span></span></div>);
+              return (<div key={i} style={{ display: "flex", gap: 6, padding: "3px 0", fontSize: 13 }}><span>{r.icon}</span><span><b style={{color:"#e2e8f0"}}>{r.what}</b><span style={{color:"#94a3b8"}}> — {r.desc}</span></span></div>);
             })}
           </div>
         </div>
 
         <div style={{ marginBottom: 14 }}>
-          <div style={{ fontSize: 11, color: "#a78bfa", fontWeight: 700, marginBottom: 4 }}>TRAINING (RELATIVE)</div>
-          <div style={{ fontSize: 12, color: "#94a3b8", lineHeight: 1.5 }}>
+          <div style={{ fontSize: 13, color: "#a78bfa", fontWeight: 700, marginBottom: 4 }}>TRAINING (RELATIVE)</div>
+          <div style={{ fontSize: 14, color: "#94a3b8", lineHeight: 1.5 }}>
             Your 5 training stats are compared <b style={{color:"#facc15"}}>against your opponent's</b> each match. Only the <b style={{color:"#e2e8f0"}}>difference</b> matters:
           </div>
           <div style={{ background: "rgba(0,0,0,0.3)", borderRadius: 6, padding: 6, marginTop: 4 }}>
@@ -403,15 +403,15 @@ function HelpScreen(props) {
               { stat: "🫀 Stamina", effect: "Reduces bar acceleration between strikes" },
               { stat: "🛡️ Grit", effect: "Raises your minimum score on bad misses" }
             ].map(function(r, i) {
-              return (<div key={i} style={{ fontSize: 11, padding: "2px 0", color: "#94a3b8" }}><b style={{color:"#e2e8f0"}}>{r.stat}</b> — {r.effect}</div>);
+              return (<div key={i} style={{ fontSize: 13, padding: "2px 0", color: "#94a3b8" }}><b style={{color:"#e2e8f0"}}>{r.stat}</b> — {r.effect}</div>);
             })}
           </div>
-          <div style={{ fontSize: 11, color: "#64748b", marginTop: 4 }}>Example: You have ⚡8, opponent has ⚡5 → net +3 → bar is noticeably slower for you. If both are ⚡8 → cancels out completely.</div>
+          <div style={{ fontSize: 13, color: "#64748b", marginTop: 4 }}>Example: You have ⚡8, opponent has ⚡5 → net +3 → bar is noticeably slower for you. If both are ⚡8 → cancels out completely.</div>
         </div>
 
         <div>
-          <div style={{ fontSize: 11, color: "#22c55e", fontWeight: 700, marginBottom: 4 }}>POINTS & RANKINGS</div>
-          <div style={{ fontSize: 12, color: "#94a3b8", lineHeight: 1.5 }}>
+          <div style={{ fontSize: 13, color: "#22c55e", fontWeight: 700, marginBottom: 4 }}>POINTS & RANKINGS</div>
+          <div style={{ fontSize: 14, color: "#94a3b8", lineHeight: 1.5 }}>
             Win matches to earn points. <b style={{color:"#ef4444"}}>R1 losers get nothing</b> — you must win to earn. Higher tiers pay more. Rankings update after each event based on total season points. In season 2+, you <b style={{color:"#f59e0b"}}>defend</b> last season's points at each calendar slot.
           </div>
         </div>
@@ -767,18 +767,18 @@ export default function Arena(props) {
       <style dangerouslySetInnerHTML={{__html:CSS}} />
       <div style={{fontSize:48}}>⚔️</div>
       <h1 style={{fontSize:22,fontWeight:900,letterSpacing:3,background:"linear-gradient(135deg,#facc15,#f59e0b)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",margin:"8px 0 4px"}}>ARENA TOUR</h1>
-      <p style={{color:"#64748b",fontSize:11,margin:"0 0 16px"}}>1000 Warriors • 5 Tournament Tiers • Grand Slams • Season Finals</p>
+      <p style={{color:"#64748b",fontSize:13,margin:"0 0 16px"}}>1000 Warriors • 5 Tournament Tiers • Grand Slams • Season Finals</p>
       <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:12,padding:18,maxWidth:320,width:"100%"}}>
-        <div style={{fontSize:12,color:"#94a3b8",fontWeight:700,letterSpacing:1,marginBottom:4,textTransform:"uppercase"}}>Enter Your Warrior Name</div>
+        <div style={{fontSize:14,color:"#94a3b8",fontWeight:700,letterSpacing:1,marginBottom:4,textTransform:"uppercase"}}>Enter Your Warrior Name</div>
         <input value={inp} onChange={function(e){setInp(e.target.value)}} placeholder="e.g. Novak, Rafa, Serena..." onKeyDown={function(e){if(e.key==="Enter"&&inp.trim())newSeason()}}
           style={{width:"100%",padding:10,borderRadius:8,border:"1px solid rgba(250,204,21,0.3)",background:"rgba(0,0,0,0.4)",color:"#facc15",fontSize:16,fontWeight:700,outline:"none",boxSizing:"border-box",textAlign:"center",marginBottom:8}} />
         <button onClick={function(){if(inp.trim())newSeason();}} disabled={!inp.trim()} style={Object.assign({},bs("linear-gradient(135deg,#facc15,#f59e0b)","#000"),{width:"100%",marginBottom:6,opacity:inp.trim()?1:0.4})}>Begin Season 1</button>
-        <button onClick={function(){fileRef.current&&fileRef.current.click()}} style={Object.assign({},bs("rgba(255,255,255,0.05)","#94a3b8"),{width:"100%",fontSize:11,border:"1px solid rgba(255,255,255,0.1)"})}>📂 Load Save</button>
+        <button onClick={function(){fileRef.current&&fileRef.current.click()}} style={Object.assign({},bs("rgba(255,255,255,0.05)","#94a3b8"),{width:"100%",fontSize:13,border:"1px solid rgba(255,255,255,0.1)"})}>📂 Load Save</button>
         <input ref={fileRef} type="file" accept=".json" onChange={importSave} style={{display:"none"}} />
       </div>
       <div style={{marginTop:14,maxWidth:320,background:"rgba(99,102,241,0.05)",border:"1px solid rgba(129,140,248,0.1)",borderRadius:10,padding:10,textAlign:"left"}}>
-        <div style={{color:"#818cf8",fontSize:11,fontWeight:700,letterSpacing:1,marginBottom:4}}>ATP-STYLE SEASON</div>
-        <div style={{color:"#c7d2fe",fontSize:12,lineHeight:1.6}}>20-event season: <b>4 blocks</b> of 4 weekly tournaments + <b>Grand Slam</b>. Climb tiers from Futures → Masters as your rank improves. <b>Top 16</b> contest Season Finals. All 1000 players compete every week.</div>
+        <div style={{color:"#818cf8",fontSize:13,fontWeight:700,letterSpacing:1,marginBottom:4}}>ATP-STYLE SEASON</div>
+        <div style={{color:"#c7d2fe",fontSize:14,lineHeight:1.6}}>20-event season: <b>4 blocks</b> of 4 weekly tournaments + <b>Grand Slam</b>. Climb tiers from Futures → Masters as your rank improves. <b>Top 16</b> contest Season Finals. All 1000 players compete every week.</div>
       </div>
     </div>
   );
@@ -801,62 +801,44 @@ export default function Arena(props) {
         {showHelp && (<HelpScreen onClose={function(){setHelp(false)}} />)}
 
         {/* ── Status Bar ── */}
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"6px 10px",background:"rgba(0,0,0,0.3)",borderRadius:8,marginBottom:6,border:"1px solid rgba(255,255,255,0.04)"}}>
-          <div>
-            <div style={{fontSize:12,color:"#facc15",fontWeight:800}}>{S.pName}<span style={{color:"#475569",fontWeight:400,marginLeft:6,fontSize:12}}>S{S.sNum} Wk{Math.min(S.calIdx+1,TOTAL_EVENTS)}</span></div>
+        <div style={{padding:"10px 12px",background:"rgba(0,0,0,0.3)",borderRadius:10,marginBottom:6,border:"1px solid rgba(255,255,255,0.05)"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
+            <span style={{fontSize:17,color:"#facc15",fontWeight:800,letterSpacing:0.3}}>{S.pName}</span>
+            <span style={{fontSize:20,color:"#facc15",fontWeight:900,letterSpacing:0.5}}>#{pRank}</span>
           </div>
-          <div style={{display:"flex",gap:8,alignItems:"center",fontSize:11}}>
-            <span style={{color:"#facc15",fontWeight:900}}>#{pRank}</span>
-            <span style={{color:"#64748b"}}>{(S.player.sp||0).toLocaleString()}p</span>
-            <span style={{color:"#22c55e",fontWeight:700}}>💰{(function(m){return m>=1000000?(m/1000000).toFixed(1)+"M":m>=1000?Math.round(m/1000)+"K":m})(S.player.money||0)}</span>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+            <span style={{fontSize:12,color:"#64748b",fontWeight:600}}>S{S.sNum} • Wk {Math.min(S.calIdx+1,TOTAL_EVENTS)}/{TOTAL_EVENTS}</span>
+            <div style={{display:"flex",gap:10,alignItems:"center"}}>
+              <span style={{fontSize:14,color:"#cbd5e1",fontWeight:700}}>{(S.player.sp||0).toLocaleString()}<span style={{color:"#64748b",fontWeight:400,fontSize:12,marginLeft:2}}>pts</span></span>
+              <span style={{fontSize:14,color:"#22c55e",fontWeight:800}}>💰{(function(m){return m>=1000000?(m/1000000).toFixed(1)+"M":m>=1000?Math.round(m/1000)+"K":m})(S.player.money||0)}</span>
+            </div>
           </div>
         </div>
         {/* Season progress mini-bar */}
-        <div style={{display:"flex",gap:1,marginBottom:6,height:3}}>
+        <div style={{display:"flex",gap:1,marginBottom:6,height:4}}>
           {S.cal.map(function(ev,i){return (<div key={i} style={{flex:1,borderRadius:2,background:ev.done?(ev.type==="gs"?"#facc15":"#22c55e"):i===S.calIdx?"#818cf8":"rgba(255,255,255,0.04)"}}/>);})}
         </div>
 
-        {/* ── Next Event ── */}
-        {!seasonDone && curEvent && !picking && (
-          <div style={{background:"rgba(0,0,0,0.2)",borderRadius:8,padding:8,border:"1px solid "+(curEvent.type==="gs"?"rgba(250,204,21,0.12)":"rgba(255,255,255,0.04)"),marginBottom:6}}>
-            {curEvent.type === "gs" ? (
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:6}}>
-                <div><span style={{fontSize:12,fontWeight:900,color:"#facc15"}}>👑 Grand Slam {curEvent.gsNum}</span><span style={{fontSize:11,color:"#64748b",marginLeft:6}}>64p • 16K</span></div>
-                {pRank <= 64 ? (
-                  <button onClick={function(){startTourney(5)}} style={Object.assign({},bs("linear-gradient(135deg,#facc15,#f59e0b)","#000"),{fontSize:11,padding:"7px 14px"})}>⚔️ Enter</button>
-                ) : (
-                  <button onClick={function(){
-                    var cal=S.cal.slice();cal[S.calIdx].done=true;cal[S.calIdx].result={pPts:0,defending:0,net:0,pRound:0,parallel:[]};
-                    save(Object.assign({},S,{cal:cal,calIdx:S.calIdx+1}));
-                  }} style={Object.assign({},bs("rgba(255,255,255,0.05)","#94a3b8"),{fontSize:12,padding:"6px 12px",border:"1px solid rgba(255,255,255,0.06)"})}>⏭ Skip (#{pRank})</button>
-                )}
-              </div>
-            ) : (
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                <div><span style={{fontSize:11,fontWeight:700,color:"#e2e8f0"}}>Week {curEvent.block}.{curEvent.week}</span>{(function(){var def=(S.player.def&&S.player.def[S.calIdx])||0;return def>0?(<span style={{fontSize:11,color:"#f59e0b",marginLeft:6}}>def:{def}</span>):null;})()}</div>
-                <button onClick={function(){setPicking(true)}} style={Object.assign({},bs("linear-gradient(135deg,#22d3ee,#818cf8)","#000"),{fontSize:11,padding:"7px 14px"})}>⚔️ Play</button>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* ── Tier Picker ── */}
+        {/* ── Tier Picker (compact horizontal pills) ── */}
         {!seasonDone && picking && (
-          <div style={{background:"rgba(0,0,0,0.3)",borderRadius:8,padding:8,border:"1px solid rgba(129,140,248,0.12)",marginBottom:6}}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
-              <span style={{fontSize:12,fontWeight:700,color:"#818cf8"}}>Select Tier <span style={{color:"#64748b",fontWeight:400}}>(#{pRank})</span></span>
-              <button onClick={function(){setPicking(false)}} style={{background:"none",border:"none",color:"#64748b",fontSize:14,cursor:"pointer"}}>✕</button>
+          <div style={{background:"rgba(0,0,0,0.35)",borderRadius:10,padding:10,border:"1px solid rgba(129,140,248,0.2)",marginBottom:6}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+              <span style={{fontSize:14,fontWeight:800,color:"#818cf8",letterSpacing:0.5}}>CHOOSE TIER <span style={{color:"#64748b",fontWeight:400,marginLeft:4}}>#{pRank}</span></span>
+              <button onClick={function(){setPicking(false)}} style={{background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.1)",color:"#94a3b8",fontSize:16,cursor:"pointer",width:28,height:28,borderRadius:6,lineHeight:1,padding:0}}>✕</button>
             </div>
-            {[0,1,2,3,4].map(function(ti){
-              var t = TIERS[ti]; var canEnter = avTiers.indexOf(ti) >= 0;
-              return (
-                <button key={ti} onClick={function(){if(canEnter){setPicking(false);startTourney(ti);}}} disabled={!canEnter}
-                  style={{display:"flex",justifyContent:"space-between",alignItems:"center",width:"100%",padding:"6px 8px",borderRadius:5,marginBottom:2,border:"1px solid "+(canEnter?t.col+"44":"rgba(255,255,255,0.03)"),background:canEnter?"rgba(0,0,0,0.2)":"transparent",cursor:canEnter?"pointer":"default",opacity:canEnter?1:0.3}}>
-                  <span style={{fontSize:12,color:t.col,fontWeight:700}}>{t.name} <span style={{color:"#64748b",fontWeight:400}}>({t.rankRange[0]}-{t.rankRange[1]})</span></span>
-                  <span style={{fontSize:11,color:"#94a3b8"}}>{t.pts[t.pts.length-1]}p / 💰{(t.money[t.money.length-1]/1000).toFixed(0)}K</span>
-                </button>
-              );
-            })}
+            <div style={{display:"grid",gridTemplateColumns:"repeat(5, 1fr)",gap:5}}>
+              {[0,1,2,3,4].map(function(ti){
+                var t = TIERS[ti]; var canEnter = avTiers.indexOf(ti) >= 0;
+                return (
+                  <button key={ti} onClick={function(){if(canEnter){setPicking(false);startTourney(ti);}}} disabled={!canEnter}
+                    style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"8px 2px",borderRadius:8,border:"2px solid "+(canEnter?t.col:"rgba(255,255,255,0.04)"),background:canEnter?"rgba(0,0,0,0.35)":"transparent",cursor:canEnter?"pointer":"default",opacity:canEnter?1:0.3,minHeight:64}}>
+                    <span style={{fontSize:14,color:t.col,fontWeight:900,letterSpacing:0.5}}>{t.short}</span>
+                    <span style={{fontSize:12,color:"#e2e8f0",fontWeight:700,marginTop:2}}>{t.pts[t.pts.length-1]}p</span>
+                    <span style={{fontSize:11,color:"#22c55e",fontWeight:600,marginTop:1}}>${(t.money[t.money.length-1]/1000).toFixed(0)}K</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         )}
 
@@ -869,26 +851,21 @@ export default function Arena(props) {
           </div>
         )}
 
-        {/* ── Quick Actions ── */}
-        <div style={{display:"flex",gap:4,marginBottom:6}}>
-          <button onClick={function(){setScr("training")}} style={Object.assign({},bs("rgba(99,102,241,0.08)","#818cf8"),{flex:1,fontSize:12,border:"1px solid rgba(129,140,248,0.12)",padding:"6px 8px"})}>🏋️ Train ({S.player.tr.tp||0})</button>
-          <button onClick={function(){setHelp(true)}} style={{padding:"6px 8px",borderRadius:6,border:"1px solid rgba(250,204,21,0.15)",background:"rgba(250,204,21,0.05)",color:"#facc15",fontSize:12,cursor:"pointer",fontWeight:700}}>?</button>
-          <button onClick={function(){doSync(S)}} disabled={syncing} style={{padding:"6px 8px",borderRadius:6,border:"1px solid rgba(34,197,94,0.15)",background:"rgba(34,197,94,0.05)",color:syncing?"#475569":"#22c55e",fontSize:11,cursor:syncing?"default":"pointer",fontWeight:700}}>{syncing?"...":"☁️ Sync"}</button>
-          <button onClick={exportSave} style={{padding:"6px 8px",borderRadius:6,border:"1px solid rgba(255,255,255,0.05)",background:"transparent",color:"#475569",fontSize:11,cursor:"pointer"}}>💾</button>
-          <button onClick={function(){fileRef.current&&fileRef.current.click()}} style={{padding:"6px 8px",borderRadius:6,border:"1px solid rgba(255,255,255,0.05)",background:"transparent",color:"#475569",fontSize:11,cursor:"pointer"}}>📂</button>
-          <button onClick={newGame} style={{padding:"8px 12px",borderRadius:6,border:"1px solid rgba(239,68,68,0.35)",background:"rgba(239,68,68,0.1)",color:"#ef4444",fontSize:12,cursor:"pointer",fontWeight:700}}>🔄 Restart</button>
-          <input ref={fileRef} type="file" accept=".json" onChange={importSave} style={{display:"none"}} />
-        </div>
-        {syncMsg && (<div style={{fontSize:12,color:syncMsg==="Synced!"?"#22c55e":"#ef4444",textAlign:"center",marginBottom:4,fontWeight:700}}>{syncMsg}</div>)}
+        {/* ── Train button (primary) ── */}
+        {!picking && (
+          <button onClick={function(){setScr("training")}} style={{width:"100%",padding:"12px 16px",borderRadius:8,border:"1px solid rgba(129,140,248,0.3)",background:"rgba(99,102,241,0.12)",color:"#a5b4fc",fontSize:15,fontWeight:800,cursor:"pointer",marginBottom:6,letterSpacing:0.5}}>🏋️ TRAINING <span style={{color:"#facc15",marginLeft:6}}>{S.player.tr.tp||0} TP</span></button>
+        )}
+        <input ref={fileRef} type="file" accept=".json" onChange={importSave} style={{display:"none"}} />
+        {syncMsg && (<div style={{fontSize:13,color:syncMsg==="Synced!"?"#22c55e":"#ef4444",textAlign:"center",marginBottom:4,fontWeight:700}}>{syncMsg}</div>)}
 
         {/* ── Last Week ── */}
         {lastDone && lastDone.result && lastDone.result.parallel && lastDone.result.parallel.length > 0 && (
           <div style={{background:"rgba(0,0,0,0.2)",borderRadius:6,padding:6,border:"1px solid rgba(255,255,255,0.03)",marginBottom:6}}>
-            <div style={{fontSize:11,color:"#64748b",fontWeight:700,marginBottom:3}}>📰 LAST WEEK</div>
+            <div style={{fontSize:13,color:"#64748b",fontWeight:700,marginBottom:3}}>📰 LAST WEEK</div>
             <div style={{display:"flex",gap:3,flexWrap:"wrap"}}>
               {lastDone.result.parallel.map(function(pr, i){
                 if (!pr) return null; var t = TIERS[pr.tier];
-                return (<span key={i} style={{fontSize:11,padding:"2px 5px",borderRadius:3,background:pr.playerEvent?"rgba(250,204,21,0.08)":"rgba(0,0,0,0.2)",color:pr.playerEvent?"#facc15":t.col}}>{t.short}{pr.count>1?"×"+pr.count:""}: {pr.playerEvent?"You "+(lastDone.result.pPts||0)+"p":(pr.winner&&pr.winner.name)?sh(pr.winner.name):"—"}</span>);
+                return (<span key={i} style={{fontSize:13,padding:"2px 5px",borderRadius:3,background:pr.playerEvent?"rgba(250,204,21,0.08)":"rgba(0,0,0,0.2)",color:pr.playerEvent?"#facc15":t.col}}>{t.short}{pr.count>1?"×"+pr.count:""}: {pr.playerEvent?"You "+(lastDone.result.pPts||0)+"p":(pr.winner&&pr.winner.name)?sh(pr.winner.name):"—"}</span>);
               })}
             </div>
           </div>
@@ -896,15 +873,16 @@ export default function Arena(props) {
 
         {/* ── Tabs ── */}
         <div style={{display:"flex",gap:2,marginBottom:6}}>
-          {["calendar","rankings","history"].map(function(t){
-            return (<button key={t} onClick={function(){setTab(t)}} style={{flex:1,padding:"6px",borderRadius:5,border:"none",cursor:"pointer",background:tab===t?"rgba(250,204,21,0.12)":"rgba(255,255,255,0.02)",color:tab===t?"#facc15":"#64748b",fontSize:12,fontWeight:700,letterSpacing:1}}>{t==="calendar"?"📅 Calendar":t==="rankings"?"🏆 Rankings":"📊 Results"}</button>);
+          {["calendar","rankings","history","settings"].map(function(t){
+            var label = t==="calendar"?"📅 Calendar":t==="rankings"?"🏆 Rankings":t==="history"?"📊 Results":"⚙️";
+            return (<button key={t} onClick={function(){setTab(t)}} style={{flex:t==="settings"?0.5:1,padding:"8px 4px",borderRadius:6,border:"none",cursor:"pointer",background:tab===t?"rgba(250,204,21,0.12)":"rgba(255,255,255,0.02)",color:tab===t?"#facc15":"#64748b",fontSize:13,fontWeight:700,letterSpacing:0.5}}>{label}</button>);
           })}
         </div>
 
         {tab === "calendar" && (
           <div style={{background:"rgba(0,0,0,0.2)",borderRadius:8,padding:6,border:"1px solid rgba(255,255,255,0.04)"}}>
             {!seasonDone && curEvent && !picking && (
-              <div style={{fontSize:11,color:"#facc15",fontWeight:700,textAlign:"center",marginBottom:6,letterSpacing:0.5}}>
+              <div style={{fontSize:13,color:"#facc15",fontWeight:700,textAlign:"center",marginBottom:6,letterSpacing:0.5}}>
                 {curEvent.type==="gs"
                   ? (pRank<=64 ? "👑 TAP THE HIGHLIGHTED CELL TO ENTER GRAND SLAM" : "👑 TAP TO SKIP (NOT QUALIFIED, #"+pRank+")")
                   : "▶ TAP THE HIGHLIGHTED CELL TO PLAY WEEK "+curEvent.block+"."+curEvent.week}
@@ -927,23 +905,23 @@ export default function Arena(props) {
                       {isCur ? (isGS ? (pRank<=64 ? "👑▶" : "👑⏭") : "▶") : ev.done && tier ? tier.short : isGS ? "👑" : "—"}
                     </div>
                     {isCur ? (
-                      <div style={{fontSize:11,color:"#e2e8f0",fontWeight:700,marginTop:2}}>
+                      <div style={{fontSize:13,color:"#e2e8f0",fontWeight:700,marginTop:2}}>
                         {isGS ? "GS "+ev.gsNum : "Wk "+ev.block+"."+ev.week}
                         {def>0&&(<div style={{fontSize:10,color:"#f59e0b",marginTop:1}}>def:{def}</div>)}
                       </div>
                     ) : ev.done && ev.result ? (
-                      <div style={{fontSize:12,color:"#e2e8f0",fontWeight:600,lineHeight:1.1,marginTop:1}}>
+                      <div style={{fontSize:14,color:"#e2e8f0",fontWeight:600,lineHeight:1.1,marginTop:1}}>
                         {ev.result.pPts}
-                        {net!=null&&net!==0&&(<span style={{color:net>0?"#22c55e":"#ef4444",fontWeight:700,marginLeft:2,fontSize:11}}>{net>0?"+":""}{net}</span>)}
+                        {net!=null&&net!==0&&(<span style={{color:net>0?"#22c55e":"#ef4444",fontWeight:700,marginLeft:2,fontSize:13}}>{net>0?"+":""}{net}</span>)}
                       </div>
                     ) : def > 0 ? (
-                      <div style={{fontSize:11,color:"#f59e0b",marginTop:1}}>d:{def}</div>
+                      <div style={{fontSize:13,color:"#f59e0b",marginTop:1}}>d:{def}</div>
                     ) : null}
                   </div>
                 );
               })}
             </div>
-            <div style={{display:"flex",justifyContent:"space-between",marginTop:8,fontSize:11,color:"#64748b"}}>
+            <div style={{display:"flex",justifyContent:"space-between",marginTop:8,fontSize:13,color:"#64748b"}}>
               <span>{S.calIdx}/{TOTAL_EVENTS} played</span>
               <span>{seasonDone?"→ Finals":"Next: "+(S.cal[S.calIdx]?S.cal[S.calIdx].type==="gs"?"GS "+S.cal[S.calIdx].gsNum:"Wk "+(S.cal[S.calIdx].block||"")+"."+((S.cal[S.calIdx].week||"")):"")}</span>
             </div>
@@ -961,17 +939,17 @@ export default function Arena(props) {
             return (
               <div key={p.id+"-"+i} onClick={function(){setProf({p:p,rank:i+1})}} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"3px 5px",background:p.isP?"rgba(250,204,21,0.08)":i%2===0?"rgba(255,255,255,0.012)":"transparent",borderRadius:3,marginBottom:1,cursor:"pointer",borderLeft:i<16?"2px solid "+(i<4?"#facc15":i<8?"#22c55e":i<12?"#3b82f6":"#94a3b8"):"2px solid transparent"}}>
                 <div style={{minWidth:0,flex:1}}>
-                  <div style={{fontSize:12,color:p.isP?"#facc15":"#e2e8f0",fontWeight:p.isP?700:400,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
+                  <div style={{fontSize:14,color:p.isP?"#facc15":"#e2e8f0",fontWeight:p.isP?700:400,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
                     <span style={{color:i<3?["#facc15","#94a3b8","#cd7f32"][i]:"#475569",fontWeight:700,marginRight:3,width:26,display:"inline-block",textAlign:"right"}}>#{i+1}</span>
                     {p.isP?S.pName+" ⭐":(p.emoji||"")+" "+sh(p.name)}
                   </div>
-                  <div style={{fontSize:11,color:"#475569",marginTop:1}}>
+                  <div style={{fontSize:13,color:"#475569",marginTop:1}}>
                     {p.isP?"":"Talent:"}{p.isP?"":((p.skill||0)>80?(<span style={{color:"#ef4444"}}>Elite</span>):(p.skill||0)>60?(<span style={{color:"#f59e0b"}}>Strong</span>):(p.skill||0)>40?(<span style={{color:"#22d3ee"}}>Avg</span>):(<span style={{color:"#94a3b8"}}>Dev</span>))} <span style={{color:"#22d3ee"}}>⚡{t.r||0}</span> <span style={{color:"#f472b6"}}>💪{t.p||0}</span> <span style={{color:"#4ade80"}}>🎯{t.f||0}</span> <span style={{color:"#fb923c"}}>🫀{t.s||0}</span> <span style={{color:"#a78bfa"}}>🛡{t.g||0}</span>
                   </div>
                 </div>
                 <div style={{textAlign:"right"}}>
-                  <div style={{fontSize:12,fontWeight:600,color:p.isP?"#facc15":"#cbd5e1"}}>{(p.sp||0).toLocaleString()}</div>
-                  <div style={{fontSize:11,color:"#475569"}}>AT:{(p.ap||0).toLocaleString()}</div>
+                  <div style={{fontSize:14,fontWeight:600,color:p.isP?"#facc15":"#cbd5e1"}}>{(p.sp||0).toLocaleString()}</div>
+                  <div style={{fontSize:13,color:"#475569"}}>AT:{(p.ap||0).toLocaleString()}</div>
                 </div>
               </div>
             );
@@ -981,39 +959,71 @@ export default function Arena(props) {
               {ranked.slice(0, showTop).map(function(p, i){ return renderRow(p, i); })}
               {needNear && (
                 <div>
-                  <div style={{textAlign:"center",padding:"4px",color:"#475569",fontSize:11}}>··· {nearStart - showTop} more ···</div>
+                  <div style={{textAlign:"center",padding:"4px",color:"#475569",fontSize:13}}>··· {nearStart - showTop} more ···</div>
                   {ranked.slice(nearStart, nearEnd + 1).map(function(p, i){ return renderRow(p, nearStart + i); })}
                 </div>
               )}
-              <div style={{textAlign:"center",fontSize:11,color:"#475569",padding:3}}>Tap any player for profile • {ranked.length} total</div>
+              <div style={{textAlign:"center",fontSize:13,color:"#475569",padding:3}}>Tap any player for profile • {ranked.length} total</div>
             </div>
           );
         })()}
 
         {tab === "history" && (
           <div style={{background:"rgba(0,0,0,0.25)",borderRadius:8,padding:6,border:"1px solid rgba(255,255,255,0.04)",maxHeight:380,overflowY:"auto"}}>
-            {(S.tHist||[]).length===0?(<div style={{color:"#475569",fontSize:11,padding:6}}>No events yet.</div>):
+            {(S.tHist||[]).length===0?(<div style={{color:"#475569",fontSize:13,padding:6}}>No events yet.</div>):
             (S.tHist||[]).slice().reverse().map(function(t,i){
               var tier = TIERS[t.tier]||TIERS[0];
               return (
                 <div key={i} style={{padding:"5px 7px",background:i%2?"transparent":"rgba(255,255,255,0.015)",borderRadius:4,marginBottom:1}}>
-                  <div style={{display:"flex",justifyContent:"space-between",fontSize:12}}>
+                  <div style={{display:"flex",justifyContent:"space-between",fontSize:14}}>
                     <span><span style={{color:tier.col,fontWeight:700}}>{tier.short}</span><span style={{color:"#64748b",marginLeft:4}}>S{t.season}</span></span>
                     <div style={{textAlign:"right"}}>
                       <span style={{color:"#e2e8f0",fontWeight:600}}>{(t.pPts||0).toLocaleString()}</span>
-                      {t.netChange != null && (<span style={{color:t.netChange>0?"#22c55e":t.netChange<0?"#ef4444":"#64748b",fontWeight:700,marginLeft:4,fontSize:11}}>{t.netChange>0?"+"+t.netChange:t.netChange===0?"±0":t.netChange}</span>)}
+                      {t.netChange != null && (<span style={{color:t.netChange>0?"#22c55e":t.netChange<0?"#ef4444":"#64748b",fontWeight:700,marginLeft:4,fontSize:13}}>{t.netChange>0?"+"+t.netChange:t.netChange===0?"±0":t.netChange}</span>)}
                     </div>
                   </div>
-                  <div style={{display:"flex",justifyContent:"space-between",fontSize:11,color:"#64748b",marginTop:1}}>
+                  <div style={{display:"flex",justifyContent:"space-between",fontSize:13,color:"#64748b",marginTop:1}}>
                     <span>Reached: <span style={{color:"#94a3b8"}}>{t.roundName||"R1"}</span>{t.defending>0 && (<span style={{color:"#f59e0b",marginLeft:4}}>(def:{t.defending})</span>)}{t.money>0&&(<span style={{color:"#22c55e",marginLeft:4}}>💰{(t.money/1000).toFixed(0)}K</span>)}</span>
                     {t.winner&&(<span style={{color:t.winner.isP?"#facc15":"#94a3b8"}}>🏆 {t.winner.isP?"YOU":sh(t.winner.name)}</span>)}
                   </div>
                 </div>
               );
             })}
-            {(S.champs||[]).length>0&&(<div style={{marginTop:4,borderTop:"1px solid rgba(255,255,255,0.05)",paddingTop:4}}><div style={{fontSize:11,color:"#facc15",fontWeight:700,marginBottom:2}}>👑 Season Champions</div>{S.champs.map(function(c,i){return(<div key={i} style={{fontSize:11,color:c.isP?"#facc15":"#94a3b8"}}>S{c.s}: {c.isP?"🌟 YOU":c.name}</div>);})}</div>)}
+            {(S.champs||[]).length>0&&(<div style={{marginTop:4,borderTop:"1px solid rgba(255,255,255,0.05)",paddingTop:4}}><div style={{fontSize:13,color:"#facc15",fontWeight:700,marginBottom:2}}>👑 Season Champions</div>{S.champs.map(function(c,i){return(<div key={i} style={{fontSize:13,color:c.isP?"#facc15":"#94a3b8"}}>S{c.s}: {c.isP?"🌟 YOU":c.name}</div>);})}</div>)}
           </div>
         )}
+
+        {tab === "settings" && (function(){
+          var rowStyle = {display:"flex",alignItems:"center",justifyContent:"space-between",padding:"14px 14px",borderRadius:10,marginBottom:8,background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.06)",width:"100%",cursor:"pointer",textAlign:"left"};
+          var labelStyle = {fontSize:15,fontWeight:700,color:"#e2e8f0"};
+          var hintStyle = {fontSize:12,color:"#64748b",marginTop:2};
+          return (
+            <div style={{background:"rgba(0,0,0,0.2)",borderRadius:8,padding:10,border:"1px solid rgba(255,255,255,0.04)"}}>
+              <button onClick={function(){setHelp(true)}} style={Object.assign({},rowStyle,{border:"1px solid rgba(250,204,21,0.2)"})}>
+                <div><div style={labelStyle}>❓ How to Play</div><div style={hintStyle}>Game rules & strike mechanic</div></div>
+                <span style={{color:"#facc15",fontSize:18}}>›</span>
+              </button>
+              {userId && (
+                <button onClick={function(){doSync(S)}} disabled={syncing} style={Object.assign({},rowStyle,{border:"1px solid rgba(34,197,94,0.2)",opacity:syncing?0.6:1})}>
+                  <div><div style={labelStyle}>☁️ Sync to Cloud</div><div style={hintStyle}>Back up achievements to leaderboard</div></div>
+                  <span style={{color:"#22c55e",fontSize:14,fontWeight:700}}>{syncing?"...":"Sync"}</span>
+                </button>
+              )}
+              <button onClick={exportSave} style={rowStyle}>
+                <div><div style={labelStyle}>💾 Export Save</div><div style={hintStyle}>Download your game as JSON</div></div>
+                <span style={{color:"#94a3b8",fontSize:18}}>›</span>
+              </button>
+              <button onClick={function(){fileRef.current&&fileRef.current.click()}} style={rowStyle}>
+                <div><div style={labelStyle}>📂 Import Save</div><div style={hintStyle}>Load a previously exported save</div></div>
+                <span style={{color:"#94a3b8",fontSize:18}}>›</span>
+              </button>
+              <button onClick={newGame} style={Object.assign({},rowStyle,{border:"1px solid rgba(239,68,68,0.25)",background:"rgba(239,68,68,0.05)",marginTop:16})}>
+                <div><div style={Object.assign({},labelStyle,{color:"#ef4444"})}>🔄 Restart Game</div><div style={hintStyle}>Erase current save and start over</div></div>
+                <span style={{color:"#ef4444",fontSize:18}}>›</span>
+              </button>
+            </div>
+          );
+        })()}
       </div>
     );
   }
@@ -1022,20 +1032,20 @@ export default function Arena(props) {
   if (scr === "training") return (
     <div style={W}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
-        <span style={{fontSize:13,color:"#818cf8",fontWeight:800}}>🏋️ TRAINING CAMP</span>
-        <button onClick={function(){setScr("hub")}} style={{background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.1)",color:"#94a3b8",padding:"5px 10px",borderRadius:6,fontSize:12,cursor:"pointer"}}>← Hub</button>
+        <span style={{fontSize:15,color:"#818cf8",fontWeight:800}}>🏋️ TRAINING CAMP</span>
+        <button onClick={function(){setScr("hub")}} style={{background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.1)",color:"#94a3b8",padding:"5px 10px",borderRadius:6,fontSize:14,cursor:"pointer"}}>← Hub</button>
       </div>
-      <div style={{textAlign:"center",marginBottom:14}}><span style={{fontSize:22,color:"#facc15",fontWeight:900}}>{S.player.tr.tp||0}</span><span style={{color:"#94a3b8",fontSize:12,marginLeft:6}}>TP</span></div>
+      <div style={{textAlign:"center",marginBottom:14}}><span style={{fontSize:22,color:"#facc15",fontWeight:900}}>{S.player.tr.tp||0}</span><span style={{color:"#94a3b8",fontSize:14,marginLeft:6}}>TP</span></div>
       {[{k:"r",l:"Reflexes",i:"⚡",d:"Slows bar speed (relative)",c:"#22d3ee"},{k:"p",l:"Power",i:"💪",d:"Widens sweet spot (relative)",c:"#f472b6"},{k:"f",l:"Focus",i:"🎯",d:"Strike score bonus (relative)",c:"#4ade80"},{k:"s",l:"Stamina",i:"🫀",d:"Less bar acceleration between strikes",c:"#fb923c"},{k:"g",l:"Grit",i:"🛡️",d:"Raises minimum score on bad hits",c:"#a78bfa"}].map(function(st){
         var lv=S.player.tr[st.k]||0,cost=trainCost(lv),can=(S.player.tr.tp||0)>=cost&&lv<20;
         return (
           <div key={st.k} style={{marginBottom:8,padding:10,background:"rgba(255,255,255,0.025)",borderRadius:8,border:"1px solid "+(can?st.c+"33":"rgba(255,255,255,0.04)")}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
-              <div><span style={{color:st.c,fontWeight:700,fontSize:13}}>{st.i} {st.l}</span><span style={{color:"#64748b",fontSize:12,marginLeft:6}}>Lv.{lv}/20</span></div>
-              <button onClick={function(){doTrain(st.k)}} disabled={!can} style={{background:can?st.c:"rgba(255,255,255,0.04)",color:can?"#000":"#475569",border:"none",padding:"4px 10px",borderRadius:5,fontSize:11,fontWeight:700,cursor:can?"pointer":"default",opacity:can?1:0.5}}>{lv>=20?"MAX":cost+" TP"}</button>
+              <div><span style={{color:st.c,fontWeight:700,fontSize:13}}>{st.i} {st.l}</span><span style={{color:"#64748b",fontSize:14,marginLeft:6}}>Lv.{lv}/20</span></div>
+              <button onClick={function(){doTrain(st.k)}} disabled={!can} style={{background:can?st.c:"rgba(255,255,255,0.04)",color:can?"#000":"#475569",border:"none",padding:"4px 10px",borderRadius:5,fontSize:13,fontWeight:700,cursor:can?"pointer":"default",opacity:can?1:0.5}}>{lv>=20?"MAX":cost+" TP"}</button>
             </div>
             <div style={{display:"flex",gap:1,marginBottom:3}}>{Array.from({length:20}).map(function(_,i){return(<div key={i} style={{flex:1,height:5,borderRadius:2,background:i<lv?st.c:"rgba(255,255,255,0.05)"}}/>);})}</div>
-            <div style={{fontSize:11,color:"#64748b"}}>{st.d}</div>
+            <div style={{fontSize:13,color:"#64748b"}}>{st.d}</div>
           </div>
         );
       })}
@@ -1045,19 +1055,19 @@ export default function Arena(props) {
         var maxed = total >= 100;
         return (
           <div style={{background:"rgba(99,102,241,0.05)",borderRadius:6,padding:8,border:"1px solid rgba(129,140,248,0.08)",marginTop:4}}>
-            <div style={{fontSize:11,color:"#818cf8",fontWeight:700,marginBottom:3}}>TRAINING GUIDE</div>
-            <div style={{fontSize:11,color:"#94a3b8",lineHeight:1.5}}>
+            <div style={{fontSize:13,color:"#818cf8",fontWeight:700,marginBottom:3}}>TRAINING GUIDE</div>
+            <div style={{fontSize:13,color:"#94a3b8",lineHeight:1.5}}>
               All stats are <span style={{color:"#facc15"}}>relative</span> — only the gap vs your opponent matters. If you both have ⚡10, it cancels out.
             </div>
             {maxed ? (
               <div style={{marginTop:6,padding:6,background:"rgba(250,204,21,0.06)",borderRadius:4,border:"1px solid rgba(250,204,21,0.1)"}}>
-                <div style={{fontSize:12,color:"#facc15",fontWeight:700}}>🏅 TRAINING COMPLETE</div>
-                <div style={{fontSize:11,color:"#94a3b8",lineHeight:1.5,marginTop:2}}>
+                <div style={{fontSize:14,color:"#facc15",fontWeight:700}}>🏅 TRAINING COMPLETE</div>
+                <div style={{fontSize:13,color:"#94a3b8",lineHeight:1.5,marginTop:2}}>
                   All stats maxed! But top NPCs also train heavily — elite opponents with skill 85+ and 15+ training still score <span style={{color:"#ef4444"}}>89-99</span> against you. Masters and Grand Slam difficulty (speed 4.5-6.5×, zone 3-6px) ensures you still need <span style={{color:"#22c55e"}}>near-perfect timing</span> to beat the best. Your advantage is the gap closes — not that you become invincible.
                 </div>
               </div>
             ) : (
-              <div style={{fontSize:11,color:"#475569",marginTop:3}}>
+              <div style={{fontSize:13,color:"#475569",marginTop:3}}>
                 Total: {total}/100 • NPCs gain 0-2 levels per tournament • Tournament winners gain 1 level
               </div>
             )}
@@ -1079,10 +1089,10 @@ export default function Arena(props) {
         {prof && (<Profile player={prof.p} rank={prof.rank} playerName={S.pName} onClose={function(){setProf(null)}} />)}
         {showHelp && (<HelpScreen onClose={function(){setHelp(false)}} />)}
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
-          <div><span style={{fontSize:11,color:tier.col,fontWeight:700}}>{tier.name}</span><span style={{color:"#475569",margin:"0 4px"}}>•</span><span style={{fontSize:12,color:"#94a3b8"}}>{rNames[Math.min(ts.round,tier.rounds-1)]}</span></div>
+          <div><span style={{fontSize:13,color:tier.col,fontWeight:700}}>{tier.name}</span><span style={{color:"#475569",margin:"0 4px"}}>•</span><span style={{fontSize:14,color:"#94a3b8"}}>{rNames[Math.min(ts.round,tier.rounds-1)]}</span></div>
           <div style={{display:"flex",gap:6,alignItems:"center"}}>
-            <button onClick={function(){setHelp(true)}} style={{background:"none",border:"1px solid rgba(250,204,21,0.15)",color:"#facc15",fontSize:11,padding:"2px 6px",borderRadius:4,cursor:"pointer",fontWeight:700}}>?</button>
-            <span style={{fontSize:11,color:"#94a3b8"}}>{S.pName} <span style={{color:"#facc15"}}>#{pRank}</span></span>
+            <button onClick={function(){setHelp(true)}} style={{background:"none",border:"1px solid rgba(250,204,21,0.15)",color:"#facc15",fontSize:13,padding:"2px 6px",borderRadius:4,cursor:"pointer",fontWeight:700}}>?</button>
+            <span style={{fontSize:13,color:"#94a3b8"}}>{S.pName} <span style={{color:"#facc15"}}>#{pRank}</span></span>
           </div>
         </div>
         <div style={{display:"flex",gap:2,marginBottom:6}}>
@@ -1092,15 +1102,15 @@ export default function Arena(props) {
         {pm && ts.alive && opp && (
           <div style={{background:"rgba(0,0,0,0.4)",border:"1px solid "+tier.col+"22",borderRadius:10,padding:10,marginBottom:6,animation:"glow 2s ease infinite"}}>
             <div style={{textAlign:"center",marginBottom:4}}>
-              <div style={{fontSize:14,fontWeight:900,color:tier.col}}>⚔️ {rNames[ts.round]}</div>
-              <div style={{fontSize:11,color:"#94a3b8",marginTop:2}}><span style={{color:"#facc15"}}>{S.pName}</span> vs <span style={{color:"#e2e8f0",cursor:"pointer",textDecoration:"underline"}} onClick={function(){setProf({p:opp,rank:oppRank})}}>{opp.emoji} {opp.name}</span></div>
-              <div style={{display:"flex",justifyContent:"center",gap:8,marginTop:3,fontSize:11}}>
+              <div style={{fontSize:16,fontWeight:900,color:tier.col}}>⚔️ {rNames[ts.round]}</div>
+              <div style={{fontSize:13,color:"#94a3b8",marginTop:2}}><span style={{color:"#facc15"}}>{S.pName}</span> vs <span style={{color:"#e2e8f0",cursor:"pointer",textDecoration:"underline"}} onClick={function(){setProf({p:opp,rank:oppRank})}}>{opp.emoji} {opp.name}</span></div>
+              <div style={{display:"flex",justifyContent:"center",gap:8,marginTop:3,fontSize:13}}>
                 <span style={{color:"#64748b"}}>Rank: <span style={{color:"#e2e8f0"}}>#{oppRank}</span></span>
                 <span style={{color:"#64748b"}}>Talent: <span style={{color:(opp.skill||0)>80?"#ef4444":(opp.skill||0)>60?"#f59e0b":(opp.skill||0)>40?"#22d3ee":"#94a3b8"}}>{(opp.skill||0)>80?"Elite":(opp.skill||0)>60?"Strong":(opp.skill||0)>40?"Average":"Developing"}</span></span>
                 <span style={{color:"#64748b"}}>Pts: <span style={{color:"#e2e8f0"}}>{(opp.sp||0).toLocaleString()}</span></span>
               </div>
               {(function(){var ot=opp.tr||{},pt=S.player.tr||{}; return (
-                <div style={{display:"flex",justifyContent:"center",gap:5,marginTop:3,fontSize:11,padding:"3px 6px",background:"rgba(0,0,0,0.3)",borderRadius:4}}>
+                <div style={{display:"flex",justifyContent:"center",gap:5,marginTop:3,fontSize:13,padding:"3px 6px",background:"rgba(0,0,0,0.3)",borderRadius:4}}>
                   {[{k:"r",i:"⚡",c:"#22d3ee"},{k:"p",i:"💪",c:"#f472b6"},{k:"f",i:"🎯",c:"#4ade80"},{k:"s",i:"🫀",c:"#fb923c"},{k:"g",i:"🛡",c:"#a78bfa"}].map(function(s){var d=(pt[s.k]||0)-(ot[s.k]||0);return(<span key={s.k} style={{color:s.c}}>{s.i}<span style={{color:"#facc15"}}>{pt[s.k]||0}</span><span style={{color:"#475569"}}>v</span><span style={{color:"#e2e8f0"}}>{ot[s.k]||0}</span>{d!==0&&(<span style={{color:d>0?"#22c55e":"#ef4444",marginLeft:1}}>{d>0?"+"+d:d}</span>)}</span>);})}
                 </div>
               );})()}
@@ -1111,7 +1121,7 @@ export default function Arena(props) {
                 var diffLabel = d <= 1 ? "Easy" : d <= 3 ? "Medium" : d <= 5 ? "Hard" : d <= 7 ? "Very Hard" : "Extreme";
                 var diffCol = d <= 1 ? "#4ade80" : d <= 3 ? "#22d3ee" : d <= 5 ? "#f59e0b" : d <= 7 ? "#ef4444" : "#dc2626";
                 return (
-                  <div style={{display:"flex",justifyContent:"center",gap:8,marginTop:3,fontSize:11,color:"#475569"}}>
+                  <div style={{display:"flex",justifyContent:"center",gap:8,marginTop:3,fontSize:13,color:"#475569"}}>
                     <span>Difficulty: <span style={{color:diffCol,fontWeight:700}}>{diffLabel}</span></span>
                     <span>Bar: {barSpd}×</span>
                     <span>Zone: {sweet}px</span>
@@ -1125,13 +1135,13 @@ export default function Arena(props) {
         {ts.done && (
           <div style={{background:"rgba(0,0,0,0.5)",borderRadius:10,padding:14,textAlign:"center",border:"1px solid "+tier.col+"22",marginBottom:6}}>
             <div style={{fontSize:18,fontWeight:900,color:ts.alive?tier.col:"#94a3b8"}}>{ts.alive?"🏆 "+tier.name+" Champion!":"Tournament Complete"}</div>
-            <div style={{color:"#94a3b8",fontSize:11,marginTop:3}}>{ts.log.filter(function(m){return m.won}).length}W-{ts.log.filter(function(m){return !m.won}).length}L • {ts.log.reduce(function(a,m){return a+m.pts},0).toLocaleString()} pts</div>
-            {(function(){ var ptsE = ts.log.reduce(function(a,m){return a+m.pts},0); var moneyE = 0; var t = TIERS[ts.tierIdx]; for(var mi=0;mi<ts.log.length;mi++){if(ts.log[mi].won&&t.money)moneyE+=(t.money[mi]||0);} return moneyE > 0 ? (<div style={{fontSize:12,color:"#22c55e",marginTop:2}}>💰 +${moneyE.toLocaleString()}</div>) : null; })()}
-            {(function(){ var def = (S.player.def && S.player.def[S.calIdx]) || 0; var earned = ts.log.reduce(function(a,m){return a+m.pts},0); var net = earned - def; return def > 0 ? (<div style={{fontSize:12,marginTop:3}}><span style={{color:"#f59e0b"}}>Defending: {def}</span><span style={{color:"#475569",margin:"0 4px"}}>→</span><span style={{color:net>=0?"#22c55e":"#ef4444",fontWeight:700}}>Net: {net>=0?"+"+net:net}</span></div>) : null; })()}
+            <div style={{color:"#94a3b8",fontSize:13,marginTop:3}}>{ts.log.filter(function(m){return m.won}).length}W-{ts.log.filter(function(m){return !m.won}).length}L • {ts.log.reduce(function(a,m){return a+m.pts},0).toLocaleString()} pts</div>
+            {(function(){ var ptsE = ts.log.reduce(function(a,m){return a+m.pts},0); var moneyE = 0; var t = TIERS[ts.tierIdx]; for(var mi=0;mi<ts.log.length;mi++){if(ts.log[mi].won&&t.money)moneyE+=(t.money[mi]||0);} return moneyE > 0 ? (<div style={{fontSize:14,color:"#22c55e",marginTop:2}}>💰 +${moneyE.toLocaleString()}</div>) : null; })()}
+            {(function(){ var def = (S.player.def && S.player.def[S.calIdx]) || 0; var earned = ts.log.reduce(function(a,m){return a+m.pts},0); var net = earned - def; return def > 0 ? (<div style={{fontSize:14,marginTop:3}}><span style={{color:"#f59e0b"}}>Defending: {def}</span><span style={{color:"#475569",margin:"0 4px"}}>→</span><span style={{color:net>=0?"#22c55e":"#ef4444",fontWeight:700}}>Net: {net>=0?"+"+net:net}</span></div>) : null; })()}
             <button onClick={finishT} style={Object.assign({},bs("linear-gradient(135deg,"+tier.col+",#f59e0b)","#000"),{marginTop:10})}>Return to Hub →</button>
           </div>
         )}
-        {ts.log.length>0&&(<div style={{background:"rgba(0,0,0,0.2)",borderRadius:6,padding:6,marginTop:4}}><div style={{fontSize:11,color:"#64748b",fontWeight:700,marginBottom:3}}>MATCH LOG</div>{ts.log.map(function(m,i){return(<div key={i} style={{display:"flex",justifyContent:"space-between",padding:"2px 4px",fontSize:12,color:m.won?"#22c55e":"#ef4444"}}><span>{m.won?"W":"L"} {m.round} vs {sh(m.opp)}</span><span>+{m.pts}</span></div>);})}</div>)}
+        {ts.log.length>0&&(<div style={{background:"rgba(0,0,0,0.2)",borderRadius:6,padding:6,marginTop:4}}><div style={{fontSize:13,color:"#64748b",fontWeight:700,marginBottom:3}}>MATCH LOG</div>{ts.log.map(function(m,i){return(<div key={i} style={{display:"flex",justifyContent:"space-between",padding:"2px 4px",fontSize:14,color:m.won?"#22c55e":"#ef4444"}}><span>{m.won?"W":"L"} {m.round} vs {sh(m.opp)}</span><span>+{m.pts}</span></div>);})}</div>)}
       </div>
     );
   }
@@ -1143,14 +1153,14 @@ export default function Arena(props) {
       <div style={W}>
         <style dangerouslySetInnerHTML={{__html:CSS}} />
         <div style={{textAlign:"center",marginBottom:8}}>
-          <div style={{fontSize:13,fontWeight:900,letterSpacing:3,background:"linear-gradient(90deg,#ef4444,#f59e0b,#22c55e,#3b82f6,#a855f7)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>SEASON {S.sNum} FINALS</div>
-          <div style={{fontSize:12,color:"#94a3b8",marginTop:2}}>{fs.champ?"Champion Crowned":fs.phase==="groups"?"Group Stage":fs.phase==="semis"?"Semifinals":"World Championship"}</div>
+          <div style={{fontSize:15,fontWeight:900,letterSpacing:3,background:"linear-gradient(90deg,#ef4444,#f59e0b,#22c55e,#3b82f6,#a855f7)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>SEASON {S.sNum} FINALS</div>
+          <div style={{fontSize:14,color:"#94a3b8",marginTop:2}}>{fs.champ?"Champion Crowned":fs.phase==="groups"?"Group Stage":fs.phase==="semis"?"Semifinals":"World Championship"}</div>
         </div>
-        {fs.champ&&(<div style={{textAlign:"center",padding:16}}><div style={{fontSize:48}}>👑</div><div style={{fontSize:20,fontWeight:900,color:"#facc15",letterSpacing:3,animation:"cg 2s ease infinite"}}>{fs.champ.isP?"YOU ARE WORLD CHAMPION!":"WORLD CHAMPION"}</div>{!fs.champ.isP&&(<div style={{fontSize:13,color:"#94a3b8",marginTop:4}}>{fs.champ.emoji} {fs.champ.name}</div>)}<button onClick={nextSeason} style={Object.assign({},bs("linear-gradient(135deg,#facc15,#f59e0b)","#000"),{marginTop:14})}>🔄 Season {(S.sNum||1)+1}</button></div>)}
-        {fpm&&fopp&&!fs.champ&&(<div style={{background:"rgba(0,0,0,0.4)",border:"1px solid rgba(250,204,21,0.12)",borderRadius:10,padding:10,marginBottom:6,animation:"glow 2s ease infinite"}}><div style={{textAlign:"center",marginBottom:4}}><div style={{fontSize:14,fontWeight:900,color:"#facc15"}}>{fs.phase==="final"?"👑 WORLD CHAMPIONSHIP":"⚔️ "+fs.phase.toUpperCase()}</div><div style={{fontSize:11,color:"#94a3b8",marginTop:2}}><span style={{color:"#facc15"}}>{S.pName}</span> vs <span style={{color:"#e2e8f0"}}>{fopp.emoji} {fopp.name}</span></div></div><PowerBar key={"f-"+fs.phase+"-"+fopp.id} onDone={onFR} oppSkill={fopp.skill||60} diff={fs.phase==="final"?5:fs.phase==="semis"?4:3} tr={S.player.tr} otr={fopp.tr||{}} /></div>)}
-        {!fs.champ&&(<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:4,marginBottom:6}}>{fs.houses.map(function(h,hi){return(<div key={hi} style={{background:"rgba(0,0,0,0.25)",borderRadius:6,padding:5,border:"1px solid "+HC[hi]+"33"}}><div style={{fontSize:12,fontWeight:700,color:HC[hi],marginBottom:2}}>{HI[hi]} {HN[hi]}</div>{h.slice().sort(function(a,b){return(b.gP||0)-(a.gP||0)}).map(function(p){return(<div key={p.id} style={{display:"flex",justifyContent:"space-between",fontSize:11,padding:"1px 3px",background:p.isP?"rgba(250,204,21,0.06)":"transparent",borderRadius:2,color:p.isP?"#facc15":"#cbd5e1"}}><span style={{maxWidth:60,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{p.isP?"You":sh(p.name)}</span><span style={{fontWeight:600}}>{(p.gW||0)}W-{(p.gL||0)}L</span></div>);})}</div>);})}</div>)}
-        {!fs.champ&&fs.semis.length>0&&(<div style={{background:"rgba(0,0,0,0.25)",borderRadius:6,padding:6,marginBottom:6}}><div style={{fontSize:12,color:"#facc15",fontWeight:700,marginBottom:3}}>Semifinals</div>{fs.semis.map(function(m,i){return(<div key={i} style={{fontSize:12,color:"#cbd5e1",padding:"2px 0",display:"flex",justifyContent:"space-between"}}><span>{m.a.isP?"You":sh(m.a.name)} vs {m.b.isP?"You":sh(m.b.name)}</span><span style={{color:m.w?"#22c55e":"#64748b",fontWeight:600}}>{m.w?(m.w.isP?"You!":sh(m.w.name)):"—"}</span></div>);})}</div>)}
-        {!pQ&&!fs.champ&&(<div style={{textAlign:"center",padding:10,background:"rgba(239,68,68,0.05)",borderRadius:8}}><div style={{color:"#ef4444",fontWeight:700,fontSize:12}}>You didn't qualify</div></div>)}
+        {fs.champ&&(<div style={{textAlign:"center",padding:16}}><div style={{fontSize:48}}>👑</div><div style={{fontSize:20,fontWeight:900,color:"#facc15",letterSpacing:3,animation:"cg 2s ease infinite"}}>{fs.champ.isP?"YOU ARE WORLD CHAMPION!":"WORLD CHAMPION"}</div>{!fs.champ.isP&&(<div style={{fontSize:15,color:"#94a3b8",marginTop:4}}>{fs.champ.emoji} {fs.champ.name}</div>)}<button onClick={nextSeason} style={Object.assign({},bs("linear-gradient(135deg,#facc15,#f59e0b)","#000"),{marginTop:14})}>🔄 Season {(S.sNum||1)+1}</button></div>)}
+        {fpm&&fopp&&!fs.champ&&(<div style={{background:"rgba(0,0,0,0.4)",border:"1px solid rgba(250,204,21,0.12)",borderRadius:10,padding:10,marginBottom:6,animation:"glow 2s ease infinite"}}><div style={{textAlign:"center",marginBottom:4}}><div style={{fontSize:16,fontWeight:900,color:"#facc15"}}>{fs.phase==="final"?"👑 WORLD CHAMPIONSHIP":"⚔️ "+fs.phase.toUpperCase()}</div><div style={{fontSize:13,color:"#94a3b8",marginTop:2}}><span style={{color:"#facc15"}}>{S.pName}</span> vs <span style={{color:"#e2e8f0"}}>{fopp.emoji} {fopp.name}</span></div></div><PowerBar key={"f-"+fs.phase+"-"+fopp.id} onDone={onFR} oppSkill={fopp.skill||60} diff={fs.phase==="final"?5:fs.phase==="semis"?4:3} tr={S.player.tr} otr={fopp.tr||{}} /></div>)}
+        {!fs.champ&&(<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:4,marginBottom:6}}>{fs.houses.map(function(h,hi){return(<div key={hi} style={{background:"rgba(0,0,0,0.25)",borderRadius:6,padding:5,border:"1px solid "+HC[hi]+"33"}}><div style={{fontSize:14,fontWeight:700,color:HC[hi],marginBottom:2}}>{HI[hi]} {HN[hi]}</div>{h.slice().sort(function(a,b){return(b.gP||0)-(a.gP||0)}).map(function(p){return(<div key={p.id} style={{display:"flex",justifyContent:"space-between",fontSize:13,padding:"1px 3px",background:p.isP?"rgba(250,204,21,0.06)":"transparent",borderRadius:2,color:p.isP?"#facc15":"#cbd5e1"}}><span style={{maxWidth:60,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{p.isP?"You":sh(p.name)}</span><span style={{fontWeight:600}}>{(p.gW||0)}W-{(p.gL||0)}L</span></div>);})}</div>);})}</div>)}
+        {!fs.champ&&fs.semis.length>0&&(<div style={{background:"rgba(0,0,0,0.25)",borderRadius:6,padding:6,marginBottom:6}}><div style={{fontSize:14,color:"#facc15",fontWeight:700,marginBottom:3}}>Semifinals</div>{fs.semis.map(function(m,i){return(<div key={i} style={{fontSize:14,color:"#cbd5e1",padding:"2px 0",display:"flex",justifyContent:"space-between"}}><span>{m.a.isP?"You":sh(m.a.name)} vs {m.b.isP?"You":sh(m.b.name)}</span><span style={{color:m.w?"#22c55e":"#64748b",fontWeight:600}}>{m.w?(m.w.isP?"You!":sh(m.w.name)):"—"}</span></div>);})}</div>)}
+        {!pQ&&!fs.champ&&(<div style={{textAlign:"center",padding:10,background:"rgba(239,68,68,0.05)",borderRadius:8}}><div style={{color:"#ef4444",fontWeight:700,fontSize:14}}>You didn't qualify</div></div>)}
       </div>
     );
   }
