@@ -83,6 +83,14 @@ export function playTitle() {
   setTimeout(function(){ tone({ freq: 1046.5, duration: 0.5, volume: 0.25, type: "triangle" }); }, 560);
 }
 
+// Rank-up chime — bright ascending two-tone
+export function playRankUp() {
+  if (muted) return;
+  tone({ freq: 659.25, duration: 0.12, volume: 0.2, type: "triangle" });
+  setTimeout(function(){ tone({ freq: 987.77, duration: 0.18, volume: 0.22, type: "triangle" }); }, 90);
+  setTimeout(function(){ tone({ freq: 1318.51, duration: 0.28, volume: 0.2, type: "triangle" }); }, 210);
+}
+
 // Subtle click for button taps
 export function playClick() {
   if (muted) return;

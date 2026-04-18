@@ -1,12 +1,12 @@
 import * as React from "react";
 import { syncAchievements, saveGameToCloud, loadGameFromCloud } from "./firebase";
-import { playStrike, playVictory, playDefeat, isMuted, setMuted } from "./sounds";
+import { playStrike, playVictory, playDefeat, playTitle, playRankUp, isMuted, setMuted } from "./sounds";
 const { useState, useEffect, useRef } = React;
 
 /* ═══ CONSTANTS ═══ */
 const SK = "arena-t3";
 const W = { minHeight: "100vh", background: "linear-gradient(180deg,#080810 0%,#0f172a 50%,#080810 100%)", fontFamily: "'Trebuchet MS',sans-serif", color: "#fff", padding: 10, boxSizing: "border-box" };
-const CSS = "@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}@keyframes glow{0%,100%{box-shadow:0 0 10px rgba(250,204,21,0.15)}50%{box-shadow:0 0 24px rgba(250,204,21,0.4)}}@keyframes hit{0%{transform:scale(1)}30%{transform:scale(1.12)}100%{transform:scale(1)}}@keyframes miss{0%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}100%{transform:translateX(0)}}@keyframes cg{0%,100%{text-shadow:0 0 10px rgba(250,204,21,0.5)}50%{text-shadow:0 0 30px rgba(250,204,21,0.9)}}";
+const CSS = "@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}@keyframes glow{0%,100%{box-shadow:0 0 10px rgba(250,204,21,0.15)}50%{box-shadow:0 0 24px rgba(250,204,21,0.4)}}@keyframes hit{0%{transform:scale(1)}30%{transform:scale(1.12)}100%{transform:scale(1)}}@keyframes miss{0%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}100%{transform:translateX(0)}}@keyframes cg{0%,100%{text-shadow:0 0 10px rgba(250,204,21,0.5)}50%{text-shadow:0 0 30px rgba(250,204,21,0.9)}}@keyframes confetti-fall{0%{transform:translateY(-10vh) rotate(0deg);opacity:1}100%{transform:translateY(110vh) rotate(720deg);opacity:0}}";
 const EMO = ["⚔️","🛡️","🗡️","🏹","🔱","⚡","🔥","💀","👑","🐉","🦅","🐺","🦁","🐍","🦊","🎭","🐻","🦈","🦂","🐲","🏴","🎪","🔮","🌀","☠️","🦇","🐗","🐅","🦏","🐊"];
 
 /* Tiers: Futures, Challenger, Tour250, Tour500, Masters, GrandSlam */
@@ -315,6 +315,41 @@ function Profile(props) {
 }
 
 /* ═══ HELP / TUTORIAL ═══ */
+/* ═══ Confetti ═══ */
+function Confetti() {
+  var pieces = [];
+  var emojis = ["🎉","⭐","🏆","💫","✨","🎊"];
+  var colors = ["#facc15","#22c55e","#3b82f6","#ef4444","#a855f7","#f472b6"];
+  for (var i = 0; i < 48; i++) {
+    pieces.push({
+      id: i,
+      left: Math.random() * 100,
+      delay: Math.random() * 0.6,
+      duration: 1.8 + Math.random() * 1.6,
+      emoji: emojis[i % emojis.length],
+      color: colors[i % colors.length],
+      size: 18 + Math.random() * 14
+    });
+  }
+  return (
+    <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, pointerEvents: "none", zIndex: 9999, overflow: "hidden" }}>
+      {pieces.map(function(p){
+        return (
+          <div key={p.id} style={{
+            position: "absolute",
+            left: p.left + "%",
+            top: 0,
+            fontSize: p.size,
+            color: p.color,
+            animation: "confetti-fall " + p.duration + "s cubic-bezier(0.2,0.7,0.4,1) " + p.delay + "s forwards",
+            willChange: "transform, opacity"
+          }}>{p.emoji}</div>
+        );
+      })}
+    </div>
+  );
+}
+
 function HelpScreen(props) {
   return (
     <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.9)", zIndex: 999, overflowY: "auto", padding: 16 }} onClick={props.onClose}>
@@ -460,6 +495,21 @@ export default function Arena(props) {
   var _syncMsg = useState(""), syncMsg = _syncMsg[0], setSyncMsg = _syncMsg[1];
   var _mutedState = useState(isMuted()), mutedState = _mutedState[0], setMutedState = _mutedState[1];
   function toggleMute() { var n = !mutedState; setMuted(n); setMutedState(n); }
+  var _confetti = useState(false), confetti = _confetti[0], setConfetti = _confetti[1];
+  var lastRankRef = useRef(null);
+
+  /* Rank-up chime when crossing tier thresholds */
+  useEffect(function() {
+    if (!S) return;
+    var r = pRankOf(S);
+    var prev = lastRankRef.current;
+    lastRankRef.current = r;
+    if (prev == null) return;
+    var thresholds = [1, 3, 10, 16, 50, 100, 500];
+    for (var i = 0; i < thresholds.length; i++) {
+      if (r <= thresholds[i] && prev > thresholds[i]) { playRankUp(); break; }
+    }
+  }, [S]);
 
   function doSync(seasonData) {
     if (!userId || !seasonData) return;
@@ -570,6 +620,12 @@ export default function Arena(props) {
     var log = ts.log.concat([{ round: rNames[ts.round], opp: opp.name, won: won, pts: won ? tier.pts[ts.round] : 0 }]);
     var r = runBk(bk, ts.round, won, tier.rounds);
     setTS({ bracket: r.bracket, round: r.round, pending: r.pending, done: r.done, alive: won, log: log, tierIdx: ts.tierIdx });
+    if (r.done && won) {
+      /* Tournament title won — celebrate */
+      setTimeout(function(){ playTitle(); }, 500);
+      setConfetti(true);
+      setTimeout(function(){ setConfetti(false); }, 3200);
+    }
   }
 
   function finishT() {
@@ -802,6 +858,7 @@ export default function Arena(props) {
     return (
       <div style={W}>
         <style dangerouslySetInnerHTML={{__html:CSS}} />
+        {confetti && (<Confetti />)}
         {prof && (<Profile player={prof.p} rank={prof.rank} playerName={S.pName} onClose={function(){setProf(null)}} />)}
         {showHelp && (<HelpScreen onClose={function(){setHelp(false)}} />)}
 
@@ -1095,6 +1152,7 @@ export default function Arena(props) {
     return (
       <div style={W}>
         <style dangerouslySetInnerHTML={{__html:CSS}} />
+        {confetti && (<Confetti />)}
         {prof && (<Profile player={prof.p} rank={prof.rank} playerName={S.pName} onClose={function(){setProf(null)}} />)}
         {showHelp && (<HelpScreen onClose={function(){setHelp(false)}} />)}
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
