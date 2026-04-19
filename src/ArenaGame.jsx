@@ -86,9 +86,11 @@ function mkSeason(name, num, prev) {
   var rankHist = prev && prev.player.rankHist ? prev.player.rankHist.slice(-20) : [];
   /* Head-to-head records persist across seasons */
   var h2h = prev && prev.player.h2h ? prev.player.h2h : {};
+  /* Career timeline persists across seasons; seed on fresh game */
+  var timeline = prev && prev.player.timeline ? prev.player.timeline.slice() : [{ type: "start", s: num || 1, w: 0 }];
   return {
     pName: name || "Champion", sNum: num || 1, npcs: npcs, cal: mkCalendar(), calIdx: 0,
-    player: { id: 1, isP: true, sp: pSP, ap: prev ? prev.player.ap : 0, tr: ptr, best: pBest, def: def, res: res, money: prev ? prev.player.money : 0, seasonMoney: 0, rankHist: rankHist, h2h: h2h },
+    player: { id: 1, isP: true, sp: pSP, ap: prev ? prev.player.ap : 0, tr: ptr, best: pBest, def: def, res: res, money: prev ? prev.player.money : 0, seasonMoney: 0, rankHist: rankHist, h2h: h2h, timeline: timeline },
     champs: prev ? prev.champs : [], tHist: prev ? prev.tHist : [], phase: "hub"
   };
 }
@@ -372,6 +374,51 @@ function Profile(props) {
               })}
               {props.h2h.length > 5 && (
                 <div style={{ fontSize: 11, color: "#475569", textAlign: "center", marginTop: 4 }}>showing last 5 of {props.h2h.length} meetings</div>
+              )}
+            </div>
+          );
+        })()}
+        {/* Career timeline (player only) */}
+        {p.isP && props.timeline && props.timeline.length > 0 && (function(){
+          var events = props.timeline.slice().reverse(); /* newest first */
+          var shown = events.slice(0, 12);
+          var iconFor = function(t){ return t === "title" ? "🏆" : t === "gs" ? "👑" : t === "peak" ? "📈" : t === "start" ? "🌱" : "•"; };
+          var colorFor = function(t){ return t === "title" ? "#facc15" : t === "gs" ? "#f59e0b" : t === "peak" ? "#22c55e" : t === "start" ? "#818cf8" : "#94a3b8"; };
+          var rNames6 = RN6; var rNames5 = RN5;
+          return (
+            <div style={{ marginTop: 10, padding: 10, background: "rgba(0,0,0,0.25)", borderRadius: 8, border: "1px solid rgba(255,255,255,0.05)" }}>
+              <div style={{ fontSize: 13, color: "#94a3b8", fontWeight: 700, letterSpacing: 0.5, textTransform: "uppercase", marginBottom: 8 }}>📅 Career Timeline</div>
+              <div style={{ position: "relative", paddingLeft: 20 }}>
+                <div style={{ position: "absolute", left: 7, top: 4, bottom: 4, width: 2, background: "rgba(255,255,255,0.08)" }} />
+                {shown.map(function(ev, i){
+                  var tierInfo = ev.tier != null ? TIERS[ev.tier] : null;
+                  var roundName = "";
+                  if (ev.type === "gs" && ev.pRound != null) { roundName = rNames6[Math.min(ev.pRound, 5)] || ""; }
+                  var label = "";
+                  var detail = "";
+                  if (ev.type === "title") {
+                    label = "Won " + (tierInfo ? tierInfo.name : "Tournament");
+                    detail = (ev.pts ? ev.pts + " pts" : "") + (ev.money ? " • $" + (ev.money >= 1000 ? Math.round(ev.money/1000) + "K" : ev.money) : "");
+                  } else if (ev.type === "gs") {
+                    label = "Grand Slam " + (ev.gsNum || "") + " — " + roundName;
+                    detail = (ev.pts ? ev.pts + " pts" : "") + (ev.money ? " • $" + (ev.money >= 1000 ? Math.round(ev.money/1000) + "K" : ev.money) : "");
+                  } else if (ev.type === "peak") {
+                    label = "Reached career-high #" + ev.rank;
+                  } else if (ev.type === "start") {
+                    label = "Career started";
+                  }
+                  return (
+                    <div key={i} style={{ position: "relative", marginBottom: 10 }}>
+                      <div style={{ position: "absolute", left: -20, top: 0, width: 18, height: 18, borderRadius: "50%", background: "rgba(15,23,42,1)", border: "2px solid " + colorFor(ev.type), display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10 }}>{iconFor(ev.type)}</div>
+                      <div style={{ fontSize: 11, color: "#64748b", fontWeight: 700, letterSpacing: 0.3 }}>S{ev.s}{ev.w ? " • Wk " + ev.w : ""}</div>
+                      <div style={{ fontSize: 14, color: colorFor(ev.type), fontWeight: 800, marginTop: 1 }}>{label}</div>
+                      {detail && (<div style={{ fontSize: 12, color: "#cbd5e1", marginTop: 1 }}>{detail}</div>)}
+                    </div>
+                  );
+                })}
+              </div>
+              {events.length > shown.length && (
+                <div style={{ fontSize: 11, color: "#475569", textAlign: "center", marginTop: 4 }}>showing {shown.length} of {events.length} events</div>
               )}
             </div>
           );
@@ -787,6 +834,7 @@ export default function Arena(props) {
     });
     /* Update player with DEFENDING POINTS system */
     var pb = Object.assign({}, S.player.best||{});
+    var oldPeak = pb.rank || 1001;
     if (wonTitle) { pb.titles = (pb.titles||0) + 1; if (isGS) pb.gsTitles = (pb.gsTitles||0) + 1; }
     /* Defending: points earned at this calendar slot last season */
     var defending = (S.player.def && S.player.def[S.calIdx]) || 0;
@@ -798,7 +846,24 @@ export default function Arena(props) {
     if (newSP > (pb.peakS||0)) pb.peakS = newSP;
     var newRes = (S.player.res || [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]).slice();
     newRes[S.calIdx] = pp;
-    var newP = Object.assign({}, S.player, { sp: newSP, ap: (S.player.ap||0)+pp, tr: Object.assign({}, S.player.tr, { tp: (S.player.tr.tp||0) + Math.floor(pp/4) + 15 }), best: pb, res: newRes });
+    /* Career timeline entries for this event */
+    var tlNew = [];
+    var curEv = S.cal && S.cal[S.calIdx];
+    var wLabel = curEv ? (curEv.type === "gs" ? ("GS " + curEv.gsNum) : (curEv.block + "." + curEv.week)) : String(S.calIdx + 1);
+    /* Compute money earned here so timeline has it */
+    var tlMoney = 0;
+    for (var tlmi = 0; tlmi <= pRound; tlmi++) { tlMoney += (tier.money || [])[tlmi] || 0; }
+    if (wonTitle) {
+      tlNew.push({ type: "title", s: S.sNum, w: wLabel, tier: ts.tierIdx, pts: pp, money: tlMoney });
+    } else if (isGS && pRound >= 2) {
+      /* Quarterfinals or better at a Grand Slam, even without title */
+      tlNew.push({ type: "gs", s: S.sNum, w: wLabel, gsNum: curEv ? curEv.gsNum : null, pRound: pRound, pts: pp, money: tlMoney });
+    }
+    if (curRank < oldPeak) {
+      tlNew.push({ type: "peak", s: S.sNum, w: wLabel, rank: curRank });
+    }
+    var newTimeline = (S.player.timeline || []).concat(tlNew).slice(-200);
+    var newP = Object.assign({}, S.player, { sp: newSP, ap: (S.player.ap||0)+pp, tr: Object.assign({}, S.player.tr, { tp: (S.player.tr.tp||0) + Math.floor(pp/4) + 15 }), best: pb, res: newRes, timeline: newTimeline });
     /* Update NPC peak ranks */
     var tempS = Object.assign({}, S, { player: newP, npcs: newNpcs });
     var ranked = getRanked(tempS);
@@ -996,13 +1061,13 @@ export default function Arena(props) {
       <motion.div key="hub" {...screenAnim} style={W}>
         <style dangerouslySetInnerHTML={{__html:CSS}} />
         {confetti && (<Confetti />)}
-        {prof && (<Profile player={prof.p} rank={prof.rank} playerName={S.pName} h2h={!prof.p.isP && S.player.h2h ? (S.player.h2h[prof.p.id] || []) : null} onClose={function(){setProf(null)}} />)}
+        {prof && (<Profile player={prof.p} rank={prof.rank} playerName={S.pName} h2h={!prof.p.isP && S.player.h2h ? (S.player.h2h[prof.p.id] || []) : null} timeline={prof.p.isP ? (S.player.timeline || []) : null} onClose={function(){setProf(null)}} />)}
         {showHelp && (<HelpScreen onClose={function(){setHelp(false)}} />)}
 
-        {/* ── Status Bar ── */}
-        <div style={{padding:"10px 12px",background:"rgba(0,0,0,0.3)",borderRadius:10,marginBottom:6,border:"1px solid rgba(255,255,255,0.05)"}}>
+        {/* ── Status Bar (tap to open your profile) ── */}
+        <div onClick={function(){ setProf({ p: Object.assign({}, S.player, { name: S.pName, emoji: "⚔️" }), rank: pRank }); }} style={{padding:"10px 12px",background:"rgba(0,0,0,0.3)",borderRadius:10,marginBottom:6,border:"1px solid rgba(255,255,255,0.05)",cursor:"pointer"}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
-            <span style={{fontSize:17,color:"#facc15",fontWeight:800,letterSpacing:0.3}}>{S.pName}</span>
+            <span style={{fontSize:17,color:"#facc15",fontWeight:800,letterSpacing:0.3}}>{S.pName}<span style={{ color: "#475569", fontSize: 11, fontWeight: 500, marginLeft: 6 }}>view profile ›</span></span>
             <span style={{fontSize:20,color:"#facc15",fontWeight:900,letterSpacing:0.5}}>#{pRank}</span>
           </div>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
@@ -1293,7 +1358,7 @@ export default function Arena(props) {
       <motion.div key="tourney" {...screenAnim} style={W}>
         <style dangerouslySetInnerHTML={{__html:CSS}} />
         {confetti && (<Confetti />)}
-        {prof && (<Profile player={prof.p} rank={prof.rank} playerName={S.pName} h2h={!prof.p.isP && S.player.h2h ? (S.player.h2h[prof.p.id] || []) : null} onClose={function(){setProf(null)}} />)}
+        {prof && (<Profile player={prof.p} rank={prof.rank} playerName={S.pName} h2h={!prof.p.isP && S.player.h2h ? (S.player.h2h[prof.p.id] || []) : null} timeline={prof.p.isP ? (S.player.timeline || []) : null} onClose={function(){setProf(null)}} />)}
         {showHelp && (<HelpScreen onClose={function(){setHelp(false)}} />)}
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
           <div><span style={{fontSize:13,color:tier.col,fontWeight:700}}>{tier.name}</span><span style={{color:"#475569",margin:"0 4px"}}>•</span><span style={{fontSize:14,color:"#94a3b8"}}>{rNames[Math.min(ts.round,tier.rounds-1)]}</span></div>
