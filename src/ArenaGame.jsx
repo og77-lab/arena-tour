@@ -1,7 +1,16 @@
 import * as React from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { syncAchievements, saveGameToCloud, loadGameFromCloud } from "./firebase";
 import { playStrike, playVictory, playDefeat, playTitle, playRankUp, isMuted, setMuted } from "./sounds";
 const { useState, useEffect, useRef } = React;
+
+/* Framer Motion presets for screen transitions */
+const screenAnim = {
+  initial: { opacity: 0, y: 12 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -8 },
+  transition: { duration: 0.22, ease: "easeOut" }
+};
 
 /* ═══ CONSTANTS ═══ */
 const SK = "arena-t3";
@@ -117,6 +126,7 @@ function PowerBar(props) {
   var _cnt = useState(0), cnt = _cnt[0], setCnt = _cnt[1];
   var _res = useState(null), res = _res[0], setRes = _res[1];
   var _fx = useState(""), fx = _fx[0], setFx = _fx[1];
+  var _pop = useState(null), pop = _pop[0], setPop = _pop[1];
   var raf = useRef(null);
   var tr = props.tr || {}, otr = props.otr || {};
   var nR=(tr.r||0)-(otr.r||0), nP=(tr.p||0)-(otr.p||0), nF=(tr.f||0)-(otr.f||0), nS=(tr.s||0)-(otr.s||0), nG=(tr.g||0)-(otr.g||0);
@@ -143,6 +153,9 @@ function PowerBar(props) {
     var oBase = Math.min(95, 55 + effSkill * 0.4);
     var osc = Math.min(99, oBase + (Math.random() * 14 - 5));
     setFx(sc > 75 ? "hit" : "miss"); setTimeout(function () { setFx(""); }, 350);
+    var popId = Date.now() + Math.random();
+    setPop({ id: popId, val: Math.round(sc), label: sc >= 85 ? "PERFECT!" : sc >= 75 ? "GREAT" : sc >= 60 ? "GOOD" : "MISS" });
+    setTimeout(function(){ setPop(function(p){ return p && p.id === popId ? null : p; }); }, 900);
     playStrike(sc);
     var nm = myH.concat([sc]), no = opH.concat([osc]);
     setMyH(nm); setOpH(no);
@@ -157,7 +170,20 @@ function PowerBar(props) {
 
   var sl = ctr - sw / 2;
   return (
-    <div style={{ textAlign: "center", padding: "6px 0", animation: fx === "hit" ? "hit 0.3s ease" : fx === "miss" ? "miss 0.3s ease" : "none" }}>
+    <div style={{ textAlign: "center", padding: "6px 0", position: "relative", animation: fx === "hit" ? "hit 0.3s ease" : fx === "miss" ? "miss 0.3s ease" : "none" }}>
+      <AnimatePresence>
+        {pop && (
+          <motion.div key={pop.id}
+            initial={{ opacity: 0, y: 0, scale: 0.7 }}
+            animate={{ opacity: 1, y: -60, scale: 1.1 }}
+            exit={{ opacity: 0, y: -80, scale: 0.9 }}
+            transition={{ duration: 0.9, ease: "easeOut" }}
+            style={{ position: "absolute", top: 40, left: 0, right: 0, pointerEvents: "none", zIndex: 20 }}>
+            <div style={{ fontSize: 34, fontWeight: 900, color: pop.val >= 85 ? "#facc15" : pop.val >= 75 ? "#4ade80" : pop.val >= 60 ? "#facc15" : "#ef4444", textShadow: "0 2px 10px rgba(0,0,0,0.6)", letterSpacing: 1 }}>+{pop.val}</div>
+            <div style={{ fontSize: 12, fontWeight: 800, color: pop.val >= 85 ? "#facc15" : pop.val >= 75 ? "#4ade80" : pop.val >= 60 ? "#fb923c" : "#ef4444", letterSpacing: 2, marginTop: 2 }}>{pop.label}</div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       {ph !== "done" && (
         <div>
           <div style={{ display: "flex", justifyContent: "center", gap: 12, marginBottom: 8 }}>
@@ -821,10 +847,10 @@ export default function Arena(props) {
   }
 
   /* ═══ RENDER ═══ */
-  if (scr === "loading") return (<div style={Object.assign({},W,{display:"flex",alignItems:"center",justifyContent:"center"})}><style dangerouslySetInnerHTML={{__html:CSS}} /><span style={{color:"#facc15",fontSize:16}}>⚔️ Loading Arena Tour...</span></div>);
+  if (scr === "loading") return (<motion.div key="loading" {...screenAnim} style={Object.assign({},W,{display:"flex",alignItems:"center",justifyContent:"center"})}><style dangerouslySetInnerHTML={{__html:CSS}} /><span style={{color:"#facc15",fontSize:16}}>⚔️ Loading Arena Tour...</span></motion.div>);
 
   if (scr === "title") return (
-    <div style={Object.assign({},W,{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",textAlign:"center"})}>
+    <motion.div key="title" {...screenAnim} style={Object.assign({},W,{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",textAlign:"center"})}>
       <style dangerouslySetInnerHTML={{__html:CSS}} />
       <div style={{fontSize:48}}>⚔️</div>
       <h1 style={{fontSize:22,fontWeight:900,letterSpacing:3,background:"linear-gradient(135deg,#facc15,#f59e0b)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",margin:"8px 0 4px"}}>ARENA TOUR</h1>
@@ -841,7 +867,7 @@ export default function Arena(props) {
         <div style={{color:"#818cf8",fontSize:13,fontWeight:700,letterSpacing:1,marginBottom:4}}>ATP-STYLE SEASON</div>
         <div style={{color:"#c7d2fe",fontSize:14,lineHeight:1.6}}>20-event season: <b>4 blocks</b> of 4 weekly tournaments + <b>Grand Slam</b>. Climb tiers from Futures → Masters as your rank improves. <b>Top 16</b> contest Season Finals. All 1000 players compete every week.</div>
       </div>
-    </div>
+    </motion.div>
   );
 
   if (!S) return (<div style={W}><p>Loading...</p></div>);
@@ -856,7 +882,7 @@ export default function Arena(props) {
   if (scr === "hub") {
     var lastDone = S.calIdx > 0 ? S.cal[S.calIdx - 1] : null;
     return (
-      <div style={W}>
+      <motion.div key="hub" {...screenAnim} style={W}>
         <style dangerouslySetInnerHTML={{__html:CSS}} />
         {confetti && (<Confetti />)}
         {prof && (<Profile player={prof.p} rank={prof.rank} playerName={S.pName} onClose={function(){setProf(null)}} />)}
@@ -1090,13 +1116,13 @@ export default function Arena(props) {
             </div>
           );
         })()}
-      </div>
+      </motion.div>
     );
   }
 
   /* ─── TRAINING ─── */
   if (scr === "training") return (
-    <div style={W}>
+    <motion.div key="training" {...screenAnim} style={W}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
         <span style={{fontSize:15,color:"#818cf8",fontWeight:800}}>🏋️ TRAINING CAMP</span>
         <button onClick={function(){setScr("hub")}} style={{background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.1)",color:"#94a3b8",padding:"5px 10px",borderRadius:6,fontSize:14,cursor:"pointer"}}>← Hub</button>
@@ -1140,7 +1166,7 @@ export default function Arena(props) {
           </div>
         );
       })()}
-    </div>
+    </motion.div>
   );
 
   /* ─── TOURNAMENT ─── */
@@ -1150,7 +1176,7 @@ export default function Arena(props) {
     var opp = pm ? (pm.a.isP ? pm.b : pm.a) : null;
     var oppRank = 0; if (opp) { for (var oi = 0; oi < ranked.length; oi++) if (ranked[oi].id===opp.id){oppRank=oi+1;break;} }
     return (
-      <div style={W}>
+      <motion.div key="tourney" {...screenAnim} style={W}>
         <style dangerouslySetInnerHTML={{__html:CSS}} />
         {confetti && (<Confetti />)}
         {prof && (<Profile player={prof.p} rank={prof.rank} playerName={S.pName} onClose={function(){setProf(null)}} />)}
@@ -1209,7 +1235,7 @@ export default function Arena(props) {
           </div>
         )}
         {ts.log.length>0&&(<div style={{background:"rgba(0,0,0,0.2)",borderRadius:6,padding:6,marginTop:4}}><div style={{fontSize:13,color:"#64748b",fontWeight:700,marginBottom:3}}>MATCH LOG</div>{ts.log.map(function(m,i){return(<div key={i} style={{display:"flex",justifyContent:"space-between",padding:"2px 4px",fontSize:14,color:m.won?"#22c55e":"#ef4444"}}><span>{m.won?"W":"L"} {m.round} vs {sh(m.opp)}</span><span>+{m.pts}</span></div>);})}</div>)}
-      </div>
+      </motion.div>
     );
   }
 
@@ -1217,7 +1243,7 @@ export default function Arena(props) {
   if (scr === "finals" && fs) {
     var fpm=null,fopp=null; if(fs.pending!=null&&!fs.champ){if(fs.phase==="groups")fpm=fs.gm[fs.pending];else if(fs.phase==="semis")fpm=fs.semis[fs.pending];else if(fs.phase==="final")fpm=fs.final;if(fpm)fopp=fpm.a.isP?fpm.b:fpm.a;} var pQ=false;for(var hi=0;hi<fs.houses.length;hi++)for(var pi=0;pi<fs.houses[hi].length;pi++)if(fs.houses[hi][pi].isP)pQ=true;
     return (
-      <div style={W}>
+      <motion.div key="finals" {...screenAnim} style={W}>
         <style dangerouslySetInnerHTML={{__html:CSS}} />
         <div style={{textAlign:"center",marginBottom:8}}>
           <div style={{fontSize:15,fontWeight:900,letterSpacing:3,background:"linear-gradient(90deg,#ef4444,#f59e0b,#22c55e,#3b82f6,#a855f7)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>SEASON {S.sNum} FINALS</div>
@@ -1228,7 +1254,7 @@ export default function Arena(props) {
         {!fs.champ&&(<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:4,marginBottom:6}}>{fs.houses.map(function(h,hi){return(<div key={hi} style={{background:"rgba(0,0,0,0.25)",borderRadius:6,padding:5,border:"1px solid "+HC[hi]+"33"}}><div style={{fontSize:14,fontWeight:700,color:HC[hi],marginBottom:2}}>{HI[hi]} {HN[hi]}</div>{h.slice().sort(function(a,b){return(b.gP||0)-(a.gP||0)}).map(function(p){return(<div key={p.id} style={{display:"flex",justifyContent:"space-between",fontSize:13,padding:"1px 3px",background:p.isP?"rgba(250,204,21,0.06)":"transparent",borderRadius:2,color:p.isP?"#facc15":"#cbd5e1"}}><span style={{maxWidth:60,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{p.isP?"You":sh(p.name)}</span><span style={{fontWeight:600}}>{(p.gW||0)}W-{(p.gL||0)}L</span></div>);})}</div>);})}</div>)}
         {!fs.champ&&fs.semis.length>0&&(<div style={{background:"rgba(0,0,0,0.25)",borderRadius:6,padding:6,marginBottom:6}}><div style={{fontSize:14,color:"#facc15",fontWeight:700,marginBottom:3}}>Semifinals</div>{fs.semis.map(function(m,i){return(<div key={i} style={{fontSize:14,color:"#cbd5e1",padding:"2px 0",display:"flex",justifyContent:"space-between"}}><span>{m.a.isP?"You":sh(m.a.name)} vs {m.b.isP?"You":sh(m.b.name)}</span><span style={{color:m.w?"#22c55e":"#64748b",fontWeight:600}}>{m.w?(m.w.isP?"You!":sh(m.w.name)):"—"}</span></div>);})}</div>)}
         {!pQ&&!fs.champ&&(<div style={{textAlign:"center",padding:10,background:"rgba(239,68,68,0.05)",borderRadius:8}}><div style={{color:"#ef4444",fontWeight:700,fontSize:14}}>You didn't qualify</div></div>)}
-      </div>
+      </motion.div>
     );
   }
 

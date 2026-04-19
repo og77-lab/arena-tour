@@ -11,7 +11,8 @@
       "Bash(rmdir _tmp)",
       "Bash(npm install:*)",
       "Bash(gh --version)",
-      "Bash(npx vite *)"
+      "Bash(npx vite *)",
+      "Bash(npm ls *)"
     ]
   }
 }
