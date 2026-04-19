@@ -84,9 +84,11 @@ function mkSeason(name, num, prev) {
   var res = []; for (var ri = 0; ri < TOTAL_EVENTS; ri++) res.push(0);
   /* Rank history — carry over last 20 entries from previous season */
   var rankHist = prev && prev.player.rankHist ? prev.player.rankHist.slice(-20) : [];
+  /* Head-to-head records persist across seasons */
+  var h2h = prev && prev.player.h2h ? prev.player.h2h : {};
   return {
     pName: name || "Champion", sNum: num || 1, npcs: npcs, cal: mkCalendar(), calIdx: 0,
-    player: { id: 1, isP: true, sp: pSP, ap: prev ? prev.player.ap : 0, tr: ptr, best: pBest, def: def, res: res, money: prev ? prev.player.money : 0, seasonMoney: 0, rankHist: rankHist },
+    player: { id: 1, isP: true, sp: pSP, ap: prev ? prev.player.ap : 0, tr: ptr, best: pBest, def: def, res: res, money: prev ? prev.player.money : 0, seasonMoney: 0, rankHist: rankHist, h2h: h2h },
     champs: prev ? prev.champs : [], tHist: prev ? prev.tHist : [], phase: "hub"
   };
 }
@@ -249,7 +251,7 @@ function PowerBar(props) {
                 }
               })()}
             </div>
-            <button onClick={function(){props.onDone(res.w)}} style={Object.assign({}, bs(res.w ? "#22c55e" : "#475569", res.w ? "#000" : "#e2e8f0"), { fontSize: 14 })}>
+            <button onClick={function(){props.onDone(res.w, res.pa, res.oa)}} style={Object.assign({}, bs(res.w ? "#22c55e" : "#475569", res.w ? "#000" : "#e2e8f0"), { fontSize: 14 })}>
               {res.w ? "→ Next Match" : "→ Continue"}
             </button>
           </div>
@@ -330,6 +332,50 @@ function Profile(props) {
             return (<div key={i} style={{ background: "rgba(0,0,0,0.3)", borderRadius: 6, padding: "6px 8px", textAlign: "center" }}><div style={{ fontSize: 16, fontWeight: 800, color: "#facc15" }}>{s.v}</div><div style={{ fontSize: 13, color: "#64748b" }}>{s.l}</div></div>);
           })}
         </div>
+        {/* Head-to-Head */}
+        {!p.isP && props.h2h && props.h2h.length > 0 && (function(){
+          var wins = 0, losses = 0;
+          for (var hi = 0; hi < props.h2h.length; hi++) { if (props.h2h[hi].w) wins++; else losses++; }
+          var last5 = props.h2h.slice(-5).reverse();
+          var rNamesBy = [5,5,5,5,5,6];
+          return (
+            <div style={{ marginTop: 10, padding: 8, background: "rgba(0,0,0,0.25)", borderRadius: 8, border: "1px solid rgba(255,255,255,0.05)" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                <span style={{ fontSize: 13, color: "#94a3b8", fontWeight: 700, letterSpacing: 0.5, textTransform: "uppercase" }}>Head-to-Head</span>
+                <span style={{ fontSize: 14, fontWeight: 800 }}>
+                  <span style={{ color: "#22c55e" }}>{wins}W</span>
+                  <span style={{ color: "#475569", margin: "0 3px" }}>–</span>
+                  <span style={{ color: "#ef4444" }}>{losses}L</span>
+                </span>
+              </div>
+              {last5.map(function(e, i){
+                var tierInfo = TIERS[e.tier] || TIERS[0];
+                var rNames6 = tierInfo.rounds === 6 ? RN6 : RN5;
+                var rName = rNames6[Math.min(e.round, tierInfo.rounds - 1)] || ("R" + (e.round + 1));
+                return (
+                  <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "4px 6px", borderRadius: 4, background: i % 2 === 0 ? "rgba(255,255,255,0.02)" : "transparent", marginBottom: 1 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, minWidth: 0, flex: 1 }}>
+                      <span style={{ width: 18, height: 18, borderRadius: 4, background: e.w ? "#22c55e" : "#ef4444", color: "#000", fontSize: 11, fontWeight: 900, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{e.w ? "W" : "L"}</span>
+                      <span style={{ fontSize: 12, color: tierInfo.col, fontWeight: 700 }}>{tierInfo.short}</span>
+                      <span style={{ fontSize: 12, color: "#94a3b8" }}>{rName}</span>
+                      <span style={{ fontSize: 11, color: "#475569" }}>S{e.s}</span>
+                    </div>
+                    {e.ma != null && e.oa != null && (
+                      <span style={{ fontSize: 12, fontWeight: 700, color: "#cbd5e1", letterSpacing: 0.5 }}>
+                        <span style={{ color: e.w ? "#22c55e" : "#cbd5e1" }}>{e.ma}</span>
+                        <span style={{ color: "#475569", margin: "0 3px" }}>–</span>
+                        <span style={{ color: e.w ? "#cbd5e1" : "#ef4444" }}>{e.oa}</span>
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+              {props.h2h.length > 5 && (
+                <div style={{ fontSize: 11, color: "#475569", textAlign: "center", marginTop: 4 }}>showing last 5 of {props.h2h.length} meetings</div>
+              )}
+            </div>
+          );
+        })()}
         {!p.isP && (
           <div style={{ marginTop: 8, padding: 6, background: "rgba(99,102,241,0.05)", borderRadius: 6, border: "1px solid rgba(129,140,248,0.08)" }}>
             <div style={{ fontSize: 13, color: "#c7d2fe", lineHeight: 1.5 }}>
@@ -686,7 +732,7 @@ export default function Arena(props) {
     setTtab("match"); setScr("tourney");
   }
 
-  function onTR(won) {
+  function onTR(won, myAvg, oppAvg) {
     if (!ts) return;
     var tier = TIERS[ts.tierIdx]; var rNames = tier.rounds === 6 ? RN6 : RN5;
     var bk = JSON.parse(JSON.stringify(ts.bracket)); bk._pts = tier.pts; bk._tier = ts.tierIdx;
@@ -696,6 +742,18 @@ export default function Arena(props) {
     var log = ts.log.concat([{ round: rNames[ts.round], opp: opp.name, won: won, pts: won ? tier.pts[ts.round] : 0 }]);
     var r = runBk(bk, ts.round, won, tier.rounds);
     setTS({ bracket: r.bracket, round: r.round, pending: r.pending, done: r.done, alive: won, log: log, tierIdx: ts.tierIdx });
+    /* Record head-to-head vs this opponent */
+    if (opp && opp.id) {
+      var h2h = Object.assign({}, S.player.h2h || {});
+      var entries = (h2h[opp.id] || []).concat([{
+        s: S.sNum, tier: ts.tierIdx, round: ts.round, w: won,
+        ma: myAvg != null ? Math.round(myAvg) : null,
+        oa: oppAvg != null ? Math.round(oppAvg) : null,
+        name: opp.name, emoji: opp.emoji
+      }]);
+      h2h[opp.id] = entries.slice(-10); /* keep last 10 per opponent */
+      save(Object.assign({}, S, { player: Object.assign({}, S.player, { h2h: h2h }) }));
+    }
     if (r.done && won) {
       /* Tournament title won — celebrate */
       setTimeout(function(){ playTitle(); }, 500);
@@ -938,7 +996,7 @@ export default function Arena(props) {
       <motion.div key="hub" {...screenAnim} style={W}>
         <style dangerouslySetInnerHTML={{__html:CSS}} />
         {confetti && (<Confetti />)}
-        {prof && (<Profile player={prof.p} rank={prof.rank} playerName={S.pName} onClose={function(){setProf(null)}} />)}
+        {prof && (<Profile player={prof.p} rank={prof.rank} playerName={S.pName} h2h={!prof.p.isP && S.player.h2h ? (S.player.h2h[prof.p.id] || []) : null} onClose={function(){setProf(null)}} />)}
         {showHelp && (<HelpScreen onClose={function(){setHelp(false)}} />)}
 
         {/* ── Status Bar ── */}
@@ -1235,7 +1293,7 @@ export default function Arena(props) {
       <motion.div key="tourney" {...screenAnim} style={W}>
         <style dangerouslySetInnerHTML={{__html:CSS}} />
         {confetti && (<Confetti />)}
-        {prof && (<Profile player={prof.p} rank={prof.rank} playerName={S.pName} onClose={function(){setProf(null)}} />)}
+        {prof && (<Profile player={prof.p} rank={prof.rank} playerName={S.pName} h2h={!prof.p.isP && S.player.h2h ? (S.player.h2h[prof.p.id] || []) : null} onClose={function(){setProf(null)}} />)}
         {showHelp && (<HelpScreen onClose={function(){setHelp(false)}} />)}
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
           <div><span style={{fontSize:13,color:tier.col,fontWeight:700}}>{tier.name}</span><span style={{color:"#475569",margin:"0 4px"}}>•</span><span style={{fontSize:14,color:"#94a3b8"}}>{rNames[Math.min(ts.round,tier.rounds-1)]}</span></div>
