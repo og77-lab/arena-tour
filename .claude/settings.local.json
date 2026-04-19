@@ -12,7 +12,8 @@
       "Bash(npm install:*)",
       "Bash(gh --version)",
       "Bash(npx vite *)",
-      "Bash(npm ls *)"
+      "Bash(npm ls *)",
+      "Bash(node -e ' *)"
     ]
   }
 }
