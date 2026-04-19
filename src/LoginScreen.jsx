@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { registerUser, loginUser } from './firebase'
 
+const FONT = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+
 export default function LoginScreen({ onGuest }) {
-  const [mode, setMode] = useState('login') // 'login' or 'register'
+  const [mode, setMode] = useState('login')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -32,14 +34,14 @@ export default function LoginScreen({ onGuest }) {
 
   const W = {
     minHeight: '100vh',
-    background: 'linear-gradient(180deg,#080810 0%,#0f172a 50%,#080810 100%)',
+    background: '#f8fafc',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
-    fontFamily: "'Trebuchet MS',sans-serif", color: '#fff', padding: 20
+    fontFamily: FONT, color: '#0f172a', padding: 20
   }
 
   const inputStyle = {
     width: '100%', padding: '12px 14px', borderRadius: 8,
-    border: '1px solid #334155', background: '#0f172a', color: '#fff',
+    border: '1px solid #e5e7eb', background: '#ffffff', color: '#0f172a',
     fontSize: 14, outline: 'none', boxSizing: 'border-box'
   }
 
@@ -48,15 +50,17 @@ export default function LoginScreen({ onGuest }) {
       <div style={{ width: '100%', maxWidth: 360 }}>
         <div style={{ textAlign: 'center', marginBottom: 30 }}>
           <div style={{ fontSize: 48, marginBottom: 8 }}>⚔️</div>
-          <div style={{ fontSize: 24, fontWeight: 900, letterSpacing: 2 }}>ARENA TOUR</div>
+          <div style={{ fontSize: 24, fontWeight: 900, letterSpacing: 2, color: '#1e40af' }}>ARENA TOUR</div>
           <div style={{ fontSize: 12, color: '#64748b', marginTop: 4 }}>Combat Tournament Career</div>
         </div>
 
         <div style={{
-          background: 'rgba(15,23,42,0.8)', border: '1px solid #1e293b',
+          background: '#ffffff',
+          border: '1px solid #e5e7eb',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
           borderRadius: 12, padding: 24
         }}>
-          <div style={{ display: 'flex', marginBottom: 20, borderRadius: 8, overflow: 'hidden', border: '1px solid #334155' }}>
+          <div style={{ display: 'flex', marginBottom: 20, borderRadius: 8, overflow: 'hidden', border: '1px solid #e5e7eb' }}>
             {['login', 'register'].map(m => (
               <button key={m} onClick={() => { setMode(m); setError(''); }}
                 style={{
@@ -74,18 +78,18 @@ export default function LoginScreen({ onGuest }) {
 
           <form onSubmit={handleSubmit}>
             <div style={{ marginBottom: 14 }}>
-              <label style={{ fontSize: 11, color: '#94a3b8', fontWeight: 700, marginBottom: 4, display: 'block', textTransform: 'uppercase', letterSpacing: 1 }}>Email</label>
+              <label style={{ fontSize: 11, color: '#64748b', fontWeight: 700, marginBottom: 4, display: 'block', textTransform: 'uppercase', letterSpacing: 1 }}>Email</label>
               <input type="email" value={email} onChange={e => setEmail(e.target.value)}
                 style={inputStyle} placeholder="warrior@arena.com" required />
             </div>
             <div style={{ marginBottom: 20 }}>
-              <label style={{ fontSize: 11, color: '#94a3b8', fontWeight: 700, marginBottom: 4, display: 'block', textTransform: 'uppercase', letterSpacing: 1 }}>Password</label>
+              <label style={{ fontSize: 11, color: '#64748b', fontWeight: 700, marginBottom: 4, display: 'block', textTransform: 'uppercase', letterSpacing: 1 }}>Password</label>
               <input type="password" value={password} onChange={e => setPassword(e.target.value)}
                 style={inputStyle} placeholder="Min 6 characters" required minLength={6} />
             </div>
 
             {error && (
-              <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid #7f1d1d', borderRadius: 8, padding: '8px 12px', marginBottom: 14, color: '#ef4444', fontSize: 12 }}>
+              <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 8, padding: '8px 12px', marginBottom: 14, color: '#dc2626', fontSize: 12 }}>
                 {error}
               </div>
             )}
@@ -93,7 +97,7 @@ export default function LoginScreen({ onGuest }) {
             <button type="submit" disabled={loading}
               style={{
                 width: '100%', padding: '14px 0', borderRadius: 8, border: 'none',
-                background: loading ? '#334155' : '#facc15', color: '#000',
+                background: loading ? '#e5e7eb' : '#1e40af', color: loading ? '#64748b' : '#ffffff',
                 fontSize: 14, fontWeight: 900, cursor: loading ? 'default' : 'pointer',
                 letterSpacing: 1, textTransform: 'uppercase'
               }}
@@ -105,8 +109,8 @@ export default function LoginScreen({ onGuest }) {
 
         <button onClick={onGuest}
           style={{
-            width: '100%', padding: '12px 0', borderRadius: 8, border: '1px solid #334155',
-            background: 'transparent', color: '#64748b',
+            width: '100%', padding: '12px 0', borderRadius: 8, border: '1px solid #e5e7eb',
+            background: '#ffffff', color: '#475569',
             fontSize: 13, fontWeight: 700, cursor: 'pointer',
             marginTop: 12, letterSpacing: 0.5
           }}
