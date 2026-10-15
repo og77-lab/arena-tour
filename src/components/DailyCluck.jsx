@@ -88,6 +88,60 @@ function leadStory(y, v) {
     say: pk(["Small steps, dear. Small, determined steps.", "Rome wasn't built in a day. Neither was my left knee.", "Next week, the big one. Or the medium one."], v, 1) };
 }
 
+/* Front-page stories that aren't about you: Grand Slam champions, a new #1, Cinderella titles, giant-killings, big titles */
+function WorldLead(props) {
+  var L = props.lead, v = props.v, s;
+  var nm = function (p) { return p.emoji + " " + sh(p.name); };
+  if (L.type === "slam") {
+    var N = up(sh(L.winner.name)), u = L.upset;
+    s = { kick: pk(["Grand Slam", "Slam special", "The big one"], v, 0), p: L.winner, crown: true, pose: "cheer",
+      h: pk([N + " WINS THE GRAND SLAM!", "SLAM QUEEN " + N, N + " CONQUERS THE GRAND SLAM", "GLORY! " + N + " TAKES THE SLAM", "THE SLAM BELONGS TO " + N], v, 1),
+      deck: u && u.winner.id === L.winner.id ? "Ranked #" + u.wRank + ", she left top seed " + nm(u.fav) + " (#" + u.favRank + ") and sixty-two others in the dust."
+        : pk(["Sixty-four grannies saddled up. One rode home with the golden lance.", "Six rounds, six wins, one very smug rooster.", "The biggest prize on tour, and she barely spilt her tea."], v, 2),
+      body: nm(L.winner) + (L.winner.rank ? " (world #" + L.winner.rank + ")" : "") + " is the toast of the tour after the week's Grand Slam. " + pk(["Celebrations went on until well past nine o'clock.", "Her rooster has hired an agent.", "The knitting circle has already started on the commemorative scarf."], v, 3) };
+  } else if (L.type === "no1") {
+    s = { kick: pk(["A new queen", "Changing of the guard", "World rankings"], v, 0), p: L.p, crown: true, pose: "cheer",
+      h: pk(["NEW WORLD NUMBER ONE: " + up(sh(L.p.name)), up(sh(L.p.name)) + " SEIZES THE CROWN", "LONG LIVE QUEEN " + up(sh(L.p.name)), "THE THRONE HAS A NEW BOTTOM"], v, 1),
+      deck: pk(["The old queen has been sent to the back of the bus.", "The golden crown changes heads for the first time in weeks.", "Somewhere, a former world number one is sulking into her scones."], v, 2),
+      body: nm(L.p) + " tops the world rankings this week. " + pk(["The view from the top is lovely, she says, if a bit draughty.", "She celebrated with a second biscuit. Living dangerously.", "Rivals have already started training twice as hard."], v, 1) };
+  } else if (L.type === "upsetTitle") {
+    var U = L.upset, T = TIERS[L.tier].name;
+    s = { kick: pk([T + " shock", "Cinderella story", "Nobody saw it coming"], v, 0), p: U.winner, pose: "cheer",
+      h: pk(["NOBODY SAW " + up(sh(U.winner.name)) + " COMING", up(sh(U.winner.name)) + " STUNS " + up(T), "CINDERELLA ON A ROOSTER", "FROM NOWHERE TO " + up(T) + " CHAMPION"], v, 1),
+      deck: "World #" + U.wRank + " " + sh(U.winner.name) + " won a " + T + " title as an outsider. Top seed " + nm(U.fav) + " (#" + U.favRank + ") was left eating dust.",
+      body: pk(["Bookmakers are reportedly lying down in a dark room.", "Her rooster was 200-to-1. He'd like that noted.", "\"I just closed my eyes and pointed the lance,\" she told reporters."], v, 2) };
+  } else if (L.type === "shock") {
+    var K = L.shock, TT = TIERS[K.tier].name;
+    s = { kick: pk(["Upset of the week", "Giant-killing!", "Shock result"], v, 0), p: K.w, pose: "cheer", fallen: K.l,
+      h: pk([up(sh(K.w.name)) + " TOPPLES " + up(sh(K.l.name)) + "!", "DAVID AND GOLIATH, ON ROOSTERBACK", up(sh(K.l.name)) + " DUMPED BY WORLD #" + K.wRank, "THE UPSET THAT SHOOK THE HENHOUSE"], v, 1),
+      deck: "In the " + K.round + " of a " + TT + ", world #" + K.wRank + " " + sh(K.w.name) + " knocked out #" + K.lRank + " " + sh(K.l.name) + ".",
+      body: pk(["Several spectators had to be revived with smelling salts and a custard cream.", sh(K.l.name) + " has asked for the lance to be inspected.", "The losing rooster is said to be \"absolutely mortified\"."], v, 3) };
+  } else {
+    var TB = TIERS[L.tier].name;
+    s = { kick: TB, p: L.winner, pose: "cheer",
+      h: pk([up(sh(L.winner.name)) + " CONQUERS THE " + up(TB), up(TB) + " GOLD FOR " + up(sh(L.winner.name)), up(sh(L.winner.name)) + " IS THE WEEK'S BIG WINNER"], v, 1),
+      deck: "The week's most prestigious title went to " + nm(L.winner) + (L.winner.rank ? " (world #" + L.winner.rank + ")" : "") + (L.count > 1 ? ", best of " + L.count + " events at this level." : "."),
+      body: pk(["She dedicated the win to her late husband's moustache.", "Her rooster celebrated by pecking a steward. Twice.", "\"Not bad for a Tuesday,\" she said, adjusting her shawl."], v, 2) };
+  }
+  return (
+    <section>
+      <Kicker col="#7c2d12">{s.kick}</Kicker>
+      <Headline big>{s.h}</Headline>
+      <div style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 14, color: SOFT, marginBottom: 8 }}>{s.deck}</div>
+      <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+        <Photo w={118} tilt={-2.5} caption={sh(s.p.name) + pk([" takes a bow", " on her lap of honour", " soaks it up"], v, 1)}>
+          <div style={{ marginBottom: -4 }}><Rider palette={paletteFor(s.p.id, L.type === "no1" ? 1 : L.type === "upsetTitle" ? L.upset.wRank : L.type === "shock" ? L.shock.wRank : s.p.rank)} width={112} pose={s.pose} crown={s.crown} /></div>
+        </Photo>
+        <div style={{ minWidth: 0 }}>
+          <Body>{s.body}</Body>
+          {s.fallen && (<Photo w={84} tilt={3} caption={sh(s.fallen.name) + ", in the hay"}><div style={{ marginBottom: -4 }}><Rider palette={paletteFor(s.fallen.id, L.shock.lRank)} width={78} pose="knocked" hatOff={true} flip={true} /></div></Photo>)}
+        </div>
+      </div>
+      <Bubble by={sh(s.p.name)}>{quote(s.p.id, v)}</Bubble>
+    </section>
+  );
+}
+
 /* After a tournament: the paper spins onto the screen over everything, and folds itself away when you're done */
 export default function DailyCluck(props) {
   var _f = useState(false), folding = _f[0], setFolding = _f[1];
@@ -142,6 +196,8 @@ export function CluckPaper(props) {
   var is = props.issue, y = is.special ? null : is.you, w = is.world, pe = is.peers || {}, ev = is.myEvent || {};
   var v = is.v != null ? is.v : Math.floor((is.at || 0) / 1000) % 997;
   var lead = y ? leadStory(y, v) : null;
+  var youLead = !is.lead || is.lead.type === "you";
+  var ledWith = is.lead && is.lead.winner ? is.lead.winner.id : null;
   var rankLine = !y ? "" : !y.rankBefore || y.rankBefore === y.rankAfter
     ? "In the world rankings she holds steady at #" + y.rankAfter + "."
     : "In the world rankings she " + (y.rankAfter < y.rankBefore ? "climbs" : "slips") + " from #" + y.rankBefore + " to #" + y.rankAfter + ".";
@@ -191,14 +247,17 @@ export function CluckPaper(props) {
           </section>
         )}
 
-        {/* Lead: you */}
+        {/* Front page: the week's biggest story, when it isn't you */}
+        {y && !youLead && (<WorldLead lead={is.lead} v={v} />)}
+
+        {/* You: the lead story, or your own column further down */}
         {y && (<section>
-          <Kicker>{y.champion ? pk(["Extra! Extra!", "Stop the presses!", "Hold the front page!"], v, 0) : pk(["This week on the tour", "From the jousting lanes", "Our granny of the week", "Dispatches from the stables"], v, 0)}</Kicker>
-          <Headline big>{lead.h}</Headline>
-          <div style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 14, color: SOFT, marginBottom: 8 }}>{lead.deck}</div>
+          <Kicker>{!youLead ? pk(["Meanwhile, your week", "And how did our granny do?", "Your week on the tour", "Closer to home"], v, 2) : y.champion ? pk(["Extra! Extra!", "Stop the presses!", "Hold the front page!"], v, 0) : pk(["This week on the tour", "From the jousting lanes", "Our granny of the week", "Dispatches from the stables"], v, 0)}</Kicker>
+          <Headline big={youLead}>{lead.h}</Headline>
+          <div style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: youLead ? 14 : 13, color: SOFT, marginBottom: 8 }}>{lead.deck}</div>
           <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
-            <Photo w={118} tilt={-2.5} caption={y.name + (y.champion ? " with the spoils" : " after the dust settled")}>
-              <div style={{ marginBottom: -4 }}><Rider palette={PLAYER_PALETTE} width={112} pose={lead.pose === "fallen" ? "knocked" : lead.pose} crown={y.champion} hatOff={lead.pose === "fallen"} /></div>
+            <Photo w={youLead ? 118 : 92} tilt={-2.5} caption={y.name + (y.champion ? " with the spoils" : " after the dust settled")}>
+              <div style={{ marginBottom: -4 }}><Rider palette={PLAYER_PALETTE} width={youLead ? 112 : 88} pose={lead.pose === "fallen" ? "knocked" : lead.pose} crown={y.champion} hatOff={lead.pose === "fallen"} /></div>
             </Photo>
             <div style={{ minWidth: 0 }}>
               <Body>{y.name} collected <b>{y.pts} points</b>{y.money ? " and " + money(y.money) + " in prize money" : ""} at {y.tierName}. {rankLine}</Body>
@@ -231,7 +290,7 @@ export function CluckPaper(props) {
         </section>)}
 
         {/* Your tournament */}
-        {ev.champ && !ev.champ.isP && (
+        {ev.champ && !ev.champ.isP && String(ev.champ.id) !== String(ledWith) && (
           <section>
             <Kicker col="#1d4ed8">{ev.tierName}</Kicker>
             <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
@@ -286,7 +345,7 @@ export function CluckPaper(props) {
               );
             })}
           </div>
-          {w.bigEvent && w.bigEvent.winner && (
+          {w.bigEvent && w.bigEvent.winner && String(w.bigEvent.winner.id) !== String(ledWith) && (
             <Body><span style={{ display: "inline-block", marginTop: 8 }}><b>{TIERS[w.bigEvent.tier].name}:</b> {w.bigEvent.winner.emoji} {sh(w.bigEvent.winner.name)}{w.bigEvent.rank ? " (#" + w.bigEvent.rank + ")" : ""} took the week's biggest title{w.bigEvent.count > 1 ? " among " + w.bigEvent.count + " events" : ""}.</span></Body>
           )}
         </section>

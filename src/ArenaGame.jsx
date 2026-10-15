@@ -12,6 +12,7 @@ import Confetti from "./components/Confetti";
 import BracketView from "./components/BracketView";
 import HelpScreen from "./components/HelpScreen";
 import HomeTab from "./components/HomeTab";
+import SeasonTab from "./components/SeasonTab";
 import TierSheet from "./components/TierSheet";
 import BottomNav, { NAV_HEIGHT } from "./components/BottomNav";
 import MatchHeader from "./components/MatchHeader";
@@ -390,6 +391,10 @@ export default function Arena(props) {
     var curEvent = S.cal && S.cal[S.calIdx];
     var isGSweek = curEvent && curEvent.type === "gs";
     var tempRanked = getRanked(Object.assign({}, S, { player: newP, npcs: newNpcs }));
+    /* Newsroom notes: the week's biggest giant-killing anywhere on tour, and each tier's most surprising champion */
+    var rkOf = {}; tempRanked.forEach(function(p, i){ if (!p.isP) rkOf[p.id] = i + 1; });
+    var shock = null;
+    var brief = function(p){ return { id: p.id, name: p.name, emoji: p.emoji || "" }; };
     /* Mark which NPCs played in player's tournament (they already got points above) */
     var playedIds = {};
     for (var bri = 0; bri < ts.bracket.length; bri++) {
@@ -413,7 +418,7 @@ export default function Arena(props) {
       if (eligible.length < 8) continue;
       /* Shuffle eligible pool */
       for (var ek = eligible.length - 1; ek > 0; ek--) { var ej = Math.floor(Math.random()*(ek+1)); var et = eligible[ek]; eligible[ek] = eligible[ej]; eligible[ej] = et; }
-      var topWinner = null;
+      var topWinner = null, tierUpset = null;
       for (var ev = 0; ev < numEvents; ev++) {
         var poolStart = ev * pt.size;
         var pool = eligible.slice(poolStart, poolStart + pt.size);
@@ -435,6 +440,8 @@ export default function Arena(props) {
               var w2 = nW(cur[mi2], cur[mi2+1]);
               var l2 = w2.id === cur[mi2].id ? cur[mi2+1] : cur[mi2];
               deepRound[w2.id] = rd2 + 1;
+              var gap = (rkOf[w2.id] || 0) - (rkOf[l2.id] || 0);
+              if (gap > 0 && (!shock || gap * (1 + pti * 0.6) > shock.gap * (1 + shock.tier * 0.6))) shock = { tier: pti, round: (pt.rounds === 6 ? RN6 : RN5)[rd2], w: brief(w2), l: brief(l2), wRank: rkOf[w2.id], lRank: rkOf[l2.id], gap: gap };
               /* Loser gets points for round reached */
               var loserNpc = newNpcs.find(function(n){return n.id===l2.id;});
               if (loserNpc && rd2 > 0) { var lPts = Math.round(pt.pts[rd2-1] * 0.6); loserNpc.sp = (loserNpc.sp||0)+lPts; loserNpc.ap = (loserNpc.ap||0)+lPts; }
@@ -453,6 +460,10 @@ export default function Arena(props) {
             wNpc.best = Object.assign({},wNpc.best||{}); wNpc.best.titles = (wNpc.best.titles||0)+1;
             if (pti === 5) wNpc.best.gsTitles = (wNpc.best.gsTitles||0)+1;
             if (!topWinner || totalWin > (topWinner.pts||0)) topWinner = { name: winner.name, emoji: winner.emoji, id: winner.id, pts: totalWin };
+            /* How unlikely was this champion? Compare her to the event's top seed */
+            var fav = pool.reduce(function(a, p){ return (rkOf[p.id] || 9999) < (rkOf[a.id] || 9999) ? p : a; }, pool[0]);
+            var seedGap = (rkOf[winner.id] || 0) - (rkOf[fav.id] || 0);
+            if (seedGap > 0 && (!tierUpset || seedGap > tierUpset.gap)) tierUpset = { winner: brief(winner), wRank: rkOf[winner.id], fav: brief(fav), favRank: rkOf[fav.id], gap: seedGap };
           }
           /* Semifinalists get partial points */
           if (brackets.length >= 3) {
@@ -464,7 +475,8 @@ export default function Arena(props) {
           }
         }
       }
-      parallelResults.push({ tier: pti, count: numEvents, winner: topWinner });
+      if (topWinner) topWinner.rank = rkOf[topWinner.id];
+      parallelResults.push({ tier: pti, count: numEvents, winner: topWinner, upset: tierUpset });
     }
     /* ── TRAINING: every rider earns and spends training points by the player's rules ── */
     var trainLog = {};
@@ -477,17 +489,18 @@ export default function Arena(props) {
     var moneyEarned = 0;
     for (var mri = 0; mri <= pRound; mri++) { moneyEarned += (tier.money || [])[mri] || 0; }
     var hist = (S.tHist||[]).concat([{ num: (S.tHist||[]).length + 1, season: S.sNum, tier: ts.tierIdx, tierName: tier.name, pPts: pp, defending: defending, netChange: netChange, pRound: pRound, roundName: rNames[pRound], money: moneyEarned, winner: champW ? { name: champW.isP ? S.pName : champW.name, emoji: champW.emoji||"👑", isP: champW.isP } : null }]);
-    var cal = S.cal.slice(); cal[S.calIdx].done = true; cal[S.calIdx].tier = ts.tierIdx; cal[S.calIdx].result = { pPts: pp, defending: defending, net: netChange, pRound: pRound, parallel: parallelResults };
+    var cal = S.cal.slice(); cal[S.calIdx].done = true; cal[S.calIdx].tier = ts.tierIdx; cal[S.calIdx].result = { pPts: pp, defending: defending, net: netChange, pRound: pRound, won: !!wonTitle, parallel: parallelResults };
     newP.money = (newP.money || 0) + moneyEarned;
     newP.seasonMoney = (newP.seasonMoney || 0) + moneyEarned;
     /* Record post-event rank for sparkline */
     var newRank = pRankOf(Object.assign({}, S, { player: newP, npcs: newNpcs }));
     newP.rankHist = (newP.rankHist || []).concat([newRank]).slice(-40);
+    cal[S.calIdx].result.rankAfter = newRank;
     var afterS = Object.assign({}, S, { player: newP, npcs: newNpcs, tHist: hist, cal: cal, calIdx: S.calIdx + 1, activeT: null, activeF: null });
     var issue = null;
     try {
       issue = buildIssue({ before: S, after: afterS, bracket: ts.bracket, roundNames: rNames, tierIdx: ts.tierIdx, tierName: tier.name, pRound: pRound, wonTitle: wonTitle,
-        pts: pp, net: netChange, money: moneyEarned, champ: champW, parallel: parallelResults, trainLog: trainLog, weekLabel: curEv && curEv.type === "gs" ? "Grand Slam " + curEv.gsNum : "Week " + wLabel });
+        pts: pp, net: netChange, money: moneyEarned, champ: champW, parallel: parallelResults, shock: shock, trainLog: trainLog, weekLabel: curEv && curEv.type === "gs" ? "Grand Slam " + curEv.gsNum : "Week " + wLabel });
     } catch (e) { console.error("News issue failed:", e); }
     if (issue) {
       issue.fans = { before: fansBefore, perf: perf.d, notes: perf.notes, promise: prom, sponsor: sponsor, after: fansNow };
@@ -655,48 +668,9 @@ export default function Arena(props) {
 
           {hubTab === "season" && (
             <div>
-              {sectionTitle("Season " + S.sNum, seasonDone ? "Season complete." : S.calIdx + " of " + TOTAL_EVENTS + " events played")}
-              <div style={card({padding:8,marginBottom:12})}>
-                {!seasonDone && curEvent && (
-                  <div style={{fontSize:13,color:C.goldInk,fontWeight:800,textAlign:"center",margin:"2px 0 8px"}}>
-                    {curEvent.type==="gs"
-                      ? (pRank<=64 ? "👑 Tap the highlighted week to enter the Grand Slam" : "👑 Grand Slam — not qualified at #"+pRank+", tap to skip")
-                      : "▶ Tap the highlighted week to play week "+curEvent.block+"."+curEvent.week}
-                  </div>
-                )}
-                <div style={{display:"grid",gridTemplateColumns:"repeat(5, 1fr)",gap:5}}>
-                  {S.cal.map(function(ev, idx){
-                    var isCur = idx === S.calIdx && !seasonDone;
-                    var isGS = ev.type === "gs";
-                    var tier = ev.tier != null ? TIERS[ev.tier] : null;
-                    var def = (S.player.def && S.player.def[idx]) || 0;
-                    var net = ev.result ? ev.result.net : null;
-                    var bg = isCur ? C.goldSoft : ev.done ? (isGS ? "#fef3c7" : "#ecfdf5") : C.cardWarm;
-                    var bord = isCur ? "2px solid " + C.ink : isGS ? "2px solid #f5c451" : "1.5px solid " + C.line;
-                    return (
-                      <div key={idx} onClick={isCur ? playCurrent : undefined}
-                        style={{background:bg,border:bord,borderRadius:10,padding:"6px 2px",textAlign:"center",minWidth:0,cursor:isCur?"pointer":"default",animation:isCur?"pulse 1.5s ease infinite":"none",boxShadow:isCur?"0 3px 0 "+C.ink:"none"}}>
-                        <div style={{fontSize:12,fontWeight:900,color:isGS?C.goldInk:isCur?C.text:ev.done?C.text:C.textMuted,lineHeight:1.2}}>
-                          {isCur ? (isGS ? (pRank<=64 ? "👑▶" : "👑⏭") : "▶ " + ev.block + "." + ev.week) : ev.done && tier ? tier.short : isGS ? "👑 GS" + ev.gsNum : ev.block + "." + ev.week}
-                        </div>
-                        {ev.done && ev.result ? (
-                          <div style={{fontSize:13,color:C.text,fontWeight:800,lineHeight:1.1,marginTop:2}}>
-                            {ev.result.pPts}
-                            {net!=null&&net!==0&&(<span style={{display:"block",color:net>0?C.greenInk:C.redInk,fontWeight:900,fontSize:11}}>{net>0?"+":""}{net}</span>)}
-                          </div>
-                        ) : def > 0 ? (
-                          <div style={{fontSize:11,color:C.redInk,marginTop:2,fontWeight:800}} title="Points from last season at this event">−{def}</div>
-                        ) : null}
-                      </div>
-                    );
-                  })}
-                </div>
-                <div style={{fontSize:12,color:C.textMuted,marginTop:8,lineHeight:1.4}}>
-                  Numbers in red are points you're <b style={{color:C.text}}>defending</b> from last season — they drop off when that event is played.
-                </div>
-              </div>
-
-              <div style={Object.assign(label(C.textSoft), {margin:"4px 2px 6px"})}>Results</div>
+              <SeasonTab S={S} pRank={pRank} curEvent={curEvent} seasonDone={seasonDone} avail={seasonDone ? [] : availableTiers(S)} wildcard={wildcardTier(S)}
+                gsOk={pRank <= 64 || hasSlamWildcard(fansOf(S.player))} onPlay={playCurrent} onFinals={startFinals} onNextSeason={nextSeason} />
+              <div style={Object.assign(label(C.textSoft), {margin:"14px 2px 6px"})}>Career results</div>
               <div style={card({padding:6})}>
                 {(S.tHist||[]).length===0?(<div style={{color:C.textMuted,fontSize:13,padding:6}}>No events yet.</div>):
                 (S.tHist||[]).slice().reverse().map(function(t,i){

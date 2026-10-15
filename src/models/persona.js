@@ -30,7 +30,8 @@ var QUOTES = [
 
 export function roosterName(id) { return pick(R_FIRST, id, 1) + " " + pick(R_LAST, id, 2); }
 export function trait(id) { return pick(TRAITS, id, 3); }
-export function quote(id, salt) { return pick(QUOTES, id, 4 + (salt || 0)); }
+/* High bits: the low ones repeat too often across neighbouring ids */
+export function quote(id, salt) { return QUOTES[(h(id, 4 + (salt || 0)) >>> 16) % QUOTES.length]; }
 
 /* Top 10 are the tour's legends (golden helmets); #1 is the reigning world champion (crown) */
 export function standing(rank) {

@@ -35,7 +35,7 @@ export default function Profile(props) {
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginBottom: 10 }}>
           {[{ l: "Current Rank", v: "#" + rank, c: rank <= 10 ? "#b45309" : rank <= 50 ? "#22c55e" : "#475569" },
-            { l: "Peak Rank", v: "#" + (b.rank < 1001 ? b.rank : "—"), c: "#4f46e5" },
+            { l: "Peak Rank", v: "#" + Math.min(b.rank || 1001, rank), c: "#4f46e5" },
             { l: "Season Pts", v: (p.sp||0).toLocaleString(), c: "#0891b2" },
             { l: "All-Time Pts", v: (p.ap||0).toLocaleString(), c: "#db2777" },
             { l: "Season Prize $", v: "$"+(function(m){return m>=1000000?(m/1000000).toFixed(1)+"M":m>=1000?Math.round(m/1000)+"K":m})(p.isP?(p.seasonMoney||0):(Math.round((p.sp||0)*3))), c: "#22c55e" },
