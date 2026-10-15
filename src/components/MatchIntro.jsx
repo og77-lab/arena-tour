@@ -18,7 +18,7 @@ function FighterBlock(props) {
       initial={{ x: left ? -260 : 260, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ type: "spring", stiffness: 260, damping: 22, delay: left ? 0.12 : 0.22 }}
-      style={{ position: "absolute", width: "52%", textAlign: left ? "left" : "right", top: left ? "17%" : undefined, bottom: left ? undefined : "17%", left: left ? "6%" : undefined, right: left ? undefined : "6%", zIndex: 3 }}>
+      style={{ position: "absolute", width: "52%", textAlign: left ? "left" : "right", top: left ? "15%" : undefined, bottom: left ? undefined : props.raised ? "25%" : "17%", left: left ? "6%" : undefined, right: left ? undefined : "6%", zIndex: 3 }}>
       <div style={{ display: "inline-block", filter: left ? "drop-shadow(0 0 18px rgba(250,204,21,0.55))" : "drop-shadow(0 0 18px rgba(239,68,68,0.5))" }}>
         <Rider palette={props.palette} width={128} flip={!left} pose={running ? "charge" : "idle"} running={running} />
       </div>
@@ -103,7 +103,35 @@ export default function MatchIntro(props) {
         </motion.div>
 
         <FighterBlock side="left" name={props.you.name} emoji={props.you.emoji} sub={props.you.sub} palette={props.you.palette} />
-        <FighterBlock side="right" name={props.foe.name} emoji={props.foe.emoji} sub={props.foe.sub} palette={props.foe.palette} />
+        <FighterBlock side="right" name={props.foe.name} emoji={props.foe.emoji} sub={props.foe.sub} palette={props.foe.palette} raised={!!props.scout} />
+
+        {/* Scouting summary: training gap per stat, difficulty, head-to-head */}
+        {props.scout && stage === "slam" && (
+          <div style={{ position: "absolute", left: 0, right: 0, bottom: "calc(3.5% + 26px)", zIndex: 4, display: "flex", justifyContent: "center", pointerEvents: "none" }}>
+          <motion.div initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.75, type: "spring", stiffness: 260, damping: 24 }}
+            style={{ width: "min(92%, 440px)", background: "rgba(15,23,42,0.88)", border: "1px solid rgba(255,255,255,0.18)", borderRadius: 14, padding: "8px 12px", boxSizing: "border-box" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 10, fontWeight: 900, letterSpacing: 2, color: "rgba(255,255,255,0.85)" }}>
+              <span>SCOUTING</span>
+              <span>
+                <span style={{ color: props.scout.diff.colOnDark }}>{props.scout.diff.label.toUpperCase()}</span>
+                <span style={{ opacity: 0.6, margin: "0 6px" }}>·</span>
+                {props.scout.h2h && props.scout.h2h.w + props.scout.h2h.l > 0 ? "H2H " + props.scout.h2h.w + "–" + props.scout.h2h.l : "FIRST MEETING"}
+              </span>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6 }}>
+              {props.scout.stats.map(function (s) {
+                var g = s.you - s.foe;
+                return (
+                  <div key={s.label} style={{ textAlign: "center", flex: 1 }}>
+                    <div style={{ fontSize: 16 }}>{s.icon}</div>
+                    <div style={{ fontSize: 13, fontWeight: 900, color: g > 0 ? "#4ade80" : g < 0 ? "#f87171" : "rgba(255,255,255,0.75)" }}>{g > 0 ? "+" + g : g < 0 ? "−" + (-g) : "="}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </motion.div>
+          </div>
+        )}
 
         {/* VS slam */}
         <div style={{ position: "absolute", left: "50%", top: "50%", zIndex: 5 }}>

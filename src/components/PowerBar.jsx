@@ -376,7 +376,7 @@ export default function PowerBar(props) {
           you={{ name: youName, emoji: youEmoji, sub: props.youSub, palette: youPal }}
           foe={{ name: oppName, emoji: oppEmoji, sub: props.foeSub, palette: foePal }}
           roundLabel={props.roundLabel} tierName={props.tierName} tierColor={tierColor}
-          bestOf={bestOf} resumeSet={sets.length > 0 || myH.length > 0 ? setNum : null}
+          bestOf={bestOf} resumeSet={sets.length > 0 || myH.length > 0 ? setNum : null} scout={props.scout}
           skipSignal={skip}
           onDone={function () { setPh(sets.length > 0 && myH.length === 0 ? "setintro" : "go"); if (sets.length > 0 && myH.length === 0) setTimeout(function () { setPh("go"); }, 1100); }} />
       )}

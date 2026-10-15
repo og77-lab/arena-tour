@@ -4,26 +4,63 @@ import { syncAchievements, saveGameToCloud, loadGameFromCloud } from "./firebase
 import { playTitle, playRankUp, isMuted, setMuted } from "./sounds";
 import { W, CSS, EMO, TIERS, RN5, RN6, HN, HC, HI, TOTAL_EVENTS, FINALS_BO, screenAnim } from "./models/constants";
 import { sh, bs, nW, pRankOf, getRanked, getARanked, trainCost } from "./models/formulas";
-import { sSet, sGet } from "./engine/persistence";
+import { sSet, sGet, stamp, pickNewest, queueCloudSave, cancelCloudSave } from "./engine/persistence";
 import { mkSeason } from "./engine/seasonManager";
 import PowerBar from "./components/PowerBar";
 import Profile from "./components/Profile";
-import RankSparkline from "./components/RankSparkline";
 import Confetti from "./components/Confetti";
 import BracketView from "./components/BracketView";
 import HelpScreen from "./components/HelpScreen";
+import HomeTab from "./components/HomeTab";
+import TierSheet from "./components/TierSheet";
+import BottomNav, { NAV_HEIGHT } from "./components/BottomNav";
+import MatchHeader from "./components/MatchHeader";
+import ScoutSheet from "./components/ScoutSheet";
+import { paletteFor } from "./components/Rider";
+import { C, FONT, display, label, card, button, money } from "./ui/theme";
 
 const { useState, useEffect, useRef } = React;
 
 function talentLabel(skill) { var s = skill || 0; return s > 80 ? "Elite" : s > 60 ? "Strong" : s > 40 ? "Average" : "Developing"; }
 
+var SCOUT_STATS = [
+  { k: "r", icon: "⚡", label: "Reflexes", what: "Whoever's ahead gets a slower bar" },
+  { k: "p", icon: "💪", label: "Power", what: "Whoever's ahead gets a wider gold zone" },
+  { k: "f", icon: "🎯", label: "Focus", what: "Bonus points on every strike" },
+  { k: "s", icon: "🫀", label: "Stamina", what: "Less speed-up between strikes and sets" },
+  { k: "g", icon: "🛡️", label: "Grit", what: "A higher floor on bad strikes" }
+];
+
+/* d = the match difficulty number PowerBar uses (round + tier offset) */
+function diffInfo(d) {
+  return {
+    label: d <= 1 ? "Easy" : d <= 3 ? "Medium" : d <= 5 ? "Hard" : d <= 7 ? "Very hard" : "Extreme",
+    col: d <= 1 ? C.greenInk : d <= 3 ? "#0e7490" : d <= 5 ? C.goldInk : C.redInk,
+    colOnDark: d <= 1 ? "#4ade80" : d <= 3 ? "#67e8f9" : d <= 5 ? "#fbbf24" : "#f87171",
+    what: "Later rounds and bigger events mean a faster bar and a smaller gold zone"
+  };
+}
+
+function buildScout(S, o, oRank, d) {
+  var mine = S.player.tr || {}, hers = o.tr || {};
+  var meetings = (S.player.h2h && S.player.h2h[o.id]) || [];
+  var w = meetings.filter(function (m) { return m.w; }).length;
+  return {
+    name: sh(o.name), emoji: o.emoji || "", palette: paletteFor(o.id), rank: oRank, talent: talentLabel(o.skill), pts: o.sp || 0,
+    h2h: { w: w, l: meetings.length - w },
+    stats: SCOUT_STATS.map(function (s) { return { icon: s.icon, label: s.label, what: s.what, you: mine[s.k] || 0, foe: hers[s.k] || 0 }; }),
+    diff: diffInfo(d)
+  };
+}
+
 
 /* ═══ MAIN APP ═══ */
 export default function Arena(props) {
   var userId = props.userId;
+  var owner = userId || "guest";
   var _scr = useState("loading"), scr = _scr[0], setScr = _scr[1];
   var _S = useState(null), S = _S[0], setS = _S[1];
-  var _tab = useState("calendar"), tab = _tab[0], setTab = _tab[1];
+  var _tab = useState("home"), tab = _tab[0], setTab = _tab[1];
   var _inp = useState(""), inp = _inp[0], setInp = _inp[1];
   var _ts = useState(null), ts = _ts[0], setTS = _ts[1];
   var _fs = useState(null), fs = _fs[0], setFS = _fs[1];
@@ -45,15 +82,18 @@ export default function Arena(props) {
     }
     if (userId) {
       loadGameFromCloud(userId).then(function(cloud) {
-        if (cloud && cloud.player) { fin(cloud); sSet(cloud); }
-        else fin(sGet());
+        var local = sGet();
+        var best = pickNewest(local, cloud, owner);
+        fin(best);
+        if (best && best === cloud) sSet(cloud);
+        else if (best && best === local) queueCloudSave(userId, stamp(local, owner), saveGameToCloud);
       }).catch(function() { fin(sGet()); });
     } else {
       fin(sGet());
     }
   }, []);
 
-  function save(s) { setS(s); sSet(s); if (userId) saveGameToCloud(userId, s).catch(function(e){ console.error("Cloud save failed:", e); }); }
+  function save(s) { var st = stamp(s, owner); setS(st); sSet(st); queueCloudSave(userId, st, saveGameToCloud); }
 
   /* Live tournament/finals state (bracket + current match progress) rides along in the save, so a reload resumes mid-event.
      Written after every change, so it always lands after any save() made in the same update. */
@@ -61,9 +101,9 @@ export default function Arena(props) {
     if (!S) return;
     var patch = scr === "tourney" && ts ? { activeT: ts, activeF: null } : scr === "finals" && fs ? { activeT: null, activeF: fs } : null;
     if (!patch) return;
-    var snap = Object.assign({}, S, patch);
+    var snap = stamp(Object.assign({}, S, patch), owner);
     sSet(snap);
-    if (userId) saveGameToCloud(userId, snap).catch(function(e){ console.error("Cloud save failed:", e); });
+    queueCloudSave(userId, snap, saveGameToCloud);
   }, [ts, fs]);
   function exportSave() { if (!S) return; var b = new Blob([JSON.stringify(S)],{type:"application/json"}); var u = URL.createObjectURL(b); var a = document.createElement("a"); a.href = u; a.download = "arena-"+S.pName+"-s"+S.sNum+".json"; a.click(); URL.revokeObjectURL(u); }
   function importSave(e) { var f = e.target.files && e.target.files[0]; if (!f) return; var r = new FileReader(); r.onload = function(ev){ try { var d = JSON.parse(ev.target.result); if (d && d.player) { save(d); setScr("hub"); } } catch(err){} }; r.readAsText(f); }
@@ -73,6 +113,7 @@ export default function Arena(props) {
   function toggleMute() { var n = !mutedState; setMuted(n); setMutedState(n); }
   var _confetti = useState(false), confetti = _confetti[0], setConfetti = _confetti[1];
   var _showBracket = useState(false), showBracket = _showBracket[0], setShowBracket = _showBracket[1];
+  var _showScout = useState(false), showScout = _showScout[0], setShowScout = _showScout[1];
   var lastRankRef = useRef(null);
 
   /* Rank-up chime when crossing tier thresholds */
@@ -100,7 +141,7 @@ export default function Arena(props) {
 
   function newSeason() { save(mkSeason(inp, 1, null)); setScr("hub"); }
   function nextSeason() { if (!S) return; doSync(S); save(mkSeason(S.pName, (S.sNum||1)+1, S)); setScr("hub"); }
-  function newGame() { if (confirm("Start a brand new game? Your current save will be erased.")) { sSet(null); if (userId) saveGameToCloud(userId, null).catch(function(){}); setS(null); setTS(null); setFS(null); setScr("title"); } }
+  function newGame() { if (confirm("Start a brand new game? Your current save will be erased.")) { cancelCloudSave(); sSet(null); if (userId) saveGameToCloud(userId, null).catch(function(){}); setS(null); setTS(null); setFS(null); setScr("title"); } }
 
   function doTrain(stat) {
     if (!S) return;
@@ -467,299 +508,224 @@ export default function Arena(props) {
   var curEvent = !seasonDone ? S.cal[S.calIdx] : null;
   var avTiers = availableTiers(S);
 
-  /* ─── HUB ─── */
-  if (scr === "hub") {
-    var lastDone = S.calIdx > 0 ? S.cal[S.calIdx - 1] : null;
+  /* ─── HUB ─── (tabs: home · train · season · rankings · more, with a bottom nav) */
+  if (scr === "hub" || scr === "training") {
+    var hubTab = scr === "training" ? "train" : tab;
+    var tpNow = (S.player.tr && S.player.tr.tp) || 0;
+    var affordable = ["r","p","f","s","g"].filter(function(k){ var lv = (S.player.tr[k]||0); return lv < 20 && tpNow >= trainCost(lv); }).length;
+    function goTab(t) { setScr("hub"); setTab(t); try { window.scrollTo(0, 0); } catch (e) {} }
+    function sectionTitle(txt, sub) {
+      return (<div style={{margin:"2px 2px 8px"}}><div style={display(24)}>{txt}</div>{sub && (<div style={{fontSize:13,color:C.textSoft,marginTop:2}}>{sub}</div>)}</div>);
+    }
     return (
-      <motion.div key="hub" {...screenAnim} style={W}>
+      <motion.div key="hub" {...screenAnim} style={Object.assign({}, W, { background: C.page, padding: "10px 10px " + (NAV_HEIGHT + 28) + "px" })}>
         <style dangerouslySetInnerHTML={{__html:CSS}} />
         {confetti && (<Confetti />)}
         {prof && (<Profile player={prof.p} rank={prof.rank} playerName={S.pName} h2h={!prof.p.isP && S.player.h2h ? (S.player.h2h[prof.p.id] || []) : null} timeline={prof.p.isP ? (S.player.timeline || []) : null} onClose={function(){setProf(null)}} />)}
         {showHelp && (<HelpScreen onClose={function(){setHelp(false)}} />)}
-
-        {/* ── Status Bar (tap to open your profile) ── */}
-        <div onClick={function(){ setProf({ p: Object.assign({}, S.player, { name: S.pName, emoji: "⚔️" }), rank: pRank }); }} style={{padding:"10px 12px",background:"#ffffff",borderRadius:10,marginBottom:6,border:"1px solid #f1f5f9",cursor:"pointer"}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
-            <span style={{fontSize:17,color:"#b45309",fontWeight:800,letterSpacing:0.3}}>{S.pName}<span style={{ color: "#94a3b8", fontSize: 11, fontWeight: 500, marginLeft: 6 }}>view profile ›</span></span>
-            <span style={{fontSize:20,color:"#b45309",fontWeight:900,letterSpacing:0.5}}>#{pRank}</span>
-          </div>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-            <span style={{fontSize:12,color:"#64748b",fontWeight:600}}>S{S.sNum} • Wk {Math.min(S.calIdx+1,TOTAL_EVENTS)}/{TOTAL_EVENTS}</span>
-            <div style={{display:"flex",gap:10,alignItems:"center"}}>
-              <span style={{fontSize:14,color:"#334155",fontWeight:700}}>{(S.player.sp||0).toLocaleString()}<span style={{color:"#64748b",fontWeight:400,fontSize:12,marginLeft:2}}>pts</span></span>
-              <span style={{fontSize:14,color:"#22c55e",fontWeight:800}}>💰{(function(m){return m>=1000000?(m/1000000).toFixed(1)+"M":m>=1000?Math.round(m/1000)+"K":m})(S.player.money||0)}</span>
-            </div>
-          </div>
-        </div>
-        {/* Season progress mini-bar */}
-        <div style={{display:"flex",gap:1,marginBottom:6,height:4}}>
-          {S.cal.map(function(ev,i){return (<div key={i} style={{flex:1,borderRadius:2,background:ev.done?(ev.type==="gs"?"#b45309":"#22c55e"):i===S.calIdx?"#4f46e5":"#f8fafc"}}/>);})}
-        </div>
-
-        {/* Rank trajectory sparkline */}
-        <RankSparkline history={S.player.rankHist || []} />
-
-        {/* ── Tier Picker (compact horizontal pills) ── */}
-        {!seasonDone && picking && (
-          <div style={{background:"#ffffff",borderRadius:10,padding:10,border:"1px solid rgba(129,140,248,0.2)",marginBottom:6}}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
-              <span style={{fontSize:14,fontWeight:800,color:"#4f46e5",letterSpacing:0.5}}>CHOOSE TIER <span style={{color:"#64748b",fontWeight:400,marginLeft:4}}>#{pRank}</span></span>
-              <button onClick={function(){setPicking(false)}} style={{background:"#f1f5f9",border:"1px solid #e5e7eb",color:"#475569",fontSize:16,cursor:"pointer",width:28,height:28,borderRadius:6,lineHeight:1,padding:0}}>✕</button>
-            </div>
-            <div style={{display:"grid",gridTemplateColumns:"repeat(5, 1fr)",gap:5}}>
-              {[0,1,2,3,4].map(function(ti){
-                var t = TIERS[ti]; var canEnter = avTiers.indexOf(ti) >= 0;
-                return (
-                  <button key={ti} onClick={function(){if(canEnter){setPicking(false);startTourney(ti);}}} disabled={!canEnter}
-                    style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"8px 2px",borderRadius:8,border:"2px solid "+(canEnter?t.col:"#f8fafc"),background:canEnter?"#ffffff":"transparent",cursor:canEnter?"pointer":"default",opacity:canEnter?1:0.3,minHeight:64}}>
-                    <span style={{fontSize:14,color:t.col,fontWeight:900,letterSpacing:0.5}}>{t.short}</span>
-                    <span style={{fontSize:12,color:"#0f172a",fontWeight:700,marginTop:2}}>{t.pts[t.pts.length-1]}p</span>
-                    <span style={{fontSize:11,color:"#22c55e",fontWeight:600,marginTop:1}}>${(t.money[t.money.length-1]/1000).toFixed(0)}K</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* ── Season Done ── */}
-        {seasonDone && (
-          <div style={{background:"#ffffff",borderRadius:8,padding:10,border:"1px solid rgba(250,204,21,0.1)",marginBottom:6,textAlign:"center"}}>
-            <button onClick={pRank<=16?startFinals:nextSeason} style={Object.assign({},bs(pRank<=16?"linear-gradient(135deg,#f59e0b,#ef4444,#a855f7)":"linear-gradient(135deg,#cbd5e1,#94a3b8)",pRank<=16?"#ffffff":"#475569"),{width:"100%",animation:pRank<=16?"pulse 1.5s ease infinite":"none"})}>
-              {pRank <= 16 ? "👑 Season Finals" : "🔄 Season " + ((S.sNum||1)+1)}
-            </button>
-          </div>
-        )}
-
-        {/* ── Train button (primary) ── */}
-        {!picking && (
-          <button onClick={function(){setScr("training")}} style={{width:"100%",padding:"12px 16px",borderRadius:8,border:"1px solid rgba(129,140,248,0.3)",background:"rgba(99,102,241,0.12)",color:"#4f46e5",fontSize:15,fontWeight:800,cursor:"pointer",marginBottom:6,letterSpacing:0.5}}>🏋️ TRAINING <span style={{color:"#b45309",marginLeft:6}}>{S.player.tr.tp||0} TP</span></button>
-        )}
+        {picking && !seasonDone && (<TierSheet available={avTiers} rank={pRank} onClose={function(){setPicking(false)}} onPick={function(ti){ setPicking(false); startTourney(ti); }} />)}
         <input ref={fileRef} type="file" accept=".json" onChange={importSave} style={{display:"none"}} />
-        {syncMsg && (<div style={{fontSize:13,color:syncMsg==="Synced!"?"#22c55e":"#ef4444",textAlign:"center",marginBottom:4,fontWeight:700}}>{syncMsg}</div>)}
 
-        {/* ── Last Week ── */}
-        {lastDone && lastDone.result && lastDone.result.parallel && lastDone.result.parallel.length > 0 && (
-          <div style={{background:"#ffffff",borderRadius:6,padding:6,border:"1px solid #f8fafc",marginBottom:6}}>
-            <div style={{fontSize:13,color:"#64748b",fontWeight:700,marginBottom:3}}>📰 LAST WEEK</div>
-            <div style={{display:"flex",gap:3,flexWrap:"wrap"}}>
-              {lastDone.result.parallel.map(function(pr, i){
-                if (!pr) return null; var t = TIERS[pr.tier];
-                return (<span key={i} style={{fontSize:13,padding:"2px 5px",borderRadius:3,background:pr.playerEvent?"rgba(250,204,21,0.08)":"#ffffff",color:pr.playerEvent?"#b45309":t.col}}>{t.short}{pr.count>1?"×"+pr.count:""}: {pr.playerEvent?"You "+(lastDone.result.pPts||0)+"p":(pr.winner&&pr.winner.name)?sh(pr.winner.name):"—"}</span>);
-              })}
-            </div>
-          </div>
-        )}
+        <div style={{maxWidth:520,margin:"0 auto",textAlign:"left"}}>
+          {syncMsg && (<div style={{fontSize:13,color:syncMsg==="Synced!"?C.greenInk:C.redInk,textAlign:"center",marginBottom:6,fontWeight:800}}>{syncMsg}</div>)}
 
-        {/* ── Tabs ── */}
-        <div style={{display:"flex",gap:2,marginBottom:6}}>
-          {["calendar","rankings","history","settings"].map(function(t){
-            var label = t==="calendar"?"📅 Calendar":t==="rankings"?"🏆 Rankings":t==="history"?"📊 Results":"⚙️";
-            return (<button key={t} onClick={function(){setTab(t)}} style={{flex:t==="settings"?0.5:1,padding:"8px 4px",borderRadius:6,border:"none",cursor:"pointer",background:tab===t?"rgba(250,204,21,0.12)":"#f8fafc",color:tab===t?"#b45309":"#64748b",fontSize:13,fontWeight:700,letterSpacing:0.5}}>{label}</button>);
-          })}
-        </div>
+          {hubTab === "home" && (
+            <HomeTab S={S} pRank={pRank} curEvent={curEvent} seasonDone={seasonDone}
+              onPlay={playCurrent} onFinals={startFinals} onNextSeason={nextSeason}
+              onTrain={function(){ goTab("train"); }}
+              onOpenProfile={function(){ setProf({ p: Object.assign({}, S.player, { name: S.pName, emoji: "👵" }), rank: pRank }); }} />
+          )}
 
-        {tab === "calendar" && (
-          <div style={{background:"#ffffff",borderRadius:8,padding:6,border:"1px solid #f8fafc"}}>
-            {!seasonDone && curEvent && !picking && (
-              <div style={{fontSize:13,color:"#b45309",fontWeight:700,textAlign:"center",marginBottom:6,letterSpacing:0.5}}>
-                {curEvent.type==="gs"
-                  ? (pRank<=64 ? "👑 TAP THE HIGHLIGHTED CELL TO ENTER GRAND SLAM" : "👑 TAP TO SKIP (NOT QUALIFIED, #"+pRank+")")
-                  : "▶ TAP THE HIGHLIGHTED CELL TO PLAY WEEK "+curEvent.block+"."+curEvent.week}
+          {hubTab === "train" && (
+            <div>
+              {sectionTitle("Training Camp", "Spend training points between tournaments. Stats only count relative to your opponent.")}
+              <div style={card({textAlign:"center",marginBottom:10,padding:"10px 12px"})}>
+                <div style={label()}>Training points</div>
+                <div style={display(30, C.goldInk)}>{tpNow} TP</div>
               </div>
-            )}
-            <div style={{display:"grid",gridTemplateColumns:"repeat(5, 1fr)",gap:4}}>
-              {S.cal.map(function(ev, idx){
-                var isCur = idx === S.calIdx && !seasonDone;
-                var isGS = ev.type === "gs";
-                var tier = ev.tier != null ? TIERS[ev.tier] : null;
-                var def = (S.player.def && S.player.def[idx]) || 0;
-                var net = ev.result ? ev.result.net : null;
-                var bg = isCur ? "rgba(250,204,21,0.22)" : ev.done ? (isGS ? "rgba(250,204,21,0.06)" : "rgba(34,197,94,0.06)") : "#f8fafc";
-                var bord = isCur ? "2px solid #facc15" : isGS ? "1px solid rgba(250,204,21,0.3)" : ev.done ? "1px solid rgba(34,197,94,0.12)" : "1px solid #f8fafc";
+              {[{k:"r",l:"Reflexes",i:"⚡",d:"Slows the bar relative to your opponent",c:"#0891b2"},{k:"p",l:"Power",i:"💪",d:"Widens the gold zone",c:"#db2777"},{k:"f",l:"Focus",i:"🎯",d:"Adds to every strike score",c:"#16a34a"},{k:"s",l:"Stamina",i:"🫀",d:"Less speed-up between strikes and sets",c:"#ea580c"},{k:"g",l:"Grit",i:"🛡️",d:"Raises your floor on bad strikes",c:"#7c3aed"}].map(function(st){
+                var lv=S.player.tr[st.k]||0,cost=trainCost(lv),can=tpNow>=cost&&lv<20;
                 return (
-                  <div key={idx}
-                    onClick={isCur ? playCurrent : undefined}
-                    style={{background:bg,border:bord,borderRadius:6,padding:isCur?"8px 2px":"5px 2px",textAlign:"center",minWidth:0,cursor:isCur?"pointer":"default",animation:isCur?"pulse 1.5s ease infinite":"none",boxShadow:isCur?"0 0 12px rgba(250,204,21,0.35)":"none"}}>
-                    <div style={{fontSize:isCur?13:12,fontWeight:800,color:isGS?"#b45309":isCur?"#b45309":ev.done?(tier?tier.col:"#475569"):"#94a3b8",lineHeight:1.2}}>
-                      {isCur ? (isGS ? (pRank<=64 ? "👑▶" : "👑⏭") : "▶") : ev.done && tier ? tier.short : isGS ? "👑" : "—"}
+                  <div key={st.k} style={card({marginBottom:8,padding:"10px 12px",borderColor:can?st.c:C.line})}>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6,gap:8}}>
+                      <div><span style={{color:C.text,fontWeight:900,fontSize:15}}>{st.i} {st.l}</span><span style={{color:C.textSoft,fontSize:13,marginLeft:6,fontWeight:700}}>Lv {lv}/20</span></div>
+                      <button onClick={function(){doTrain(st.k)}} disabled={!can} style={button(can?"gold":"ghost",{padding:"6px 12px",fontSize:13,opacity:can?1:0.6,cursor:can?"pointer":"default"})}>{lv>=20?"MAX":cost+" TP"}</button>
                     </div>
-                    {isCur ? (
-                      <div style={{fontSize:13,color:"#0f172a",fontWeight:700,marginTop:2}}>
-                        {isGS ? "GS "+ev.gsNum : "Wk "+ev.block+"."+ev.week}
-                        {def>0&&(<div style={{fontSize:10,color:"#f59e0b",marginTop:1}}>def:{def}</div>)}
-                      </div>
-                    ) : ev.done && ev.result ? (
-                      <div style={{fontSize:14,color:"#0f172a",fontWeight:600,lineHeight:1.1,marginTop:1}}>
-                        {ev.result.pPts}
-                        {net!=null&&net!==0&&(<span style={{color:net>0?"#22c55e":"#ef4444",fontWeight:700,marginLeft:2,fontSize:13}}>{net>0?"+":""}{net}</span>)}
-                      </div>
-                    ) : def > 0 ? (
-                      <div style={{fontSize:13,color:"#f59e0b",marginTop:1}}>d:{def}</div>
-                    ) : null}
+                    <div style={{display:"flex",gap:2,marginBottom:5}}>{Array.from({length:20}).map(function(_,i){return(<div key={i} style={{flex:1,height:7,borderRadius:2,background:i<lv?st.c:"#efe3c4"}}/>);})}</div>
+                    <div style={{fontSize:13,color:C.textSoft}}>{st.d}</div>
                   </div>
                 );
               })}
+              {(function(){
+                var tr = S.player.tr;
+                var total = (tr.r||0)+(tr.p||0)+(tr.f||0)+(tr.s||0)+(tr.g||0);
+                return (
+                  <div style={card({padding:"10px 12px",background:C.cardWarm})}>
+                    <div style={label(C.goldInk)}>How training works</div>
+                    <div style={{fontSize:13,color:C.textSoft,lineHeight:1.5,marginTop:4}}>
+                      Only the <b style={{color:C.text}}>gap</b> to your opponent matters — if you both have ⚡10, it cancels out. Rivals train too: 0–2 levels per tournament, more for deep runs.
+                    </div>
+                    <div style={{fontSize:12,color:C.textMuted,marginTop:6,fontWeight:700}}>Total {total}/100{total>=100?" · fully trained — the rest is your timing":""}</div>
+                  </div>
+                );
+              })()}
             </div>
-            <div style={{display:"flex",justifyContent:"space-between",marginTop:8,fontSize:13,color:"#64748b"}}>
-              <span>{S.calIdx}/{TOTAL_EVENTS} played</span>
-              <span>{seasonDone?"→ Finals":"Next: "+(S.cal[S.calIdx]?S.cal[S.calIdx].type==="gs"?"GS "+S.cal[S.calIdx].gsNum:"Wk "+(S.cal[S.calIdx].block||"")+"."+((S.cal[S.calIdx].week||"")):"")}</span>
-            </div>
-          </div>
-        )}
+          )}
 
-        {tab === "rankings" && (function(){
-          var pIdx = -1; for (var pi = 0; pi < ranked.length; pi++) { if (ranked[pi].isP) { pIdx = pi; break; } }
-          var showTop = 50;
-          var nearStart = Math.max(showTop, pIdx - 3);
-          var nearEnd = Math.min(ranked.length - 1, pIdx + 7);
-          var needNear = pIdx >= showTop;
-          function renderRow(p, i) {
-            var t = p.tr||{};
-            return (
-              <div key={p.id+"-"+i} onClick={function(){setProf({p:p,rank:i+1})}} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"3px 5px",background:p.isP?"rgba(250,204,21,0.08)":i%2===0?"#f8fafc":"transparent",borderRadius:3,marginBottom:1,cursor:"pointer",borderLeft:i<16?"2px solid "+(i<4?"#b45309":i<8?"#22c55e":i<12?"#3b82f6":"#475569"):"2px solid transparent"}}>
-                <div style={{minWidth:0,flex:1}}>
-                  <div style={{fontSize:14,color:p.isP?"#b45309":"#0f172a",fontWeight:p.isP?700:400,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
-                    <span style={{color:i<3?["#b45309","#475569","#cd7f32"][i]:"#94a3b8",fontWeight:700,marginRight:3,width:26,display:"inline-block",textAlign:"right"}}>#{i+1}</span>
-                    {p.isP?S.pName+" ⭐":(p.emoji||"")+" "+sh(p.name)}
+          {hubTab === "season" && (
+            <div>
+              {sectionTitle("Season " + S.sNum, seasonDone ? "Season complete." : S.calIdx + " of " + TOTAL_EVENTS + " events played")}
+              <div style={card({padding:8,marginBottom:12})}>
+                {!seasonDone && curEvent && (
+                  <div style={{fontSize:13,color:C.goldInk,fontWeight:800,textAlign:"center",margin:"2px 0 8px"}}>
+                    {curEvent.type==="gs"
+                      ? (pRank<=64 ? "👑 Tap the highlighted week to enter the Grand Slam" : "👑 Grand Slam — not qualified at #"+pRank+", tap to skip")
+                      : "▶ Tap the highlighted week to play week "+curEvent.block+"."+curEvent.week}
                   </div>
-                  <div style={{fontSize:13,color:"#94a3b8",marginTop:1}}>
-                    {p.isP?"":"Talent:"}{p.isP?"":((p.skill||0)>80?(<span style={{color:"#ef4444"}}>Elite</span>):(p.skill||0)>60?(<span style={{color:"#f59e0b"}}>Strong</span>):(p.skill||0)>40?(<span style={{color:"#0891b2"}}>Avg</span>):(<span style={{color:"#475569"}}>Dev</span>))} <span style={{color:"#0891b2"}}>⚡{t.r||0}</span> <span style={{color:"#db2777"}}>💪{t.p||0}</span> <span style={{color:"#16a34a"}}>🎯{t.f||0}</span> <span style={{color:"#ea580c"}}>🫀{t.s||0}</span> <span style={{color:"#7c3aed"}}>🛡{t.g||0}</span>
-                  </div>
+                )}
+                <div style={{display:"grid",gridTemplateColumns:"repeat(5, 1fr)",gap:5}}>
+                  {S.cal.map(function(ev, idx){
+                    var isCur = idx === S.calIdx && !seasonDone;
+                    var isGS = ev.type === "gs";
+                    var tier = ev.tier != null ? TIERS[ev.tier] : null;
+                    var def = (S.player.def && S.player.def[idx]) || 0;
+                    var net = ev.result ? ev.result.net : null;
+                    var bg = isCur ? C.goldSoft : ev.done ? (isGS ? "#fef3c7" : "#ecfdf5") : C.cardWarm;
+                    var bord = isCur ? "2px solid " + C.ink : isGS ? "2px solid #f5c451" : "1.5px solid " + C.line;
+                    return (
+                      <div key={idx} onClick={isCur ? playCurrent : undefined}
+                        style={{background:bg,border:bord,borderRadius:10,padding:"6px 2px",textAlign:"center",minWidth:0,cursor:isCur?"pointer":"default",animation:isCur?"pulse 1.5s ease infinite":"none",boxShadow:isCur?"0 3px 0 "+C.ink:"none"}}>
+                        <div style={{fontSize:12,fontWeight:900,color:isGS?C.goldInk:isCur?C.text:ev.done?C.text:C.textMuted,lineHeight:1.2}}>
+                          {isCur ? (isGS ? (pRank<=64 ? "👑▶" : "👑⏭") : "▶ " + ev.block + "." + ev.week) : ev.done && tier ? tier.short : isGS ? "👑 GS" + ev.gsNum : ev.block + "." + ev.week}
+                        </div>
+                        {ev.done && ev.result ? (
+                          <div style={{fontSize:13,color:C.text,fontWeight:800,lineHeight:1.1,marginTop:2}}>
+                            {ev.result.pPts}
+                            {net!=null&&net!==0&&(<span style={{display:"block",color:net>0?C.greenInk:C.redInk,fontWeight:900,fontSize:11}}>{net>0?"+":""}{net}</span>)}
+                          </div>
+                        ) : def > 0 ? (
+                          <div style={{fontSize:11,color:C.redInk,marginTop:2,fontWeight:800}} title="Points from last season at this event">−{def}</div>
+                        ) : null}
+                      </div>
+                    );
+                  })}
                 </div>
-                <div style={{textAlign:"right"}}>
-                  <div style={{fontSize:14,fontWeight:600,color:p.isP?"#b45309":"#334155"}}>{(p.sp||0).toLocaleString()}</div>
-                  <div style={{fontSize:13,color:"#94a3b8"}}>AT:{(p.ap||0).toLocaleString()}</div>
+                <div style={{fontSize:12,color:C.textMuted,marginTop:8,lineHeight:1.4}}>
+                  Numbers in red are points you're <b style={{color:C.text}}>defending</b> from last season — they drop off when that event is played.
                 </div>
               </div>
-            );
-          }
-          return (
-            <div style={{background:"#ffffff",borderRadius:6,padding:4,border:"1px solid #f8fafc",maxHeight:380,overflowY:"auto"}}>
-              {ranked.slice(0, showTop).map(function(p, i){ return renderRow(p, i); })}
-              {needNear && (
-                <div>
-                  <div style={{textAlign:"center",padding:"4px",color:"#94a3b8",fontSize:13}}>··· {nearStart - showTop} more ···</div>
-                  {ranked.slice(nearStart, nearEnd + 1).map(function(p, i){ return renderRow(p, nearStart + i); })}
-                </div>
-              )}
-              <div style={{textAlign:"center",fontSize:13,color:"#94a3b8",padding:3}}>Tap any player for profile • {ranked.length} total</div>
-            </div>
-          );
-        })()}
 
-        {tab === "history" && (
-          <div style={{background:"#ffffff",borderRadius:8,padding:6,border:"1px solid #f8fafc",maxHeight:380,overflowY:"auto"}}>
-            {(S.tHist||[]).length===0?(<div style={{color:"#94a3b8",fontSize:13,padding:6}}>No events yet.</div>):
-            (S.tHist||[]).slice().reverse().map(function(t,i){
-              var tier = TIERS[t.tier]||TIERS[0];
+              <div style={Object.assign(label(C.textSoft), {margin:"4px 2px 6px"})}>Results</div>
+              <div style={card({padding:6})}>
+                {(S.tHist||[]).length===0?(<div style={{color:C.textMuted,fontSize:13,padding:6}}>No events yet.</div>):
+                (S.tHist||[]).slice().reverse().map(function(t,i){
+                  var tier = TIERS[t.tier]||TIERS[0];
+                  return (
+                    <div key={i} style={{padding:"6px 8px",background:i%2?"transparent":C.cardWarm,borderRadius:8}}>
+                      <div style={{display:"flex",justifyContent:"space-between",fontSize:14}}>
+                        <span style={{display:"flex",alignItems:"center",gap:6}}><span aria-hidden style={{width:8,height:8,borderRadius:"50%",background:tier.col}} /><span style={{color:C.text,fontWeight:900}}>{tier.name}</span><span style={{color:C.textMuted,fontWeight:700}}>S{t.season}</span></span>
+                        <div style={{textAlign:"right"}}>
+                          <span style={{color:C.text,fontWeight:800}}>{(t.pPts||0).toLocaleString()} pts</span>
+                          {t.netChange != null && (<span style={{color:t.netChange>0?C.greenInk:t.netChange<0?C.redInk:C.textMuted,fontWeight:900,marginLeft:6,fontSize:13}}>{t.netChange>0?"+"+t.netChange:t.netChange===0?"±0":t.netChange}</span>)}
+                        </div>
+                      </div>
+                      <div style={{display:"flex",justifyContent:"space-between",fontSize:12,color:C.textSoft,marginTop:2}}>
+                        <span>Reached <b style={{color:C.text}}>{t.roundName||"R1"}</b>{t.money>0&&(<span style={{color:C.greenInk,marginLeft:6,fontWeight:800}}>{money(t.money)}</span>)}</span>
+                        {t.winner&&(<span style={{color:t.winner.isP?C.goldInk:C.textSoft,fontWeight:t.winner.isP?900:600}}>🏆 {t.winner.isP?"YOU":sh(t.winner.name)}</span>)}
+                      </div>
+                    </div>
+                  );
+                })}
+                {(S.champs||[]).length>0&&(<div style={{marginTop:6,borderTop:"1px dashed "+C.line,padding:"6px 8px 2px"}}><div style={label(C.goldInk)}>👑 Season champions</div>{S.champs.map(function(c,i){return(<div key={i} style={{fontSize:13,color:c.isP?C.goldInk:C.textSoft,fontWeight:c.isP?900:600,marginTop:2}}>S{c.s}: {c.isP?"🌟 YOU":c.name}</div>);})}</div>)}
+              </div>
+            </div>
+          )}
+
+          {hubTab === "rankings" && (function(){
+            var pIdx = -1; for (var pi = 0; pi < ranked.length; pi++) { if (ranked[pi].isP) { pIdx = pi; break; } }
+            var showTop = 50;
+            var nearStart = Math.max(showTop, pIdx - 3);
+            var nearEnd = Math.min(ranked.length - 1, pIdx + 7);
+            var needNear = pIdx >= showTop;
+            function renderRow(p, i) {
+              var t = p.tr||{};
               return (
-                <div key={i} style={{padding:"5px 7px",background:i%2?"transparent":"#f8fafc",borderRadius:4,marginBottom:1}}>
-                  <div style={{display:"flex",justifyContent:"space-between",fontSize:14}}>
-                    <span><span style={{color:tier.col,fontWeight:700}}>{tier.short}</span><span style={{color:"#64748b",marginLeft:4}}>S{t.season}</span></span>
-                    <div style={{textAlign:"right"}}>
-                      <span style={{color:"#0f172a",fontWeight:600}}>{(t.pPts||0).toLocaleString()}</span>
-                      {t.netChange != null && (<span style={{color:t.netChange>0?"#22c55e":t.netChange<0?"#ef4444":"#64748b",fontWeight:700,marginLeft:4,fontSize:13}}>{t.netChange>0?"+"+t.netChange:t.netChange===0?"±0":t.netChange}</span>)}
+                <div key={p.id+"-"+i} onClick={function(){setProf({p:p,rank:i+1})}} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"5px 8px",background:p.isP?C.goldSoft:i%2===0?C.cardWarm:"transparent",borderRadius:8,cursor:"pointer",borderLeft:i<16?"3px solid "+(i<4?C.gold:i<8?"#22c55e":i<12?"#3b82f6":"#64748b"):"3px solid transparent"}}>
+                  <div style={{minWidth:0,flex:1}}>
+                    <div style={{fontSize:14,color:C.text,fontWeight:p.isP?900:700,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
+                      <span style={{color:i<3?C.goldInk:C.textMuted,fontWeight:900,marginRight:4,width:30,display:"inline-block",textAlign:"right"}}>#{i+1}</span>
+                      {p.isP?S.pName+" ⭐":(p.emoji||"")+" "+sh(p.name)}
+                    </div>
+                    <div style={{fontSize:12,color:C.textMuted,marginTop:1,fontWeight:600}}>
+                      {p.isP?"":"Talent "}{p.isP?"":((p.skill||0)>80?"Elite":(p.skill||0)>60?"Strong":(p.skill||0)>40?"Average":"Developing")}{p.isP?"":" · "}⚡{t.r||0} 💪{t.p||0} 🎯{t.f||0} 🫀{t.s||0} 🛡{t.g||0}
                     </div>
                   </div>
-                  <div style={{display:"flex",justifyContent:"space-between",fontSize:13,color:"#64748b",marginTop:1}}>
-                    <span>Reached: <span style={{color:"#475569"}}>{t.roundName||"R1"}</span>{t.defending>0 && (<span style={{color:"#f59e0b",marginLeft:4}}>(def:{t.defending})</span>)}{t.money>0&&(<span style={{color:"#22c55e",marginLeft:4}}>💰{(t.money/1000).toFixed(0)}K</span>)}</span>
-                    {t.winner&&(<span style={{color:t.winner.isP?"#b45309":"#475569"}}>🏆 {t.winner.isP?"YOU":sh(t.winner.name)}</span>)}
+                  <div style={{textAlign:"right"}}>
+                    <div style={{fontSize:14,fontWeight:900,color:C.text}}>{(p.sp||0).toLocaleString()}</div>
+                    <div style={{fontSize:11,color:C.textMuted,fontWeight:600}}>all-time {(p.ap||0).toLocaleString()}</div>
                   </div>
                 </div>
               );
-            })}
-            {(S.champs||[]).length>0&&(<div style={{marginTop:4,borderTop:"1px solid #f1f5f9",paddingTop:4}}><div style={{fontSize:13,color:"#b45309",fontWeight:700,marginBottom:2}}>👑 Season Champions</div>{S.champs.map(function(c,i){return(<div key={i} style={{fontSize:13,color:c.isP?"#b45309":"#475569"}}>S{c.s}: {c.isP?"🌟 YOU":c.name}</div>);})}</div>)}
-          </div>
-        )}
+            }
+            return (
+              <div>
+                {sectionTitle("Rankings", "Season points. Top 16 qualify for the Season Finals.")}
+                <div style={card({padding:6})}>
+                  {ranked.slice(0, showTop).map(function(p, i){ return renderRow(p, i); })}
+                  {needNear && (
+                    <div>
+                      <div style={{textAlign:"center",padding:"6px",color:C.textMuted,fontSize:13,fontWeight:700}}>··· {nearStart - showTop} more ···</div>
+                      {ranked.slice(nearStart, nearEnd + 1).map(function(p, i){ return renderRow(p, nearStart + i); })}
+                    </div>
+                  )}
+                  <div style={{textAlign:"center",fontSize:12,color:C.textMuted,padding:6,fontWeight:600}}>Tap any rider for her profile · {ranked.length} riders</div>
+                </div>
+              </div>
+            );
+          })()}
 
-        {tab === "settings" && (function(){
-          var rowStyle = {display:"flex",alignItems:"center",justifyContent:"space-between",padding:"14px 14px",borderRadius:10,marginBottom:8,background:"#f8fafc",border:"1px solid #f1f5f9",width:"100%",cursor:"pointer",textAlign:"left"};
-          var labelStyle = {fontSize:15,fontWeight:700,color:"#0f172a"};
-          var hintStyle = {fontSize:12,color:"#64748b",marginTop:2};
-          return (
-            <div style={{background:"#ffffff",borderRadius:8,padding:10,border:"1px solid #f8fafc"}}>
-              <button onClick={function(){setHelp(true)}} style={Object.assign({},rowStyle,{border:"1px solid rgba(250,204,21,0.2)"})}>
-                <div><div style={labelStyle}>❓ How to Play</div><div style={hintStyle}>Game rules & strike mechanic</div></div>
-                <span style={{color:"#b45309",fontSize:18}}>›</span>
-              </button>
-              <button onClick={toggleMute} style={rowStyle}>
-                <div><div style={labelStyle}>{mutedState?"🔇":"🔊"} Sound Effects</div><div style={hintStyle}>Strike hits, victory & defeat tones</div></div>
-                <span style={{color:mutedState?"#ef4444":"#22c55e",fontSize:14,fontWeight:800,letterSpacing:0.5}}>{mutedState?"OFF":"ON"}</span>
-              </button>
-              {userId && (
-                <button onClick={function(){doSync(S)}} disabled={syncing} style={Object.assign({},rowStyle,{border:"1px solid rgba(34,197,94,0.2)",opacity:syncing?0.6:1})}>
-                  <div><div style={labelStyle}>☁️ Sync to Cloud</div><div style={hintStyle}>Back up achievements to leaderboard</div></div>
-                  <span style={{color:"#22c55e",fontSize:14,fontWeight:700}}>{syncing?"...":"Sync"}</span>
+          {hubTab === "more" && (function(){
+            var rowStyle = Object.assign(card({padding:"12px 14px",marginBottom:8}), {display:"flex",alignItems:"center",justifyContent:"space-between",width:"100%",cursor:"pointer",textAlign:"left",fontFamily:FONT});
+            var labelStyle = {fontSize:15,fontWeight:900,color:C.text};
+            var hintStyle = {fontSize:12,color:C.textSoft,marginTop:2};
+            return (
+              <div>
+                {sectionTitle("More")}
+                <button onClick={function(){setHelp(true)}} style={rowStyle}>
+                  <div><div style={labelStyle}>❓ How to Play</div><div style={hintStyle}>Sets, strikes and training explained</div></div>
+                  <span style={{color:C.goldInk,fontSize:20,fontWeight:900}}>›</span>
                 </button>
-              )}
-              <button onClick={exportSave} style={rowStyle}>
-                <div><div style={labelStyle}>💾 Export Save</div><div style={hintStyle}>Download your game as JSON</div></div>
-                <span style={{color:"#475569",fontSize:18}}>›</span>
-              </button>
-              <button onClick={function(){fileRef.current&&fileRef.current.click()}} style={rowStyle}>
-                <div><div style={labelStyle}>📂 Import Save</div><div style={hintStyle}>Load a previously exported save</div></div>
-                <span style={{color:"#475569",fontSize:18}}>›</span>
-              </button>
-              <button onClick={newGame} style={Object.assign({},rowStyle,{border:"1px solid rgba(239,68,68,0.25)",background:"rgba(239,68,68,0.05)",marginTop:16})}>
-                <div><div style={Object.assign({},labelStyle,{color:"#ef4444"})}>🔄 Restart Game</div><div style={hintStyle}>Erase current save and start over</div></div>
-                <span style={{color:"#ef4444",fontSize:18}}>›</span>
-              </button>
-            </div>
-          );
-        })()}
+                <button onClick={toggleMute} style={rowStyle}>
+                  <div><div style={labelStyle}>{mutedState?"🔇":"🔊"} Sound Effects</div><div style={hintStyle}>Clucks, clangs, fanfares</div></div>
+                  <span style={{color:mutedState?C.redInk:C.greenInk,fontSize:14,fontWeight:900,letterSpacing:0.5}}>{mutedState?"OFF":"ON"}</span>
+                </button>
+                {userId && (
+                  <button onClick={function(){doSync(S)}} disabled={syncing} style={Object.assign({},rowStyle,{opacity:syncing?0.6:1})}>
+                    <div><div style={labelStyle}>☁️ Sync to Leaderboard</div><div style={hintStyle}>Post your achievements to the global leaderboard</div></div>
+                    <span style={{color:C.greenInk,fontSize:14,fontWeight:900}}>{syncing?"...":"Sync"}</span>
+                  </button>
+                )}
+                <button onClick={exportSave} style={rowStyle}>
+                  <div><div style={labelStyle}>💾 Export Save</div><div style={hintStyle}>Download your game as a file</div></div>
+                  <span style={{color:C.textSoft,fontSize:20,fontWeight:900}}>›</span>
+                </button>
+                <button onClick={function(){fileRef.current&&fileRef.current.click()}} style={rowStyle}>
+                  <div><div style={labelStyle}>📂 Import Save</div><div style={hintStyle}>Load a previously exported file</div></div>
+                  <span style={{color:C.textSoft,fontSize:20,fontWeight:900}}>›</span>
+                </button>
+                <button onClick={newGame} style={Object.assign({},rowStyle,{borderColor:"#fecaca",background:"#fff5f5",marginTop:16})}>
+                  <div><div style={Object.assign({},labelStyle,{color:C.redInk})}>🔄 Restart Game</div><div style={hintStyle}>Erase this save and start over</div></div>
+                  <span style={{color:C.redInk,fontSize:20,fontWeight:900}}>›</span>
+                </button>
+              </div>
+            );
+          })()}
+        </div>
+
+        <BottomNav tab={hubTab} onTab={goTab} badges={{ train: affordable || null }} />
       </motion.div>
     );
   }
-
-  /* ─── TRAINING ─── */
-  if (scr === "training") return (
-    <motion.div key="training" {...screenAnim} style={W}>
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
-        <span style={{fontSize:15,color:"#4f46e5",fontWeight:800}}>🏋️ TRAINING CAMP</span>
-        <button onClick={function(){setScr("hub")}} style={{background:"#f1f5f9",border:"1px solid #e5e7eb",color:"#475569",padding:"5px 10px",borderRadius:6,fontSize:14,cursor:"pointer"}}>← Hub</button>
-      </div>
-      <div style={{textAlign:"center",marginBottom:14}}><span style={{fontSize:22,color:"#b45309",fontWeight:900}}>{S.player.tr.tp||0}</span><span style={{color:"#475569",fontSize:14,marginLeft:6}}>TP</span></div>
-      {[{k:"r",l:"Reflexes",i:"⚡",d:"Slows bar speed (relative)",c:"#22d3ee"},{k:"p",l:"Power",i:"💪",d:"Widens sweet spot (relative)",c:"#f472b6"},{k:"f",l:"Focus",i:"🎯",d:"Strike score bonus (relative)",c:"#4ade80"},{k:"s",l:"Stamina",i:"🫀",d:"Less bar acceleration between strikes",c:"#fb923c"},{k:"g",l:"Grit",i:"🛡️",d:"Raises minimum score on bad hits",c:"#7c3aed"}].map(function(st){
-        var lv=S.player.tr[st.k]||0,cost=trainCost(lv),can=(S.player.tr.tp||0)>=cost&&lv<20;
-        return (
-          <div key={st.k} style={{marginBottom:8,padding:10,background:"#f8fafc",borderRadius:8,border:"1px solid "+(can?st.c+"33":"#f8fafc")}}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
-              <div><span style={{color:st.c,fontWeight:700,fontSize:13}}>{st.i} {st.l}</span><span style={{color:"#64748b",fontSize:14,marginLeft:6}}>Lv.{lv}/20</span></div>
-              <button onClick={function(){doTrain(st.k)}} disabled={!can} style={{background:can?st.c:"#f8fafc",color:can?"#000":"#94a3b8",border:"none",padding:"4px 10px",borderRadius:5,fontSize:13,fontWeight:700,cursor:can?"pointer":"default",opacity:can?1:0.5}}>{lv>=20?"MAX":cost+" TP"}</button>
-            </div>
-            <div style={{display:"flex",gap:1,marginBottom:3}}>{Array.from({length:20}).map(function(_,i){return(<div key={i} style={{flex:1,height:5,borderRadius:2,background:i<lv?st.c:"#f1f5f9"}}/>);})}</div>
-            <div style={{fontSize:13,color:"#64748b"}}>{st.d}</div>
-          </div>
-        );
-      })}
-      {(function(){
-        var tr = S.player.tr;
-        var total = (tr.r||0)+(tr.p||0)+(tr.f||0)+(tr.s||0)+(tr.g||0);
-        var maxed = total >= 100;
-        return (
-          <div style={{background:"rgba(99,102,241,0.05)",borderRadius:6,padding:8,border:"1px solid rgba(129,140,248,0.08)",marginTop:4}}>
-            <div style={{fontSize:13,color:"#4f46e5",fontWeight:700,marginBottom:3}}>TRAINING GUIDE</div>
-            <div style={{fontSize:13,color:"#475569",lineHeight:1.5}}>
-              All stats are <span style={{color:"#b45309"}}>relative</span> — only the gap vs your opponent matters. If you both have ⚡10, it cancels out.
-            </div>
-            {maxed ? (
-              <div style={{marginTop:6,padding:6,background:"rgba(250,204,21,0.06)",borderRadius:4,border:"1px solid rgba(250,204,21,0.1)"}}>
-                <div style={{fontSize:14,color:"#b45309",fontWeight:700}}>🏅 TRAINING COMPLETE</div>
-                <div style={{fontSize:13,color:"#475569",lineHeight:1.5,marginTop:2}}>
-                  All stats maxed! But top NPCs also train heavily — elite opponents with skill 85+ and 15+ training still score <span style={{color:"#ef4444"}}>89-99</span> against you. Masters and Grand Slam difficulty (speed 4.5-6.5×, zone 3-6px) ensures you still need <span style={{color:"#22c55e"}}>near-perfect timing</span> to beat the best. Your advantage is the gap closes — not that you become invincible.
-                </div>
-              </div>
-            ) : (
-              <div style={{fontSize:13,color:"#94a3b8",marginTop:3}}>
-                Total: {total}/100 • NPCs gain 0-2 levels per tournament • Tournament winners gain 1 level
-              </div>
-            )}
-          </div>
-        );
-      })()}
-    </motion.div>
-  );
 
   /* ─── TOURNAMENT ─── */
   if (scr === "tourney" && ts) {
@@ -767,54 +733,25 @@ export default function Arena(props) {
     var pm = ts.pending != null && ts.bracket[ts.round] ? ts.bracket[ts.round][ts.pending] : null;
     var opp = pm ? (pm.a.isP ? pm.b : pm.a) : null;
     var oppRank = 0; if (opp) { for (var oi = 0; oi < ranked.length; oi++) if (ranked[oi].id===opp.id){oppRank=oi+1;break;} }
+    var matchDiff = ts.round + [0,1,2,3,4,3][ts.tierIdx];
+    var scoutT = opp ? buildScout(S, opp, oppRank, matchDiff) : null;
     return (
-      <motion.div key="tourney" {...screenAnim} style={W}>
+      <motion.div key="tourney" {...screenAnim} style={Object.assign({}, W, { background: C.page })}>
         <style dangerouslySetInnerHTML={{__html:CSS}} />
         {confetti && (<Confetti />)}
         {prof && (<Profile player={prof.p} rank={prof.rank} playerName={S.pName} h2h={!prof.p.isP && S.player.h2h ? (S.player.h2h[prof.p.id] || []) : null} timeline={prof.p.isP ? (S.player.timeline || []) : null} onClose={function(){setProf(null)}} />)}
         {showHelp && (<HelpScreen onClose={function(){setHelp(false)}} />)}
         {showBracket && (<BracketView ts={ts} playerName={S.pName} onClose={function(){setShowBracket(false)}} />)}
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
-          <div><span style={{fontSize:13,color:tier.col,fontWeight:700}}>{tier.name}</span><span style={{color:"#94a3b8",margin:"0 4px"}}>•</span><span style={{fontSize:14,color:"#475569"}}>{rNames[Math.min(ts.round,tier.rounds-1)]}</span></div>
-          <div style={{display:"flex",gap:6,alignItems:"center"}}>
-            <button onClick={function(){setShowBracket(true)}} style={{background:"rgba(129,140,248,0.1)",border:"1px solid rgba(129,140,248,0.3)",color:"#4f46e5",fontSize:12,padding:"3px 8px",borderRadius:4,cursor:"pointer",fontWeight:700,letterSpacing:0.3}}>🌐 Bracket</button>
-            <button onClick={function(){setHelp(true)}} style={{background:"none",border:"1px solid rgba(250,204,21,0.15)",color:"#b45309",fontSize:13,padding:"2px 6px",borderRadius:4,cursor:"pointer",fontWeight:700}}>?</button>
-            <span style={{fontSize:13,color:"#475569"}}>{S.pName} <span style={{color:"#b45309"}}>#{pRank}</span></span>
-          </div>
-        </div>
-        <div style={{display:"flex",gap:2,marginBottom:6}}>
-          {rNames.map(function(_,i){return(<div key={i} style={{flex:1,height:3,borderRadius:2,background:i<ts.round?tier.col:i===ts.round?tier.col+"66":"#f8fafc"}}/>);})}
-        </div>
+        {showScout && scoutT && pm && ts.alive && (<ScoutSheet scout={scoutT} onClose={function(){setShowScout(false)}} />)}
+        <div style={{maxWidth:520,margin:"0 auto",textAlign:"left"}}>
+        <MatchHeader tierName={tier.name} tierColor={tier.col} roundLabel={ts.done ? (ts.alive ? "Champion" : "Tournament over") : rNames[Math.min(ts.round,tier.rounds-1)]}
+          bestOf={tier.bo || 3} rounds={rNames} roundIdx={ts.done ? (ts.alive ? tier.rounds : -1) : ts.round}
+          onScout={pm && ts.alive && opp ? function(){ setShowScout(true); } : null}
+          onBracket={function(){ setShowBracket(true); }} onHelp={function(){ setHelp(true); }} />
 
         {pm && ts.alive && opp && (
-          <div style={{background:"#ffffff",border:"1px solid "+tier.col+"22",borderRadius:10,padding:10,marginBottom:6}}>
-            <div style={{textAlign:"center",marginBottom:4}}>
-              <div style={{display:"flex",justifyContent:"center",gap:10,marginTop:2,fontSize:12,alignItems:"center"}}>
-                <span style={{color:"#64748b"}}>Foe: <span style={{color:"#0f172a",cursor:"pointer",textDecoration:"underline",fontWeight:700}} onClick={function(){setProf({p:opp,rank:oppRank})}}>#{oppRank}</span></span>
-                <span style={{color:"#64748b"}}>Talent: <span style={{color:(opp.skill||0)>80?"#ef4444":(opp.skill||0)>60?"#f59e0b":(opp.skill||0)>40?"#22d3ee":"#475569",fontWeight:700}}>{(opp.skill||0)>80?"Elite":(opp.skill||0)>60?"Strong":(opp.skill||0)>40?"Average":"Developing"}</span></span>
-                <span style={{color:"#64748b"}}>Pts: <span style={{color:"#0f172a",fontWeight:700}}>{(opp.sp||0).toLocaleString()}</span></span>
-              </div>
-              {(function(){var ot=opp.tr||{},pt=S.player.tr||{}; return (
-                <div style={{display:"flex",justifyContent:"center",gap:5,marginTop:3,fontSize:13,padding:"3px 6px",background:"#ffffff",borderRadius:4}}>
-                  {[{k:"r",i:"⚡",c:"#22d3ee"},{k:"p",i:"💪",c:"#f472b6"},{k:"f",i:"🎯",c:"#4ade80"},{k:"s",i:"🫀",c:"#fb923c"},{k:"g",i:"🛡",c:"#7c3aed"}].map(function(s){var d=(pt[s.k]||0)-(ot[s.k]||0);return(<span key={s.k} style={{color:s.c}}>{s.i}<span style={{color:"#b45309"}}>{pt[s.k]||0}</span><span style={{color:"#94a3b8"}}>v</span><span style={{color:"#0f172a"}}>{ot[s.k]||0}</span>{d!==0&&(<span style={{color:d>0?"#22c55e":"#ef4444",marginLeft:1}}>{d>0?"+"+d:d}</span>)}</span>);})}
-                </div>
-              );})()}
-              {(function(){
-                var d = ts.round + [0,1,2,3,4,3][ts.tierIdx];
-                var barSpd = Math.max(0.8, 2.4 + d * 0.4).toFixed(1);
-                var sweet = Math.max(3, 12 - d * 1.5);
-                var diffLabel = d <= 1 ? "Easy" : d <= 3 ? "Medium" : d <= 5 ? "Hard" : d <= 7 ? "Very Hard" : "Extreme";
-                var diffCol = d <= 1 ? "#4ade80" : d <= 3 ? "#22d3ee" : d <= 5 ? "#f59e0b" : d <= 7 ? "#ef4444" : "#dc2626";
-                return (
-                  <div style={{display:"flex",justifyContent:"center",gap:8,marginTop:3,fontSize:13,color:"#64748b"}}>
-                    <span>Difficulty: <span style={{color:diffCol,fontWeight:700}}>{diffLabel}</span></span>
-                    <span>Bar: {barSpd}×</span>
-                    <span>Zone: {sweet}px</span>
-                  </div>
-                );
-              })()}
-            </div>
-            <PowerBar key={"t-"+ts.round} onDone={onTR} oppSkill={opp.skill||50} diff={ts.round + [0,1,2,3,4,3][ts.tierIdx]} tr={S.player.tr} otr={opp.tr||{}} playerName={S.pName} playerEmoji="⚔️" oppName={sh(opp.name)} oppEmoji={opp.emoji||"👤"} oppId={opp.id} tierColor={tier.col} roundLabel={rNames[ts.round]}
+          <div>
+            <PowerBar key={"t-"+ts.round} scout={scoutT} onDone={onTR} oppSkill={opp.skill||50} diff={ts.round + [0,1,2,3,4,3][ts.tierIdx]} tr={S.player.tr} otr={opp.tr||{}} playerName={S.pName} playerEmoji="⚔️" oppName={sh(opp.name)} oppEmoji={opp.emoji||"👤"} oppId={opp.id} tierColor={tier.col} roundLabel={rNames[ts.round]}
               tierName={tier.name} youSub={"World #"+pRank} foeSub={"World #"+oppRank+" · "+talentLabel(opp.skill)}
               isFinal={ts.round >= tier.rounds-1} nextLabel={ts.round < tier.rounds-1 ? rNames[ts.round+1] : null} eliminated={true}
               stakes={{ pts: tier.pts[ts.round], money: (tier.money||[])[ts.round]||0 }}
@@ -822,16 +759,21 @@ export default function Arena(props) {
               onProgress={function(p){ setTS(function(prev){ return prev ? Object.assign({}, prev, { match: p }) : prev; }); }} />
           </div>
         )}
-        {ts.done && (
-          <div style={{background:"#ffffff",borderRadius:10,padding:14,textAlign:"center",border:"1px solid "+tier.col+"22",marginBottom:6}}>
-            <div style={{fontSize:18,fontWeight:900,color:ts.alive?tier.col:"#475569"}}>{ts.alive?"🏆 "+tier.name+" Champion!":"Tournament Complete"}</div>
-            <div style={{color:"#475569",fontSize:13,marginTop:3}}>{ts.log.filter(function(m){return m.won}).length}W-{ts.log.filter(function(m){return !m.won}).length}L • {ts.log.reduce(function(a,m){return a+m.pts},0).toLocaleString()} pts</div>
-            {(function(){ var ptsE = ts.log.reduce(function(a,m){return a+m.pts},0); var moneyE = 0; var t = TIERS[ts.tierIdx]; for(var mi=0;mi<ts.log.length;mi++){if(ts.log[mi].won&&t.money)moneyE+=(t.money[mi]||0);} return moneyE > 0 ? (<div style={{fontSize:14,color:"#22c55e",marginTop:2}}>💰 +${moneyE.toLocaleString()}</div>) : null; })()}
-            {(function(){ var def = (S.player.def && S.player.def[S.calIdx]) || 0; var earned = ts.log.reduce(function(a,m){return a+m.pts},0); var net = earned - def; return def > 0 ? (<div style={{fontSize:14,marginTop:3}}><span style={{color:"#f59e0b"}}>Defending: {def}</span><span style={{color:"#94a3b8",margin:"0 4px"}}>→</span><span style={{color:net>=0?"#22c55e":"#ef4444",fontWeight:700}}>Net: {net>=0?"+"+net:net}</span></div>) : null; })()}
-            <button onClick={finishT} style={Object.assign({},bs("linear-gradient(135deg,"+tier.col+",#f59e0b)","#000"),{marginTop:10})}>Return to Hub →</button>
-          </div>
-        )}
-        {ts.log.length>0&&(<div style={{background:"#ffffff",borderRadius:6,padding:6,marginTop:4}}><div style={{fontSize:13,color:"#64748b",fontWeight:700,marginBottom:3}}>MATCH LOG</div>{ts.log.map(function(m,i){return(<div key={i} style={{display:"flex",justifyContent:"space-between",padding:"2px 4px",fontSize:14,color:m.won?"#22c55e":"#ef4444"}}><span>{m.won?"W":"L"} {m.round} vs {sh(m.opp)}</span><span>+{m.pts}</span></div>);})}</div>)}
+        {ts.done && (function(){
+          var earned = ts.log.reduce(function(a,m){return a+m.pts},0);
+          var moneyE = 0; for (var mi=0; mi<ts.log.length; mi++) { if (ts.log[mi].won && tier.money) moneyE += (tier.money[mi]||0); }
+          var def = (S.player.def && S.player.def[S.calIdx]) || 0, net = earned - def;
+          return (
+            <div style={card({textAlign:"center",padding:"16px 14px",marginBottom:8})}>
+              <div style={display(24, ts.alive ? C.goldInk : C.text)}>{ts.alive ? "🏆 " + tier.name + " Champion!" : "Tournament complete"}</div>
+              <div style={{color:C.textSoft,fontSize:14,marginTop:6,fontWeight:700}}>{ts.log.filter(function(m){return m.won}).length} won · {ts.log.filter(function(m){return !m.won}).length} lost · <b style={{color:C.text}}>{earned.toLocaleString()} pts</b>{moneyE > 0 && (<b style={{color:C.greenInk}}> · +{money(moneyE)}</b>)}</div>
+              {def > 0 && (<div style={{fontSize:13,marginTop:4,fontWeight:700,color:C.textSoft}}>Defending {def} from last season → <b style={{color:net>=0?C.greenInk:C.redInk}}>net {net>=0?"+"+net:net}</b></div>)}
+              <button onClick={finishT} style={button("gold",{marginTop:12,width:"100%"})}>Back to the tour →</button>
+            </div>
+          );
+        })()}
+        {ts.log.length>0&&(<div style={card({padding:"8px 10px"})}><div style={Object.assign(label(C.textSoft),{marginBottom:4})}>Match log</div>{ts.log.map(function(m,i){return(<div key={i} style={{display:"flex",justifyContent:"space-between",padding:"3px 2px",fontSize:14,fontWeight:800,color:m.won?C.greenInk:C.redInk,borderTop:i?"1px dashed "+C.line:"none"}}><span>{m.won?"W":"L"} · {m.round} vs {sh(m.opp)}</span><span>+{m.pts}</span></div>);})}</div>)}
+        </div>
       </motion.div>
     );
   }
@@ -847,11 +789,20 @@ export default function Arena(props) {
           <div style={{fontSize:14,color:"#475569",marginTop:2}}>{fs.champ?"Champion Crowned":fs.phase==="groups"?"Group Stage":fs.phase==="semis"?"Semifinals":"World Championship"}</div>
         </div>
         {fs.champ&&(<div style={{textAlign:"center",padding:16}}><div style={{fontSize:48}}>👑</div><div style={{fontSize:20,fontWeight:900,color:"#b45309",letterSpacing:3,animation:"cg 2s ease infinite"}}>{fs.champ.isP?"YOU ARE WORLD CHAMPION!":"WORLD CHAMPION"}</div>{!fs.champ.isP&&(<div style={{fontSize:15,color:"#475569",marginTop:4}}>{fs.champ.emoji} {fs.champ.name}</div>)}<button onClick={nextSeason} style={Object.assign({},bs("linear-gradient(135deg,#facc15,#f59e0b)","#000"),{marginTop:14})}>🔄 Season {(S.sNum||1)+1}</button></div>)}
-        {fpm&&fopp&&!fs.champ&&(<div style={{background:"#ffffff",border:"1px solid rgba(250,204,21,0.12)",borderRadius:10,padding:10,marginBottom:6,animation:"glow 2s ease infinite"}}><div style={{textAlign:"center",marginBottom:4}}><div style={{fontSize:16,fontWeight:900,color:"#b45309"}}>{fs.phase==="final"?"👑 WORLD CHAMPIONSHIP":"⚔️ "+fs.phase.toUpperCase()}</div><div style={{fontSize:13,color:"#475569",marginTop:2}}><span style={{color:"#b45309"}}>{S.pName}</span> vs <span style={{color:"#0f172a"}}>{fopp.emoji} {fopp.name}</span></div></div><PowerBar key={"f-"+fs.phase+"-"+fopp.id} onDone={onFR} oppSkill={fopp.skill||60} diff={fs.phase==="final"?5:fs.phase==="semis"?4:3} tr={S.player.tr} otr={fopp.tr||{}} playerName={S.pName} playerEmoji="⚔️" oppName={sh(fopp.name)} oppEmoji={fopp.emoji||"👤"} oppId={fopp.id} tierColor={fs.phase==="final"?"#b45309":"#8b5cf6"} roundLabel={fs.phase==="final"?"World Final":fs.phase==="semis"?"Semifinal":"Group Stage"}
+        {fpm&&fopp&&!fs.champ&&(function(){
+          var fRank = 0; for (var fri = 0; fri < ranked.length; fri++) if (ranked[fri].id === fopp.id) { fRank = fri + 1; break; }
+          var scoutF = buildScout(S, fopp, fRank, fs.phase==="final"?5:fs.phase==="semis"?4:3);
+          return (<div style={{maxWidth:520,margin:"0 auto 6px",textAlign:"left"}}>
+          {showScout && (<ScoutSheet scout={scoutF} onClose={function(){setShowScout(false)}} />)}
+          <MatchHeader tierName={"Season " + S.sNum + " Finals"} tierColor="#a855f7" roundLabel={fs.phase==="final"?"World Final":fs.phase==="semis"?"Semifinal":"Group Stage"}
+            bestOf={FINALS_BO} rounds={["Group Stage","Semifinal","World Final"]} roundIdx={fs.phase==="final"?2:fs.phase==="semis"?1:0}
+            onScout={function(){ setShowScout(true); }} onHelp={function(){ setHelp(true); }} />
+          <PowerBar key={"f-"+fs.phase+"-"+fopp.id} scout={scoutF} onDone={onFR} oppSkill={fopp.skill||60} diff={fs.phase==="final"?5:fs.phase==="semis"?4:3} tr={S.player.tr} otr={fopp.tr||{}} playerName={S.pName} playerEmoji="⚔️" oppName={sh(fopp.name)} oppEmoji={fopp.emoji||"👤"} oppId={fopp.id} tierColor={fs.phase==="final"?"#b45309":"#8b5cf6"} roundLabel={fs.phase==="final"?"World Final":fs.phase==="semis"?"Semifinal":"Group Stage"}
           tierName={"Season "+S.sNum+" Finals"} youSub={"World #"+pRank} foeSub={talentLabel(fopp.skill)}
           isFinal={fs.phase==="final"} nextLabel={fs.phase==="semis"?"World Final":null} eliminated={fs.phase!=="groups"}
           bestOf={FINALS_BO} initialProgress={fs.match}
-          onProgress={function(p){ setFS(function(prev){ return prev ? Object.assign({}, prev, { match: p }) : prev; }); }} /></div>)}
+          onProgress={function(p){ setFS(function(prev){ return prev ? Object.assign({}, prev, { match: p }) : prev; }); }} /></div>);
+        })()}
         {!fs.champ&&(<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:4,marginBottom:6}}>{fs.houses.map(function(h,hi){return(<div key={hi} style={{background:"#ffffff",borderRadius:6,padding:5,border:"1px solid "+HC[hi]+"33"}}><div style={{fontSize:14,fontWeight:700,color:HC[hi],marginBottom:2}}>{HI[hi]} {HN[hi]}</div>{h.slice().sort(function(a,b){return(b.gP||0)-(a.gP||0)}).map(function(p){return(<div key={p.id} style={{display:"flex",justifyContent:"space-between",fontSize:13,padding:"1px 3px",background:p.isP?"rgba(250,204,21,0.06)":"transparent",borderRadius:2,color:p.isP?"#b45309":"#334155"}}><span style={{maxWidth:60,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{p.isP?"You":sh(p.name)}</span><span style={{fontWeight:600}}>{(p.gW||0)}W-{(p.gL||0)}L</span></div>);})}</div>);})}</div>)}
         {!fs.champ&&fs.semis.length>0&&(<div style={{background:"#ffffff",borderRadius:6,padding:6,marginBottom:6}}><div style={{fontSize:14,color:"#b45309",fontWeight:700,marginBottom:3}}>Semifinals</div>{fs.semis.map(function(m,i){return(<div key={i} style={{fontSize:14,color:"#334155",padding:"2px 0",display:"flex",justifyContent:"space-between"}}><span>{m.a.isP?"You":sh(m.a.name)} vs {m.b.isP?"You":sh(m.b.name)}</span><span style={{color:m.w?"#22c55e":"#64748b",fontWeight:600}}>{m.w?(m.w.isP?"You!":sh(m.w.name)):"—"}</span></div>);})}</div>)}
         {!pQ&&!fs.champ&&(<div style={{textAlign:"center",padding:10,background:"rgba(239,68,68,0.05)",borderRadius:8}}><div style={{color:"#ef4444",fontWeight:700,fontSize:14}}>You didn't qualify</div></div>)}
