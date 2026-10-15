@@ -12,7 +12,7 @@ import JoustStage from "./JoustStage";
 import { PLAYER_PALETTE, paletteFor } from "./Rider";
 import { crowdRoar } from "../engine/fans";
 import { CoachBubble } from "./Coach";
-import { enterMatch, leaveMatch } from "../music";
+import { enterMatch, leaveMatch, startBattle, stopBattle } from "../music";
 
 const { useState, useEffect, useRef } = React;
 
@@ -340,6 +340,11 @@ export default function PowerBar(props) {
   var sl = ctr - sw / 2;
   var lastMark = marks[marks.length - 1];
   var isDone = ph === "done" && res;
+  /* Battle music: on once the opening animation is over, off when the match is decided (the outro has its own fanfare) */
+  useEffect(function () {
+    if (ph === "done") stopBattle();
+    else if (ph !== "intro") startBattle();
+  }, [ph]);
 
   var story = null;
   if (res) {

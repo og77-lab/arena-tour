@@ -1,101 +1,110 @@
 // Background music — separate from the synthesized sound effects (sounds.js), with its own on/off switch.
-// Menu music: four tunes shuffled so the same tune never comes back within two tracks.
-// During a match the menu music fades out; the match will get its own track (playBattle hook below).
+// Two channels, each a shuffled playlist where a tune never comes back within two tracks:
+//   menu   — the screens around the match; fades out while a match is on screen
+//   battle — only the match itself: starts when the opening animation ends, fades out when the match is decided
 
-var MENU_TRACKS = ["/music/rooster.mp3", "/music/jousting.mp3", "/music/grandma.mp3", "/music/grandma-joust.mp3"];
 var VOLUME = 0.35, FADE_MS = 900, GAP_MS = 1500;
-var KEY_ON = "arena-music", KEY_RECENT = "arena-music-recent";
+var KEY_ON = "arena-music";
 
 function load(k, d) { try { var v = localStorage.getItem(k); return v == null ? d : v; } catch (e) { return d; } }
 function store(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
 
 var enabled = load(KEY_ON, "true") !== "false";
-var recent = (function () { try { return JSON.parse(load(KEY_RECENT, "[]")) || []; } catch (e) { return []; } })();
-var mode = "menu";          /* "menu" | "match" */
 var unlocked = false;       /* browsers only allow audio after the first tap or key */
-var audio = null, fadeTimer = null, gapTimer = null, leaveTimer = null, matchDepth = 0;
+var hidden = function () { return typeof document !== "undefined" && document.hidden; };
 
-/* Never the current tune or the one before it */
-function pickNext() {
-  var pool = MENU_TRACKS.filter(function (t) { return recent.indexOf(t) < 0; });
-  if (!pool.length) pool = MENU_TRACKS.slice();
-  var t = pool[Math.floor(Math.random() * pool.length)];
-  recent = [t].concat(recent.filter(function (r) { return r !== t; })).slice(0, 2);
-  store(KEY_RECENT, JSON.stringify(recent));
-  return t;
-}
+/* One playlist with its own audio element, fades and no-repeat memory */
+function Channel(tracks, recentKey, gapMs) {
+  var ch = { want: false, audio: null, fade: null, gap: null };
+  var recent = (function () { try { return JSON.parse(load(recentKey, "[]")) || []; } catch (e) { return []; } })();
 
-function fadeTo(target, ms, then) {
-  if (fadeTimer) clearInterval(fadeTimer);
-  if (!audio) { if (then) then(); return; }
-  var a = audio, start = a.volume, steps = Math.max(1, Math.round(ms / 50)), i = 0;
-  fadeTimer = setInterval(function () {
-    i++;
-    a.volume = Math.max(0, Math.min(1, start + (target - start) * (i / steps)));
-    if (i >= steps) { clearInterval(fadeTimer); fadeTimer = null; if (then) then(); }
-  }, 50);
-}
-
-function startTrack(src) {
-  if (audio) { audio.pause(); audio.onended = null; }
-  audio = new Audio(src);
-  audio.preload = "auto";
-  audio.volume = 0;
-  audio.onended = function () { audio = null; gapTimer = setTimeout(function () { gapTimer = null; playMenu(); }, GAP_MS); };
-  var p = audio.play();
-  if (p && p.catch) p.catch(function () { /* still locked — the next tap will retry */ unlocked = false; });
-  fadeTo(VOLUME, FADE_MS);
-}
-
-function shouldPlay() { return enabled && unlocked && mode === "menu" && !(typeof document !== "undefined" && document.hidden); }
-
-/* Start or resume the menu music if everything allows it */
-function playMenu() {
-  if (!shouldPlay() || gapTimer) return;
-  if (audio && !audio.ended) {
-    if (audio.paused) { var p = audio.play(); if (p && p.catch) p.catch(function () {}); }
-    fadeTo(VOLUME, FADE_MS);
-    return;
+  function pickNext() {
+    var pool = tracks.filter(function (t) { return recent.indexOf(t) < 0; });
+    if (!pool.length) pool = tracks.slice();
+    var t = pool[Math.floor(Math.random() * pool.length)];
+    recent = [t].concat(recent.filter(function (r) { return r !== t; })).slice(0, 2);
+    store(recentKey, JSON.stringify(recent));
+    return t;
   }
-  startTrack(pickNext());
+  function fadeTo(target, ms, then) {
+    if (ch.fade) clearInterval(ch.fade);
+    if (!ch.audio) { if (then) then(); return; }
+    var a = ch.audio, start = a.volume, steps = Math.max(1, Math.round(ms / 50)), i = 0;
+    ch.fade = setInterval(function () {
+      i++;
+      a.volume = Math.max(0, Math.min(1, start + (target - start) * (i / steps)));
+      if (i >= steps) { clearInterval(ch.fade); ch.fade = null; if (then) then(); }
+    }, 50);
+  }
+  function startTrack() {
+    if (ch.audio) { ch.audio.pause(); ch.audio.onended = null; }
+    var a = new Audio(pickNext());
+    ch.audio = a; a.preload = "auto"; a.volume = 0;
+    a.onended = function () { if (ch.audio !== a) return; ch.audio = null; ch.gap = setTimeout(function () { ch.gap = null; ch.sync(); }, gapMs); };
+    var p = a.play();
+    if (p && p.catch) p.catch(function () { unlocked = false; /* still locked: the next tap retries */ });
+    fadeTo(VOLUME, FADE_MS);
+  }
+  /* Play if wanted and allowed, otherwise fade out and pause (keeping the place in the tune) */
+  ch.sync = function () {
+    if (ch.want && enabled && unlocked && !hidden()) {
+      if (ch.gap) return;
+      if (ch.audio && !ch.audio.ended) {
+        if (ch.audio.paused) { var p = ch.audio.play(); if (p && p.catch) p.catch(function () {}); }
+        fadeTo(VOLUME, FADE_MS);
+      } else startTrack();
+    } else {
+      if (ch.gap) { clearTimeout(ch.gap); ch.gap = null; }
+      if (ch.audio) { var a = ch.audio; fadeTo(0, FADE_MS, function () { if (a === ch.audio) a.pause(); }); }
+    }
+  };
+  /* Fresh tune next time (used when a match ends: the next match gets a new one) */
+  ch.drop = function () { var a = ch.audio; if (!a) return; fadeTo(0, FADE_MS, function () { a.pause(); if (ch.audio === a) ch.audio = null; }); };
+  ch.peek = function () { return { want: ch.want, track: ch.audio ? ch.audio.src.split("/").pop() : null, paused: ch.audio ? ch.audio.paused : null, volume: ch.audio ? +ch.audio.volume.toFixed(2) : null, recent: recent.slice() }; };
+  ch.skip = function () { if (ch.audio && ch.audio.duration) ch.audio.currentTime = Math.max(0, ch.audio.duration - 0.3); };
+  return ch;
 }
 
-function pauseMenu() {
-  if (gapTimer) { clearTimeout(gapTimer); gapTimer = null; }
-  if (!audio) return;
-  var a = audio;
-  fadeTo(0, FADE_MS, function () { if (a === audio) a.pause(); });
-}
+var menu = Channel(["/music/rooster.mp3", "/music/jousting.mp3", "/music/grandma.mp3", "/music/grandma-joust.mp3"], "arena-music-recent", GAP_MS);
+var battle = Channel(["/music/fight-1.mp3", "/music/fight-2.mp3", "/music/fight-3.mp3", "/music/fight-4.mp3"], "arena-battle-recent", 300);
+menu.want = true;
+
+function syncAll() { menu.sync(); battle.sync(); }
 
 /* ── Public API ── */
 
 export function isMusicOn() { return enabled; }
-export function setMusicOn(v) {
-  enabled = !!v; store(KEY_ON, enabled ? "true" : "false");
-  if (enabled) playMenu(); else pauseMenu();
-}
+export function setMusicOn(v) { enabled = !!v; store(KEY_ON, enabled ? "true" : "false"); syncAll(); }
 
 /* A match is on screen (PowerBar mounted): menu music bows out. Leaving is debounced so the gap between
-   two matches in the same tournament doesn't bring the music back for a second */
+   two matches in the same tournament doesn't bring the menu music back for a second */
+var matchDepth = 0, leaveTimer = null;
 export function enterMatch() {
   matchDepth++;
   if (leaveTimer) { clearTimeout(leaveTimer); leaveTimer = null; }
-  if (mode !== "match") { mode = "match"; pauseMenu(); }
+  if (menu.want) { menu.want = false; menu.sync(); }
 }
 export function leaveMatch() {
   matchDepth = Math.max(0, matchDepth - 1);
+  stopBattle();
   if (matchDepth > 0) return;
   if (leaveTimer) clearTimeout(leaveTimer);
-  leaveTimer = setTimeout(function () { leaveTimer = null; if (matchDepth === 0) { mode = "menu"; playMenu(); } }, 1200);
+  leaveTimer = setTimeout(function () { leaveTimer = null; if (matchDepth === 0) { menu.want = true; menu.sync(); } }, 1200);
 }
+
+/* Battle music: from the end of the opening animation until the match is decided */
+export function startBattle() { if (!battle.want) { battle.want = true; battle.sync(); } }
+export function stopBattle() { if (battle.want) { battle.want = false; battle.drop(); } }
 
 /* First tap/key anywhere unlocks audio; music pauses while the app is in the background */
 if (typeof window !== "undefined") {
-  var unlock = function () { if (unlocked) return; unlocked = true; playMenu(); };
+  var unlock = function () { if (unlocked) return; unlocked = true; syncAll(); };
   window.addEventListener("pointerdown", unlock, true);
   window.addEventListener("keydown", unlock, true);
-  document.addEventListener("visibilitychange", function () { if (document.hidden) { if (audio) audio.pause(); } else playMenu(); });
-  /* Read-only peek for debugging from the console */
-  window.__gjMusic = function () { return { mode: mode, enabled: enabled, unlocked: unlocked, track: audio ? audio.src.split("/").pop() : null, paused: audio ? audio.paused : null, volume: audio ? +audio.volume.toFixed(2) : null, recent: recent.slice() }; };
-  window.__gjMusicSkip = function () { if (audio && audio.duration) audio.currentTime = Math.max(0, audio.duration - 0.3); };
+  document.addEventListener("visibilitychange", function () {
+    if (hidden()) { [menu, battle].forEach(function (c) { if (c.audio) c.audio.pause(); }); } else syncAll();
+  });
+  /* Read-only peek and a skip, for debugging from the console */
+  window.__gjMusic = function () { return { enabled: enabled, unlocked: unlocked, menu: menu.peek(), battle: battle.peek() }; };
+  window.__gjMusicSkip = function (which) { (which === "battle" ? battle : menu).skip(); };
 }
