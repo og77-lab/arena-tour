@@ -29,6 +29,8 @@ export default function Interview(props) {
   var iv = props.iv;
   var _pick = useState(null), pick = _pick[0], setPick = _pick[1];
   var _res = useState(null), res = _res[0], setRes = _res[1];
+  /* The coach tip is marked seen as soon as you answer — keep it on screen for this interview so nothing jumps */
+  var coachOn = useState(!!props.coach)[0];
 
   function choose(a) {
     if (pick) return;
@@ -51,6 +53,12 @@ export default function Interview(props) {
           </span>
           <div style={{ fontSize: 11, fontWeight: 900, letterSpacing: 3, color: "#93c5fd", marginTop: 10 }}>POST-TOURNAMENT PRESS</div>
         </div>
+        {coachOn && (
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 12, background: "rgba(255,255,255,0.1)", border: "1.5px solid #fde68a", borderRadius: 12, padding: "7px 10px", color: "#fff", fontSize: 13, fontWeight: 700, lineHeight: 1.4 }}>
+            <span aria-hidden style={{ fontSize: 20 }}>📣</span>
+            <span>Coach Hettie: after every tournament the press wants a word. Each outlet's crowd likes different things — and nobody likes the same joke twice. Your fans go up or down with the answer.</span>
+          </div>
+        )}
 
         <div style={{ display: "flex", alignItems: "flex-start", gap: 10, marginTop: 14 }}>
           <span aria-hidden style={{ fontSize: 34, lineHeight: 1 }}>🎤</span>

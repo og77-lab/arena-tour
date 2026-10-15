@@ -11,6 +11,7 @@ import SetBreak from "./SetBreak";
 import JoustStage from "./JoustStage";
 import { PLAYER_PALETTE, paletteFor } from "./Rider";
 import { crowdRoar } from "../engine/fans";
+import { CoachBubble } from "./Coach";
 
 const { useState, useEffect, useRef } = React;
 
@@ -375,6 +376,16 @@ export default function PowerBar(props) {
   else if (setsWon === need - 1) { setTag = "MATCH POINT"; setTagColor = "#facc15"; }
   else if (setsLost === need - 1) { setTag = "ON THE BRINK"; setTagColor = "#f87171"; }
 
+  /* First joust: the coach talks you through the first set (shown over the arena, so nothing moves) */
+  var coachText = null;
+  if (props.coach && ph === "go") {
+    var struck = sets.length * STRIKES_PER_SET + cnt;
+    if (struck === 0) coachText = "Watch the blue marker below. Tap STRIKE when it's inside the GOLD zone!";
+    else if (struck === 1) coachText = "Gold scores 85+. A miss still scores — just less. Two more strikes this set.";
+    else if (struck === 2) coachText = "Last strike of the set: the set goes to whoever has the higher AVERAGE of the three.";
+    else if (sets.length === 1 && cnt === 0) coachText = "Win " + need + " sets to take the match. The bar speeds up as it goes on — keep your eye on it.";
+  }
+
   var shake = REDUCED_MOTION || !fx ? "none" : fx.kind === "crit" ? "arenaShakeHard 0.4s ease" : "arenaShake 0.35s ease";
   var redAlert = deciding || !!banner;
   var lastSet = sets[sets.length - 1];
@@ -386,7 +397,7 @@ export default function PowerBar(props) {
           you={{ name: youName, emoji: youEmoji, sub: props.youSub, palette: youPal }}
           foe={{ name: oppName, emoji: oppEmoji, sub: props.foeSub, palette: foePal }}
           roundLabel={props.roundLabel} tierName={props.tierName} tierColor={tierColor}
-          bestOf={bestOf} resumeSet={sets.length > 0 || myH.length > 0 ? setNum : null} scout={props.scout}
+          bestOf={bestOf} resumeSet={sets.length > 0 || myH.length > 0 ? setNum : null} scout={props.scout} coach={props.coach}
           skipSignal={skip}
           onDone={function () { setPh(sets.length > 0 && myH.length === 0 ? "setintro" : "go"); if (sets.length > 0 && myH.length === 0) setTimeout(function () { setPh("go"); }, 1100); }} />
       )}
@@ -448,6 +459,7 @@ export default function PowerBar(props) {
           {banner ? banner.target : " "}
         </div>
 
+        <CoachBubble text={coachText} />
         {reveal && (<StrikeReveal key={reveal.id} reveal={reveal} />)}
         {ph === "setintro" && (<SetIntroCard setNum={setNum} tag={setTag} tagColor={setTagColor} />)}
       </div>

@@ -195,6 +195,12 @@ export default function MatchIntro(props) {
           <div style={{ position: "absolute", inset: 0, zIndex: 7, overflowY: "auto", padding: "12px", boxSizing: "border-box", display: "flex" }}>
           {/* margin:auto centres when there's room and scrolls (instead of clipping) on short screens */}
           <div style={{ margin: "auto", width: "100%", display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
+            {props.coach && (
+              <div style={{ width: "min(100%, 440px)", display: "flex", alignItems: "center", gap: 8, background: "rgba(15,23,42,0.92)", color: "#fff", border: "1.5px solid #fde68a", borderRadius: 12, padding: "7px 10px", fontSize: 13, fontWeight: 800, lineHeight: 1.35, boxSizing: "border-box" }}>
+                <span aria-hidden style={{ fontSize: 20 }}>📣</span>
+                <span>Coach Hettie: size her up first. Green numbers are where you're stronger, red where she is. Then hit FIGHT!</span>
+              </div>
+            )}
             {props.scout && (<TaleOfTape scout={props.scout} you={props.you} foe={props.foe} />)}
             <motion.button onClick={function (e) { e.stopPropagation(); startCount(); }} onPointerDown={function (e) { e.stopPropagation(); }}
               initial={{ y: 20, scale: 0.9 }} animate={{ y: 0, scale: 1 }} transition={{ delay: 0.15, type: "spring", stiffness: 380, damping: 18 }}

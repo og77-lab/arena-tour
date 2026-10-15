@@ -26,6 +26,7 @@ import { tallyTournament, checkAchievements } from "./engine/achievements";
 import { updateRival, rivalRecord } from "./engine/rivalry";
 import { ACHIEVEMENTS } from "./engine/achievements";
 import AchievementsSheet, { AchToast, achCount } from "./components/Achievements";
+import { CoachCard } from "./components/Coach";
 import { fansOf, clampFans, weeklyDrift, performanceDelta, sponsorTP, hasTierWildcard, hasSlamWildcard } from "./engine/fans";
 import { makeInterview, resolvePromise } from "./engine/interview";
 import Interview from "./components/Interview";
@@ -179,7 +180,7 @@ export default function Arena(props) {
       fans: Object.assign({}, iv.issue.fans, { after: f, interview: outcome.delta })
     });
     var news = (S.news || []).slice(); if (news[0] && news[0].at === iv.issue.at) news[0] = issue;
-    save(Object.assign({}, S, { news: news, player: Object.assign({}, p, { stats: outcome.viral ? Object.assign({}, p.stats || {}, { viral: ((p.stats || {}).viral || 0) + 1 }) : (p.stats || {}), fans: f, lastTones: [answer.tone].concat(p.lastTones || []).slice(0, 2), ivSeen: (iv.iv.used || []).concat(p.ivSeen || []).slice(0, 48), promise: answer.tone === "bold" ? { wk: iv.issue.wk } : null }) }));
+    save(Object.assign({}, S, { news: news, player: Object.assign({}, p, { tips: Object.assign({}, p.tips || {}, { interview: true }), stats: outcome.viral ? Object.assign({}, p.stats || {}, { viral: ((p.stats || {}).viral || 0) + 1 }) : (p.stats || {}), fans: f, lastTones: [answer.tone].concat(p.lastTones || []).slice(0, 2), ivSeen: (iv.iv.used || []).concat(p.ivSeen || []).slice(0, 48), promise: answer.tone === "bold" ? { wk: iv.issue.wk } : null }) }));
     return issue;
   }
   var lastRankRef = useRef(null);
@@ -207,7 +208,18 @@ export default function Arena(props) {
       .finally(function() { setSyncing(false); });
   }
 
-  function newSeason() { save(mkSeason(inp, 1, null)); setScr("hub"); }
+  function newSeason() { var ns = mkSeason(inp, 1, null); ns.player.tutorial = true; save(ns); setScr("hub"); }
+  /* Coach tips: each shows once; new games get the full tour, older saves only tips for features added since */
+  function tipOn(id) {
+    if (!S) return false;
+    var t = S.player.tips || {};
+    if (t.all || t[id]) return false;
+    return !!S.player.tutorial || id === "rival";
+  }
+  function markTip(id, all) {
+    var t = Object.assign({}, S.player.tips || {}); t[id] = true; if (all) t.all = true;
+    save(Object.assign({}, S, { player: Object.assign({}, S.player, { tips: t }) }));
+  }
   function nextSeason(from) { var cur = from && from.cal ? from : S; if (!cur) return; doSync(cur); save(mkSeason(cur.pName, (cur.sNum||1)+1, cur)); setScr("hub"); }
   function newGame() { if (confirm("Start a brand new game? Your current save will be erased.")) { cancelCloudSave(); sSet(null); if (userId) saveGameToCloud(userId, null).catch(function(){}); setS(null); setTS(null); setFS(null); setScr("title"); } }
 
@@ -328,7 +340,7 @@ export default function Arena(props) {
         name: opp.name, emoji: opp.emoji
       }]);
       h2h[opp.id] = entries.slice(-10); /* keep last 10 per opponent */
-      save(Object.assign({}, S, { player: Object.assign({}, S.player, { h2h: h2h }) }));
+      save(Object.assign({}, S, { player: Object.assign({}, S.player, { h2h: h2h, tips: Object.assign({}, S.player.tips || {}, { match: true }) }) }));
     }
     if (r.done && won) {
       /* Tournament title won — celebrate */
@@ -666,6 +678,12 @@ export default function Arena(props) {
     var affordable = ["r","p","f","s","g"].filter(function(k){ var lv = (S.player.tr[k]||0); return lv < 20 && tpNow >= trainCost(lv); }).length;
     function goTab(t) { setScr("hub"); setTab(t); if (t === "news") { setNewsIdx(0); markNewsSeen(); } try { window.scrollTo(0, 0); } catch (e) {} }
     var newsUnread = !!(S.news && S.news[0] && S.newsSeenAt !== S.news[0].at);
+    var hubTip = null;
+    if (!paper && !interview && !gala && !showAch && !prof && !showHelp) {
+      if (picking) hubTip = tipOn("tiers") ? "tiers" : null;
+      else if (hubTab === "home") hubTip = tipOn("welcome") ? "welcome" : S.player.rival && tipOn("rival") ? "rival" : null;
+      else if (["train", "season", "rankings", "news"].indexOf(hubTab) >= 0 && tipOn(hubTab)) hubTip = hubTab;
+    }
     function sectionTitle(txt, sub) {
       return (<div style={{margin:"2px 2px 8px"}}><div style={display(24)}>{txt}</div>{sub && (<div style={{fontSize:13,color:C.textSoft,marginTop:2}}>{sub}</div>)}</div>);
     }
@@ -675,12 +693,13 @@ export default function Arena(props) {
         {confetti && (<Confetti />)}
         {prof && (<Profile player={prof.p} rank={prof.rank} isRival={!!(S.player.rival && prof.p.id === S.player.rival.id)} playerName={S.pName} h2h={!prof.p.isP && S.player.h2h ? (S.player.h2h[prof.p.id] || []) : null} timeline={prof.p.isP ? (S.player.timeline || []) : null} onClose={function(){setProf(null)}} />)}
         {showHelp && (<HelpScreen onClose={function(){setHelp(false)}} />)}
+        {hubTip && (<CoachCard key={hubTip} id={hubTip} vars={{ name: S.pName, rival: S.player.rival ? S.player.rival.name : null }} onDone={function(all){ markTip(hubTip, all); }} />)}
         {picking && !seasonDone && (<TierSheet available={avTiers} wildcard={wildcardTier(S)} rank={pRank} onClose={function(){setPicking(false)}} onPick={function(ti){ setPicking(false); startTourney(ti); }} />)}
         {gala && (<SeasonGala S={S} champ={gala.champ} runnerUp={gala.runnerUp} champRank={gala.champRank} awards={gala.awards} you={gala.you} hall={gala.hall} goal={gala.goal} onDone={finishGala} />)}
         {achQ.length > 0 && (<AchToast queue={achQ} onShown={function(){ setAchQ(function(q){ return q.slice(1); }); }} onOpen={function(){ setAchQ([]); setShowAch(true); }} />)}
         {showAch && (<AchievementsSheet S={S} onClose={function(){ setShowAch(false); }} />)}
         {paper && (<DailyCluck issue={paper} onClose={function(){ setPaper(null); markNewsSeen(); }} />)}
-        {interview && (<Interview iv={interview.iv} recentTones={S.player.lastTones || []} fans={fansOf(S.player)}
+        {interview && (<Interview coach={tipOn("interview")} iv={interview.iv} recentTones={S.player.lastTones || []} fans={fansOf(S.player)}
           onAnswer={onInterviewAnswer} onDone={function(issue){ setInterview(null); setPaper(issue || interview.issue); }} />)}
         <input ref={fileRef} type="file" accept=".json" onChange={importSave} style={{display:"none"}} />
 
@@ -946,7 +965,7 @@ export default function Arena(props) {
 
         {pm && ts.alive && opp && (
           <div>
-            <PowerBar key={"t-"+ts.round} scout={scoutT} onDone={onTR} oppSkill={opp.skill||50} diff={ts.round + [0,1,2,3,4,3][ts.tierIdx]} tr={S.player.tr} otr={opp.tr||{}} playerName={S.pName} playerEmoji="⚔️" oppName={sh(opp.name)} oppEmoji={opp.emoji||"👤"} oppId={opp.id} oppRank={oppRank} fans={fansOf(S.player)} tierColor={tier.col} roundLabel={rNames[ts.round]}
+            <PowerBar key={"t-"+ts.round} coach={tipOn("match")} scout={scoutT} onDone={onTR} oppSkill={opp.skill||50} diff={ts.round + [0,1,2,3,4,3][ts.tierIdx]} tr={S.player.tr} otr={opp.tr||{}} playerName={S.pName} playerEmoji="⚔️" oppName={sh(opp.name)} oppEmoji={opp.emoji||"👤"} oppId={opp.id} oppRank={oppRank} fans={fansOf(S.player)} tierColor={tier.col} roundLabel={rNames[ts.round]}
               tierName={tier.name} youSub={"World #"+pRank} foeSub={"World #"+oppRank+" · "+talentLabel(opp.skill)}
               isFinal={ts.round >= tier.rounds-1} nextLabel={ts.round < tier.rounds-1 ? rNames[ts.round+1] : null} eliminated={true}
               stakes={{ pts: tier.pts[ts.round], money: (tier.money||[])[ts.round]||0 }}
