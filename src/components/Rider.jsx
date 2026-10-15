@@ -77,7 +77,7 @@ export function Rider(props) {
         </g>
 
         {/* ── Granny ── */}
-        <g style={svgT("56px 64px", GRANNY_POSE[pose], pose === "fallen" ? "transform 0.55s cubic-bezier(.5,-0.3,.6,1)" : "transform 0.22s cubic-bezier(.3,1.6,.5,1)")}>
+        <g style={Object.assign(svgT("56px 64px", GRANNY_POSE[pose], pose === "fallen" ? "transform 0.55s cubic-bezier(.5,-0.3,.6,1)" : "transform 0.22s cubic-bezier(.3,1.6,.5,1)"), { display: props.noRider ? "none" : undefined })}>
           <g stroke={INK} strokeWidth="2" strokeLinejoin="round">
             <path d="M36 66 Q50 54 72 63 L70 76 Q52 82 38 74 Z" fill={p.dress} />
             <ellipse cx="63" cy="82" rx="5" ry="3" fill="#1f2937" />

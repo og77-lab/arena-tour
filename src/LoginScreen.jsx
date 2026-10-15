@@ -49,9 +49,10 @@ export default function LoginScreen({ onGuest }) {
     <div style={W}>
       <div style={{ width: '100%', maxWidth: 360 }}>
         <div style={{ textAlign: 'center', marginBottom: 30 }}>
-          <div style={{ fontSize: 48, marginBottom: 8 }}>⚔️</div>
-          <div style={{ fontSize: 24, fontWeight: 900, letterSpacing: 2, color: '#1e40af' }}>ARENA TOUR</div>
-          <div style={{ fontSize: 12, color: '#64748b', marginTop: 4 }}>Combat Tournament Career</div>
+          <img src="/icon-192.png" alt="" width="84" height="84" style={{ borderRadius: 20, marginBottom: 10, border: '3px solid #3f2a1d', boxShadow: '0 4px 0 #3f2a1d' }} />
+          <div style={{ fontSize: 11, fontWeight: 900, letterSpacing: 5, color: '#92400e' }}>THE GRAND</div>
+          <div style={{ fontSize: 26, fontWeight: 900, fontStyle: 'italic', color: '#1c1917', lineHeight: 1.1 }}>Granny Rooster Joust</div>
+          <div style={{ fontSize: 12, color: '#57534e', marginTop: 4, fontWeight: 700 }}>Sign in to save your granny's career in the cloud</div>
         </div>
 
         <div style={{
@@ -80,7 +81,7 @@ export default function LoginScreen({ onGuest }) {
             <div style={{ marginBottom: 14 }}>
               <label style={{ fontSize: 11, color: '#64748b', fontWeight: 700, marginBottom: 4, display: 'block', textTransform: 'uppercase', letterSpacing: 1 }}>Email</label>
               <input type="email" value={email} onChange={e => setEmail(e.target.value)}
-                style={inputStyle} placeholder="warrior@arena.com" required />
+                style={inputStyle} placeholder="granny@joust.com" required />
             </div>
             <div style={{ marginBottom: 20 }}>
               <label style={{ fontSize: 11, color: '#64748b', fontWeight: 700, marginBottom: 4, display: 'block', textTransform: 'uppercase', letterSpacing: 1 }}>Password</label>
@@ -102,7 +103,7 @@ export default function LoginScreen({ onGuest }) {
                 letterSpacing: 1, textTransform: 'uppercase'
               }}
             >
-              {loading ? '...' : mode === 'login' ? '⚔️ Enter Arena' : '⚔️ Join Arena'}
+              {loading ? '...' : mode === 'login' ? '🐓 Saddle up' : '🐓 Join the joust'}
             </button>
           </form>
         </div>

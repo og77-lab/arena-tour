@@ -30,6 +30,20 @@ export const TIERS = [
   { name: "Grand Slam", short: "GS", col: "#f59e0b", size: 64, rounds: 6, bo: 5, pts: [250,500,1000,2000,4000,8000], money: [10000,25000,60000,150000,400000,1000000], rankRange: [1,64] }
 ];
 
+/* Training stats. Save keys (k) are unchanged; each stat belongs to the granny (rider) or the rooster (mount).
+   Effects are relative to the opponent — only the gap counts. */
+export const STATS = [
+  { k: "r", icon: "⚡", label: "Reflexes", who: "granny", col: "#0891b2", what: "Slows the bar for whoever's ahead" },
+  { k: "f", icon: "🎯", label: "Aim", who: "granny", col: "#16a34a", what: "Bonus points on every strike" },
+  { k: "g", icon: "🛡️", label: "Stubbornness", who: "granny", col: "#7c3aed", what: "A higher floor on bad strikes" },
+  { k: "s", icon: "🫀", label: "Stamina", who: "rooster", col: "#ea580c", what: "Less speed-up between strikes and sets" },
+  { k: "p", icon: "🐾", label: "Steady Stride", who: "rooster", col: "#db2777", what: "A wider gold zone — a steady mount is easier to aim from" }
+];
+export const STAT_GROUPS = [
+  { who: "granny", icon: "👵", title: "Granny", sub: "Rider skills" },
+  { who: "rooster", icon: "🐓", title: "Rooster", sub: "Mount conditioning" }
+];
+
 /* Every match in the Season Finals is best of 5 sets */
 export const FINALS_BO = 5;
 

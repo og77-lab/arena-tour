@@ -2,7 +2,7 @@ import * as React from "react";
 import { motion } from "framer-motion";
 import { syncAchievements, saveGameToCloud, loadGameFromCloud } from "./firebase";
 import { playTitle, playRankUp, isMuted, setMuted } from "./sounds";
-import { W, CSS, EMO, TIERS, RN5, RN6, HN, HC, HI, TOTAL_EVENTS, FINALS_BO, screenAnim } from "./models/constants";
+import { W, CSS, EMO, TIERS, RN5, RN6, HN, HC, HI, TOTAL_EVENTS, FINALS_BO, STATS, STAT_GROUPS, screenAnim } from "./models/constants";
 import { sh, bs, nW, pRankOf, getRanked, getARanked, trainCost } from "./models/formulas";
 import { sSet, sGet, stamp, pickNewest, queueCloudSave, cancelCloudSave } from "./engine/persistence";
 import { mkSeason } from "./engine/seasonManager";
@@ -16,20 +16,13 @@ import TierSheet from "./components/TierSheet";
 import BottomNav, { NAV_HEIGHT } from "./components/BottomNav";
 import MatchHeader from "./components/MatchHeader";
 import ScoutSheet from "./components/ScoutSheet";
-import { paletteFor } from "./components/Rider";
+import { Rider, PLAYER_PALETTE, paletteFor } from "./components/Rider";
 import { C, FONT, display, label, card, button, money } from "./ui/theme";
 
 const { useState, useEffect, useRef } = React;
 
 function talentLabel(skill) { var s = skill || 0; return s > 80 ? "Elite" : s > 60 ? "Strong" : s > 40 ? "Average" : "Developing"; }
 
-var SCOUT_STATS = [
-  { k: "r", icon: "⚡", label: "Reflexes", what: "Whoever's ahead gets a slower bar" },
-  { k: "p", icon: "💪", label: "Power", what: "Whoever's ahead gets a wider gold zone" },
-  { k: "f", icon: "🎯", label: "Focus", what: "Bonus points on every strike" },
-  { k: "s", icon: "🫀", label: "Stamina", what: "Less speed-up between strikes and sets" },
-  { k: "g", icon: "🛡️", label: "Grit", what: "A higher floor on bad strikes" }
-];
 
 /* d = the match difficulty number PowerBar uses (round + tier offset) */
 function diffInfo(d) {
@@ -48,7 +41,7 @@ function buildScout(S, o, oRank, d) {
   return {
     name: sh(o.name), emoji: o.emoji || "", palette: paletteFor(o.id), rank: oRank, talent: talentLabel(o.skill), pts: o.sp || 0,
     h2h: { w: w, l: meetings.length - w },
-    stats: SCOUT_STATS.map(function (s) { return { icon: s.icon, label: s.label, what: s.what, you: mine[s.k] || 0, foe: hers[s.k] || 0 }; }),
+    stats: STATS.map(function (s) { return { icon: s.icon, label: s.label, what: s.what, who: s.who, you: mine[s.k] || 0, foe: hers[s.k] || 0 }; }),
     diff: diffInfo(d)
   };
 }
@@ -477,25 +470,26 @@ export default function Arena(props) {
   }
 
   /* ═══ RENDER ═══ */
-  if (scr === "loading") return (<motion.div key="loading" {...screenAnim} style={Object.assign({},W,{display:"flex",alignItems:"center",justifyContent:"center"})}><style dangerouslySetInnerHTML={{__html:CSS}} /><span style={{color:"#b45309",fontSize:16}}>⚔️ Loading Arena Tour...</span></motion.div>);
+  if (scr === "loading") return (<motion.div key="loading" {...screenAnim} style={Object.assign({},W,{background:C.page,display:"flex",alignItems:"center",justifyContent:"center"})}><style dangerouslySetInnerHTML={{__html:CSS}} /><span style={{color:C.goldInk,fontSize:16,fontWeight:800}}>🐓 Saddling the roosters…</span></motion.div>);
 
   if (scr === "title") return (
-    <motion.div key="title" {...screenAnim} style={Object.assign({},W,{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",textAlign:"center"})}>
+    <motion.div key="title" {...screenAnim} style={Object.assign({},W,{background:C.page,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",textAlign:"center",fontFamily:FONT})}>
       <style dangerouslySetInnerHTML={{__html:CSS}} />
-      <div style={{fontSize:48}}>⚔️</div>
-      <h1 style={{fontSize:22,fontWeight:900,letterSpacing:3,background:"linear-gradient(135deg,#facc15,#f59e0b)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",margin:"8px 0 4px"}}>ARENA TOUR</h1>
-      <p style={{color:"#64748b",fontSize:13,margin:"0 0 16px"}}>1000 Warriors • 5 Tournament Tiers • Grand Slams • Season Finals</p>
-      <div style={{background:"#f8fafc",border:"1px solid #f1f5f9",borderRadius:12,padding:18,maxWidth:320,width:"100%"}}>
-        <div style={{fontSize:14,color:"#475569",fontWeight:700,letterSpacing:1,marginBottom:4,textTransform:"uppercase"}}>Enter Your Warrior Name</div>
-        <input value={inp} onChange={function(e){setInp(e.target.value)}} placeholder="e.g. Novak, Rafa, Serena..." onKeyDown={function(e){if(e.key==="Enter"&&inp.trim())newSeason()}}
-          style={{width:"100%",padding:10,borderRadius:8,border:"1px solid rgba(250,204,21,0.3)",background:"#ffffff",color:"#b45309",fontSize:16,fontWeight:700,outline:"none",boxSizing:"border-box",textAlign:"center",marginBottom:8}} />
-        <button onClick={function(){if(inp.trim())newSeason();}} disabled={!inp.trim()} style={Object.assign({},bs("linear-gradient(135deg,#facc15,#f59e0b)","#000"),{width:"100%",marginBottom:6,opacity:inp.trim()?1:0.4})}>Begin Season 1</button>
-        <button onClick={function(){fileRef.current&&fileRef.current.click()}} style={Object.assign({},bs("#f1f5f9","#475569"),{width:"100%",fontSize:13,border:"1px solid #e5e7eb"})}>📂 Load Save</button>
+      <img src="/icon-192.png" alt="" width="96" height="96" style={{borderRadius:22,border:"3px solid "+C.ink,boxShadow:"0 4px 0 "+C.ink}} />
+      <div style={Object.assign(label(C.goldInk),{marginTop:14,letterSpacing:5})}>The Grand</div>
+      <h1 style={Object.assign(display(30),{margin:"2px 0 6px"})}>Granny Rooster Joust</h1>
+      <p style={{color:C.textSoft,fontSize:13,margin:"0 0 16px",fontWeight:700}}>1000 grannies · 5 tournament tiers · Grand Slams · Season Finals</p>
+      <div style={card({padding:18,maxWidth:320,width:"100%",boxSizing:"border-box"})}>
+        <div style={Object.assign(label(C.textSoft),{marginBottom:6})}>Name your granny</div>
+        <input value={inp} onChange={function(e){setInp(e.target.value)}} placeholder="e.g. Grandma Ruth, Nana Rosa…" onKeyDown={function(e){if(e.key==="Enter"&&inp.trim())newSeason()}}
+          style={{width:"100%",padding:12,borderRadius:10,border:"2px solid "+C.lineStrong,background:C.cardWarm,color:C.text,fontSize:16,fontWeight:800,outline:"none",boxSizing:"border-box",textAlign:"center",marginBottom:10,fontFamily:FONT}} />
+        <button onClick={function(){if(inp.trim())newSeason();}} disabled={!inp.trim()} style={button("gold",{width:"100%",marginBottom:8,opacity:inp.trim()?1:0.45})}>Saddle up · Season 1</button>
+        <button onClick={function(){fileRef.current&&fileRef.current.click()}} style={button("ghost",{width:"100%",fontSize:13})}>📂 Load a save file</button>
         <input ref={fileRef} type="file" accept=".json" onChange={importSave} style={{display:"none"}} />
       </div>
-      <div style={{marginTop:14,maxWidth:320,background:"rgba(99,102,241,0.05)",border:"1px solid rgba(129,140,248,0.1)",borderRadius:10,padding:10,textAlign:"left"}}>
-        <div style={{color:"#4f46e5",fontSize:13,fontWeight:700,letterSpacing:1,marginBottom:4}}>ATP-STYLE SEASON</div>
-        <div style={{color:"#4338ca",fontSize:14,lineHeight:1.6}}>20-event season: <b>4 blocks</b> of 4 weekly tournaments + <b>Grand Slam</b>. Climb tiers from Futures → Masters as your rank improves. <b>Top 16</b> contest Season Finals. All 1000 players compete every week.</div>
+      <div style={card({marginTop:12,maxWidth:320,width:"100%",boxSizing:"border-box",padding:"10px 12px",textAlign:"left",background:C.cardWarm})}>
+        <div style={label(C.goldInk)}>How a season works</div>
+        <div style={{color:C.textSoft,fontSize:13,lineHeight:1.55,marginTop:4}}>20 events: <b style={{color:C.text}}>4 blocks</b> of weekly tournaments, each closed by a <b style={{color:C.text}}>Grand Slam</b>. Climb from Futures to Masters as your rank rises. The <b style={{color:C.text}}>top 16</b> ride in the Season Finals.</div>
       </div>
     </motion.div>
   );
@@ -543,16 +537,31 @@ export default function Arena(props) {
                 <div style={label()}>Training points</div>
                 <div style={display(30, C.goldInk)}>{tpNow} TP</div>
               </div>
-              {[{k:"r",l:"Reflexes",i:"⚡",d:"Slows the bar relative to your opponent",c:"#0891b2"},{k:"p",l:"Power",i:"💪",d:"Widens the gold zone",c:"#db2777"},{k:"f",l:"Focus",i:"🎯",d:"Adds to every strike score",c:"#16a34a"},{k:"s",l:"Stamina",i:"🫀",d:"Less speed-up between strikes and sets",c:"#ea580c"},{k:"g",l:"Grit",i:"🛡️",d:"Raises your floor on bad strikes",c:"#7c3aed"}].map(function(st){
-                var lv=S.player.tr[st.k]||0,cost=trainCost(lv),can=tpNow>=cost&&lv<20;
+              {STAT_GROUPS.map(function(g){
                 return (
-                  <div key={st.k} style={card({marginBottom:8,padding:"10px 12px",borderColor:can?st.c:C.line})}>
-                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6,gap:8}}>
-                      <div><span style={{color:C.text,fontWeight:900,fontSize:15}}>{st.i} {st.l}</span><span style={{color:C.textSoft,fontSize:13,marginLeft:6,fontWeight:700}}>Lv {lv}/20</span></div>
-                      <button onClick={function(){doTrain(st.k)}} disabled={!can} style={button(can?"gold":"ghost",{padding:"6px 12px",fontSize:13,opacity:can?1:0.6,cursor:can?"pointer":"default"})}>{lv>=20?"MAX":cost+" TP"}</button>
+                  <div key={g.who} style={card({marginBottom:10,padding:"10px 12px 4px"})}>
+                    <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:4}}>
+                      <div style={{flexShrink:0,width:58,height:46,borderRadius:10,background:"linear-gradient(180deg,#fef3c7,#fde68a)",border:"1.5px solid "+C.line,display:"flex",alignItems:"flex-end",justifyContent:"center",overflow:"hidden"}}>
+                        <Rider palette={PLAYER_PALETTE} width={58} pose="idle" noRider={g.who==="rooster"} />
+                      </div>
+                      <div>
+                        <div style={display(20)}>{g.icon} {g.title}</div>
+                        <div style={label(C.textSoft)}>{g.sub}</div>
+                      </div>
                     </div>
-                    <div style={{display:"flex",gap:2,marginBottom:5}}>{Array.from({length:20}).map(function(_,i){return(<div key={i} style={{flex:1,height:7,borderRadius:2,background:i<lv?st.c:"#efe3c4"}}/>);})}</div>
-                    <div style={{fontSize:13,color:C.textSoft}}>{st.d}</div>
+                    {STATS.filter(function(st){ return st.who === g.who; }).map(function(st, si){
+                      var lv=S.player.tr[st.k]||0,cost=trainCost(lv),can=tpNow>=cost&&lv<20;
+                      return (
+                        <div key={st.k} style={{padding:"9px 0",borderTop:"1px dashed "+C.line}}>
+                          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6,gap:8}}>
+                            <div><span style={{color:C.text,fontWeight:900,fontSize:15}}>{st.icon} {st.label}</span><span style={{color:C.textSoft,fontSize:13,marginLeft:6,fontWeight:700}}>Lv {lv}/20</span></div>
+                            <button onClick={function(){doTrain(st.k)}} disabled={!can} style={button(can?"gold":"ghost",{padding:"6px 12px",fontSize:13,opacity:can?1:0.6,cursor:can?"pointer":"default"})}>{lv>=20?"MAX":cost+" TP"}</button>
+                          </div>
+                          <div style={{display:"flex",gap:2,marginBottom:5}}>{Array.from({length:20}).map(function(_,i){return(<div key={i} style={{flex:1,height:7,borderRadius:2,background:i<lv?st.col:"#efe3c4"}}/>);})}</div>
+                          <div style={{fontSize:13,color:C.textSoft}}>{st.what}</div>
+                        </div>
+                      );
+                    })}
                   </div>
                 );
               })}
@@ -657,7 +666,7 @@ export default function Arena(props) {
                       {p.isP?S.pName+" ⭐":(p.emoji||"")+" "+sh(p.name)}
                     </div>
                     <div style={{fontSize:12,color:C.textMuted,marginTop:1,fontWeight:600}}>
-                      {p.isP?"":"Talent "}{p.isP?"":((p.skill||0)>80?"Elite":(p.skill||0)>60?"Strong":(p.skill||0)>40?"Average":"Developing")}{p.isP?"":" · "}⚡{t.r||0} 💪{t.p||0} 🎯{t.f||0} 🫀{t.s||0} 🛡{t.g||0}
+                      {p.isP?"":"Talent "}{p.isP?"":((p.skill||0)>80?"Elite":(p.skill||0)>60?"Strong":(p.skill||0)>40?"Average":"Developing")}{p.isP?"":" · "}{STATS.map(function(st){ return st.icon + (t[st.k]||0); }).join(" ")}
                     </div>
                   </div>
                   <div style={{textAlign:"right"}}>

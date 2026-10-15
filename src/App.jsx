@@ -3,6 +3,7 @@ import Arena from './ArenaGame'
 import LoginScreen from './LoginScreen'
 import Leaderboard from './Leaderboard'
 import { onAuthChange, logoutUser } from './firebase'
+import Splash, { splashSeen } from './components/Splash'
 
 const FONT = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
 
@@ -10,6 +11,7 @@ function App() {
   const [user, setUser] = useState(undefined)
   const [guest, setGuest] = useState(false)
   const [view, setView] = useState('game')
+  const [splashDone, setSplashDone] = useState(splashSeen)
 
   useEffect(() => {
     return onAuthChange((u) => {
@@ -18,12 +20,17 @@ function App() {
     })
   }, [])
 
+  /* Auth resolves underneath while the opening video plays */
+  if (!splashDone) {
+    return <Splash onDone={() => setSplashDone(true)} />
+  }
+
   if (user === undefined) {
     return (
-      <div style={{ minHeight: '100vh', background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0f172a', fontFamily: FONT }}>
+      <div style={{ minHeight: '100vh', background: '#fff8e7', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1c1917', fontFamily: FONT }}>
         <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 32, marginBottom: 8 }}>⚔️</div>
-          <div style={{ fontSize: 14, color: '#64748b' }}>Loading...</div>
+          <img src="/icon-192.png" alt="" width="72" height="72" style={{ borderRadius: 16, marginBottom: 8 }} />
+          <div style={{ fontSize: 14, color: '#57534e', fontWeight: 700 }}>Saddling the roosters…</div>
         </div>
       </div>
     )
@@ -80,7 +87,7 @@ function App() {
               cursor: 'pointer', letterSpacing: 0.5
             }}
           >
-            ⚔️ Game
+            🐓 Game
           </button>
           <button
             onClick={() => setView('leaderboard')}

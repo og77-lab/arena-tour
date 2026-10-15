@@ -63,7 +63,7 @@ export default function Leaderboard() {
       <div style={{ maxWidth: 520, margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: 20 }}>
           <div style={{ fontSize: 20, fontWeight: 900, letterSpacing: 1, color: '#1e40af' }}>🏆 GLOBAL LEADERBOARD</div>
-          <div style={{ fontSize: 12, color: '#64748b', marginTop: 4 }}>{data.length} warrior{data.length !== 1 ? 's' : ''} registered</div>
+          <div style={{ fontSize: 12, color: '#64748b', marginTop: 4 }}>{data.length} {data.length !== 1 ? 'grannies' : 'granny'} registered</div>
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginBottom: 18 }}>

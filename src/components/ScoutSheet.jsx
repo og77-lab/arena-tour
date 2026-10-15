@@ -64,7 +64,15 @@ export default function ScoutSheet(props) {
 
         <div style={card({ padding: "6px 12px", marginTop: 10 })}>
           <div style={Object.assign(label(C.textSoft), { margin: "4px 0 2px" })}>Training — only the gap counts</div>
-          {sc.stats.map(function (s, i) { return (<ScoutStatRow key={s.label} s={s} first={i === 0} />); })}
+          {sc.stats.map(function (s, i) {
+            var head = i === 0 || sc.stats[i - 1].who !== s.who;
+            return (
+              <div key={s.label}>
+                {head && s.who && (<div style={{ fontSize: 12, fontWeight: 900, color: C.text, margin: i ? "8px 0 0" : "2px 0 0" }}>{s.who === "granny" ? "👵 Granny" : "🐓 Rooster"}</div>)}
+                <ScoutStatRow s={s} first={head} />
+              </div>
+            );
+          })}
         </div>
 
         <div style={card({ padding: "10px 12px", marginTop: 10, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 })}>

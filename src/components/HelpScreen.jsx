@@ -1,13 +1,14 @@
 /* ═══ HelpScreen ═══ "How to Play" overlay with strike mechanic, NPC scores, training explanation */
 
 import { bs } from "../models/formulas";
+import { STATS } from "../models/constants";
 
 export default function HelpScreen(props) {
   return (
     <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(15,23,42,0.5)", zIndex: 999, overflowY: "auto", padding: 16 }} onClick={props.onClose}>
       <div style={{ maxWidth: 360, margin: "0 auto", background: "#ffffff", borderRadius: 14, padding: 16, border: "1px solid #e5e7eb" }} onClick={function(e){e.stopPropagation();}}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-          <span style={{ fontSize: 16, fontWeight: 900, color: "#b45309" }}>⚔️ How To Play</span>
+          <span style={{ fontSize: 16, fontWeight: 900, color: "#b45309" }}>🐓 How To Play</span>
           <button onClick={props.onClose} style={{ background: "none", border: "none", color: "#64748b", fontSize: 20, cursor: "pointer" }}>✕</button>
         </div>
 
@@ -92,14 +93,9 @@ export default function HelpScreen(props) {
             Your 5 training stats are compared <b style={{color:"#b45309"}}>against your opponent's</b> each match. Only the <b style={{color:"#0f172a"}}>difference</b> matters:
           </div>
           <div style={{ background: "#ffffff", borderRadius: 6, padding: 6, marginTop: 4 }}>
-            {[
-              { stat: "⚡ Reflexes", effect: "Slows/speeds bar relative to opponent" },
-              { stat: "💪 Power", effect: "Widens/shrinks gold zone relative to opponent" },
-              { stat: "🎯 Focus", effect: "Adds/subtracts from your strike score" },
-              { stat: "🫀 Stamina", effect: "Reduces bar acceleration and set-to-set fatigue" },
-              { stat: "🛡️ Grit", effect: "Raises your minimum score on bad misses" }
-            ].map(function(r, i) {
-              return (<div key={i} style={{ fontSize: 13, padding: "2px 0", color: "#475569" }}><b style={{color:"#0f172a"}}>{r.stat}</b> — {r.effect}</div>);
+            {STATS.map(function(s, i, all) {
+              var head = i === 0 || all[i - 1].who !== s.who;
+              return (<div key={s.k}>{head && (<div style={{ fontSize: 12, fontWeight: 900, letterSpacing: 1, color: "#57534e", margin: i ? "6px 0 2px" : "0 0 2px" }}>{s.who === "granny" ? "👵 GRANNY — rider skills" : "🐓 ROOSTER — mount conditioning"}</div>)}<div style={{ fontSize: 13, padding: "2px 0", color: "#475569" }}><b style={{color:"#0f172a"}}>{s.icon} {s.label}</b> — {s.what}</div></div>);
             })}
           </div>
           <div style={{ fontSize: 13, color: "#64748b", marginTop: 4 }}>Example: You have ⚡8, opponent has ⚡5 → net +3 → bar is noticeably slower for you. If both are ⚡8 → cancels out completely.</div>

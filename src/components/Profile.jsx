@@ -1,6 +1,6 @@
 /* ═══ Profile ═══ Player/NPC profile modal: stats, talent bar, training, h2h, career timeline */
 
-import { TIERS, RN5, RN6 } from "../models/constants";
+import { TIERS, RN5, RN6, STATS } from "../models/constants";
 
 export default function Profile(props) {
   var p = props.player; var rank = props.rank; var onClose = props.onClose;
@@ -49,7 +49,7 @@ export default function Profile(props) {
             </div>
             <div style={{ fontSize: 13, color: "#64748b", marginTop: 4 }}>
               {Math.round(p.skill||0) >= (p.pot||92) - 1 ? (
-                <span style={{color:"#f59e0b"}}>⚡ At peak potential — this warrior has maxed out their natural talent.</span>
+                <span style={{color:"#f59e0b"}}>⚡ At peak potential — this granny has maxed out her natural talent.</span>
               ) : (
                 <span>Room to grow: <span style={{color:"#f59e0b"}}>{Math.round((p.pot||92) - (p.skill||0))}</span> points until peak potential.</span>
               )}
@@ -62,9 +62,10 @@ export default function Profile(props) {
             <span style={{ fontSize: 14, color: "#64748b", fontWeight: 700 }}>TRAINING LEVELS</span>
             <span style={{ fontSize: 13, color: "#7c3aed", fontWeight: 700 }}>{totalTr}/100</span>
           </div>
-          {[{k:"r",i:"⚡",l:"Reflexes",c:"#0891b2"},{k:"p",i:"💪",l:"Power",c:"#db2777"},{k:"f",i:"🎯",l:"Focus",c:"#16a34a"},{k:"s",i:"🫀",l:"Stamina",c:"#ea580c"},{k:"g",i:"🛡️",l:"Grit",c:"#7c3aed"}].map(function(s){
+          {STATS.map(function(st){ return { k: st.k, i: st.icon, l: st.label, c: st.col, who: st.who }; }).map(function(s, si, all){
             var lv = t[s.k]||0;
-            return (<div key={s.k} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}><span style={{ color: s.c, fontSize: 13, width: 70 }}>{s.i} {s.l}</span><div style={{ flex: 1, display: "flex", gap: 1 }}>{Array.from({length:20}).map(function(_,i){return (<div key={i} style={{flex:1,height:5,borderRadius:2,background:i<lv?s.c:"#f1f5f9"}}/>);})}</div><span style={{fontSize:14,color:"#475569",width:20,textAlign:"right"}}>{lv}</span></div>);
+            var head = si === 0 || all[si - 1].who !== s.who;
+            return (<div key={s.k}>{head && (<div style={{ fontSize: 11, fontWeight: 900, letterSpacing: 1.2, color: "#57534e", margin: si ? "6px 0 2px" : "0 0 2px" }}>{s.who === "granny" ? "👵 GRANNY" : "🐓 ROOSTER"}</div>)}<div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}><span style={{ color: "#1c1917", fontWeight: 700, fontSize: 13, width: 112, flexShrink: 0 }}>{s.i} {s.l}</span><div style={{ flex: 1, display: "flex", gap: 1 }}>{Array.from({length:20}).map(function(_,i){return (<div key={i} style={{flex:1,height:5,borderRadius:2,background:i<lv?s.c:"#f1f5f9"}}/>);})}</div><span style={{fontSize:14,color:"#475569",width:20,textAlign:"right"}}>{lv}</span></div></div>);
           })}
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 6 }}>
@@ -165,7 +166,7 @@ export default function Profile(props) {
         {!p.isP && (
           <div style={{ marginTop: 8, padding: 6, background: "rgba(99,102,241,0.05)", borderRadius: 6, border: "1px solid rgba(129,140,248,0.08)" }}>
             <div style={{ fontSize: 13, color: "#4338ca", lineHeight: 1.5 }}>
-              <b style={{color:"#4f46e5"}}>Talent</b> = innate combat rating. <b style={{color:"#f59e0b"}}>Potential</b> = their personal ceiling (the orange marker). Talent grows slowly through experience but can never exceed potential. <b style={{color:"#7c3aed"}}>Training</b> stacks on top — a low-talent warrior with elite training can beat a naturally gifted one.
+              <b style={{color:"#4f46e5"}}>Talent</b> = innate combat rating. <b style={{color:"#f59e0b"}}>Potential</b> = their personal ceiling (the orange marker). Talent grows slowly through experience but can never exceed potential. <b style={{color:"#7c3aed"}}>Training</b> stacks on top — a low-talent granny with elite training can beat a naturally gifted one.
             </div>
           </div>
         )}
