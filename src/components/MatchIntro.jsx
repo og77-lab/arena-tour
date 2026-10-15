@@ -1,4 +1,5 @@
-/* ═══ MatchIntro ═══ Full-screen VS splash + 3-2-1-FIGHT countdown before each match */
+/* ═══ MatchIntro ═══ Before each match: the scouting report first (take your time), then — on your word — the full
+   VS splash and 3-2-1-FIGHT countdown in one uninterrupted run */
 
 import * as React from "react";
 import { createPortal } from "react-dom";
@@ -90,7 +91,7 @@ function TaleOfTape(props) {
 }
 
 export default function MatchIntro(props) {
-  var _stage = useState("slam"), stage = _stage[0], setStage = _stage[1];
+  var _stage = useState(props.scout ? "scout" : "slam"), stage = _stage[0], setStage = _stage[1];
   var _n = useState(3), n = _n[0], setN = _n[1];
   var timers = useRef([]);
   var doneRef = useRef(props.onDone);
@@ -109,18 +110,20 @@ export default function MatchIntro(props) {
     later(function () { doneRef.current(); }, 2330);
   }
 
-  /* After the slam the intro waits on the tale-of-the-tape card; the countdown only starts when the player is ready */
-  useEffect(function () {
-    playWhoosh();
+  /* The cinematic: riders charge in, the VS slams, and the countdown follows straight on — nothing to tap, nothing in the way */
+  function startCinematic() {
+    clearAll();
+    setStage("slam"); playWhoosh();
     later(function () { playImpact(true); vibrate(35); }, 420);
-    later(function () { setStage(function (s) { return s === "slam" ? "scout" : s; }); }, 1500);
+    later(startCount, 1500);
+  }
+  useEffect(function () {
+    if (!props.scout) startCinematic();
     return clearAll;
   }, []);
 
-  function advance() {
-    if (stage === "slam") setStage("scout");
-    else if (stage === "scout") startCount();
-  }
+  /* Only the scouting report waits for the player */
+  function advance() { if (stage === "scout") startCinematic(); }
 
   /* Parent bumps skipSignal on Space/Enter */
   var skipSeen = useRef(props.skipSignal);
@@ -138,7 +141,39 @@ export default function MatchIntro(props) {
       initial={{ opacity: 0 }}
       animate={stage === "out" ? { opacity: 0, scale: 1.08 } : { opacity: 1, scale: 1 }}
       transition={{ duration: stage === "out" ? 0.25 : 0.12 }}
-      style={{ position: "fixed", inset: 0, zIndex: 1000, background: "#070b14", overflow: "hidden", fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", touchAction: "manipulation", userSelect: "none", WebkitUserSelect: "none", cursor: "pointer" }}>
+      style={{ position: "fixed", inset: 0, zIndex: 1000, background: "#070b14", overflow: "hidden", fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", touchAction: "manipulation", userSelect: "none", WebkitUserSelect: "none", cursor: stage === "scout" ? "pointer" : "default" }}>
+      {/* 1 · Scouting report on a quiet backdrop */}
+      {stage === "scout" && (
+        <div style={{ position: "absolute", inset: 0, zIndex: 7, overflowY: "auto", padding: "12px", boxSizing: "border-box", display: "flex",
+          background: "radial-gradient(circle at 50% 30%,#1e293b 0%,#0b1120 70%)" }}>
+          <div aria-hidden style={{ position: "absolute", inset: 0, background: "repeating-linear-gradient(115deg,rgba(255,255,255,0.03) 0 2px,transparent 2px 22px)", pointerEvents: "none" }} />
+          {/* margin:auto centres when there's room and scrolls (instead of clipping) on short screens */}
+          <div style={{ margin: "auto", width: "100%", display: "flex", flexDirection: "column", alignItems: "center", gap: 12, position: "relative" }}>
+            <div style={{ textAlign: "center" }}>
+              {props.tierName && (<div style={{ fontSize: 11, fontWeight: 900, letterSpacing: 5, color: "#fde68a", textTransform: "uppercase" }}>{props.tierName}</div>)}
+              <div style={{ fontSize: 13, fontWeight: 900, letterSpacing: 3, color: "#fff", textTransform: "uppercase", marginTop: 3 }}>
+                {props.roundLabel || "Match"} · {props.resumeSet ? "resuming set " + props.resumeSet : "best of " + (props.bestOf || 3) + " sets"}
+              </div>
+            </div>
+            {props.coach && (
+              <div style={{ width: "min(100%, 440px)", display: "flex", alignItems: "center", gap: 8, background: "rgba(15,23,42,0.92)", color: "#fff", border: "1.5px solid #fde68a", borderRadius: 12, padding: "7px 10px", fontSize: 13, fontWeight: 800, lineHeight: 1.35, boxSizing: "border-box" }}>
+                <span aria-hidden style={{ fontSize: 20 }}>📣</span>
+                <span>Coach Hettie: size her up first. Green numbers are where you're stronger, red where she is. Then send the riders out!</span>
+              </div>
+            )}
+            <TaleOfTape scout={props.scout} you={props.you} foe={props.foe} />
+            <motion.button onClick={function (e) { e.stopPropagation(); startCinematic(); }} onPointerDown={function (e) { e.stopPropagation(); }}
+              initial={{ y: 20, scale: 0.9 }} animate={{ y: 0, scale: 1 }} transition={{ delay: 0.15, type: "spring", stiffness: 380, damping: 18 }}
+              style={{ flexShrink: 0, background: "linear-gradient(180deg,#f87171,#dc2626)", color: "#fff", border: "2px solid #450a0a", boxShadow: "0 5px 0 #450a0a", borderRadius: 14, padding: "13px 30px", fontWeight: 900, fontSize: 18, letterSpacing: 2, cursor: "pointer", fontFamily: "inherit", animation: REDUCED_MOTION ? "none" : "pulse 1.3s ease infinite 0.6s" }}>
+              ⚔️ TO THE LANES!
+            </motion.button>
+            <div style={{ fontSize: 11, color: "rgba(255,255,255,0.75)", fontWeight: 700, letterSpacing: 1.5, flexShrink: 0 }}>TAP THE BUTTON OR PRESS SPACE</div>
+          </div>
+        </div>
+      )}
+
+      {/* 2 · The cinematic, mounted fresh so every animation plays from the start */}
+      {stage !== "scout" && (
       <div style={{ position: "absolute", inset: 0, animation: REDUCED_MOTION ? "none" : "arenaShakeHard 0.45s ease 0.42s" }}>
         {/* Diagonal split halves */}
         <motion.div initial={{ x: "-100%" }} animate={{ x: 0 }} transition={{ type: "spring", stiffness: 200, damping: 26 }}
@@ -184,33 +219,11 @@ export default function MatchIntro(props) {
         <Sparks count={22} delay={0.42} spread={190} zIndex={4} />
 
         <AnimatePresence>
-          {stage !== "slam" && (
+          {(stage === "count" || stage === "out") && (
             <motion.div key="dim" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              style={{ position: "absolute", inset: 0, background: stage === "scout" ? "rgba(2,6,23,0.72)" : "radial-gradient(circle,rgba(0,0,0,0.25),rgba(0,0,0,0.7))", zIndex: 6 }} />
+              style={{ position: "absolute", inset: 0, background: "radial-gradient(circle,rgba(0,0,0,0.25),rgba(0,0,0,0.7))", zIndex: 6 }} />
           )}
         </AnimatePresence>
-
-        {/* Tale of the tape: waits here until the player is ready */}
-        {stage === "scout" && (
-          <div style={{ position: "absolute", inset: 0, zIndex: 7, overflowY: "auto", padding: "12px", boxSizing: "border-box", display: "flex" }}>
-          {/* margin:auto centres when there's room and scrolls (instead of clipping) on short screens */}
-          <div style={{ margin: "auto", width: "100%", display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
-            {props.coach && (
-              <div style={{ width: "min(100%, 440px)", display: "flex", alignItems: "center", gap: 8, background: "rgba(15,23,42,0.92)", color: "#fff", border: "1.5px solid #fde68a", borderRadius: 12, padding: "7px 10px", fontSize: 13, fontWeight: 800, lineHeight: 1.35, boxSizing: "border-box" }}>
-                <span aria-hidden style={{ fontSize: 20 }}>📣</span>
-                <span>Coach Hettie: size her up first. Green numbers are where you're stronger, red where she is. Then hit FIGHT!</span>
-              </div>
-            )}
-            {props.scout && (<TaleOfTape scout={props.scout} you={props.you} foe={props.foe} />)}
-            <motion.button onClick={function (e) { e.stopPropagation(); startCount(); }} onPointerDown={function (e) { e.stopPropagation(); }}
-              initial={{ y: 20, scale: 0.9 }} animate={{ y: 0, scale: 1 }} transition={{ delay: 0.15, type: "spring", stiffness: 380, damping: 18 }}
-              style={{ flexShrink: 0, background: "linear-gradient(180deg,#f87171,#dc2626)", color: "#fff", border: "2px solid #450a0a", boxShadow: "0 5px 0 #450a0a", borderRadius: 14, padding: "13px 30px", fontWeight: 900, fontSize: 18, letterSpacing: 2, cursor: "pointer", fontFamily: "inherit", animation: REDUCED_MOTION ? "none" : "pulse 1.3s ease infinite 0.6s" }}>
-              ⚔️ READY? FIGHT!
-            </motion.button>
-            <div style={{ fontSize: 11, color: "rgba(255,255,255,0.75)", fontWeight: 700, letterSpacing: 1.5, flexShrink: 0 }}>TAP THE BUTTON OR PRESS SPACE</div>
-          </div>
-          </div>
-        )}
 
         {/* Countdown */}
         {(stage === "count" || stage === "out") && (
@@ -229,13 +242,8 @@ export default function MatchIntro(props) {
           </div>
         )}
 
-        {stage === "slam" && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 0.7 }} transition={{ delay: 0.9 }}
-            style={{ position: "absolute", bottom: "3.5%", left: 0, right: 0, textAlign: "center", color: "#fff", fontSize: 11, fontWeight: 700, letterSpacing: 2, zIndex: 4 }}>
-            TAP TO SEE THE SCOUTING REPORT
-          </motion.div>
-        )}
       </div>
+      )}
     </motion.div>,
     document.body
   );
