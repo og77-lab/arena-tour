@@ -28,6 +28,7 @@ import { updateRival, rivalRecord } from "./engine/rivalry";
 import { ACHIEVEMENTS } from "./engine/achievements";
 import AchievementsSheet, { AchToast, achCount } from "./components/Achievements";
 import { CoachCard } from "./components/Coach";
+import TrainStage from "./components/TrainingAnim";
 import { fansOf, clampFans, weeklyDrift, performanceDelta, sponsorTP, hasTierWildcard, hasSlamWildcard } from "./engine/fans";
 import { makeInterview, resolvePromise } from "./engine/interview";
 import Interview from "./components/Interview";
@@ -151,6 +152,7 @@ export default function Arena(props) {
   var _interview = useState(null), interview = _interview[0], setInterview = _interview[1];
   var _newsIdx = useState(0), newsIdx = _newsIdx[0], setNewsIdx = _newsIdx[1];
   var _gala = useState(null), gala = _gala[0], setGala = _gala[1];
+  var _trainFx = useState(null), trainFx = _trainFx[0], setTrainFx = _trainFx[1];
   var _achQ = useState([]), achQ = _achQ[0], setAchQ = _achQ[1];
   var _showAch = useState(false), showAch = _showAch[0], setShowAch = _showAch[1];
   /* Achievements: whenever the save changes on the hub, award anything newly earned (only on the hub, so a save never
@@ -233,6 +235,10 @@ export default function Arena(props) {
     if (t.tp < cost || (t[stat]||0) >= 20) return;
     t.tp -= cost; t[stat] = (t[stat]||0) + 1;
     save(Object.assign({}, S, { player: Object.assign({}, S.player, { tr: t }) }));
+    /* A one-second gag in the card's little stage, plus a chime */
+    var st = STATS.filter(function(x){ return x.k === stat; })[0];
+    setTrainFx(function(prev){ return { k: stat, label: st ? st.icon : "", col: st ? st.col : C.gold, who: st ? st.who : "granny", n: ((prev && prev.n) || 0) + 1 }; });
+    playRankUp();
   }
 
   /* ─── Play current event (used by calendar cell click and Next Event button) ─── */
@@ -731,9 +737,7 @@ export default function Arena(props) {
                 return (
                   <div key={g.who} style={card({marginBottom:10,padding:"10px 12px 4px"})}>
                     <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:4}}>
-                      <div style={{flexShrink:0,width:58,height:46,borderRadius:10,background:"linear-gradient(180deg,#fef3c7,#fde68a)",border:"1.5px solid "+C.line,display:"flex",alignItems:"flex-end",justifyContent:"center",overflow:"hidden"}}>
-                        <Rider palette={PLAYER_PALETTE} width={58} pose="idle" noRider={g.who==="rooster"} />
-                      </div>
+                      <TrainStage who={g.who} fx={trainFx && trainFx.who === g.who ? trainFx : null} w={112} h={80} />
                       <div>
                         <div style={display(20)}>{g.icon} {g.title}</div>
                         <div style={label(C.textSoft)}>{g.sub}</div>
