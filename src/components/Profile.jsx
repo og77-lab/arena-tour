@@ -99,8 +99,11 @@ export default function Profile(props) {
                       <span style={{ fontSize: 12, color: "#475569" }}>{rName}</span>
                       <span style={{ fontSize: 11, color: "#94a3b8" }}>S{e.s}</span>
                     </div>
+                    {e.sc && (
+                      <span style={{ fontSize: 12, fontWeight: 900, color: e.w ? "#22c55e" : "#ef4444", marginRight: 6 }}>{e.sc.replace("-", "–")}</span>
+                    )}
                     {e.ma != null && e.oa != null && (
-                      <span style={{ fontSize: 12, fontWeight: 700, color: "#334155", letterSpacing: 0.5 }}>
+                      <span style={{ fontSize: e.sc ? 11 : 12, fontWeight: 700, color: "#334155", letterSpacing: 0.5, opacity: e.sc ? 0.6 : 1 }}>
                         <span style={{ color: e.w ? "#22c55e" : "#334155" }}>{e.ma}</span>
                         <span style={{ color: "#94a3b8", margin: "0 3px" }}>–</span>
                         <span style={{ color: e.w ? "#334155" : "#ef4444" }}>{e.oa}</span>

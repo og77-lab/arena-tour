@@ -14,7 +14,7 @@ export default function HelpScreen(props) {
         <div style={{ marginBottom: 14 }}>
           <div style={{ fontSize: 13, color: "#b45309", fontWeight: 700, marginBottom: 6 }}>THE STRIKE SYSTEM</div>
           <div style={{ fontSize: 14, color: "#4338ca", lineHeight: 1.6, marginBottom: 8 }}>
-            Each match is <b style={{color:"#0f172a"}}>3 strikes</b>. A white cursor bounces left-right across the power bar. Tap <b style={{color:"#ef4444"}}>STRIKE</b> to stop it. Your score depends on where it lands:
+            A cursor bounces left-right across the power bar. Tap <b style={{color:"#ef4444"}}>STRIKE</b> (or press Space) to stop it. Your score depends on where it lands:
           </div>
           <div style={{ background: "#ffffff", borderRadius: 8, padding: 10, marginBottom: 8 }}>
             <div style={{ position: "relative", height: 24, background: "linear-gradient(90deg,#e2e8f0,#ffffff,#e2e8f0)", borderRadius: 12, overflow: "hidden", marginBottom: 8, border: "1px solid #94a3b8" }}>
@@ -42,7 +42,13 @@ export default function HelpScreen(props) {
             })}
           </div>
           <div style={{ fontSize: 14, color: "#475569", lineHeight: 1.5 }}>
-            After 3 strikes, your <b style={{color:"#0f172a"}}>average</b> is compared to the NPC's average. <b style={{color:"#22c55e"}}>Higher average wins.</b>
+            Matches are played in <b style={{color:"#0f172a"}}>sets</b>. Each set is <b style={{color:"#0f172a"}}>3 strikes</b> — the <b style={{color:"#22c55e"}}>higher average takes the set</b>, so one bad strike can still be rescued.
+          </div>
+          <div style={{ fontSize: 14, color: "#475569", lineHeight: 1.5, marginTop: 6 }}>
+            Win the majority of sets to win the match: <b style={{color:"#0f172a"}}>best of 3</b> in Futures → Tour 500, <b style={{color:"#0f172a"}}>best of 5</b> in Masters, Grand Slams and the Season Finals.
+          </div>
+          <div style={{ fontSize: 13, color: "#64748b", lineHeight: 1.5, marginTop: 6 }}>
+            Progress is saved after every strike — close the game mid-match and you'll pick up exactly where you left off.
           </div>
         </div>
 
@@ -72,7 +78,8 @@ export default function HelpScreen(props) {
               { what: "Bar speed", desc: "Cursor moves faster → harder to time", icon: "⚡" },
               { what: "Gold zone", desc: "Target shrinks → less room for error", icon: "🎯" },
               { what: "NPC scores", desc: "Higher tier = stronger opponents", icon: "💀" },
-              { what: "Acceleration", desc: "Bar speeds up between strikes 1→2→3", icon: "📈" }
+              { what: "Acceleration", desc: "Bar speeds up strike by strike, resets each set", icon: "📈" },
+              { what: "Fatigue", desc: "Every new set starts a little faster than the last", icon: "🥵" }
             ].map(function(r, i) {
               return (<div key={i} style={{ display: "flex", gap: 6, padding: "3px 0", fontSize: 13 }}><span>{r.icon}</span><span><b style={{color:"#0f172a"}}>{r.what}</b><span style={{color:"#475569"}}> — {r.desc}</span></span></div>);
             })}
@@ -89,7 +96,7 @@ export default function HelpScreen(props) {
               { stat: "⚡ Reflexes", effect: "Slows/speeds bar relative to opponent" },
               { stat: "💪 Power", effect: "Widens/shrinks gold zone relative to opponent" },
               { stat: "🎯 Focus", effect: "Adds/subtracts from your strike score" },
-              { stat: "🫀 Stamina", effect: "Reduces bar acceleration between strikes" },
+              { stat: "🫀 Stamina", effect: "Reduces bar acceleration and set-to-set fatigue" },
               { stat: "🛡️ Grit", effect: "Raises your minimum score on bad misses" }
             ].map(function(r, i) {
               return (<div key={i} style={{ fontSize: 13, padding: "2px 0", color: "#475569" }}><b style={{color:"#0f172a"}}>{r.stat}</b> — {r.effect}</div>);
