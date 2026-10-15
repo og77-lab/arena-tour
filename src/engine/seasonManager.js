@@ -2,6 +2,7 @@
 
 import { TOTAL_EVENTS } from "../models/constants";
 import { mkNPCs } from "./npcGenerator";
+import { getRanked } from "../models/formulas";
 
 /* Season calendar: 4 blocks × (4 swing weeks + 1 Grand Slam) = 20 events */
 export function mkCalendar() {
@@ -35,7 +36,7 @@ export function mkSeason(name, num, prev) {
   var h2h = prev && prev.player.h2h ? prev.player.h2h : {};
   /* Career timeline persists across seasons; seed on fresh game */
   var timeline = prev && prev.player.timeline ? prev.player.timeline.slice() : [{ type: "start", s: num || 1, w: 0 }];
-  return {
+  var S = {
     pName: name || "Champion", sNum: num || 1, npcs: npcs, cal: mkCalendar(), calIdx: 0,
     player: {
       id: 1, isP: true,
@@ -49,4 +50,25 @@ export function mkSeason(name, num, prev) {
     tHist: prev ? prev.tHist : [],
     phase: "hub"
   };
+  /* The crowd, the press and the paper remember you between seasons (no undefined fields: the cloud save rejects them) */
+  if (prev) {
+    ["fans", "ivSeen", "lastTones", "goal"].forEach(function (k) { if (prev.player[k] != null) S.player[k] = prev.player[k]; });
+    if (prev.news) S.news = prev.news;
+    if (prev.newsSeenAt != null) S.newsSeenAt = prev.newsSeenAt;
+  }
+  S.start = seasonSnapshot(S);
+  return S;
 }
+
+function trTotal(tr) { tr = tr || {}; return (tr.r || 0) + (tr.p || 0) + (tr.f || 0) + (tr.s || 0) + (tr.g || 0); }
+
+/* Where everyone stood on day one — the season awards measure from here */
+export function seasonSnapshot(S) {
+  var ranks = {}, titles = {}, tr = {};
+  getRanked(S).forEach(function (p, i) {
+    var id = p.isP ? 1 : p.id;
+    ranks[id] = i + 1; titles[id] = p.isP ? 0 : (p.best && p.best.titles) || 0; tr[id] = trTotal(p.tr);
+  });
+  return { ranks: ranks, titles: titles, tr: tr };
+}
+export { trTotal };

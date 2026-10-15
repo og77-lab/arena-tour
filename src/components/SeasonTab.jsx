@@ -122,7 +122,7 @@ export default function SeasonTab(props) {
           <div style={display(22)}>{pRank <= FINALS_CUT ? "👑 You're in the Finals!" : "Season over · #" + pRank}</div>
           <div style={{ fontSize: 13, color: C.textSoft, marginTop: 4 }}>{pRank <= FINALS_CUT ? "Sixteen riders, four houses, one crown." : "Only the top 16 ride in the Finals. Train up and go again."}</div>
           <button onClick={pRank <= FINALS_CUT ? props.onFinals : props.onNextSeason} style={button("gold", { width: "100%", marginTop: 10 })}>
-            {pRank <= FINALS_CUT ? "👑 Enter the Finals" : "Start Season " + (S.sNum + 1) + " →"}
+            {pRank <= FINALS_CUT ? "👑 Enter the Finals" : "🎩 To the Season Gala →"}
           </button>
         </div>
       )}
@@ -131,6 +131,12 @@ export default function SeasonTab(props) {
       {!done && (
         <div style={card({ padding: "8px 12px" })}>
           <div style={label(C.goldInk)}>What you're chasing</div>
+          {S.player.goal && S.player.goal.s === S.sNum && (
+            <div style={{ display: "flex", alignItems: "center", gap: 8, margin: "6px 0 2px", padding: "7px 9px", borderRadius: 10, background: pRank <= S.player.goal.rank ? "#ecfdf5" : C.cardWarm, border: "1.5px solid " + (pRank <= S.player.goal.rank ? "#86efac" : C.line) }}>
+              <span aria-hidden style={{ fontSize: 18 }}>{pRank <= S.player.goal.rank ? "✅" : "🎯"}</span>
+              <span style={{ fontSize: 13, fontWeight: 800, color: C.text, lineHeight: 1.3 }}>Season goal: {S.player.goal.text}{pRank <= S.player.goal.rank ? " — done right now!" : ""}</span>
+            </div>
+          )}
           <Goal first icon="👑" title="Grand Slam entry" cut={GS_CUT} rank={pRank} myPts={myPts} cutPts={gsCut.pts} cutName={gsCut.name}
             when={weeksToGS === 0 ? "the Slam is this week" : weeksToGS > 0 ? "next Slam in " + weeksToGS + (weeksToGS === 1 ? " week" : " weeks") : "no Slams left"}
             safe={weeksToGS >= 0 ? "You're in the next Grand Slam" + (weeksToGS === 0 ? " — it's this week!" : " (in " + weeksToGS + (weeksToGS === 1 ? " week)." : " weeks).")) : "Qualified — see you next season."} />

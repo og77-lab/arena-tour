@@ -60,7 +60,7 @@ export default function HomeTab(props) {
   if (seasonDone) {
     hero = pRank <= 16
       ? { kicker: "Season " + S.sNum + " complete", title: "Season Finals", sub: "You made the top 16. Four houses, one crown.", cta: "👑 Enter the Finals", act: props.onFinals, kind: "gold" }
-      : { kicker: "Season " + S.sNum + " complete", title: "Finished #" + pRank, sub: "Top 16 qualify for the Finals. Train up and go again.", cta: "Start Season " + ((S.sNum || 1) + 1) + " →", act: props.onNextSeason, kind: "gold" };
+      : { kicker: "Season " + S.sNum + " complete", title: "Finished #" + pRank, sub: "Top 16 qualify for the Finals. Train up and go again.", cta: "🎩 To the Season Gala →", act: props.onNextSeason, kind: "gold" };
   } else if (isGS) {
     hero = gsOk
       ? { kicker: "Next event · Grand Slam " + ev.gsNum, title: "Grand Slam", sub: gsWild ? "🎟 Your fans got you a wildcard! 64 riders · best of 5 · 8,000 pts to the champion" : "64 riders · best of 5 sets · 8,000 pts to the champion", cta: "👑 Enter Grand Slam", act: props.onPlay, kind: "gold" }

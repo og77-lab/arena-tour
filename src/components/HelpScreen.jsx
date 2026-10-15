@@ -95,7 +95,7 @@ export default function HelpScreen(props) {
           <div style={{ background: "#ffffff", borderRadius: 6, padding: 6, marginTop: 4 }}>
             {STATS.map(function(s, i, all) {
               var head = i === 0 || all[i - 1].who !== s.who;
-              return (<div key={s.k}>{head && (<div style={{ fontSize: 12, fontWeight: 900, letterSpacing: 1, color: "#57534e", margin: i ? "6px 0 2px" : "0 0 2px" }}>{s.who === "granny" ? "👵 GRANNY — rider skills" : "🐓 ROOSTER — mount conditioning"}</div>)}<div style={{ fontSize: 13, padding: "2px 0", color: "#475569" }}><b style={{color:"#0f172a"}}>{s.icon} {s.label}</b> — {s.what}</div></div>);
+              return (<div key={s.k}>{head && (<div style={{ fontSize: 12, fontWeight: 900, letterSpacing: 1, color: "#57534e", margin: i ? "6px 0 2px" : "0 0 2px" }}>{s.who === "granny" ? "👵 GRANNY — rider skills" : "🐓 ROOSTER — mount conditioning"}</div>)}<div style={{ fontSize: 13, padding: "2px 0", color: "#475569" }}><b style={{color:"#0f172a"}}>{s.icon} {s.label}</b> — {s.what}. <i>Each level ahead: {s.per.charAt(0).toLowerCase() + s.per.slice(1)}.</i></div></div>);
             })}
           </div>
           <div style={{ fontSize: 13, color: "#64748b", marginTop: 4 }}>Example: You have ⚡8, opponent has ⚡5 → net +3 → bar is noticeably slower for you. If both are ⚡8 → cancels out completely.</div>

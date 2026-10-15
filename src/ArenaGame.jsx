@@ -13,6 +13,8 @@ import BracketView from "./components/BracketView";
 import HelpScreen from "./components/HelpScreen";
 import HomeTab from "./components/HomeTab";
 import SeasonTab from "./components/SeasonTab";
+import SeasonGala from "./components/SeasonGala";
+import { seasonAwards, yourSeason, hallOfHelmets, nextGoal } from "./engine/awards";
 import TierSheet from "./components/TierSheet";
 import BottomNav, { NAV_HEIGHT } from "./components/BottomNav";
 import MatchHeader from "./components/MatchHeader";
@@ -140,6 +142,7 @@ export default function Arena(props) {
   var _paper = useState(null), paper = _paper[0], setPaper = _paper[1];
   var _interview = useState(null), interview = _interview[0], setInterview = _interview[1];
   var _newsIdx = useState(0), newsIdx = _newsIdx[0], setNewsIdx = _newsIdx[1];
+  var _gala = useState(null), gala = _gala[0], setGala = _gala[1];
   var _rankView = useState({ mode: "me", above: 25, below: 25 }), rankView = _rankView[0], setRankView = _rankView[1];
   /* Opening Rankings lands on your own row, centred */
   useEffect(function () {
@@ -190,7 +193,7 @@ export default function Arena(props) {
   }
 
   function newSeason() { save(mkSeason(inp, 1, null)); setScr("hub"); }
-  function nextSeason() { if (!S) return; doSync(S); save(mkSeason(S.pName, (S.sNum||1)+1, S)); setScr("hub"); }
+  function nextSeason(from) { var cur = from && from.cal ? from : S; if (!cur) return; doSync(cur); save(mkSeason(cur.pName, (cur.sNum||1)+1, cur)); setScr("hub"); }
   function newGame() { if (confirm("Start a brand new game? Your current save will be erased.")) { cancelCloudSave(); sSet(null); if (userId) saveGameToCloud(userId, null).catch(function(){}); setS(null); setTS(null); setFS(null); setScr("title"); } }
 
   function doTrain(stat) {
@@ -519,6 +522,9 @@ export default function Arena(props) {
   /* ─── Finals ─── */
   function startFinals() {
     if (!S) return;
+    var st = mkFinals(S); setFS(st); setScr("finals");
+  }
+  function mkFinals(S) {
     var ranked = getRanked(S);
     var t16 = ranked.slice(0,16).map(function(p){return Object.assign({},p,{gP:0,gW:0,gL:0});});
     var houses = [[],[],[],[]];
@@ -526,7 +532,33 @@ export default function Arena(props) {
     var gm = [];
     for (var hi = 0; hi < 4; hi++) for (var a = 0; a < houses[hi].length; a++) for (var b = a+1; b < houses[hi].length; b++) gm.push({hi:hi,a:houses[hi][a],b:houses[hi][b],w:null});
     var st = {houses:houses,gm:gm,gi:0,phase:"groups",semis:[],final:null,champ:null,pending:null,log:[]};
-    advF(st); setFS(st); setScr("finals");
+    advF(st); return st;
+  }
+
+  /* ─── Season gala ─── Crown the world champion (the Finals are played out without you if you didn't make them),
+     record it once, then hand everything to the ceremony. Its last button starts the next season. */
+  function openGala() {
+    if (!S) return;
+    var st = fs && fs.champ ? fs : mkFinals(S);
+    var champ = st.champ, fin = st.final, runner = fin && fin.w ? (fin.w.id === fin.a.id ? fin.b : fin.a) : null;
+    var S2 = S;
+    if (champ && !(S.champs || []).some(function(c){ return c.s === S.sNum; })) {
+      S2 = Object.assign({}, S, { champs: (S.champs || []).concat([{ name: champ.isP ? S.pName : champ.name, s: S.sNum, isP: !!champ.isP, id: champ.isP ? 1 : champ.id, emoji: champ.emoji || "" }]) });
+      save(S2);
+    }
+    var ranked2 = getRanked(S2), cRank = 1;
+    ranked2.forEach(function(p, i){ if ((p.isP && champ.isP) || p.id === champ.id) cRank = i + 1; });
+    var ys = yourSeason(S2);
+    setGala({
+      champ: champ.isP ? { id: 1, name: S.pName, emoji: "👵", isP: true } : { id: champ.id, name: champ.name, emoji: champ.emoji || "" },
+      runnerUp: runner ? { id: runner.id, name: runner.isP ? S.pName : runner.name, isP: !!runner.isP } : null, champRank: cRank,
+      awards: seasonAwards(S2), you: ys, hall: hallOfHelmets(S2), goal: nextGoal(ys.rankEnd, S.sNum + 1)
+    });
+  }
+  function finishGala() {
+    var g = gala; setGala(null); setFS(null);
+    if (!S) return;
+    nextSeason(Object.assign({}, S, { player: Object.assign({}, S.player, { goal: g ? g.goal : S.player.goal }) }));
   }
   function advF(st) {
     if (st.champ) return;
@@ -586,6 +618,12 @@ export default function Arena(props) {
   if (scr === "hub" || scr === "training") {
     var hubTab = scr === "training" ? "train" : tab;
     var tpNow = (S.player.tr && S.player.tr.tp) || 0;
+    /* Average levels of the riders ranked around you — the ones you'll actually meet */
+    var rivalTr = (function(){
+      var rk = getRanked(S), me = rk.findIndex(function(p){ return p.isP; }), near = rk.slice(Math.max(0, me - 25), me + 26).filter(function(p){ return !p.isP; });
+      var o = {}; STAT_KEYS.forEach(function(k){ o[k] = near.length ? near.reduce(function(a, p){ return a + ((p.tr||{})[k]||0); }, 0) / near.length : 0; });
+      return o;
+    })();
     var affordable = ["r","p","f","s","g"].filter(function(k){ var lv = (S.player.tr[k]||0); return lv < 20 && tpNow >= trainCost(lv); }).length;
     function goTab(t) { setScr("hub"); setTab(t); if (t === "news") { setNewsIdx(0); markNewsSeen(); } try { window.scrollTo(0, 0); } catch (e) {} }
     var newsUnread = !!(S.news && S.news[0] && S.newsSeenAt !== S.news[0].at);
@@ -599,6 +637,7 @@ export default function Arena(props) {
         {prof && (<Profile player={prof.p} rank={prof.rank} playerName={S.pName} h2h={!prof.p.isP && S.player.h2h ? (S.player.h2h[prof.p.id] || []) : null} timeline={prof.p.isP ? (S.player.timeline || []) : null} onClose={function(){setProf(null)}} />)}
         {showHelp && (<HelpScreen onClose={function(){setHelp(false)}} />)}
         {picking && !seasonDone && (<TierSheet available={avTiers} wildcard={wildcardTier(S)} rank={pRank} onClose={function(){setPicking(false)}} onPick={function(ti){ setPicking(false); startTourney(ti); }} />)}
+        {gala && (<SeasonGala S={S} champ={gala.champ} runnerUp={gala.runnerUp} champRank={gala.champRank} awards={gala.awards} you={gala.you} hall={gala.hall} goal={gala.goal} onDone={finishGala} />)}
         {paper && (<DailyCluck issue={paper} onClose={function(){ setPaper(null); markNewsSeen(); }} />)}
         {interview && (<Interview iv={interview.iv} recentTones={S.player.lastTones || []} fans={fansOf(S.player)}
           onAnswer={onInterviewAnswer} onDone={function(issue){ setInterview(null); setPaper(issue || interview.issue); }} />)}
@@ -609,7 +648,7 @@ export default function Arena(props) {
 
           {hubTab === "home" && (
             <HomeTab S={S} pRank={pRank} curEvent={curEvent} seasonDone={seasonDone}
-              onPlay={playCurrent} onFinals={startFinals} onNextSeason={nextSeason}
+              onPlay={playCurrent} onFinals={startFinals} onNextSeason={openGala}
               onReadPaper={function(){ goTab("news"); }}
               onTrain={function(){ goTab("train"); }}
               onOpenProfile={function(){ setProf({ p: Object.assign({}, S.player, { name: S.pName, emoji: "👵" }), rank: pRank }); }} />
@@ -642,8 +681,23 @@ export default function Arena(props) {
                             <div><span style={{color:C.text,fontWeight:900,fontSize:15}}>{st.icon} {st.label}</span><span style={{color:C.textSoft,fontSize:13,marginLeft:6,fontWeight:700}}>Lv {lv}/20</span></div>
                             <button onClick={function(){doTrain(st.k)}} disabled={!can} style={button(can?"gold":"ghost",{padding:"6px 12px",fontSize:13,opacity:can?1:0.6,cursor:can?"pointer":"default"})}>{lv>=20?"MAX":cost+" TP"}</button>
                           </div>
-                          <div style={{display:"flex",gap:2,marginBottom:5}}>{Array.from({length:20}).map(function(_,i){return(<div key={i} style={{flex:1,height:7,borderRadius:2,background:i<lv?st.col:"#efe3c4"}}/>);})}</div>
-                          <div style={{fontSize:13,color:C.textSoft}}>{st.what}</div>
+                          {(function(){
+                            var rv = rivalTr[st.k] || 0;
+                            return (
+                              <div style={{position:"relative",display:"flex",gap:2,marginBottom:5}}>
+                                {Array.from({length:20}).map(function(_,i){return(<div key={i} style={{flex:1,height:7,borderRadius:2,background:i<lv?st.col:"#efe3c4"}}/>);})}
+                                <div title="Average of riders ranked near you" style={{position:"absolute",top:-3,height:13,width:3,borderRadius:2,background:C.ink,left:"calc("+Math.min(100,rv/20*100)+"% - 1.5px)"}} />
+                              </div>
+                            );
+                          })()}
+                          <div style={{fontSize:13,color:C.text,fontWeight:700,lineHeight:1.4}}>{st.what}.</div>
+                          <div style={{display:"grid",gridTemplateColumns:"auto 1fr",columnGap:8,rowGap:2,fontSize:12.5,color:C.textSoft,marginTop:4,lineHeight:1.35}}>
+                            <span style={{fontWeight:900,color:C.goldInk}}>Each level</span><span>{st.per}</span>
+                            <span style={{fontWeight:900,color:C.goldInk}}>Train it if</span><span>{st.best.charAt(0).toLowerCase() + st.best.slice(1)}</span>
+                            <span style={{fontWeight:900,color:C.goldInk}}>Vs rivals</span>
+                            <span>{(function(){ var rv = rivalTr[st.k] || 0, gap = Math.round((lv - rv) * 10) / 10;
+                              return (<span>You <b style={{color:C.text}}>{lv}</b> · riders near you ≈ <b style={{color:C.text}}>{rv.toFixed(1)}</b> <b style={{color: gap > 0.4 ? C.greenInk : gap < -0.4 ? C.redInk : C.textMuted}}>{gap > 0.4 ? "▲ ahead" : gap < -0.4 ? "▼ behind" : "level"}</b></span>); })()}</span>
+                          </div>
                         </div>
                       );
                     })}
@@ -657,7 +711,7 @@ export default function Arena(props) {
                   <div style={card({padding:"10px 12px",background:C.cardWarm})}>
                     <div style={label(C.goldInk)}>How training works</div>
                     <div style={{fontSize:13,color:C.textSoft,lineHeight:1.5,marginTop:4}}>
-                      Only the <b style={{color:C.text}}>gap</b> to your opponent matters — if you both have ⚡10, it cancels out. Rivals train too: 0–2 levels per tournament, more for deep runs.
+                      Only the <b style={{color:C.text}}>gap</b> to your opponent matters — if you both have ⚡10, it cancels out, and if she's ahead the effect works <b style={{color:C.text}}>against</b> you. The dark tick on each bar is the average of riders ranked near you. Rivals train too, with points they earn just like you.
                     </div>
                     <div style={{fontSize:12,color:C.textMuted,marginTop:6,fontWeight:700}}>Total {total}/100{total>=100?" · fully trained — the rest is your timing":""}</div>
                   </div>
@@ -669,7 +723,7 @@ export default function Arena(props) {
           {hubTab === "season" && (
             <div>
               <SeasonTab S={S} pRank={pRank} curEvent={curEvent} seasonDone={seasonDone} avail={seasonDone ? [] : availableTiers(S)} wildcard={wildcardTier(S)}
-                gsOk={pRank <= 64 || hasSlamWildcard(fansOf(S.player))} onPlay={playCurrent} onFinals={startFinals} onNextSeason={nextSeason} />
+                gsOk={pRank <= 64 || hasSlamWildcard(fansOf(S.player))} onPlay={playCurrent} onFinals={startFinals} onNextSeason={openGala} />
               <div style={Object.assign(label(C.textSoft), {margin:"14px 2px 6px"})}>Career results</div>
               <div style={card({padding:6})}>
                 {(S.tHist||[]).length===0?(<div style={{color:C.textMuted,fontSize:13,padding:6}}>No events yet.</div>):
@@ -876,12 +930,13 @@ export default function Arena(props) {
     var fpm=null,fopp=null; if(fs.pending!=null&&!fs.champ){if(fs.phase==="groups")fpm=fs.gm[fs.pending];else if(fs.phase==="semis")fpm=fs.semis[fs.pending];else if(fs.phase==="final")fpm=fs.final;if(fpm)fopp=fpm.a.isP?fpm.b:fpm.a;} var pQ=false;for(var hi=0;hi<fs.houses.length;hi++)for(var pi=0;pi<fs.houses[hi].length;pi++)if(fs.houses[hi][pi].isP)pQ=true;
     return (
       <motion.div key="finals" {...screenAnim} style={W}>
+        {gala && (<SeasonGala S={S} champ={gala.champ} runnerUp={gala.runnerUp} champRank={gala.champRank} awards={gala.awards} you={gala.you} hall={gala.hall} goal={gala.goal} onDone={finishGala} />)}
         <style dangerouslySetInnerHTML={{__html:CSS}} />
         <div style={{textAlign:"center",marginBottom:8}}>
           <div style={{fontSize:15,fontWeight:900,letterSpacing:3,background:"linear-gradient(90deg,#ef4444,#f59e0b,#22c55e,#3b82f6,#a855f7)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>SEASON {S.sNum} FINALS</div>
           <div style={{fontSize:14,color:"#475569",marginTop:2}}>{fs.champ?"Champion Crowned":fs.phase==="groups"?"Group Stage":fs.phase==="semis"?"Semifinals":"World Championship"}</div>
         </div>
-        {fs.champ&&(<div style={{textAlign:"center",padding:16}}><div style={{fontSize:48}}>👑</div><div style={{fontSize:20,fontWeight:900,color:"#b45309",letterSpacing:3,animation:"cg 2s ease infinite"}}>{fs.champ.isP?"YOU ARE WORLD CHAMPION!":"WORLD CHAMPION"}</div>{!fs.champ.isP&&(<div style={{fontSize:15,color:"#475569",marginTop:4}}>{fs.champ.emoji} {fs.champ.name}</div>)}<button onClick={nextSeason} style={Object.assign({},bs("linear-gradient(135deg,#facc15,#f59e0b)","#000"),{marginTop:14})}>🔄 Season {(S.sNum||1)+1}</button></div>)}
+        {fs.champ&&(<div style={{textAlign:"center",padding:16}}><div style={{fontSize:48}}>👑</div><div style={{fontSize:20,fontWeight:900,color:"#b45309",letterSpacing:3,animation:"cg 2s ease infinite"}}>{fs.champ.isP?"YOU ARE WORLD CHAMPION!":"WORLD CHAMPION"}</div>{!fs.champ.isP&&(<div style={{fontSize:15,color:"#475569",marginTop:4}}>{fs.champ.emoji} {fs.champ.name}</div>)}<button onClick={openGala} style={Object.assign({},bs("linear-gradient(135deg,#facc15,#f59e0b)","#000"),{marginTop:14})}>🎩 To the Season Gala</button></div>)}
         {fpm&&fopp&&!fs.champ&&(function(){
           var fRank = 0; for (var fri = 0; fri < ranked.length; fri++) if (ranked[fri].id === fopp.id) { fRank = fri + 1; break; }
           var scoutF = buildScout(S, fopp, fRank, fs.phase==="final"?5:fs.phase==="semis"?4:3);

@@ -31,13 +31,20 @@ export const TIERS = [
 ];
 
 /* Training stats. Save keys (k) are unchanged; each stat belongs to the granny (rider) or the rooster (mount).
-   Effects are relative to the opponent — only the gap counts. */
+   Effects are relative to the opponent — only the gap counts.
+   what = what it does in the joust; per = the effect of one level ahead of your opponent (mirrors PowerBar's formulas);
+   best = who should train it */
 export const STATS = [
-  { k: "r", icon: "⚡", label: "Reflexes", who: "granny", col: "#0891b2", what: "Slows the bar for whoever's ahead" },
-  { k: "f", icon: "🎯", label: "Aim", who: "granny", col: "#16a34a", what: "Bonus points on every strike" },
-  { k: "g", icon: "🛡️", label: "Stubbornness", who: "granny", col: "#7c3aed", what: "A higher floor on bad strikes" },
-  { k: "s", icon: "🫀", label: "Stamina", who: "rooster", col: "#ea580c", what: "Less speed-up between strikes and sets" },
-  { k: "p", icon: "🐾", label: "Steady Stride", who: "rooster", col: "#db2777", what: "A wider gold zone — a steady mount is easier to aim from" }
+  { k: "r", icon: "⚡", label: "Reflexes", who: "granny", col: "#0891b2", what: "The marker sweeps slower, so it's easier to stop it in the gold",
+    per: "Bar about 3–4% slower", best: "You keep overshooting the gold zone" },
+  { k: "f", icon: "🎯", label: "Aim", who: "granny", col: "#16a34a", what: "Extra points on every single strike — hit or miss",
+    per: "+1.5 points on every strike", best: "You want steady gains no matter how you tap" },
+  { k: "g", icon: "🛡️", label: "Stubbornness", who: "granny", col: "#7c3aed", what: "Your bad strikes aren't as bad: a higher minimum score when you miss",
+    per: "Worst possible strike +1.5 points", best: "Your misses are wild and cost you whole sets" },
+  { k: "s", icon: "🫀", label: "Stamina", who: "rooster", col: "#ea580c", what: "The bar speeds up less as a match goes on — strike after strike, set after set",
+    per: "About 5% less speed-up each strike", best: "Long best-of-5 matches get away from you late on" },
+  { k: "p", icon: "🐾", label: "Steady Stride", who: "rooster", col: "#db2777", what: "A wider gold zone — a steady mount is easier to aim from",
+    per: "Gold zone +1.2% of the bar wider", best: "You often stop just next to the gold" }
 ];
 export const STAT_GROUPS = [
   { who: "granny", icon: "👵", title: "Granny", sub: "Rider skills" },
