@@ -31,6 +31,7 @@ import AchievementsSheet, { AchToast, achCount } from "./components/Achievements
 import { CoachCard } from "./components/Coach";
 import TrainStage from "./components/TrainingAnim";
 import Leaderboard from "./Leaderboard";
+import { COACH_TP, coachPrice, entryFee, nextPedigree, statCap, weekInvestment, stampInvestment, paidEntryTier } from "./engine/investments";
 import { fansOf, clampFans, weeklyDrift, performanceDelta, sponsorTP, hasTierWildcard, hasSlamWildcard } from "./engine/fans";
 import { makeInterview, resolvePromise } from "./engine/interview";
 import Interview from "./components/Interview";
@@ -235,7 +236,7 @@ export default function Arena(props) {
     if (!S) return;
     var t = Object.assign({s:0,g:0}, S.player.tr);
     var cost = trainCost(t[stat]||0);
-    if (t.tp < cost || (t[stat]||0) >= 20) return;
+    if (t.tp < cost || (t[stat]||0) >= statCap(S.player, stat)) return;
     t.tp -= cost; t[stat] = (t[stat]||0) + 1;
     save(Object.assign({}, S, { player: Object.assign({}, S.player, { tr: t }) }));
     /* A one-second gag in the card's little stage, plus a chime */
@@ -267,7 +268,7 @@ export default function Arena(props) {
   }
 
   /* ─── Available tiers for player ─── */
-  function availableTiers(S) {
+  function availableTiers(S, earnedOnly) {
     var rank = pRankOf(S);
     var avail = [];
     for (var i = 0; i < 5; i++) {
@@ -284,11 +285,15 @@ export default function Arena(props) {
     /* Crowd favourites get a wildcard into the tier above */
     var top = Math.max.apply(null, avail);
     if (hasTierWildcard(fansOf(S.player)) && top < 4) avail.push(top + 1);
+    if (earnedOnly) return avail;
+    /* …or a paid entry bought with this week's investment */
+    var paid = paidEntryTier(S);
+    if (paid >= 0 && avail.indexOf(paid) < 0) avail.push(paid);
     return avail;
   }
   function wildcardTier(S) {
     if (!hasTierWildcard(fansOf(S.player))) return -1;
-    var a = availableTiers(S); return a[a.length - 1];
+    var a = availableTiers(S, true); return a[a.length - 1];
   }
 
   /* ─── Bracket logic ─── */
@@ -544,6 +549,7 @@ export default function Arena(props) {
     for (var mri = 0; mri <= pRound; mri++) { moneyEarned += (tier.money || [])[mri] || 0; }
     var hist = (S.tHist||[]).concat([{ num: (S.tHist||[]).length + 1, season: S.sNum, tier: ts.tierIdx, tierName: tier.name, pPts: pp, defending: defending, netChange: netChange, pRound: pRound, roundName: rNames[pRound], money: moneyEarned, winner: champW ? { name: champW.isP ? S.pName : champW.name, emoji: champW.emoji||"👑", isP: champW.isP } : null }]);
     var cal = S.cal.slice(); cal[S.calIdx].done = true; cal[S.calIdx].tier = ts.tierIdx; cal[S.calIdx].result = { pPts: pp, defending: defending, net: netChange, pRound: pRound, won: !!wonTitle, parallel: parallelResults };
+    newP.earned = (S.player.earned != null ? S.player.earned : (S.player.money || 0)) + moneyEarned;
     newP.money = (newP.money || 0) + moneyEarned;
     newP.seasonMoney = (newP.seasonMoney || 0) + moneyEarned;
     /* Record post-event rank for sparkline */
@@ -644,6 +650,30 @@ export default function Arena(props) {
     st.log=st.log.concat([{phase:st.phase,opp:(opp&&opp.name)||"?",won:won}]); st.pending=null; advF(st); setFS(st);
   }
 
+  /* ─── Prize money ─── */
+  function spend(price, change) {
+    var p = S.player; if ((p.money || 0) < price) return false;
+    var np = Object.assign({}, p, { money: (p.money || 0) - price, earned: p.earned != null ? p.earned : (p.money || 0) }, change(p));
+    save(Object.assign({}, S, { player: np }));
+    return true;
+  }
+  /* One investment per tournament week: a private session, a paid entry, or a pedigree certificate */
+  function bestOpenTier() { var a = availableTiers(S, true); return a.length ? Math.max.apply(null, a) : 0; }
+  function bookCoach() {
+    if (weekInvestment(S)) return;
+    if (spend(coachPrice(bestOpenTier()), function (p) {
+      return { tr: Object.assign({}, p.tr, { tp: (p.tr.tp || 0) + COACH_TP }), invest: stampInvestment(S, "coach") };
+    })) playRankUp();
+  }
+  function buyEntry(ti) {
+    if (weekInvestment(S)) return;
+    if (spend(entryFee(ti), function () { return { invest: stampInvestment(S, "entry", { tier: ti }) }; })) playTitle();
+  }
+  function buyPedigree() {
+    var nx = nextPedigree(S.player); if (!nx || weekInvestment(S)) return;
+    if (spend(nx.price, function (p) { return { pedigree: (p.pedigree || 0) + 1, invest: stampInvestment(S, "pedigree") }; })) { playTitle(); setConfetti(true); setTimeout(function(){ setConfetti(false); }, 2600); }
+  }
+
   /* ═══ RENDER ═══ */
   if (scr === "loading") return (<motion.div key="loading" {...screenAnim} style={Object.assign({},W,{background:C.page,display:"flex",alignItems:"center",justifyContent:"center"})}><style dangerouslySetInnerHTML={{__html:CSS}} /><span style={{color:C.goldInk,fontSize:16,fontWeight:800}}>🐓 Saddling the roosters…</span></motion.div>);
 
@@ -706,7 +736,9 @@ export default function Arena(props) {
         {prof && (<Profile player={prof.p} rank={prof.rank} isRival={!!(S.player.rival && prof.p.id === S.player.rival.id)} playerName={S.pName} h2h={!prof.p.isP && S.player.h2h ? (S.player.h2h[prof.p.id] || []) : null} timeline={prof.p.isP ? (S.player.timeline || []) : null} onClose={function(){setProf(null)}} />)}
         {showHelp && (<HelpScreen onClose={function(){setHelp(false)}} />)}
         {hubTip && (<CoachCard key={hubTip} id={hubTip} vars={{ name: S.pName, rival: S.player.rival ? S.player.rival.name : null }} onDone={function(all){ markTip(hubTip, all); }} />)}
-        {picking && !seasonDone && (<TierSheet available={avTiers} wildcard={wildcardTier(S)} rank={pRank} onClose={function(){setPicking(false)}} onPick={function(ti){ setPicking(false); startTourney(ti); }} />)}
+        {picking && !seasonDone && (<TierSheet available={avTiers} wildcard={wildcardTier(S)} rank={pRank} paid={paidEntryTier(S)}
+          entry={(function(){ var top = Math.max.apply(null, availableTiers(S, true)), ti = top + 1; if (ti > 4 || paidEntryTier(S) >= 0) return null; var fee = entryFee(ti); return { tier: ti, fee: fee, used: !!weekInvestment(S), can: !weekInvestment(S) && (S.player.money || 0) >= fee, cash: S.player.money || 0 }; })()}
+          onBuyEntry={buyEntry} onClose={function(){setPicking(false)}} onPick={function(ti){ setPicking(false); startTourney(ti); }} />)}
         {gala && (<SeasonGala S={S} champ={gala.champ} runnerUp={gala.runnerUp} champRank={gala.champRank} awards={gala.awards} you={gala.you} hall={gala.hall} goal={gala.goal} onDone={finishGala} />)}
         {achQ.length > 0 && (<AchToast queue={achQ} onShown={function(){ setAchQ(function(q){ return q.slice(1); }); }} onOpen={function(){ setAchQ([]); setShowAch(true); }} />)}
         {showAch && (<AchievementsSheet S={S} onClose={function(){ setShowAch(false); }} />)}
@@ -743,6 +775,37 @@ export default function Arena(props) {
                 <div style={label()}>Training points</div>
                 <div style={display(30, C.goldInk)}>{tpNow} TP</div>
               </div>
+              {(function(){
+                /* This week's investment: pick one */
+                var used = weekInvestment(S), cash = S.player.money || 0, cp = coachPrice(bestOpenTier()), ped = nextPedigree(S.player);
+                var row = function(icon, title, sub, price, onBuy, cta, key) {
+                  var can = !used && cash >= price;
+                  return (
+                    <div key={key} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 0",borderTop:"1px dashed "+C.line}}>
+                      <span aria-hidden style={{fontSize:24,width:30,textAlign:"center"}}>{icon}</span>
+                      <div style={{flex:1,minWidth:0}}>
+                        <div style={{fontSize:14,fontWeight:900,color:C.text}}>{title}</div>
+                        <div style={{fontSize:12,color:C.textSoft,lineHeight:1.35}}>{sub}</div>
+                      </div>
+                      <button onClick={onBuy} disabled={!can} style={button(can?"gold":"ghost",{padding:"7px 10px",fontSize:12.5,flexShrink:0,opacity:can?1:0.55})}>{cta} · {money(price)}</button>
+                    </div>
+                  );
+                };
+                return (
+                  <div style={card({marginBottom:10,padding:"10px 12px"})}>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline"}}>
+                      <span style={label(C.goldInk)}>This week's investment</span>
+                      <span style={{fontSize:12,fontWeight:900,color:C.greenInk}}>💰 {money(cash)}</span>
+                    </div>
+                    <div style={{fontSize:12,color:C.textSoft,margin:"3px 0 4px",lineHeight:1.35}}>
+                      {used ? (<span>✅ Done for this week ({used.kind === "coach" ? "private session" : used.kind === "entry" ? "paid entry" : "pedigree certificate"}). Play this week's tournament to unlock the next one.</span>)
+                        : "Pick one per tournament week: a private session, a paid entry (from the tournament list), or a pedigree certificate."}
+                    </div>
+                    {row("📣", "Private session with Coach Hettie", "+" + COACH_TP + " training points. Priced to the prizes at your level.", cp, bookCoach, "+" + COACH_TP + " TP", "coach")}
+                    {ped && row("🧬", "Rooster pedigree certificate", "Lifts Stamina and Steady Stride's cap to level " + ped.cap + ". Everything you've trained stays.", ped.price, buyPedigree, "Lv " + ped.cap, "ped")}
+                  </div>
+                );
+              })()}
               {STAT_GROUPS.map(function(g){
                 return (
                   <div key={g.who} style={card({marginBottom:10,padding:"10px 12px 4px"})}>
@@ -754,19 +817,19 @@ export default function Arena(props) {
                       </div>
                     </div>
                     {STATS.filter(function(st){ return st.who === g.who; }).map(function(st, si){
-                      var lv=S.player.tr[st.k]||0,cost=trainCost(lv),can=tpNow>=cost&&lv<20;
+                      var lv=S.player.tr[st.k]||0,cap=statCap(S.player,st.k),cost=trainCost(lv),can=tpNow>=cost&&lv<cap;
                       return (
                         <div key={st.k} style={{padding:"9px 0",borderTop:"1px dashed "+C.line}}>
                           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6,gap:8}}>
-                            <div><span style={{color:C.text,fontWeight:900,fontSize:15}}>{st.icon} {st.label}</span><span style={{color:C.textSoft,fontSize:13,marginLeft:6,fontWeight:700}}>Lv {lv}/20</span></div>
-                            <button onClick={function(){doTrain(st.k)}} disabled={!can} style={button(can?"gold":"ghost",{padding:"6px 12px",fontSize:13,opacity:can?1:0.6,cursor:can?"pointer":"default"})}>{lv>=20?"MAX":cost+" TP"}</button>
+                            <div><span style={{color:C.text,fontWeight:900,fontSize:15}}>{st.icon} {st.label}</span><span style={{color:C.textSoft,fontSize:13,marginLeft:6,fontWeight:700}}>Lv {lv}/{cap}{cap > 20 ? " 🧬" : ""}</span></div>
+                            <button onClick={function(){doTrain(st.k)}} disabled={!can} style={button(can?"gold":"ghost",{padding:"6px 12px",fontSize:13,opacity:can?1:0.6,cursor:can?"pointer":"default"})}>{lv>=cap?"MAX":cost+" TP"}</button>
                           </div>
                           {(function(){
                             var rv = rivalTr[st.k] || 0;
                             return (
                               <div style={{position:"relative",display:"flex",gap:2,marginBottom:5}}>
-                                {Array.from({length:20}).map(function(_,i){return(<div key={i} style={{flex:1,height:7,borderRadius:2,background:i<lv?st.col:"#efe3c4"}}/>);})}
-                                <div title="Average of riders ranked near you" style={{position:"absolute",top:-3,height:13,width:3,borderRadius:2,background:C.ink,left:"calc("+Math.min(100,rv/20*100)+"% - 1.5px)"}} />
+                                {Array.from({length:cap}).map(function(_,i){return(<div key={i} style={{flex:1,height:7,borderRadius:2,background:i<lv?st.col:i>=20?"#e9d5ff":"#efe3c4"}}/>);})}
+                                <div title="Average of riders ranked near you" style={{position:"absolute",top:-3,height:13,width:3,borderRadius:2,background:C.ink,left:"calc("+Math.min(100,rv/cap*100)+"% - 1.5px)"}} />
                               </div>
                             );
                           })()}

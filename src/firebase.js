@@ -45,7 +45,7 @@ export async function syncAchievements(userId, playerName, avatar, seasonData) {
     seasonsPlayed: seasonData.sNum || 1,
     bestRank: Math.min(rank, best.rank || 1001),
     bestSeasonPts: Math.max(p.sp || 0, best.peakS || 0),
-    careerMoney: p.money || 0,
+    careerMoney: p.earned != null ? p.earned : (p.money || 0),
     gsTitles: best.gsTitles || 0,
     totalTitles: best.titles || 0,
     finalsWins: best.finals || 0,

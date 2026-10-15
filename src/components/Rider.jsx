@@ -118,6 +118,21 @@ function Hat(props) {
       <rect x="65" y="18.8" width="8" height="2.6" rx="1.2" fill="#475569" stroke={INK} strokeWidth="1.2" />
       <line x1="45.5" y1="27" x2="66.5" y2="27" stroke={INK} strokeWidth="2.4" strokeLinecap="round" />
     </g>);
+  } else if (L.hat === "tophat") {
+    body = (<g>
+      <rect x="49" y="5" width="15" height="20" rx="1.5" fill="#1f2937" {...k} />
+      <rect x="49" y="18.5" width="15" height="4" fill={hc} stroke={INK} strokeWidth="1.4" />
+      <line x1="43.5" y1="26.5" x2="69.5" y2="26.5" stroke={INK} strokeWidth="3" strokeLinecap="round" />
+      <line x1="44" y1="26.5" x2="69" y2="26.5" stroke="#374151" strokeWidth="1.6" strokeLinecap="round" />
+    </g>);
+  } else if (L.hat === "viking") {
+    body = (<g>
+      <path d="M47 18.5 Q41 14 40.5 6 Q45 11.5 49.5 15 Z" fill="#fef3c7" {...k} />
+      <path d="M65 18.5 Q71 14 71.5 6 Q67 11.5 62.5 15 Z" fill="#fef3c7" {...k} />
+      <path d="M46 27 Q56 11 66 27 Z" fill="#94a3b8" {...k} />
+      <line x1="56" y1="14" x2="56" y2="27" stroke="#64748b" strokeWidth="1.6" />
+      <line x1="45" y1="27" x2="67" y2="27" stroke={INK} strokeWidth="2.4" strokeLinecap="round" />
+    </g>);
   } else if (L.hat === "beanie") {
     body = (<g>
       <path d="M45.5 28 Q46 15 56 14.5 Q66.5 15 67 28 Z" fill={hc} {...k} />

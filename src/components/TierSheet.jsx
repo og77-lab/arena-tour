@@ -31,8 +31,9 @@ export default function TierSheet(props) {
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                     <span style={{ fontSize: 16, fontWeight: 900, color: C.text }}>{t.name}</span>
-                    {ok && ti === props.wildcard && (<span style={{ fontSize: 9, fontWeight: 900, letterSpacing: 1, color: "#fff", background: "#be123c", padding: "2px 6px", borderRadius: 10 }}>🎟 FAN WILDCARD</span>)}
-                    {ok && ti === best && ti !== props.wildcard && (<span style={{ fontSize: 9, fontWeight: 900, letterSpacing: 1, color: "#fff", background: C.greenInk, padding: "2px 6px", borderRadius: 10 }}>BEST FOR YOU</span>)}
+                    {ok && ti === props.paid && (<span style={{ fontSize: 9, fontWeight: 900, letterSpacing: 1, color: "#fff", background: "#7c3aed", padding: "2px 6px", borderRadius: 10 }}>🎟 PAID ENTRY</span>)}
+                    {ok && ti === props.wildcard && ti !== props.paid && (<span style={{ fontSize: 9, fontWeight: 900, letterSpacing: 1, color: "#fff", background: "#be123c", padding: "2px 6px", borderRadius: 10 }}>🎟 FAN WILDCARD</span>)}
+                    {ok && ti === best && ti !== props.wildcard && ti !== props.paid && (<span style={{ fontSize: 9, fontWeight: 900, letterSpacing: 1, color: "#fff", background: C.greenInk, padding: "2px 6px", borderRadius: 10 }}>BEST FOR YOU</span>)}
                   </div>
                   <div style={{ fontSize: 12, color: C.textSoft, marginTop: 2 }}>
                     Best of {t.bo || 3} sets · {t.size} riders · ranks {t.rankRange[0]}–{t.rankRange[1] > 1000 ? "1000" : t.rankRange[1]}
@@ -48,6 +49,29 @@ export default function TierSheet(props) {
             );
           })}
         </div>
+
+        {/* Buy your way into the tier above — this week's investment */}
+        {props.entry && (function () {
+          var e = props.entry, t = TIERS[e.tier];
+          return (
+            <div style={card({ marginTop: 12, padding: "10px 12px", background: "#faf5ff", borderColor: "#d8b4fe" })}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <span aria-hidden style={{ fontSize: 26 }}>🎟️</span>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 14, fontWeight: 900, color: C.text }}>Buy your way into {t.name}</div>
+                  <div style={{ fontSize: 12, color: C.textSoft, lineHeight: 1.35 }}>
+                    {e.used ? "You've already made this week's investment." : "Entry for this week only — it uses this week's investment. You have " + money(e.cash) + "."}
+                  </div>
+                </div>
+                <button disabled={!e.can} onClick={function () { props.onBuyEntry(e.tier); }}
+                  style={{ fontFamily: FONT, fontWeight: 900, fontSize: 13, padding: "8px 12px", borderRadius: 10, cursor: e.can ? "pointer" : "default", flexShrink: 0,
+                    background: e.can ? "#7c3aed" : "#fff", color: e.can ? "#fff" : C.textMuted, border: "2px solid " + (e.can ? "#4c1d95" : C.line), boxShadow: e.can ? "0 3px 0 #4c1d95" : "none" }}>
+                  {money(e.fee)}
+                </button>
+              </div>
+            </div>
+          );
+        })()}
       </motion.div>
     </div>,
     document.body
