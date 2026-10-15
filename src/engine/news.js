@@ -16,7 +16,7 @@ export function buildSpecialEdition(S) {
   var last = S.calIdx > 0 ? S.cal[S.calIdx - 1] : null;
   var big = last && last.result && last.result.parallel ? last.result.parallel.filter(function (r) { return r && !r.playerEvent && r.winner; }).sort(function (a, b) { return b.tier - a.tier; })[0] : null;
   return {
-    special: true, s: S.sNum, wk: "Special edition", at: 0,
+    special: true, s: S.sNum, wk: "Special edition", at: 0, v: 0,
     you: { name: S.pName, rankAfter: me },
     world: { top: ranked.slice(0, 5).map(function (p, i) { return { p: p.isP ? { id: 1, name: S.pName, isP: true } : who(p), rank: i + 1, from: null }; }), newNo1: false, bigEvent: big ? { tier: big.tier, count: big.count, winner: big.winner } : null },
     legends: ranked.slice(0, 10).map(function (p, i) { return { p: p, rank: i + 1 }; }).filter(function (x) { return !x.p.isP; })
@@ -57,8 +57,12 @@ export function buildIssue(o) {
   var no1Before = prevTop && (prevTop.sp || 0) > 0 ? (prevTop.isP ? 1 : prevTop.id) : null;
   var bigEvent = (o.parallel || []).filter(function (r) { return r && !r.playerEvent && r.winner; }).sort(function (a, b) { return b.tier - a.tier; })[0] || null;
 
+  /* Variety counter: each issue steps it by one, so every headline pool rotates and back-to-back issues never repeat */
+  var prev = o.before.news && o.before.news[0];
+  var v = prev && prev.v != null ? prev.v + 1 : Math.floor(Math.random() * 1000);
+
   return {
-    s: o.after.sNum, wk: o.weekLabel, at: Date.now(),
+    s: o.after.sNum, wk: o.weekLabel, at: Date.now(), v: v,
     you: {
       name: o.after.pName, tierIdx: o.tierIdx, tierName: o.tierName, reached: o.wonTitle ? "Champion" : o.roundNames[o.pRound], champion: !!o.wonTitle,
       wins: matches.filter(function (m) { return m.won; }).length, losses: matches.filter(function (m) { return !m.won; }).length,

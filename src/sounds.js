@@ -85,6 +85,13 @@ export function playWhoosh() {
   noise({ filter: "bandpass", freq: 300, freqEnd: 3200, duration: 0.4, volume: 0.22, q: 0.8, attack: 0.15 });
 }
 
+/* Newspaper fold — two crisp paper crinkles and a soft swish as it's tossed aside */
+export function playPaperFold() {
+  noise({ filter: "highpass", freq: 2400, duration: 0.16, volume: 0.12, attack: 0.02 });
+  setTimeout(function () { noise({ filter: "highpass", freq: 3000, duration: 0.14, volume: 0.11, attack: 0.02 }); }, 380);
+  setTimeout(function () { noise({ filter: "bandpass", freq: 1800, freqEnd: 500, duration: 0.3, volume: 0.1, q: 0.7, attack: 0.08 }); }, 720);
+}
+
 export function playImpact(heavy) {
   tone({ freq: heavy ? 150 : 180, freqEnd: 38, duration: heavy ? 0.5 : 0.3, volume: heavy ? 0.45 : 0.32, type: "sine" });
   noise({ filter: "lowpass", freq: 1600, freqEnd: 150, duration: heavy ? 0.35 : 0.2, volume: heavy ? 0.3 : 0.2 });

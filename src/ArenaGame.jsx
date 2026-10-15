@@ -160,7 +160,7 @@ export default function Arena(props) {
       fans: Object.assign({}, iv.issue.fans, { after: f, interview: outcome.delta })
     });
     var news = (S.news || []).slice(); if (news[0] && news[0].at === iv.issue.at) news[0] = issue;
-    save(Object.assign({}, S, { news: news, player: Object.assign({}, p, { fans: f, lastTones: [answer.tone].concat(p.lastTones || []).slice(0, 2), promise: answer.tone === "bold" ? { wk: iv.issue.wk } : null }) }));
+    save(Object.assign({}, S, { news: news, player: Object.assign({}, p, { fans: f, lastTones: [answer.tone].concat(p.lastTones || []).slice(0, 2), ivSeen: (iv.iv.used || []).concat(p.ivSeen || []).slice(0, 48), promise: answer.tone === "bold" ? { wk: iv.issue.wk } : null }) }));
     return issue;
   }
   var lastRankRef = useRef(null);
@@ -499,7 +499,7 @@ export default function Arena(props) {
       /* Press first, then the paper (which quotes the interview) */
       var y = issue.you, rival = y.rivalry && y.rivalry.l >= 2 && y.rivalry.l > y.rivalry.w;
       var ctx = y.champion ? "champion" : y.reached === "Final" ? "final" : rival ? "rival" : y.wins >= 2 ? "deep" : "early";
-      setInterview({ issue: issue, iv: makeInterview(ctx, { tier: tier.name, round: y.reached, foe: y.lostTo ? sh(y.lostTo.foe.name) : "" }) });
+      setInterview({ issue: issue, iv: makeInterview(ctx, { tier: tier.name, round: y.reached, foe: y.lostTo ? sh(y.lostTo.foe.name) : "", beat: y.bestWin ? sh(y.bestWin.foe.name) : "" }, null, S.player.ivSeen) });
     }
   }
 
