@@ -2,6 +2,7 @@ import * as React from "react";
 import { motion } from "framer-motion";
 import { syncAchievements, saveGameToCloud, loadGameFromCloud } from "./firebase";
 import { playTitle, playRankUp, isMuted, setMuted } from "./sounds";
+import { isMusicOn, setMusicOn } from "./music";
 import { W, CSS, EMO, TIERS, RN5, RN6, HN, HC, HI, TOTAL_EVENTS, FINALS_BO, STATS, STAT_GROUPS, screenAnim } from "./models/constants";
 import { sh, bs, nW, pRankOf, getRanked, getARanked, trainCost } from "./models/formulas";
 import { sSet, sGet, stamp, pickNewest, queueCloudSave, cancelCloudSave } from "./engine/persistence";
@@ -141,6 +142,8 @@ export default function Arena(props) {
   var _syncMsg = useState(""), syncMsg = _syncMsg[0], setSyncMsg = _syncMsg[1];
   var _mutedState = useState(isMuted()), mutedState = _mutedState[0], setMutedState = _mutedState[1];
   function toggleMute() { var n = !mutedState; setMuted(n); setMutedState(n); }
+  var _musicOn = useState(isMusicOn()), musicOn = _musicOn[0], setMusicOnState = _musicOn[1];
+  function toggleMusic() { var n = !musicOn; setMusicOn(n); setMusicOnState(n); }
   var _confetti = useState(false), confetti = _confetti[0], setConfetti = _confetti[1];
   var _showBracket = useState(false), showBracket = _showBracket[0], setShowBracket = _showBracket[1];
   var _showScout = useState(false), showScout = _showScout[0], setShowScout = _showScout[1];
@@ -908,6 +911,10 @@ export default function Arena(props) {
                 <button onClick={function(){setHelp(true)}} style={rowStyle}>
                   <div><div style={labelStyle}>❓ How to Play</div><div style={hintStyle}>Sets, strikes and training explained</div></div>
                   <span style={{color:C.goldInk,fontSize:20,fontWeight:900}}>›</span>
+                </button>
+                <button onClick={toggleMusic} style={rowStyle}>
+                  <div><div style={labelStyle}>{musicOn?"🎵":"🔕"} Music</div><div style={hintStyle}>Tunes on the menus — never two of the same in a row</div></div>
+                  <span style={{color:musicOn?C.greenInk:C.redInk,fontSize:14,fontWeight:900,letterSpacing:0.5}}>{musicOn?"ON":"OFF"}</span>
                 </button>
                 <button onClick={toggleMute} style={rowStyle}>
                   <div><div style={labelStyle}>{mutedState?"🔇":"🔊"} Sound Effects</div><div style={hintStyle}>Clucks, clangs, fanfares</div></div>

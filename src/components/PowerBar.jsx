@@ -12,6 +12,7 @@ import JoustStage from "./JoustStage";
 import { PLAYER_PALETTE, paletteFor } from "./Rider";
 import { crowdRoar } from "../engine/fans";
 import { CoachBubble } from "./Coach";
+import { enterMatch, leaveMatch } from "../music";
 
 const { useState, useEffect, useRef } = React;
 
@@ -170,6 +171,8 @@ export default function PowerBar(props) {
   var finished = useRef(false);
   /* For the achievements: gold-zone strikes this match, and sets where all three strikes were gold */
   var goldRef = useRef({ total: 0, set: 0, flawless: 0 });
+  /* Menu music steps aside while a match is on screen */
+  useEffect(function () { enterMatch(); return leaveMatch; }, []);
   var tr = props.tr || {}, otr = props.otr || {};
   var nR=(tr.r||0)-(otr.r||0), nP=(tr.p||0)-(otr.p||0), nF=(tr.f||0)-(otr.f||0), nS=(tr.s||0)-(otr.s||0), nG=(tr.g||0)-(otr.g||0);
   var ctr = 72, swBase = Math.max(3, 12 - props.diff * 1.5 + nP * 1.2), fb = nF * 1.5;
