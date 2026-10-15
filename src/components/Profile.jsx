@@ -1,6 +1,8 @@
 /* ═══ Profile ═══ Player/NPC profile modal: stats, talent bar, training, h2h, career timeline */
 
 import { TIERS, RN5, RN6, STATS } from "../models/constants";
+import { Rider, PLAYER_PALETTE, paletteFor } from "./Rider";
+import { roosterName, trait, quote, standing } from "../models/persona";
 
 export default function Profile(props) {
   var p = props.player; var rank = props.rank; var onClose = props.onClose;
@@ -11,9 +13,25 @@ export default function Profile(props) {
   return (
     <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(15,23,42,0.5)", zIndex: 999, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }} onClick={onClose}>
       <div style={{ background: "#ffffff", borderRadius: 14, padding: 18, maxWidth: 360, width: "100%", border: "1px solid #e5e7eb", maxHeight: "80vh", overflowY: "auto" }} onClick={function(e){e.stopPropagation();}}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-          <div><span style={{ fontSize: 20 }}>{p.emoji || "👤"}</span><span style={{ fontSize: 16, fontWeight: 800, color: p.isP ? "#b45309" : "#0f172a", marginLeft: 8 }}>{p.isP ? (props.playerName || "You") : p.name}</span></div>
-          <button onClick={onClose} style={{ background: "none", border: "none", color: "#64748b", fontSize: 18, cursor: "pointer" }}>✕</button>
+        {/* Portrait hero: who she is, what she rides, what she says */}
+        <div style={{ position: "relative", margin: "-18px -18px 12px", padding: "12px 14px 12px", borderRadius: "14px 14px 0 0", background: "linear-gradient(180deg,#bae6fd 0%,#fef3c7 70%,#fde68a 100%)", borderBottom: "2px solid #e2c88e" }}>
+          <button onClick={onClose} aria-label="Close" style={{ position: "absolute", top: 8, right: 8, background: "rgba(255,255,255,0.8)", border: "1.5px solid #3f2a1d", color: "#3f2a1d", width: 30, height: 30, borderRadius: 15, fontSize: 15, fontWeight: 900, cursor: "pointer", lineHeight: "26px", padding: 0 }}>✕</button>
+          <div style={{ display: "flex", justifyContent: "center" }}>
+            <div style={{ filter: "drop-shadow(0 6px 8px rgba(63,42,29,0.25))" }}>
+              <Rider palette={p.isP ? PLAYER_PALETTE : paletteFor(p.id, rank)} width={190} pose={rank === 1 ? "cheer" : "idle"} flip={!p.isP} />
+            </div>
+          </div>
+          <div style={{ textAlign: "center", marginTop: 4 }}>
+            <div style={{ fontSize: 21, fontWeight: 900, fontStyle: "italic", color: "#1c1917", lineHeight: 1.1 }}>{p.isP ? (props.playerName || "You") : (p.emoji || "") + " " + p.name}</div>
+            {!p.isP && standing(rank) && (<div style={{ display: "inline-block", marginTop: 4, background: "#92400e", color: "#fff", fontSize: 11, fontWeight: 900, letterSpacing: 1.5, padding: "2px 10px", borderRadius: 12 }}>{standing(rank).icon} {standing(rank).tag.toUpperCase()} OF THE TOUR</div>)}
+            {!p.isP && (<div style={{ fontSize: 13, color: "#57534e", fontWeight: 700, marginTop: 4 }}>🐓 Rides <b style={{ color: "#1c1917" }}>{roosterName(p.id)}</b></div>)}
+            {!p.isP && (<div style={{ fontSize: 13, color: "#57534e", fontStyle: "italic", marginTop: 2 }}>{trait(p.id)}</div>)}
+          </div>
+          {!p.isP && (
+            <div style={{ position: "relative", margin: "8px 6px 2px", background: "#fff", border: "2px solid #3f2a1d", borderRadius: 14, padding: "6px 10px", fontFamily: "Georgia, serif", fontStyle: "italic", fontSize: 13, color: "#1c1917", boxShadow: "2px 2px 0 #3f2a1d", textAlign: "center" }}>
+              “{quote(p.id, 0)}”
+            </div>
+          )}
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginBottom: 10 }}>
           {[{ l: "Current Rank", v: "#" + rank, c: rank <= 10 ? "#b45309" : rank <= 50 ? "#22c55e" : "#475569" },

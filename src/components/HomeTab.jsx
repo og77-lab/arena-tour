@@ -127,13 +127,13 @@ export default function HomeTab(props) {
       <RankSparkline history={S.player.rankHist || []} />
 
       {/* Latest issue of the paper */}
-      {S.news && S.news[0] && (
-        <button onClick={function () { props.onReadPaper(S.news[0]); }}
+      {(
+        <button onClick={function () { props.onReadPaper(); }}
           style={Object.assign(card({ padding: "10px 12px", background: "#f4ecd8", borderColor: "#d6c7a1" }), { display: "flex", alignItems: "center", gap: 10, width: "100%", cursor: "pointer", textAlign: "left", fontFamily: FONT })}>
           <span aria-hidden style={{ fontSize: 30, transform: "rotate(-8deg)" }}>📰</span>
           <span style={{ flex: 1, minWidth: 0 }}>
             <span style={{ display: "block", fontFamily: "Georgia, 'Times New Roman', serif", fontWeight: 900, fontSize: 17, color: "#1c1917" }}>The Daily Cluck</span>
-            <span style={{ display: "block", fontSize: 12, color: "#4a4038", fontWeight: 700 }}>{S.news[0].wk} · your week, your rivals and the world's best</span>
+            <span style={{ display: "block", fontSize: 12, color: "#4a4038", fontWeight: 700 }}>{S.news && S.news[0] ? S.news[0].wk + " · your week, your rivals and the world's best" : "Special edition · the legends and the tour ahead"}</span>
           </span>
           <span style={{ fontSize: 13, fontWeight: 900, color: "#9a3412", whiteSpace: "nowrap" }}>Read ›</span>
         </button>

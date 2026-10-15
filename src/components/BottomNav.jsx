@@ -9,7 +9,8 @@ var ITEMS = [
   { id: "home", icon: "🏠", label: "Home" },
   { id: "train", icon: "🏋️", label: "Train" },
   { id: "season", icon: "📅", label: "Season" },
-  { id: "rankings", icon: "🏆", label: "Rankings" },
+  { id: "news", icon: "📰", label: "News" },
+  { id: "rankings", icon: "🏆", label: "Ranks" },
   { id: "more", icon: "⚙️", label: "More" }
 ];
 

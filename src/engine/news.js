@@ -10,6 +10,20 @@ export function rankMap(S) {
 
 function who(p) { return { id: p.id, name: p.name, emoji: p.emoji || "" }; }
 
+/* An issue that's always available: the tour as it stands, before (or between) your own stories */
+export function buildSpecialEdition(S) {
+  var ranked = getRanked(S), me = rankMap(S)[1];
+  var last = S.calIdx > 0 ? S.cal[S.calIdx - 1] : null;
+  var big = last && last.result && last.result.parallel ? last.result.parallel.filter(function (r) { return r && !r.playerEvent && r.winner; }).sort(function (a, b) { return b.tier - a.tier; })[0] : null;
+  return {
+    special: true, s: S.sNum, wk: "Special edition", at: 0,
+    you: { name: S.pName, rankAfter: me },
+    world: { top: ranked.slice(0, 5).map(function (p, i) { return { p: p.isP ? { id: 1, name: S.pName, isP: true } : who(p), rank: i + 1, from: null }; }), newNo1: false, bigEvent: big ? { tier: big.tier, count: big.count, winner: big.winner } : null },
+    legends: ranked.slice(0, 10).map(function (p, i) { return { p: p, rank: i + 1 }; }).filter(function (x) { return !x.p.isP; })
+      .map(function (x) { return { id: x.p.id, name: x.p.name, emoji: x.p.emoji || "", rank: x.rank, titles: (x.p.best && x.p.best.titles) || 0 }; })
+  };
+}
+
 /* before/after: S before this week's results and the saved S after them */
 export function buildIssue(o) {
   var before = rankMap(o.before), after = rankMap(o.after);

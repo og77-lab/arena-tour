@@ -13,8 +13,9 @@ html {
 html, body {
   margin: 0;
   width: 100%;
-  /* Nothing may ever make the page wider than the screen (that's what forces phones to zoom out) */
-  overflow-x: hidden;
+  /* Nothing may ever make the page wider than the screen (that's what forces phones to zoom out).
+     clip, not hidden: hidden turns <body> into its own scroll container and touch scrolling gets stuck on it. */
+  overflow-x: clip;
 }
 
 body {

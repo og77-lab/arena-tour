@@ -18,11 +18,11 @@ import MatchHeader from "./components/MatchHeader";
 import ScoutSheet from "./components/ScoutSheet";
 import { Rider, Face, PLAYER_PALETTE, paletteFor } from "./components/Rider";
 import { roosterName, trait, standing } from "./models/persona";
-import { buildIssue } from "./engine/news";
+import { buildIssue, buildSpecialEdition } from "./engine/news";
 import { fansOf, clampFans, weeklyDrift, performanceDelta, sponsorTP, hasTierWildcard, hasSlamWildcard } from "./engine/fans";
 import { makeInterview, resolvePromise } from "./engine/interview";
 import Interview from "./components/Interview";
-import DailyCluck from "./components/DailyCluck";
+import DailyCluck, { CluckPaper } from "./components/DailyCluck";
 import { C, FONT, display, label, card, button, money } from "./ui/theme";
 
 const { useState, useEffect, useRef } = React;
@@ -138,6 +138,18 @@ export default function Arena(props) {
   var _showScout = useState(false), showScout = _showScout[0], setShowScout = _showScout[1];
   var _paper = useState(null), paper = _paper[0], setPaper = _paper[1];
   var _interview = useState(null), interview = _interview[0], setInterview = _interview[1];
+  var _newsIdx = useState(0), newsIdx = _newsIdx[0], setNewsIdx = _newsIdx[1];
+  var _rankView = useState({ mode: "me", above: 25, below: 25 }), rankView = _rankView[0], setRankView = _rankView[1];
+  /* Opening Rankings lands on your own row, centred */
+  useEffect(function () {
+    if (scr !== "hub" || tab !== "rankings") return;
+    setRankView({ mode: "me", above: 25, below: 25 });
+    var t = setTimeout(function () { var el = document.querySelector("[data-me-row]"); if (el) el.scrollIntoView({ block: "center" }); }, 60);
+    return function () { clearTimeout(t); };
+  }, [scr, tab]);
+  function markNewsSeen() {
+    if (S && S.news && S.news[0] && S.newsSeenAt !== S.news[0].at) save(Object.assign({}, S, { newsSeenAt: S.news[0].at }));
+  }
 
   /* The player picked an answer: settle the crowd's reaction, remember the tone, record a promise, update this week's issue */
   function onInterviewAnswer(answer, outcome) {
@@ -562,7 +574,8 @@ export default function Arena(props) {
     var hubTab = scr === "training" ? "train" : tab;
     var tpNow = (S.player.tr && S.player.tr.tp) || 0;
     var affordable = ["r","p","f","s","g"].filter(function(k){ var lv = (S.player.tr[k]||0); return lv < 20 && tpNow >= trainCost(lv); }).length;
-    function goTab(t) { setScr("hub"); setTab(t); try { window.scrollTo(0, 0); } catch (e) {} }
+    function goTab(t) { setScr("hub"); setTab(t); if (t === "news") { setNewsIdx(0); markNewsSeen(); } try { window.scrollTo(0, 0); } catch (e) {} }
+    var newsUnread = !!(S.news && S.news[0] && S.newsSeenAt !== S.news[0].at);
     function sectionTitle(txt, sub) {
       return (<div style={{margin:"2px 2px 8px"}}><div style={display(24)}>{txt}</div>{sub && (<div style={{fontSize:13,color:C.textSoft,marginTop:2}}>{sub}</div>)}</div>);
     }
@@ -573,7 +586,7 @@ export default function Arena(props) {
         {prof && (<Profile player={prof.p} rank={prof.rank} playerName={S.pName} h2h={!prof.p.isP && S.player.h2h ? (S.player.h2h[prof.p.id] || []) : null} timeline={prof.p.isP ? (S.player.timeline || []) : null} onClose={function(){setProf(null)}} />)}
         {showHelp && (<HelpScreen onClose={function(){setHelp(false)}} />)}
         {picking && !seasonDone && (<TierSheet available={avTiers} wildcard={wildcardTier(S)} rank={pRank} onClose={function(){setPicking(false)}} onPick={function(ti){ setPicking(false); startTourney(ti); }} />)}
-        {paper && (<DailyCluck issue={paper} onClose={function(){ setPaper(null); }} />)}
+        {paper && (<DailyCluck issue={paper} onClose={function(){ setPaper(null); markNewsSeen(); }} />)}
         {interview && (<Interview iv={interview.iv} recentTones={S.player.lastTones || []} fans={fansOf(S.player)}
           onAnswer={onInterviewAnswer} onDone={function(issue){ setInterview(null); setPaper(issue || interview.issue); }} />)}
         <input ref={fileRef} type="file" accept=".json" onChange={importSave} style={{display:"none"}} />
@@ -584,7 +597,7 @@ export default function Arena(props) {
           {hubTab === "home" && (
             <HomeTab S={S} pRank={pRank} curEvent={curEvent} seasonDone={seasonDone}
               onPlay={playCurrent} onFinals={startFinals} onNextSeason={nextSeason}
-              onReadPaper={function(issue){ setPaper(issue); }}
+              onReadPaper={function(){ goTab("news"); }}
               onTrain={function(){ goTab("train"); }}
               onOpenProfile={function(){ setProf({ p: Object.assign({}, S.player, { name: S.pName, emoji: "👵" }), rank: pRank }); }} />
           )}
@@ -709,6 +722,32 @@ export default function Arena(props) {
             </div>
           )}
 
+          {hubTab === "news" && (function(){
+            var issues = S.news || [];
+            var idx = Math.min(newsIdx, Math.max(0, issues.length - 1));
+            var issue = issues.length ? issues[idx] : buildSpecialEdition(S);
+            return (
+              <div>
+                {sectionTitle("The Daily Cluck", issues.length ? "A fresh issue after every tournament — your run, your rivals, the world's best." : "A special edition for now. Your first real issue prints after your first tournament.")}
+                {issues.length > 0 && (
+                  <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 6, marginBottom: 6 }}>
+                    {issues.map(function (it, i) {
+                      var on = i === idx;
+                      return (
+                        <button key={it.at || i} onClick={function(){ setNewsIdx(i); }}
+                          style={{ flexShrink: 0, fontFamily: "Georgia, 'Times New Roman', serif", fontWeight: 900, fontSize: 12, padding: "6px 10px", borderRadius: 8, cursor: "pointer",
+                            background: on ? "#1c1917" : "#f4ecd8", color: on ? "#f4ecd8" : "#1c1917", border: "1.5px solid #1c1917" }}>
+                          {i === 0 ? "Latest · " : ""}S{it.s} {it.wk}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+                <CluckPaper issue={issue} inline={true} />
+              </div>
+            );
+          })()}
+
           {hubTab === "rankings" && (function(){
             var pIdx = -1; for (var pi = 0; pi < ranked.length; pi++) { if (ranked[pi].isP) { pIdx = pi; break; } }
             var showTop = 50;
@@ -718,7 +757,7 @@ export default function Arena(props) {
             function renderRow(p, i) {
               var t = p.tr||{};
               return (
-                <div key={p.id+"-"+i} onClick={function(){setProf({p:p,rank:i+1})}} style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8,padding:"5px 8px",background:p.isP?C.goldSoft:i%2===0?C.cardWarm:"transparent",borderRadius:8,cursor:"pointer",borderLeft:i<16?"3px solid "+(i<4?C.gold:i<8?"#22c55e":i<12?"#3b82f6":"#64748b"):"3px solid transparent"}}>
+                <div key={p.id+"-"+i} data-me-row={p.isP ? "1" : undefined} onClick={function(){setProf({p:p,rank:i+1})}} style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8,padding:"5px 8px",background:p.isP?C.goldSoft:i%2===0?C.cardWarm:"transparent",borderRadius:8,cursor:"pointer",borderLeft:i<16?"3px solid "+(i<4?C.gold:i<8?"#22c55e":i<12?"#3b82f6":"#64748b"):"3px solid transparent"}}>
                   <span style={{color:i<3?C.goldInk:C.textMuted,fontWeight:900,fontSize:13,width:34,textAlign:"right",flexShrink:0}}>#{i+1}</span>
                   <Face palette={p.isP ? PLAYER_PALETTE : paletteFor(p.id, i+1)} size={34} />
                   <div style={{minWidth:0,flex:1}}>
@@ -739,14 +778,25 @@ export default function Arena(props) {
             return (
               <div>
                 {sectionTitle("Rankings", "Season points. Top 16 qualify for the Season Finals.")}
+                <div style={{display:"flex",gap:6,marginBottom:8}}>
+                  {[["me","🎯 Around me"],["top","👑 Top 50"]].map(function(v){
+                    var on = rankView.mode === v[0];
+                    return (<button key={v[0]} onClick={function(){ setRankView({ mode: v[0], above: 25, below: 25 }); setTimeout(function(){ if (v[0]==="me") { var el=document.querySelector("[data-me-row]"); el && el.scrollIntoView({block:"center"}); } else window.scrollTo(0,0); }, 30); }}
+                      style={button(on?"night":"ghost",{padding:"7px 12px",fontSize:12,letterSpacing:0.5})}>{v[1]}</button>);
+                  })}
+                </div>
                 <div style={card({padding:6})}>
-                  {ranked.slice(0, showTop).map(function(p, i){ return renderRow(p, i); })}
-                  {needNear && (
-                    <div>
-                      <div style={{textAlign:"center",padding:"6px",color:C.textMuted,fontSize:13,fontWeight:700}}>··· {nearStart - showTop} more ···</div>
-                      {ranked.slice(nearStart, nearEnd + 1).map(function(p, i){ return renderRow(p, nearStart + i); })}
-                    </div>
-                  )}
+                  {rankView.mode === "top" ? ranked.slice(0, showTop).map(function(p, i){ return renderRow(p, i); }) : (function(){
+                    /* You in the middle: the same number of riders above and below, more on demand */
+                    var start = Math.max(0, pIdx - rankView.above), end = Math.min(ranked.length - 1, pIdx + rankView.below);
+                    return (
+                      <div>
+                        {start > 0 && (<button onClick={function(){ setRankView({ mode: "me", above: rankView.above + 25, below: rankView.below }); }} style={button("ghost",{width:"100%",padding:"7px",fontSize:12,marginBottom:6})}>▲ Show 25 more above (#{Math.max(1, start - 24)}–#{start})</button>)}
+                        {ranked.slice(start, end + 1).map(function(p, i){ return renderRow(p, start + i); })}
+                        {end < ranked.length - 1 && (<button onClick={function(){ setRankView({ mode: "me", above: rankView.above, below: rankView.below + 25 }); }} style={button("ghost",{width:"100%",padding:"7px",fontSize:12,marginTop:6})}>▼ Show 25 more below (#{end + 2}–#{Math.min(ranked.length, end + 26)})</button>)}
+                      </div>
+                    );
+                  })()}
                   <div style={{textAlign:"center",fontSize:12,color:C.textMuted,padding:6,fontWeight:600}}>Tap any rider for her profile · {ranked.length} riders</div>
                 </div>
               </div>
@@ -791,7 +841,7 @@ export default function Arena(props) {
           })()}
         </div>
 
-        <BottomNav tab={hubTab} onTab={goTab} badges={{ train: affordable || null }} />
+        <BottomNav tab={hubTab} onTab={goTab} badges={{ train: affordable || null, news: newsUnread ? "!" : null }} />
       </motion.div>
     );
   }

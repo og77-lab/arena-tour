@@ -65,19 +65,29 @@ function leadStory(y) {
   return { h: N + " REACHES THE " + up(y.reached), deck: y.wins + (y.wins === 1 ? " win" : " wins") + " at " + y.tierName + ". The lance is warming up.", say: "Small steps, dear. Small, determined steps.", pose: "idle" };
 }
 
+/* After a tournament: the paper spins onto the screen over everything */
 export default function DailyCluck(props) {
-  var is = props.issue, y = is.you, w = is.world, pe = is.peers, ev = is.myEvent;
-  var lead = leadStory(y);
-  var rankLine = !y.rankBefore || y.rankBefore === y.rankAfter
+  return createPortal(
+    <div onClick={props.onClose} style={{ position: "fixed", inset: 0, zIndex: 960, background: "rgba(28,25,23,0.6)", overflowY: "auto", padding: "14px 10px 30px", boxSizing: "border-box" }}>
+      <CluckPaper issue={props.issue} onClose={props.onClose} />
+    </div>,
+    document.body
+  );
+}
+
+/* The paper itself — also shown inline in the News tab (inline: no spin, no close button) */
+export function CluckPaper(props) {
+  var is = props.issue, y = is.special ? null : is.you, w = is.world, pe = is.peers || {}, ev = is.myEvent || {};
+  var lead = y ? leadStory(y) : null;
+  var rankLine = !y ? "" : !y.rankBefore || y.rankBefore === y.rankAfter
     ? "In the world rankings she holds steady at #" + y.rankAfter + "."
     : "In the world rankings she " + (y.rankAfter < y.rankBefore ? "climbs" : "slips") + " from #" + y.rankBefore + " to #" + y.rankAfter + ".";
   var top1 = w.top[0];
 
-  return createPortal(
-    <div onClick={props.onClose} style={{ position: "fixed", inset: 0, zIndex: 960, background: "rgba(28,25,23,0.6)", overflowY: "auto", padding: "14px 10px 30px", boxSizing: "border-box" }}>
+  return (
       <motion.article onClick={function (e) { e.stopPropagation(); }}
-        initial={REDUCED_MOTION ? { opacity: 0 } : { rotate: -720, scale: 0.05, opacity: 0 }}
-        animate={{ rotate: -1, scale: 1, opacity: 1 }} transition={{ duration: REDUCED_MOTION ? 0.2 : 0.85, ease: [0.2, 0.8, 0.3, 1] }}
+        initial={props.inline ? false : REDUCED_MOTION ? { opacity: 0 } : { rotate: -720, scale: 0.05, opacity: 0 }}
+        animate={{ rotate: props.inline ? 0 : -1, scale: 1, opacity: 1 }} transition={{ duration: REDUCED_MOTION ? 0.2 : 0.85, ease: [0.2, 0.8, 0.3, 1] }}
         style={{ maxWidth: 520, margin: "0 auto", background: PAPER, color: INK, padding: "14px 16px 18px", boxShadow: "0 18px 40px rgba(0,0,0,0.45)", border: "1px solid #d6c7a1",
           backgroundImage: "radial-gradient(circle at 20% 10%, rgba(255,255,255,0.5), transparent 40%), radial-gradient(circle at 80% 90%, rgba(120,90,40,0.10), transparent 45%)" }}>
         {/* Masthead */}
@@ -89,8 +99,25 @@ export default function DailyCluck(props) {
           <div style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 11, color: SOFT }}>All the jousting news that's fit to peck</div>
         </header>
 
+        {/* Special edition lead: before your first tournament */}
+        {is.special && (
+          <section>
+            <Kicker>Special edition</Kicker>
+            <Headline big>{up(is.you.name)} SADDLES UP</Headline>
+            <div style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 14, color: SOFT, marginBottom: 8 }}>A new granny joins a tour of a thousand. The roosters are restless.</div>
+            <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+              <Photo w={118} tilt={-2.5} caption={is.you.name + " at the stables"}><div style={{ marginBottom: -4 }}><Rider palette={PLAYER_PALETTE} width={112} pose="idle" /></div></Photo>
+              <div style={{ minWidth: 0 }}>
+                <Body>Ranked <b>#{is.you.rankAfter}</b> in the world, {is.you.name} sets out to climb from the dusty Futures lanes to the golden helmets of the top ten.</Body>
+                <Body>Every tournament earns a fresh issue of this paper: your results, your rivals, and the gossip from the gym.</Body>
+              </div>
+            </div>
+            <Bubble by={is.you.name}>I didn't come here to knit. Well — not only to knit.</Bubble>
+          </section>
+        )}
+
         {/* Lead: you */}
-        <section>
+        {y && (<section>
           <Kicker>{y.champion ? "Extra! Extra!" : "This week on the tour"}</Kicker>
           <Headline big>{lead.h}</Headline>
           <div style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 14, color: SOFT, marginBottom: 8 }}>{lead.deck}</div>
@@ -126,7 +153,7 @@ export default function DailyCluck(props) {
               {is.interview && (<div style={{ fontSize: 12.5, fontStyle: "italic", color: INK, marginTop: 3 }}>{is.interview.reaction}</div>)}
             </div>
           )}
-        </section>
+        </section>)}
 
         {/* Your tournament */}
         {ev.champ && !ev.champ.isP && (
@@ -147,7 +174,7 @@ export default function DailyCluck(props) {
         {(pe.climber || pe.faller || pe.gym) && (
           <section>
             <Kicker col="#166534">Around your ranking</Kicker>
-            <Headline>On the move near #{y.rankAfter}</Headline>
+            <Headline>On the move near #{y ? y.rankAfter : ""}</Headline>
             {[pe.climber && { m: pe.climber, txt: "rockets up the rankings" }, pe.faller && { m: pe.faller, txt: "takes a tumble" }].filter(Boolean).map(function (r) {
               return (
                 <div key={r.m.p.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "5px 0", borderBottom: "1px dotted " + RULE }}>
@@ -184,13 +211,33 @@ export default function DailyCluck(props) {
           )}
         </section>
 
+        {/* Legends column (special edition) */}
+        {is.legends && is.legends.length > 0 && (
+          <section>
+            <Kicker col="#92400e">Hall of the golden helmets</Kicker>
+            <Headline>The legends you'll have to unseat</Headline>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 4 }}>
+              {is.legends.map(function (l) {
+                return (
+                  <div key={l.id} style={{ display: "flex", alignItems: "center", gap: 7, fontFamily: SERIF, fontSize: 12.5, minWidth: 0 }}>
+                    <Face palette={paletteFor(l.id, l.rank)} size={32} />
+                    <span style={{ minWidth: 0, lineHeight: 1.2 }}><b>#{l.rank}</b> {l.emoji} {sh(l.name)}<br /><span style={{ color: SOFT, fontStyle: "italic" }}>{l.titles} {l.titles === 1 ? "title" : "titles"}</span></span>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
         <footer style={{ marginTop: 14, borderTop: "3px double " + RULE, paddingTop: 10, textAlign: "center" }}>
-          <button onClick={props.onClose} style={{ fontFamily: SERIF, fontWeight: 900, fontSize: 15, letterSpacing: 1, textTransform: "uppercase", background: INK, color: PAPER, border: "none", padding: "11px 22px", cursor: "pointer", boxShadow: "3px 3px 0 #9a3412" }}>
-            Fold the paper →
-          </button>
+          {props.onClose ? (
+            <button onClick={props.onClose} style={{ fontFamily: SERIF, fontWeight: 900, fontSize: 15, letterSpacing: 1, textTransform: "uppercase", background: INK, color: PAPER, border: "none", padding: "11px 22px", cursor: "pointer", boxShadow: "3px 3px 0 #9a3412" }}>
+              Fold the paper →
+            </button>
+          ) : (
+            <div style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 11, color: SOFT }}>Printed on recycled hen-house paper · Next issue after your next tournament</div>
+          )}
         </footer>
       </motion.article>
-    </div>,
-    document.body
   );
 }
