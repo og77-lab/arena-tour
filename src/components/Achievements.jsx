@@ -35,7 +35,7 @@ export function AchToast(props) {
   }, [id]);
   var a = id && id.indexOf("+") === 0 ? { icon: "🏅", t: id.slice(1) + " achievements unlocked", d: "Open your badges to see them all" } : id ? achievementById(id) : null;
   return createPortal(
-    <div style={{ position: "fixed", top: "calc(env(safe-area-inset-top) + 50px)", left: 0, right: 0, display: "flex", justifyContent: "center", zIndex: 2100, pointerEvents: "none", padding: "0 12px" }}>
+    <div style={{ position: "fixed", top: "calc(env(safe-area-inset-top) + 10px)", left: 0, right: 0, display: "flex", justifyContent: "center", zIndex: 2100, pointerEvents: "none", padding: "0 12px" }}>
       <AnimatePresence>
         {a && (
           <motion.button key={id} onClick={props.onOpen} initial={{ y: -90, opacity: 0, scale: 0.9 }} animate={{ y: 0, opacity: 1, scale: 1 }} exit={{ y: -90, opacity: 0 }}
@@ -63,7 +63,7 @@ export default function AchievementsSheet(props) {
   var S = props.S, have = S.player.ach || {};
   var n = achCount(S);
   return createPortal(
-    <div onClick={props.onClose} style={{ position: "fixed", inset: 0, zIndex: 950, background: "rgba(28,25,23,0.55)", overflowY: "auto", padding: "calc(env(safe-area-inset-top) + 52px) 10px 30px", fontFamily: FONT }}>
+    <div onClick={props.onClose} style={{ position: "fixed", inset: 0, zIndex: 950, background: "rgba(28,25,23,0.55)", overflowY: "auto", padding: "calc(env(safe-area-inset-top) + 12px) 10px 30px", fontFamily: FONT }}>
       <motion.div onClick={function (e) { e.stopPropagation(); }} initial={{ y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ type: "spring", stiffness: 320, damping: 28 }}
         style={card({ maxWidth: 520, margin: "0 auto", padding: "14px 12px", background: C.page })}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>

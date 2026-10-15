@@ -226,8 +226,9 @@ export default function PowerBar(props) {
     var pos = posRef.current;
     var d = Math.abs(pos - ctr), inZ = d <= sw / 2;
     var sc = Math.min(100, (inZ ? 85 + Math.random() * 12 : Math.max(minSc, 60 - d * 1.2 + Math.random() * 10)) + fb);
-    var oB = ((otr.r||0)+(otr.p||0)+(otr.f||0)+(otr.s||0)+(otr.g||0)) * 0.9;
-    var effSkill = (props.oppSkill||50) + oB;
+    /* Her training already works against you through the stat gaps above (bar speed, gold zone, aim, floor).
+       It used to be added to her score a second time as well, so training evenly with the field made you weaker. */
+    var effSkill = props.oppSkill||50;
     var oBase = Math.min(95, 55 + effSkill * 0.4);
     var osc = Math.min(99, oBase + (Math.random() * 14 - 5));
     var youWon = sc >= osc;

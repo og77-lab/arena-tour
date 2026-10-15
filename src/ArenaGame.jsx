@@ -1,4 +1,5 @@
 import * as React from "react";
+import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
 import { syncAchievements, saveGameToCloud, loadGameFromCloud } from "./firebase";
 import { playTitle, playRankUp, isMuted, setMuted } from "./sounds";
@@ -29,6 +30,7 @@ import { ACHIEVEMENTS } from "./engine/achievements";
 import AchievementsSheet, { AchToast, achCount } from "./components/Achievements";
 import { CoachCard } from "./components/Coach";
 import TrainStage from "./components/TrainingAnim";
+import Leaderboard from "./Leaderboard";
 import { fansOf, clampFans, weeklyDrift, performanceDelta, sponsorTP, hasTierWildcard, hasSlamWildcard } from "./engine/fans";
 import { makeInterview, resolvePromise } from "./engine/interview";
 import Interview from "./components/Interview";
@@ -153,6 +155,7 @@ export default function Arena(props) {
   var _newsIdx = useState(0), newsIdx = _newsIdx[0], setNewsIdx = _newsIdx[1];
   var _gala = useState(null), gala = _gala[0], setGala = _gala[1];
   var _trainFx = useState(null), trainFx = _trainFx[0], setTrainFx = _trainFx[1];
+  var _showLb = useState(false), showLb = _showLb[0], setShowLb = _showLb[1];
   var _achQ = useState([]), achQ = _achQ[0], setAchQ = _achQ[1];
   var _showAch = useState(false), showAch = _showAch[0], setShowAch = _showAch[1];
   /* Achievements: whenever the save changes on the hub, award anything newly earned (only on the hub, so a save never
@@ -707,6 +710,13 @@ export default function Arena(props) {
         {gala && (<SeasonGala S={S} champ={gala.champ} runnerUp={gala.runnerUp} champRank={gala.champRank} awards={gala.awards} you={gala.you} hall={gala.hall} goal={gala.goal} onDone={finishGala} />)}
         {achQ.length > 0 && (<AchToast queue={achQ} onShown={function(){ setAchQ(function(q){ return q.slice(1); }); }} onOpen={function(){ setAchQ([]); setShowAch(true); }} />)}
         {showAch && (<AchievementsSheet S={S} onClose={function(){ setShowAch(false); }} />)}
+        {showLb && createPortal(
+          <div style={{position:"fixed",inset:0,zIndex:960,background:"#f8fafc",overflowY:"auto"}}>
+            <div style={{position:"sticky",top:0,zIndex:2,display:"flex",justifyContent:"flex-end",padding:"calc(env(safe-area-inset-top) + 8px) 10px 0"}}>
+              <button aria-label="Close" onClick={function(){setShowLb(false)}} style={{width:36,height:36,borderRadius:"50%",border:"2px solid "+C.ink,background:"#fff",fontSize:18,fontWeight:900,cursor:"pointer",color:C.ink}}>×</button>
+            </div>
+            <Leaderboard />
+          </div>, document.body)}
         {paper && (<DailyCluck issue={paper} onClose={function(){ setPaper(null); markNewsSeen(); }} />)}
         {interview && (<Interview coach={tipOn("interview")} iv={interview.iv} recentTones={S.player.lastTones || []} fans={fansOf(S.player)}
           onAnswer={onInterviewAnswer} onDone={function(issue){ setInterview(null); setPaper(issue || interview.issue); }} />)}
@@ -908,6 +918,21 @@ export default function Arena(props) {
             return (
               <div>
                 {sectionTitle("More")}
+                {props.account && (
+                  <div style={Object.assign(card({padding:"12px 14px",marginBottom:8}), {display:"flex",alignItems:"center",justifyContent:"space-between",gap:10})}>
+                    <div style={{minWidth:0}}>
+                      <div style={labelStyle}>{props.account.guest ? "👤 Playing as a guest" : "👤 Your account"}</div>
+                      <div style={Object.assign({}, hintStyle, {overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"})}>{props.account.guest ? "Saved on this device only — sign in to keep it in the cloud" : props.account.email}</div>
+                    </div>
+                    {props.account.guest
+                      ? (<button onClick={props.account.onSignIn} style={button("gold",{padding:"8px 14px",fontSize:13,flexShrink:0})}>Sign in</button>)
+                      : (<button onClick={props.account.onLogout} style={button("ghost",{padding:"8px 14px",fontSize:13,color:C.redInk,flexShrink:0})}>Log out</button>)}
+                  </div>
+                )}
+                <button onClick={function(){setShowLb(true)}} style={rowStyle}>
+                  <div><div style={labelStyle}>🌍 World Leaderboard</div><div style={hintStyle}>Real players — best ranks, titles and prize money</div></div>
+                  <span style={{color:C.goldInk,fontSize:20,fontWeight:900}}>›</span>
+                </button>
                 <button onClick={function(){setShowAch(true)}} style={rowStyle}>
                   <div><div style={labelStyle}>🏅 Achievements</div><div style={hintStyle}>{achCount(S)} of {ACHIEVEMENTS.length} badges earned</div></div>
                   <span style={{color:C.goldInk,fontSize:20,fontWeight:900}}>›</span>
