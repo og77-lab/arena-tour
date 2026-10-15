@@ -16,13 +16,40 @@ import TierSheet from "./components/TierSheet";
 import BottomNav, { NAV_HEIGHT } from "./components/BottomNav";
 import MatchHeader from "./components/MatchHeader";
 import ScoutSheet from "./components/ScoutSheet";
-import { Rider, PLAYER_PALETTE, paletteFor } from "./components/Rider";
+import { Rider, Face, PLAYER_PALETTE, paletteFor } from "./components/Rider";
+import { roosterName, trait, standing } from "./models/persona";
+import { buildIssue } from "./engine/news";
+import { fansOf, clampFans, weeklyDrift, performanceDelta, sponsorTP, hasTierWildcard, hasSlamWildcard } from "./engine/fans";
+import { makeInterview, resolvePromise } from "./engine/interview";
+import Interview from "./components/Interview";
+import DailyCluck from "./components/DailyCluck";
 import { C, FONT, display, label, card, button, money } from "./ui/theme";
 
 const { useState, useEffect, useRef } = React;
 
 function talentLabel(skill) { var s = skill || 0; return s > 80 ? "Elite" : s > 60 ? "Strong" : s > 40 ? "Average" : "Developing"; }
 
+
+var STAT_KEYS = ["r", "p", "f", "s", "g"];
+function focusStat(id) { return STAT_KEYS[(Math.imul(id || 7, 2654435761) >>> 0) % STAT_KEYS.length]; }
+
+/* Rivals train by the player's rules: bank this week's training points, then buy levels at trainCost prices.
+   Each granny leans on her favourite stat but keeps the rest even. Returns levels bought. */
+function npcTrainWeek(n, tp) {
+  var tr = Object.assign({ r: 0, p: 0, f: 0, s: 0, g: 0, tp: 0 }, n.tr || {});
+  tr.tp = (tr.tp || 0) + tp;
+  var fav = focusStat(n.id), bought = 0;
+  for (var guard = 0; guard < 20; guard++) {
+    var best = null, bestScore = 1e9;
+    STAT_KEYS.forEach(function (k) { var lv = tr[k] || 0; if (lv >= 20) return; var sc = lv - (k === fav ? 2 : 0); if (sc < bestScore) { bestScore = sc; best = k; } });
+    if (!best) break;
+    var cost = trainCost(tr[best] || 0);
+    if (tr.tp < cost) break;
+    tr.tp -= cost; tr[best] = (tr[best] || 0) + 1; bought++;
+  }
+  n.tr = tr;
+  return bought;
+}
 
 /* d = the match difficulty number PowerBar uses (round + tier offset) */
 function diffInfo(d) {
@@ -39,7 +66,9 @@ function buildScout(S, o, oRank, d) {
   var meetings = (S.player.h2h && S.player.h2h[o.id]) || [];
   var w = meetings.filter(function (m) { return m.w; }).length;
   return {
-    name: sh(o.name), emoji: o.emoji || "", palette: paletteFor(o.id), rank: oRank, talent: talentLabel(o.skill), pts: o.sp || 0,
+    name: sh(o.name), emoji: o.emoji || "", palette: paletteFor(o.id, oRank), rank: oRank, talent: talentLabel(o.skill), pts: o.sp || 0,
+    rooster: roosterName(o.id), trait: trait(o.id), standing: standing(oRank), titles: (o.best && o.best.titles) || 0,
+    you: { rank: pRankOf(S), pts: S.player.sp || 0 },
     h2h: { w: w, l: meetings.length - w },
     stats: STATS.map(function (s) { return { icon: s.icon, label: s.label, what: s.what, who: s.who, you: mine[s.k] || 0, foe: hers[s.k] || 0 }; }),
     diff: diffInfo(d)
@@ -107,6 +136,21 @@ export default function Arena(props) {
   var _confetti = useState(false), confetti = _confetti[0], setConfetti = _confetti[1];
   var _showBracket = useState(false), showBracket = _showBracket[0], setShowBracket = _showBracket[1];
   var _showScout = useState(false), showScout = _showScout[0], setShowScout = _showScout[1];
+  var _paper = useState(null), paper = _paper[0], setPaper = _paper[1];
+  var _interview = useState(null), interview = _interview[0], setInterview = _interview[1];
+
+  /* The player picked an answer: settle the crowd's reaction, remember the tone, record a promise, update this week's issue */
+  function onInterviewAnswer(answer, outcome) {
+    var iv = interview; if (!iv || !S) return;
+    var p = S.player, f = clampFans(fansOf(p) + outcome.delta);
+    var issue = Object.assign({}, iv.issue, {
+      interview: { outlet: iv.iv.outlet, question: iv.iv.question, quote: answer.text, delta: outcome.delta, reaction: outcome.reaction, viral: outcome.viral, promise: answer.tone === "bold" },
+      fans: Object.assign({}, iv.issue.fans, { after: f, interview: outcome.delta })
+    });
+    var news = (S.news || []).slice(); if (news[0] && news[0].at === iv.issue.at) news[0] = issue;
+    save(Object.assign({}, S, { news: news, player: Object.assign({}, p, { fans: f, lastTones: [answer.tone].concat(p.lastTones || []).slice(0, 2), promise: answer.tone === "bold" ? { wk: iv.issue.wk } : null }) }));
+    return issue;
+  }
   var lastRankRef = useRef(null);
 
   /* Rank-up chime when crossing tier thresholds */
@@ -151,7 +195,7 @@ export default function Arena(props) {
     var ev = S.cal[S.calIdx];
     if (!ev) return;
     if (ev.type === "gs") {
-      if (pRankOf(S) <= 64) {
+      if (pRankOf(S) <= 64 || hasSlamWildcard(fansOf(S.player))) {
         startTourney(5);
       } else {
         var cal = S.cal.slice();
@@ -182,7 +226,14 @@ export default function Arena(props) {
       else if (rank > 100) avail.push(3);
       else avail.push(4);
     }
+    /* Crowd favourites get a wildcard into the tier above */
+    var top = Math.max.apply(null, avail);
+    if (hasTierWildcard(fansOf(S.player)) && top < 4) avail.push(top + 1);
     return avail;
+  }
+  function wildcardTier(S) {
+    if (!hasTierWildcard(fansOf(S.player))) return -1;
+    var a = availableTiers(S); return a[a.length - 1];
   }
 
   /* ─── Bracket logic ─── */
@@ -224,14 +275,15 @@ export default function Arena(props) {
     setTtab("match"); setScr("tourney");
   }
 
-  function onTR(won, myAvg, oppAvg, setScore) {
+  function onTR(won, myAvg, oppAvg, setScore, setSeq) {
     if (!ts) return;
     var tier = TIERS[ts.tierIdx]; var rNames = tier.rounds === 6 ? RN6 : RN5;
     var bk = JSON.parse(JSON.stringify(ts.bracket)); bk._pts = tier.pts; bk._tier = ts.tierIdx;
     var m = bk[ts.round][ts.pending]; var opp = m.a.isP ? m.b : m.a;
     var winner = won ? (m.a.isP ? m.a : m.b) : (m.a.isP ? m.b : m.a);
     winner.tP = (winner.tP||0) + tier.pts[ts.round]; m.w = winner;
-    var log = ts.log.concat([{ round: rNames[ts.round], opp: opp.name, won: won, pts: won ? tier.pts[ts.round] : 0 }]);
+    var oppRankNow = 0; var rk = getRanked(S); for (var rki = 0; rki < rk.length; rki++) { if (rk[rki].id === opp.id) { oppRankNow = rki + 1; break; } }
+    var log = ts.log.concat([{ round: rNames[ts.round], opp: opp.name, oppId: opp.id, oppRank: oppRankNow, myRank: pRankOf(S), won: won, pts: won ? tier.pts[ts.round] : 0, sc: setScore || null, seq: setSeq || "" }]);
     var r = runBk(bk, ts.round, won, tier.rounds);
     setTS({ bracket: r.bracket, round: r.round, pending: r.pending, done: r.done, alive: won, log: log, tierIdx: ts.tierIdx });
     /* Record head-to-head vs this opponent */
@@ -264,15 +316,10 @@ export default function Arena(props) {
     var pRound = 0; for (var ri = 0; ri < ts.bracket.length; ri++) { var rd = ts.bracket[ri]; if (rd) for (var mi = 0; mi < rd.length; mi++) { var mm = rd[mi]; if ((mm.a && mm.a.id===1)||(mm.b && mm.b.id===1)) pRound = ri; } }
     var champM = ts.bracket[tier.rounds - 1] && ts.bracket[tier.rounds - 1][0]; var champW = champM && champM.w;
     var wonTitle = champW && champW.id === 1;
+    var spBefore = {}; S.npcs.forEach(function(n){ spBefore[n.id] = n.sp || 0; });
     var newNpcs = S.npcs.map(function(n){
       var e = tally(n.id);
       var tr = Object.assign({s:0,g:0}, n.tr||{});
-      var stats = ["r","p","f","s","g"];
-      /* Only NPCs who competed in THIS bracket train. Others train from parallel sim below. */
-      if (e > 0) {
-        var trainR = e > 1000 ? 2 : e > 200 ? 1 : (Math.random() < 0.5 ? 1 : 0);
-        for (var ti = 0; ti < trainR; ti++) { var st = stats[Math.floor(Math.random()*5)]; if ((tr[st]||0) < 20) tr[st] = (tr[st]||0) + 1; }
-      }
       var nb = Object.assign({}, n.best||{});
       if (champW && champW.id === n.id) { nb.titles = (nb.titles||0) + 1; if (isGS) nb.gsTitles = (nb.gsTitles||0) + 1; }
       var nb2 = Object.assign({}, nb, { careerMoney: (nb.careerMoney||0) + Math.round(e * 3) });
@@ -309,7 +356,13 @@ export default function Arena(props) {
       tlNew.push({ type: "peak", s: S.sNum, w: wLabel, rank: curRank });
     }
     var newTimeline = (S.player.timeline || []).concat(tlNew).slice(-200);
-    var newP = Object.assign({}, S.player, { sp: newSP, ap: (S.player.ap||0)+pp, tr: Object.assign({}, S.player.tr, { tp: (S.player.tr.tp||0) + Math.floor(pp/4) + 15 }), best: pb, res: newRes, timeline: newTimeline });
+    /* Crowd: weekly drift + how you rode + last week's promise; sponsors pay out training points on the new total */
+    var fansBefore = fansOf(S.player);
+    var perf = performanceDelta(ts.log, wonTitle, isGS);
+    var prom = resolvePromise(S.player.promise, pRound, tier.rounds, wonTitle);
+    var fansNow = clampFans(weeklyDrift(fansBefore) + perf.d + (prom ? prom.delta : 0));
+    var sponsor = sponsorTP(fansNow);
+    var newP = Object.assign({}, S.player, { sp: newSP, ap: (S.player.ap||0)+pp, tr: Object.assign({}, S.player.tr, { tp: (S.player.tr.tp||0) + Math.floor(pp/4) + 15 + sponsor }), best: pb, res: newRes, timeline: newTimeline, fans: fansNow, promise: null });
     /* Update NPC peak ranks */
     var tempS = Object.assign({}, S, { player: newP, npcs: newNpcs });
     var ranked = getRanked(tempS);
@@ -335,7 +388,9 @@ export default function Arena(props) {
     var tierCounts = isGSweek ? [0,0,0,0,0,1] : [10,5,3,2,1,0];
     for (var pti = 0; pti < 6; pti++) {
       var numEvents = tierCounts[pti];
-      if (numEvents === 0 || pti === ts.tierIdx) { if (pti === ts.tierIdx) parallelResults.push({ tier: pti, playerEvent: true, count: 1 }); continue; }
+      /* The player's tournament is one of this tier's events; the rest of the tier still plays its own */
+      if (pti === ts.tierIdx) { parallelResults.push({ tier: pti, playerEvent: true, count: 1 }); numEvents -= 1; }
+      if (numEvents <= 0) continue;
       var pt = TIERS[pti];
       /* Collect eligible NPCs not in player's tournament */
       var eligible = [];
@@ -347,11 +402,15 @@ export default function Arena(props) {
       /* Shuffle eligible pool */
       for (var ek = eligible.length - 1; ek > 0; ek--) { var ej = Math.floor(Math.random()*(ek+1)); var et = eligible[ek]; eligible[ek] = eligible[ej]; eligible[ej] = et; }
       var topWinner = null;
-      var trainStats = ["r","p","f","s","g"];
       for (var ev = 0; ev < numEvents; ev++) {
         var poolStart = ev * pt.size;
         var pool = eligible.slice(poolStart, poolStart + pt.size);
         if (pool.length < 4) break;
+        /* One tournament per rider per week, even where tier rank ranges overlap */
+        pool = pool.filter(function(p){ return !playedIds[p.id]; });
+        pool.forEach(function(p){ playedIds[p.id] = true; });
+        if (pool.length % 2) pool.pop();
+        if (pool.length < 4) continue;
         /* Track each participant's deepest round */
         var deepRound = {};
         for (var dp = 0; dp < pool.length; dp++) deepRound[pool[dp].id] = 0;
@@ -392,36 +451,16 @@ export default function Arena(props) {
             }
           }
         }
-        /* ── TRAINING for ALL participants based on how far they went ── */
-        for (var tp2 = 0; tp2 < pool.length; tp2++) {
-          var tNpc = newNpcs.find(function(n){return n.id===pool[tp2].id;});
-          if (!tNpc) continue;
-          var dr = deepRound[pool[tp2].id] || 0;
-          var trainLevels = 0;
-          if (dr >= pt.rounds) trainLevels = 2;       /* Winner: 2 levels */
-          else if (dr >= pt.rounds - 1) trainLevels = 2; /* Finalist: 2 levels */
-          else if (dr >= pt.rounds - 2) trainLevels = 1; /* Semifinalist: 1 level */
-          else if (dr >= 1) trainLevels = 1;             /* Won at least 1 match: 1 level */
-          else trainLevels = Math.random() < 0.3 ? 1 : 0; /* R1 loser: 30% chance */
-          tNpc.tr = Object.assign({s:0,g:0}, tNpc.tr||{});
-          for (var tl = 0; tl < trainLevels; tl++) {
-            var tSt = trainStats[Math.floor(Math.random()*5)];
-            if ((tNpc.tr[tSt]||0) < 20) tNpc.tr[tSt] = (tNpc.tr[tSt]||0)+1;
-          }
-        }
       }
       parallelResults.push({ tier: pti, count: numEvents, winner: topWinner });
     }
-    /* Background training: NPCs who didn't play still have small chance */
-    var trainStats2 = ["r","p","f","s","g"];
-    for (var bgI = 0; bgI < newNpcs.length; bgI++) {
-      if (playedIds[newNpcs[bgI].id]) continue;
-      if (Math.random() < 0.12) {
-        newNpcs[bgI].tr = Object.assign({s:0,g:0}, newNpcs[bgI].tr||{});
-        var bgSt = trainStats2[Math.floor(Math.random()*5)];
-        if ((newNpcs[bgI].tr[bgSt]||0) < 20) newNpcs[bgI].tr[bgSt] = (newNpcs[bgI].tr[bgSt]||0)+1;
-      }
-    }
+    /* ── TRAINING: every rider earns and spends training points by the player's rules ── */
+    var trainLog = {};
+    newNpcs.forEach(function(n){
+      var earned = Math.max(0, (n.sp || 0) - (spBefore[n.id] || 0));
+      var bought = npcTrainWeek(n, playedIds[n.id] ? 15 + Math.floor(earned / 4) : 10);
+      if (bought) trainLog[n.id] = bought;
+    });
     /* Calculate money earned */
     var moneyEarned = 0;
     for (var mri = 0; mri <= pRound; mri++) { moneyEarned += (tier.money || [])[mri] || 0; }
@@ -432,8 +471,24 @@ export default function Arena(props) {
     /* Record post-event rank for sparkline */
     var newRank = pRankOf(Object.assign({}, S, { player: newP, npcs: newNpcs }));
     newP.rankHist = (newP.rankHist || []).concat([newRank]).slice(-40);
-    save(Object.assign({}, S, { player: newP, npcs: newNpcs, tHist: hist, cal: cal, calIdx: S.calIdx + 1, activeT: null, activeF: null }));
+    var afterS = Object.assign({}, S, { player: newP, npcs: newNpcs, tHist: hist, cal: cal, calIdx: S.calIdx + 1, activeT: null, activeF: null });
+    var issue = null;
+    try {
+      issue = buildIssue({ before: S, after: afterS, bracket: ts.bracket, roundNames: rNames, tierIdx: ts.tierIdx, tierName: tier.name, pRound: pRound, wonTitle: wonTitle,
+        pts: pp, net: netChange, money: moneyEarned, champ: champW, parallel: parallelResults, trainLog: trainLog, weekLabel: curEv && curEv.type === "gs" ? "Grand Slam " + curEv.gsNum : "Week " + wLabel });
+    } catch (e) { console.error("News issue failed:", e); }
+    if (issue) {
+      issue.fans = { before: fansBefore, perf: perf.d, notes: perf.notes, promise: prom, sponsor: sponsor, after: fansNow };
+      afterS.news = [issue].concat(S.news || []).slice(0, 12);
+    }
+    save(afterS);
     setScr("hub"); setTS(null);
+    if (issue) {
+      /* Press first, then the paper (which quotes the interview) */
+      var y = issue.you, rival = y.rivalry && y.rivalry.l >= 2 && y.rivalry.l > y.rivalry.w;
+      var ctx = y.champion ? "champion" : y.reached === "Final" ? "final" : rival ? "rival" : y.wins >= 2 ? "deep" : "early";
+      setInterview({ issue: issue, iv: makeInterview(ctx, { tier: tier.name, round: y.reached, foe: y.lostTo ? sh(y.lostTo.foe.name) : "" }) });
+    }
   }
 
   /* ─── Finals ─── */
@@ -517,7 +572,10 @@ export default function Arena(props) {
         {confetti && (<Confetti />)}
         {prof && (<Profile player={prof.p} rank={prof.rank} playerName={S.pName} h2h={!prof.p.isP && S.player.h2h ? (S.player.h2h[prof.p.id] || []) : null} timeline={prof.p.isP ? (S.player.timeline || []) : null} onClose={function(){setProf(null)}} />)}
         {showHelp && (<HelpScreen onClose={function(){setHelp(false)}} />)}
-        {picking && !seasonDone && (<TierSheet available={avTiers} rank={pRank} onClose={function(){setPicking(false)}} onPick={function(ti){ setPicking(false); startTourney(ti); }} />)}
+        {picking && !seasonDone && (<TierSheet available={avTiers} wildcard={wildcardTier(S)} rank={pRank} onClose={function(){setPicking(false)}} onPick={function(ti){ setPicking(false); startTourney(ti); }} />)}
+        {paper && (<DailyCluck issue={paper} onClose={function(){ setPaper(null); }} />)}
+        {interview && (<Interview iv={interview.iv} recentTones={S.player.lastTones || []} fans={fansOf(S.player)}
+          onAnswer={onInterviewAnswer} onDone={function(issue){ setInterview(null); setPaper(issue || interview.issue); }} />)}
         <input ref={fileRef} type="file" accept=".json" onChange={importSave} style={{display:"none"}} />
 
         <div style={{maxWidth:520,margin:"0 auto",textAlign:"left"}}>
@@ -526,6 +584,7 @@ export default function Arena(props) {
           {hubTab === "home" && (
             <HomeTab S={S} pRank={pRank} curEvent={curEvent} seasonDone={seasonDone}
               onPlay={playCurrent} onFinals={startFinals} onNextSeason={nextSeason}
+              onReadPaper={function(issue){ setPaper(issue); }}
               onTrain={function(){ goTab("train"); }}
               onOpenProfile={function(){ setProf({ p: Object.assign({}, S.player, { name: S.pName, emoji: "👵" }), rank: pRank }); }} />
           )}
@@ -659,11 +718,12 @@ export default function Arena(props) {
             function renderRow(p, i) {
               var t = p.tr||{};
               return (
-                <div key={p.id+"-"+i} onClick={function(){setProf({p:p,rank:i+1})}} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"5px 8px",background:p.isP?C.goldSoft:i%2===0?C.cardWarm:"transparent",borderRadius:8,cursor:"pointer",borderLeft:i<16?"3px solid "+(i<4?C.gold:i<8?"#22c55e":i<12?"#3b82f6":"#64748b"):"3px solid transparent"}}>
+                <div key={p.id+"-"+i} onClick={function(){setProf({p:p,rank:i+1})}} style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8,padding:"5px 8px",background:p.isP?C.goldSoft:i%2===0?C.cardWarm:"transparent",borderRadius:8,cursor:"pointer",borderLeft:i<16?"3px solid "+(i<4?C.gold:i<8?"#22c55e":i<12?"#3b82f6":"#64748b"):"3px solid transparent"}}>
+                  <span style={{color:i<3?C.goldInk:C.textMuted,fontWeight:900,fontSize:13,width:34,textAlign:"right",flexShrink:0}}>#{i+1}</span>
+                  <Face palette={p.isP ? PLAYER_PALETTE : paletteFor(p.id, i+1)} size={34} />
                   <div style={{minWidth:0,flex:1}}>
                     <div style={{fontSize:14,color:C.text,fontWeight:p.isP?900:700,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
-                      <span style={{color:i<3?C.goldInk:C.textMuted,fontWeight:900,marginRight:4,width:30,display:"inline-block",textAlign:"right"}}>#{i+1}</span>
-                      {p.isP?S.pName+" ⭐":(p.emoji||"")+" "+sh(p.name)}
+                      {p.isP?S.pName+" ⭐":(p.emoji||"")+" "+sh(p.name)}{!p.isP && standing(i+1) ? " " + standing(i+1).icon : ""}
                     </div>
                     <div style={{fontSize:12,color:C.textMuted,marginTop:1,fontWeight:600}}>
                       {p.isP?"":"Talent "}{p.isP?"":((p.skill||0)>80?"Elite":(p.skill||0)>60?"Strong":(p.skill||0)>40?"Average":"Developing")}{p.isP?"":" · "}{STATS.map(function(st){ return st.icon + (t[st.k]||0); }).join(" ")}
@@ -760,7 +820,7 @@ export default function Arena(props) {
 
         {pm && ts.alive && opp && (
           <div>
-            <PowerBar key={"t-"+ts.round} scout={scoutT} onDone={onTR} oppSkill={opp.skill||50} diff={ts.round + [0,1,2,3,4,3][ts.tierIdx]} tr={S.player.tr} otr={opp.tr||{}} playerName={S.pName} playerEmoji="⚔️" oppName={sh(opp.name)} oppEmoji={opp.emoji||"👤"} oppId={opp.id} tierColor={tier.col} roundLabel={rNames[ts.round]}
+            <PowerBar key={"t-"+ts.round} scout={scoutT} onDone={onTR} oppSkill={opp.skill||50} diff={ts.round + [0,1,2,3,4,3][ts.tierIdx]} tr={S.player.tr} otr={opp.tr||{}} playerName={S.pName} playerEmoji="⚔️" oppName={sh(opp.name)} oppEmoji={opp.emoji||"👤"} oppId={opp.id} oppRank={oppRank} fans={fansOf(S.player)} tierColor={tier.col} roundLabel={rNames[ts.round]}
               tierName={tier.name} youSub={"World #"+pRank} foeSub={"World #"+oppRank+" · "+talentLabel(opp.skill)}
               isFinal={ts.round >= tier.rounds-1} nextLabel={ts.round < tier.rounds-1 ? rNames[ts.round+1] : null} eliminated={true}
               stakes={{ pts: tier.pts[ts.round], money: (tier.money||[])[ts.round]||0 }}
@@ -806,7 +866,7 @@ export default function Arena(props) {
           <MatchHeader tierName={"Season " + S.sNum + " Finals"} tierColor="#a855f7" roundLabel={fs.phase==="final"?"World Final":fs.phase==="semis"?"Semifinal":"Group Stage"}
             bestOf={FINALS_BO} rounds={["Group Stage","Semifinal","World Final"]} roundIdx={fs.phase==="final"?2:fs.phase==="semis"?1:0}
             onScout={function(){ setShowScout(true); }} onHelp={function(){ setHelp(true); }} />
-          <PowerBar key={"f-"+fs.phase+"-"+fopp.id} scout={scoutF} onDone={onFR} oppSkill={fopp.skill||60} diff={fs.phase==="final"?5:fs.phase==="semis"?4:3} tr={S.player.tr} otr={fopp.tr||{}} playerName={S.pName} playerEmoji="⚔️" oppName={sh(fopp.name)} oppEmoji={fopp.emoji||"👤"} oppId={fopp.id} tierColor={fs.phase==="final"?"#b45309":"#8b5cf6"} roundLabel={fs.phase==="final"?"World Final":fs.phase==="semis"?"Semifinal":"Group Stage"}
+          <PowerBar key={"f-"+fs.phase+"-"+fopp.id} scout={scoutF} onDone={onFR} oppSkill={fopp.skill||60} diff={fs.phase==="final"?5:fs.phase==="semis"?4:3} tr={S.player.tr} otr={fopp.tr||{}} playerName={S.pName} playerEmoji="⚔️" oppName={sh(fopp.name)} oppEmoji={fopp.emoji||"👤"} oppId={fopp.id} oppRank={fRank} fans={fansOf(S.player)} tierColor={fs.phase==="final"?"#b45309":"#8b5cf6"} roundLabel={fs.phase==="final"?"World Final":fs.phase==="semis"?"Semifinal":"Group Stage"}
           tierName={"Season "+S.sNum+" Finals"} youSub={"World #"+pRank} foeSub={talentLabel(fopp.skill)}
           isFinal={fs.phase==="final"} nextLabel={fs.phase==="semis"?"World Final":null} eliminated={fs.phase!=="groups"}
           bestOf={FINALS_BO} initialProgress={fs.match}

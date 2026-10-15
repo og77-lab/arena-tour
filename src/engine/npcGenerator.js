@@ -1,6 +1,7 @@
 /* ═══ Engine / NPC Generator ═══ Create the 999-NPC field with skill distribution and seeded SP */
 
-import { EMO, FN, TT } from "../models/constants";
+import { EMO, TT } from "../models/constants";
+import { GRANNY_NAMES as FN } from "../models/persona";
 
 export function mkNPCs() {
   var npcs = [];

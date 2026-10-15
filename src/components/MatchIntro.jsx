@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { playWhoosh, playImpact, playBeep, playFight } from "../sounds";
 import { Sparks, vibrate, REDUCED_MOTION } from "./fx";
-import { Rider } from "./Rider";
+import { Rider, Face } from "./Rider";
 
 const { useState, useEffect, useRef } = React;
 
@@ -30,6 +30,58 @@ function FighterBlock(props) {
   );
 }
 
+/* Side-by-side comparison of the two riders: what each brings into this match */
+function TaleOfTape(props) {
+  var sc = props.scout, y = sc.you || {};
+  var h = sc.h2h || { w: 0, l: 0 };
+  var GOOD = "#4ade80", BAD = "#f87171", MID = "rgba(255,255,255,0.85)";
+  function row(label, mine, hers, better, key) {
+    return (
+      <div key={key || label} style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", alignItems: "center", gap: 8, padding: "clamp(1px, 0.7vh, 5px) 0", borderTop: "1px solid rgba(255,255,255,0.1)" }}>
+        <span style={{ textAlign: "right", fontWeight: 900, fontSize: 15, color: better > 0 ? GOOD : better < 0 ? MID : MID }}>{mine}</span>
+        <span style={{ fontSize: 10.5, fontWeight: 900, letterSpacing: 1.2, color: "rgba(255,255,255,0.75)", textTransform: "uppercase", textAlign: "center", minWidth: 104 }}>{label}</span>
+        <span style={{ textAlign: "left", fontWeight: 900, fontSize: 15, color: better < 0 ? BAD : MID }}>{hers}</span>
+      </div>
+    );
+  }
+  var prevWho = null;
+  return (
+    <motion.div onPointerDown={function (e) { e.stopPropagation(); }}
+      initial={{ y: 24, opacity: 0, scale: 0.95 }} animate={{ y: 0, opacity: 1, scale: 1 }} transition={{ type: "spring", stiffness: 300, damping: 24 }}
+      style={{ width: "min(100%, 440px)", flexShrink: 0, background: "rgba(15,23,42,0.96)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 16, padding: "10px 14px 10px", boxSizing: "border-box", color: "#fff", boxShadow: "0 18px 40px rgba(0,0,0,0.5)" }}>
+      <div style={{ textAlign: "center", fontSize: 10, fontWeight: 900, letterSpacing: 3, color: "#fde68a" }}>TALE OF THE TAPE</div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", alignItems: "center", gap: 8, margin: "6px 0 4px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 7, justifyContent: "flex-end", minWidth: 0 }}>
+          <span style={{ fontWeight: 900, fontSize: 14, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{props.you.name}</span>
+          <Face palette={props.you.palette} size={40} />
+        </div>
+        <span style={{ fontWeight: 900, fontStyle: "italic", color: "#fbbf24", fontSize: 16 }}>VS</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 7, minWidth: 0 }}>
+          <Face palette={props.foe.palette} size={40} />
+          <span style={{ fontWeight: 900, fontSize: 14, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{sc.emoji} {sc.name}{sc.standing ? " " + sc.standing.icon : ""}</span>
+        </div>
+      </div>
+      {row("World rank", y.rank ? "#" + y.rank : "—", "#" + sc.rank, y.rank && sc.rank ? sc.rank - y.rank : 0)}
+      {row("Season points", (y.pts || 0).toLocaleString(), (sc.pts || 0).toLocaleString(), (y.pts || 0) - (sc.pts || 0))}
+      {row("Talent", "—", sc.talent, 0)}
+      {sc.stats.map(function (s) {
+        var head = s.who !== prevWho; prevWho = s.who;
+        return (
+          <div key={s.label}>
+            {head && (<div style={{ textAlign: "center", fontSize: 10, fontWeight: 900, letterSpacing: 2, color: "#fde68a", marginTop: 6 }}>{s.who === "granny" ? "👵 GRANNY" : "🐓 ROOSTER"}</div>)}
+            {row(s.icon + " " + s.label, s.you, s.foe, s.you - s.foe, s.label)}
+          </div>
+        );
+      })}
+      <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "4px 12px", marginTop: 8, fontSize: 12, fontWeight: 800, color: "rgba(255,255,255,0.85)" }}>
+        <span>Difficulty <b style={{ color: sc.diff.colOnDark }}>{sc.diff.label}</b></span>
+        <span>{h.w + h.l === 0 ? "First meeting" : "Head-to-head " + h.w + "–" + h.l}</span>
+        {sc.rooster && (<span>🐓 {sc.rooster}</span>)}
+      </div>
+    </motion.div>
+  );
+}
+
 export default function MatchIntro(props) {
   var _stage = useState("slam"), stage = _stage[0], setStage = _stage[1];
   var _n = useState(3), n = _n[0], setN = _n[1];
@@ -50,26 +102,32 @@ export default function MatchIntro(props) {
     later(function () { doneRef.current(); }, 2330);
   }
 
+  /* After the slam the intro waits on the tale-of-the-tape card; the countdown only starts when the player is ready */
   useEffect(function () {
     playWhoosh();
     later(function () { playImpact(true); vibrate(35); }, 420);
-    later(startCount, 1600);
+    later(function () { setStage(function (s) { return s === "slam" ? "scout" : s; }); }, 1500);
     return clearAll;
   }, []);
+
+  function advance() {
+    if (stage === "slam") setStage("scout");
+    else if (stage === "scout") startCount();
+  }
 
   /* Parent bumps skipSignal on Space/Enter */
   var skipSeen = useRef(props.skipSignal);
   useEffect(function () {
     if (props.skipSignal === skipSeen.current) return;
     skipSeen.current = props.skipSignal;
-    if (stage === "slam") startCount();
+    advance();
   }, [props.skipSignal]);
 
   var tierColor = props.tierColor || "#f59e0b";
 
   return createPortal(
     <motion.div
-      onPointerDown={function () { if (stage === "slam") startCount(); }}
+      onPointerDown={advance}
       initial={{ opacity: 0 }}
       animate={stage === "out" ? { opacity: 0, scale: 1.08 } : { opacity: 1, scale: 1 }}
       transition={{ duration: stage === "out" ? 0.25 : 0.12 }}
@@ -103,35 +161,7 @@ export default function MatchIntro(props) {
         </motion.div>
 
         <FighterBlock side="left" name={props.you.name} emoji={props.you.emoji} sub={props.you.sub} palette={props.you.palette} />
-        <FighterBlock side="right" name={props.foe.name} emoji={props.foe.emoji} sub={props.foe.sub} palette={props.foe.palette} raised={!!props.scout} />
-
-        {/* Scouting summary: training gap per stat, difficulty, head-to-head */}
-        {props.scout && stage === "slam" && (
-          <div style={{ position: "absolute", left: 0, right: 0, bottom: "calc(3.5% + 26px)", zIndex: 4, display: "flex", justifyContent: "center", pointerEvents: "none" }}>
-          <motion.div initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.75, type: "spring", stiffness: 260, damping: 24 }}
-            style={{ width: "min(92%, 440px)", background: "rgba(15,23,42,0.88)", border: "1px solid rgba(255,255,255,0.18)", borderRadius: 14, padding: "8px 12px", boxSizing: "border-box" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 10, fontWeight: 900, letterSpacing: 2, color: "rgba(255,255,255,0.85)" }}>
-              <span>SCOUTING</span>
-              <span>
-                <span style={{ color: props.scout.diff.colOnDark }}>{props.scout.diff.label.toUpperCase()}</span>
-                <span style={{ opacity: 0.6, margin: "0 6px" }}>·</span>
-                {props.scout.h2h && props.scout.h2h.w + props.scout.h2h.l > 0 ? "H2H " + props.scout.h2h.w + "–" + props.scout.h2h.l : "FIRST MEETING"}
-              </span>
-            </div>
-            <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6 }}>
-              {props.scout.stats.map(function (s) {
-                var g = s.you - s.foe;
-                return (
-                  <div key={s.label} style={{ textAlign: "center", flex: 1 }}>
-                    <div style={{ fontSize: 16 }}>{s.icon}</div>
-                    <div style={{ fontSize: 13, fontWeight: 900, color: g > 0 ? "#4ade80" : g < 0 ? "#f87171" : "rgba(255,255,255,0.75)" }}>{g > 0 ? "+" + g : g < 0 ? "−" + (-g) : "="}</div>
-                  </div>
-                );
-              })}
-            </div>
-          </motion.div>
-          </div>
-        )}
+        <FighterBlock side="right" name={props.foe.name} emoji={props.foe.emoji} sub={props.foe.sub} palette={props.foe.palette} />
 
         {/* VS slam */}
         <div style={{ position: "absolute", left: "50%", top: "50%", zIndex: 5 }}>
@@ -146,14 +176,31 @@ export default function MatchIntro(props) {
         </div>
         <Sparks count={22} delay={0.42} spread={190} zIndex={4} />
 
-        {/* Countdown */}
         <AnimatePresence>
           {stage !== "slam" && (
             <motion.div key="dim" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              style={{ position: "absolute", inset: 0, background: "radial-gradient(circle,rgba(0,0,0,0.25),rgba(0,0,0,0.7))", zIndex: 6 }} />
+              style={{ position: "absolute", inset: 0, background: stage === "scout" ? "rgba(2,6,23,0.72)" : "radial-gradient(circle,rgba(0,0,0,0.25),rgba(0,0,0,0.7))", zIndex: 6 }} />
           )}
         </AnimatePresence>
-        {stage !== "slam" && (
+
+        {/* Tale of the tape: waits here until the player is ready */}
+        {stage === "scout" && (
+          <div style={{ position: "absolute", inset: 0, zIndex: 7, overflowY: "auto", padding: "12px", boxSizing: "border-box", display: "flex" }}>
+          {/* margin:auto centres when there's room and scrolls (instead of clipping) on short screens */}
+          <div style={{ margin: "auto", width: "100%", display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
+            {props.scout && (<TaleOfTape scout={props.scout} you={props.you} foe={props.foe} />)}
+            <motion.button onClick={function (e) { e.stopPropagation(); startCount(); }} onPointerDown={function (e) { e.stopPropagation(); }}
+              initial={{ y: 20, scale: 0.9 }} animate={{ y: 0, scale: 1 }} transition={{ delay: 0.15, type: "spring", stiffness: 380, damping: 18 }}
+              style={{ flexShrink: 0, background: "linear-gradient(180deg,#f87171,#dc2626)", color: "#fff", border: "2px solid #450a0a", boxShadow: "0 5px 0 #450a0a", borderRadius: 14, padding: "13px 30px", fontWeight: 900, fontSize: 18, letterSpacing: 2, cursor: "pointer", fontFamily: "inherit", animation: REDUCED_MOTION ? "none" : "pulse 1.3s ease infinite 0.6s" }}>
+              ⚔️ READY? FIGHT!
+            </motion.button>
+            <div style={{ fontSize: 11, color: "rgba(255,255,255,0.75)", fontWeight: 700, letterSpacing: 1.5, flexShrink: 0 }}>TAP THE BUTTON OR PRESS SPACE</div>
+          </div>
+          </div>
+        )}
+
+        {/* Countdown */}
+        {(stage === "count" || stage === "out") && (
           <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", zIndex: 7, pointerEvents: "none" }}>
             <AnimatePresence mode="popLayout">
               <motion.div key={n}
@@ -172,7 +219,7 @@ export default function MatchIntro(props) {
         {stage === "slam" && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 0.7 }} transition={{ delay: 0.9 }}
             style={{ position: "absolute", bottom: "3.5%", left: 0, right: 0, textAlign: "center", color: "#fff", fontSize: 11, fontWeight: 700, letterSpacing: 2, zIndex: 4 }}>
-            TAP OR PRESS SPACE TO SKIP
+            TAP TO SEE THE SCOUTING REPORT
           </motion.div>
         )}
       </div>

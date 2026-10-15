@@ -10,6 +10,7 @@ import MatchOutro from "./MatchOutro";
 import SetBreak from "./SetBreak";
 import JoustStage from "./JoustStage";
 import { PLAYER_PALETTE, paletteFor } from "./Rider";
+import { crowdRoar } from "../engine/fans";
 
 const { useState, useEffect, useRef } = React;
 
@@ -168,7 +169,7 @@ export default function PowerBar(props) {
   var finished = useRef(false);
   var tr = props.tr || {}, otr = props.otr || {};
   var nR=(tr.r||0)-(otr.r||0), nP=(tr.p||0)-(otr.p||0), nF=(tr.f||0)-(otr.f||0), nS=(tr.s||0)-(otr.s||0), nG=(tr.g||0)-(otr.g||0);
-  var ctr = 72, sw = Math.max(3, 12 - props.diff * 1.5 + nP * 1.2), fb = nF * 1.5;
+  var ctr = 72, swBase = Math.max(3, 12 - props.diff * 1.5 + nP * 1.2), fb = nF * 1.5;
   var accel = Math.max(0.03, 0.3 - nS * 0.015), minSc = Math.max(0, 15 + nG * 1.5);
   /* Bar resets every set, but each new set starts a little faster (fatigue — Stamina softens it) */
   var baseSpd = Math.max(0.8, 2.4 + props.diff * 0.4 - nR * 0.12);
@@ -180,6 +181,10 @@ export default function PowerBar(props) {
   var setNum = sets.length + 1;
   var cnt = myH.length;
   var deciding = setsWon === need - 1 && setsLost === need - 1;
+  /* Crowd roar: on the last strike of a set with the match on the line, a fan favourite gets a wider gold zone */
+  var onTheLine = cnt === STRIKES_PER_SET - 1 && (setsWon === need - 1 || setsLost === need - 1);
+  var roar = onTheLine ? crowdRoar(props.fans || 0) : 0;
+  var sw = swBase + roar;
 
   var youName = props.playerName || "YOU";
   var oppName = props.oppName || "OPPONENT";
@@ -187,7 +192,7 @@ export default function PowerBar(props) {
   var oppEmoji = props.oppEmoji || "👤";
   var tierColor = props.tierColor || "#f59e0b";
   var youPal = PLAYER_PALETTE;
-  var foePal = paletteFor(props.oppId);
+  var foePal = paletteFor(props.oppId, props.oppRank);
 
   /* Cursor is driven straight on the DOM node so the arena doesn't re-render 60×/s.
      Speed is normalised to 60fps units so 120Hz screens don't get a faster bar. */
@@ -300,7 +305,7 @@ export default function PowerBar(props) {
   function finish() {
     if (!res || finished.current || Date.now() - doneAt.current < 1200) return;
     finished.current = true;
-    props.onDone(res.w, res.pa, res.oa, res.setsWon + "-" + res.setsLost);
+    props.onDone(res.w, res.pa, res.oa, res.setsWon + "-" + res.setsLost, res.sets.map(function (s) { return s.won ? "W" : "L"; }).join(""));
   }
 
   /* Space / Enter drives every phase */
@@ -413,7 +418,7 @@ export default function PowerBar(props) {
         <div style={{ textAlign: "center" }}>
           <span style={{ display: "inline-flex", alignItems: "center", gap: 6, background: banner ? banner.col : "#1e293b", color: "#fff", fontSize: 10, fontWeight: 900, letterSpacing: 1.5, padding: "2px 10px", borderRadius: 20, textTransform: "uppercase", boxShadow: "0 2px 6px rgba(0,0,0,0.15)", animation: banner && !REDUCED_MOTION ? "pulse 1s ease infinite" : "none" }}>
             {!banner && (<span aria-hidden style={{ width: 7, height: 7, borderRadius: "50%", background: tierColor, boxShadow: "0 0 6px " + tierColor }} />)}
-            {banner ? banner.tag : (deciding ? "Deciding set" : "Set " + setNum) + " · Strike " + Math.min(cnt + 1, STRIKES_PER_SET) + "/" + STRIKES_PER_SET}
+            {banner ? banner.tag + (roar && ph === "go" ? " · 📣 Crowd roars" : "") : (deciding ? "Deciding set" : "Set " + setNum) + " · Strike " + Math.min(cnt + 1, STRIKES_PER_SET) + "/" + STRIKES_PER_SET}
           </span>
         </div>
 

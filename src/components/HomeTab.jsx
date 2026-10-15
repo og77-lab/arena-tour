@@ -51,7 +51,9 @@ export default function HomeTab(props) {
   var tr = S.player.tr || {};
   var def = ev && S.player.def ? (S.player.def[S.calIdx] || 0) : 0;
   var isGS = ev && ev.type === "gs";
-  var gsOk = isGS && pRank <= 64;
+  var fans = S.player.fans != null ? S.player.fans : 20;
+  var gsWild = isGS && pRank > 64 && fans >= 80;
+  var gsOk = isGS && (pRank <= 64 || gsWild);
   var heroColor = seasonDone ? "#a855f7" : isGS ? C.gold : "#0ea5e9";
 
   var hero;
@@ -61,7 +63,7 @@ export default function HomeTab(props) {
       : { kicker: "Season " + S.sNum + " complete", title: "Finished #" + pRank, sub: "Top 16 qualify for the Finals. Train up and go again.", cta: "Start Season " + ((S.sNum || 1) + 1) + " →", act: props.onNextSeason, kind: "gold" };
   } else if (isGS) {
     hero = gsOk
-      ? { kicker: "Next event · Grand Slam " + ev.gsNum, title: "Grand Slam", sub: "64 riders · best of 5 sets · 8,000 pts to the champion", cta: "👑 Enter Grand Slam", act: props.onPlay, kind: "gold" }
+      ? { kicker: "Next event · Grand Slam " + ev.gsNum, title: "Grand Slam", sub: gsWild ? "🎟 Your fans got you a wildcard! 64 riders · best of 5 · 8,000 pts to the champion" : "64 riders · best of 5 sets · 8,000 pts to the champion", cta: "👑 Enter Grand Slam", act: props.onPlay, kind: "gold" }
       : { kicker: "Next event · Grand Slam " + ev.gsNum, title: "Not qualified", sub: "Only the top 64 ride in a Slam — you're #" + pRank + ". The tour moves on.", cta: "Skip this week →", act: props.onPlay, kind: "ghost" };
   } else {
     hero = { kicker: "Next event · Week " + ev.block + "." + ev.week, title: "Weekly Tournament", sub: "Pick a tier that fits your rank. Win rounds to earn points & prize money.", cta: "Choose tournament →", act: props.onPlay, kind: "gold" };
@@ -82,10 +84,11 @@ export default function HomeTab(props) {
             <span style={Object.assign(display(19), { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" })}>{S.pName}</span>
             <span style={display(22, C.goldInk)}>#{pRank}</span>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 5, marginTop: 6 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 4, marginTop: 6 }}>
             <Stat k="Points" v={(S.player.sp || 0).toLocaleString()} />
             <Stat k="Prize" v={money(S.player.money)} color={C.greenInk} />
             <Stat k="Train" v={(tr.tp || 0) + " TP"} color={C.goldInk} />
+            <Stat k="Fans" v={"❤️ " + fans} color="#be123c" />
           </div>
         </div>
       </button>
@@ -123,8 +126,21 @@ export default function HomeTab(props) {
 
       <RankSparkline history={S.player.rankHist || []} />
 
-      {/* Around the tour last week */}
-      {news.length > 0 && (
+      {/* Latest issue of the paper */}
+      {S.news && S.news[0] && (
+        <button onClick={function () { props.onReadPaper(S.news[0]); }}
+          style={Object.assign(card({ padding: "10px 12px", background: "#f4ecd8", borderColor: "#d6c7a1" }), { display: "flex", alignItems: "center", gap: 10, width: "100%", cursor: "pointer", textAlign: "left", fontFamily: FONT })}>
+          <span aria-hidden style={{ fontSize: 30, transform: "rotate(-8deg)" }}>📰</span>
+          <span style={{ flex: 1, minWidth: 0 }}>
+            <span style={{ display: "block", fontFamily: "Georgia, 'Times New Roman', serif", fontWeight: 900, fontSize: 17, color: "#1c1917" }}>The Daily Cluck</span>
+            <span style={{ display: "block", fontSize: 12, color: "#4a4038", fontWeight: 700 }}>{S.news[0].wk} · your week, your rivals and the world's best</span>
+          </span>
+          <span style={{ fontSize: 13, fontWeight: 900, color: "#9a3412", whiteSpace: "nowrap" }}>Read ›</span>
+        </button>
+      )}
+
+      {/* Around the tour last week (shown until the first issue is printed) */}
+      {!(S.news && S.news[0]) && news.length > 0 && (
         <div style={card({ padding: "10px 12px" })}>
           <div style={label(C.textSoft)}>📰 Around the tour last week</div>
           <div style={{ marginTop: 6, display: "flex", flexDirection: "column", gap: 4 }}>

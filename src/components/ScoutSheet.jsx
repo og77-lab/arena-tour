@@ -62,6 +62,12 @@ export default function ScoutSheet(props) {
           </div>
         </div>
 
+        <div style={card({ padding: "8px 12px", marginTop: 10, background: C.cardWarm })}>
+          {sc.standing && (<div style={{ fontSize: 13, fontWeight: 900, color: C.goldInk, marginBottom: 3 }}>{sc.standing.icon} {sc.standing.tag} of the tour{sc.titles ? " · " + sc.titles + " titles" : ""}</div>)}
+          <div style={{ fontSize: 13, color: C.text, fontWeight: 700 }}>🐓 Rides <b>{sc.rooster}</b></div>
+          <div style={{ fontSize: 13, color: C.textSoft, marginTop: 2, fontStyle: "italic" }}>“{sc.trait}”</div>
+        </div>
+
         <div style={card({ padding: "6px 12px", marginTop: 10 })}>
           <div style={Object.assign(label(C.textSoft), { margin: "4px 0 2px" })}>Training — only the gap counts</div>
           {sc.stats.map(function (s, i) {

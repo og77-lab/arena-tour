@@ -27,7 +27,7 @@ function App() {
 
   if (user === undefined) {
     return (
-      <div style={{ minHeight: '100vh', background: '#fff8e7', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1c1917', fontFamily: FONT }}>
+      <div style={{ minHeight: 'calc(100dvh / var(--z, 1))', background: '#fff8e7', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1c1917', fontFamily: FONT }}>
         <div style={{ textAlign: 'center' }}>
           <img src="/icon-192.png" alt="" width="72" height="72" style={{ borderRadius: 16, marginBottom: 8 }} />
           <div style={{ fontSize: 14, color: '#57534e', fontWeight: 700 }}>Saddling the roosters…</div>

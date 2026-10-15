@@ -33,7 +33,7 @@ export default function LoginScreen({ onGuest }) {
   }
 
   const W = {
-    minHeight: '100vh',
+    minHeight: 'calc(100dvh / var(--z, 1))',
     background: '#f8fafc',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     fontFamily: FONT, color: '#0f172a', padding: 20
