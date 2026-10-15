@@ -389,14 +389,14 @@ export default function Arena(props) {
     var newTimeline = (S.player.timeline || []).concat(tlNew).slice(-200);
     /* Crowd: weekly drift + how you rode + last week's promise; sponsors pay out training points on the new total */
     var fansBefore = fansOf(S.player);
-    var perf = performanceDelta(ts.log, wonTitle, isGS);
+    var perf = performanceDelta(ts.log, wonTitle, isGS, fansBefore);
     var prom = resolvePromise(S.player.promise, pRound, tier.rounds, wonTitle);
     /* Beating your rival: the crowd loves a grudge settled on the lanes */
     var rivalNow = S.player.rival || null;
     var revengeWins = rivalNow ? ts.log.filter(function(m){ return m.won && m.oppId === rivalNow.id; }).length : 0;
     var rivalLoss = rivalNow ? ts.log.some(function(m){ return !m.won && m.oppId === rivalNow.id; }) : false;
     if (revengeWins) { perf.d += 3; perf.notes = perf.notes.concat(["revenge on " + sh(rivalNow.name)]); }
-    var fansNow = clampFans(weeklyDrift(fansBefore) + perf.d + (prom ? prom.delta : 0));
+    var fansNow = clampFans(weeklyDrift(fansBefore, curRank) + perf.d + (prom ? prom.delta : 0));
     var sponsor = sponsorTP(fansNow);
     /* Career counters for the achievements, then who your rival is after this week */
     var newStats = tallyTournament(S.player.stats, ts.log, { bo: tier.bo, tierIdx: ts.tierIdx, wonTitle: wonTitle, rivalId: rivalNow ? rivalNow.id : null, promiseKept: !!(prom && prom.kept) });
