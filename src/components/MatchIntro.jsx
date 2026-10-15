@@ -49,6 +49,13 @@ function TaleOfTape(props) {
     <motion.div onPointerDown={function (e) { e.stopPropagation(); }}
       initial={{ y: 24, opacity: 0, scale: 0.95 }} animate={{ y: 0, opacity: 1, scale: 1 }} transition={{ type: "spring", stiffness: 300, damping: 24 }}
       style={{ width: "min(100%, 440px)", flexShrink: 0, background: "rgba(15,23,42,0.96)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 16, padding: "10px 14px 10px", boxSizing: "border-box", color: "#fff", boxShadow: "0 18px 40px rgba(0,0,0,0.5)" }}>
+      {sc.rival && (
+        <motion.div initial={{ scale: 1.4, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ delay: 0.25, type: "spring", stiffness: 400, damping: 14 }}
+          style={{ textAlign: "center", margin: "-2px auto 8px", background: "linear-gradient(90deg,#9f1239,#e11d48,#9f1239)", borderRadius: 10, padding: "5px 10px", fontWeight: 900, fontSize: 13, letterSpacing: 2, color: "#fff", boxShadow: "0 3px 0 #4c0519" }}>
+          😤 YOUR ARCH-RIVAL · {h.w}–{h.l}
+          <div style={{ fontSize: 10.5, letterSpacing: 0.5, fontWeight: 800, opacity: 0.9 }}>{h.w > h.l ? "You lead the feud — keep the boot on her neck" : h.w < h.l ? "She's got your number. Time for revenge." : "All square. Somebody has to blink."}</div>
+        </motion.div>
+      )}
       <div style={{ textAlign: "center", fontSize: 10, fontWeight: 900, letterSpacing: 3, color: "#fde68a" }}>TALE OF THE TAPE</div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", alignItems: "center", gap: 8, margin: "6px 0 4px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 7, justifyContent: "flex-end", minWidth: 0 }}>

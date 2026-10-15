@@ -24,6 +24,7 @@ export default function Profile(props) {
           <div style={{ textAlign: "center", marginTop: 4 }}>
             <div style={{ fontSize: 21, fontWeight: 900, fontStyle: "italic", color: "#1c1917", lineHeight: 1.1 }}>{p.isP ? (props.playerName || "You") : (p.emoji || "") + " " + p.name}</div>
             {!p.isP && standing(rank) && (<div style={{ display: "inline-block", marginTop: 4, background: "#92400e", color: "#fff", fontSize: 11, fontWeight: 900, letterSpacing: 1.5, padding: "2px 10px", borderRadius: 12 }}>{standing(rank).icon} {standing(rank).tag.toUpperCase()} OF THE TOUR</div>)}
+            {props.isRival && (<div style={{ display: "inline-block", marginTop: 4, marginLeft: 4, background: "#be123c", color: "#fff", fontSize: 11, fontWeight: 900, letterSpacing: 1.5, padding: "2px 10px", borderRadius: 12 }}>😤 YOUR ARCH-RIVAL</div>)}
             {!p.isP && (<div style={{ fontSize: 13, color: "#57534e", fontWeight: 700, marginTop: 4 }}>🐓 Rides <b style={{ color: "#1c1917" }}>{roosterName(p.id)}</b></div>)}
             {!p.isP && (<div style={{ fontSize: 13, color: "#57534e", fontStyle: "italic", marginTop: 2 }}>{trait(p.id)}</div>)}
           </div>

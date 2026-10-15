@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { TIERS, TOTAL_EVENTS } from "../models/constants";
 import { sh } from "../models/formulas";
 import { C, FONT, display, label, card, button, pill, money } from "../ui/theme";
-import { Rider, PLAYER_PALETTE } from "./Rider";
+import { Rider, Face, PLAYER_PALETTE, paletteFor } from "./Rider";
 import RankSparkline from "./RankSparkline";
 
 function Bunting(props) {
@@ -119,6 +119,38 @@ export default function HomeTab(props) {
           <span>
             <span style={{ fontSize: 14, fontWeight: 900, color: C.text }}>🏋️ {tr.tp} training points to spend</span>
             <span style={{ display: "block", fontSize: 12, color: C.textSoft, marginTop: 2 }}>Stats only count relative to your opponent — keep up!</span>
+          </span>
+          <span style={{ fontSize: 20, color: C.goldInk, fontWeight: 900 }}>›</span>
+        </button>
+      )}
+
+      {/* Your rival: the feud at a glance */}
+      {props.rival && (
+        <button onClick={props.onRival} style={Object.assign(card({ padding: "10px 12px", background: "linear-gradient(180deg,#fff,#fff1f2)", borderColor: "#fecdd3" }), { display: "flex", alignItems: "center", gap: 10, width: "100%", cursor: "pointer", textAlign: "left", fontFamily: FONT })}>
+          <div style={{ position: "relative", flexShrink: 0 }}>
+            <Face palette={paletteFor(props.rival.p.id, props.rival.rank)} size={46} />
+            <span aria-hidden style={{ position: "absolute", right: -4, bottom: -4, fontSize: 16 }}>😤</span>
+          </div>
+          <span style={{ flex: 1, minWidth: 0 }}>
+            <span style={label("#be123c")}>Your rival</span>
+            <span style={{ display: "block", fontSize: 16, fontWeight: 900, color: C.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{props.rival.p.emoji} {props.rival.p.name}</span>
+            <span style={{ display: "block", fontSize: 12, color: C.textSoft, fontWeight: 700 }}>
+              World #{props.rival.rank} · Head-to-head <b style={{ color: props.rival.rec && props.rival.rec.w >= props.rival.rec.l ? C.greenInk : C.redInk }}>{props.rival.rec ? props.rival.rec.w + "–" + props.rival.rec.l : "—"}</b> · lead by 3 to settle it
+            </span>
+          </span>
+          <span style={{ fontSize: 20, color: "#be123c", fontWeight: 900 }}>›</span>
+        </button>
+      )}
+
+      {/* Badges */}
+      {props.ach && (
+        <button onClick={props.onAch} style={Object.assign(card({ padding: "10px 12px" }), { display: "flex", alignItems: "center", gap: 10, width: "100%", cursor: "pointer", textAlign: "left", fontFamily: FONT })}>
+          <span aria-hidden style={{ fontSize: 28 }}>🏅</span>
+          <span style={{ flex: 1, minWidth: 0 }}>
+            <span style={{ display: "block", fontSize: 15, fontWeight: 900, color: C.text }}>Achievements · {props.ach.n} / {props.ach.total}</span>
+            <span style={{ display: "block", height: 7, borderRadius: 4, background: "#efe3c4", marginTop: 5, overflow: "hidden" }}>
+              <span style={{ display: "block", width: (props.ach.n / props.ach.total * 100) + "%", height: "100%", background: "linear-gradient(90deg,#fde68a,#f59e0b)" }} />
+            </span>
           </span>
           <span style={{ fontSize: 20, color: C.goldInk, fontWeight: 900 }}>›</span>
         </button>

@@ -21,7 +21,11 @@ import MatchHeader from "./components/MatchHeader";
 import ScoutSheet from "./components/ScoutSheet";
 import { Rider, Face, PLAYER_PALETTE, paletteFor } from "./components/Rider";
 import { roosterName, trait, standing } from "./models/persona";
-import { buildIssue, buildSpecialEdition } from "./engine/news";
+import { buildIssue, buildSpecialEdition, rankMap } from "./engine/news";
+import { tallyTournament, checkAchievements } from "./engine/achievements";
+import { updateRival, rivalRecord } from "./engine/rivalry";
+import { ACHIEVEMENTS } from "./engine/achievements";
+import AchievementsSheet, { AchToast, achCount } from "./components/Achievements";
 import { fansOf, clampFans, weeklyDrift, performanceDelta, sponsorTP, hasTierWildcard, hasSlamWildcard } from "./engine/fans";
 import { makeInterview, resolvePromise } from "./engine/interview";
 import Interview from "./components/Interview";
@@ -72,7 +76,7 @@ function buildScout(S, o, oRank, d) {
     name: sh(o.name), emoji: o.emoji || "", palette: paletteFor(o.id, oRank), rank: oRank, talent: talentLabel(o.skill), pts: o.sp || 0,
     rooster: roosterName(o.id), trait: trait(o.id), standing: standing(oRank), titles: (o.best && o.best.titles) || 0,
     you: { rank: pRankOf(S), pts: S.player.sp || 0 },
-    h2h: { w: w, l: meetings.length - w },
+    h2h: { w: w, l: meetings.length - w }, rival: !!(S.player.rival && S.player.rival.id === o.id),
     stats: STATS.map(function (s) { return { icon: s.icon, label: s.label, what: s.what, who: s.who, you: mine[s.k] || 0, foe: hers[s.k] || 0 }; }),
     diff: diffInfo(d)
   };
@@ -143,6 +147,17 @@ export default function Arena(props) {
   var _interview = useState(null), interview = _interview[0], setInterview = _interview[1];
   var _newsIdx = useState(0), newsIdx = _newsIdx[0], setNewsIdx = _newsIdx[1];
   var _gala = useState(null), gala = _gala[0], setGala = _gala[1];
+  var _achQ = useState([]), achQ = _achQ[0], setAchQ = _achQ[1];
+  var _showAch = useState(false), showAch = _showAch[0], setShowAch = _showAch[1];
+  /* Achievements: whenever the save changes on the hub, award anything newly earned (only on the hub, so a save never
+     lands mid-tournament without its live bracket) */
+  useEffect(function () {
+    if (!S || !S.player || scr !== "hub") return;
+    var fresh = checkAchievements(S); if (!fresh.length) return;
+    var ach = Object.assign({}, S.player.ach || {}); fresh.forEach(function (id) { ach[id] = { s: S.sNum, at: Date.now() }; });
+    save(Object.assign({}, S, { player: Object.assign({}, S.player, { ach: ach }) }));
+    setAchQ(function (q) { return q.concat(fresh.length > 3 ? ["+" + fresh.length] : fresh); });
+  }, [S, scr]);
   var _rankView = useState({ mode: "me", above: 25, below: 25 }), rankView = _rankView[0], setRankView = _rankView[1];
   /* Opening Rankings lands on your own row, centred */
   useEffect(function () {
@@ -164,7 +179,7 @@ export default function Arena(props) {
       fans: Object.assign({}, iv.issue.fans, { after: f, interview: outcome.delta })
     });
     var news = (S.news || []).slice(); if (news[0] && news[0].at === iv.issue.at) news[0] = issue;
-    save(Object.assign({}, S, { news: news, player: Object.assign({}, p, { fans: f, lastTones: [answer.tone].concat(p.lastTones || []).slice(0, 2), ivSeen: (iv.iv.used || []).concat(p.ivSeen || []).slice(0, 48), promise: answer.tone === "bold" ? { wk: iv.issue.wk } : null }) }));
+    save(Object.assign({}, S, { news: news, player: Object.assign({}, p, { stats: outcome.viral ? Object.assign({}, p.stats || {}, { viral: ((p.stats || {}).viral || 0) + 1 }) : (p.stats || {}), fans: f, lastTones: [answer.tone].concat(p.lastTones || []).slice(0, 2), ivSeen: (iv.iv.used || []).concat(p.ivSeen || []).slice(0, 48), promise: answer.tone === "bold" ? { wk: iv.issue.wk } : null }) }));
     return issue;
   }
   var lastRankRef = useRef(null);
@@ -291,7 +306,7 @@ export default function Arena(props) {
     setTtab("match"); setScr("tourney");
   }
 
-  function onTR(won, myAvg, oppAvg, setScore, setSeq) {
+  function onTR(won, myAvg, oppAvg, setScore, setSeq, xtra) {
     if (!ts) return;
     var tier = TIERS[ts.tierIdx]; var rNames = tier.rounds === 6 ? RN6 : RN5;
     var bk = JSON.parse(JSON.stringify(ts.bracket)); bk._pts = tier.pts; bk._tier = ts.tierIdx;
@@ -299,7 +314,7 @@ export default function Arena(props) {
     var winner = won ? (m.a.isP ? m.a : m.b) : (m.a.isP ? m.b : m.a);
     winner.tP = (winner.tP||0) + tier.pts[ts.round]; m.w = winner;
     var oppRankNow = 0; var rk = getRanked(S); for (var rki = 0; rki < rk.length; rki++) { if (rk[rki].id === opp.id) { oppRankNow = rki + 1; break; } }
-    var log = ts.log.concat([{ round: rNames[ts.round], opp: opp.name, oppId: opp.id, oppRank: oppRankNow, myRank: pRankOf(S), won: won, pts: won ? tier.pts[ts.round] : 0, sc: setScore || null, seq: setSeq || "" }]);
+    var log = ts.log.concat([{ round: rNames[ts.round], opp: opp.name, oppId: opp.id, oppRank: oppRankNow, myRank: pRankOf(S), won: won, pts: won ? tier.pts[ts.round] : 0, sc: setScore || null, seq: setSeq || "", gold: (xtra && xtra.gold) || 0, flawless: (xtra && xtra.flawless) || 0 }]);
     var r = runBk(bk, ts.round, won, tier.rounds);
     setTS({ bracket: r.bracket, round: r.round, pending: r.pending, done: r.done, alive: won, log: log, tierIdx: ts.tierIdx });
     /* Record head-to-head vs this opponent */
@@ -376,9 +391,21 @@ export default function Arena(props) {
     var fansBefore = fansOf(S.player);
     var perf = performanceDelta(ts.log, wonTitle, isGS);
     var prom = resolvePromise(S.player.promise, pRound, tier.rounds, wonTitle);
+    /* Beating your rival: the crowd loves a grudge settled on the lanes */
+    var rivalNow = S.player.rival || null;
+    var revengeWins = rivalNow ? ts.log.filter(function(m){ return m.won && m.oppId === rivalNow.id; }).length : 0;
+    var rivalLoss = rivalNow ? ts.log.some(function(m){ return !m.won && m.oppId === rivalNow.id; }) : false;
+    if (revengeWins) { perf.d += 3; perf.notes = perf.notes.concat(["revenge on " + sh(rivalNow.name)]); }
     var fansNow = clampFans(weeklyDrift(fansBefore) + perf.d + (prom ? prom.delta : 0));
     var sponsor = sponsorTP(fansNow);
-    var newP = Object.assign({}, S.player, { sp: newSP, ap: (S.player.ap||0)+pp, tr: Object.assign({}, S.player.tr, { tp: (S.player.tr.tp||0) + Math.floor(pp/4) + 15 + sponsor }), best: pb, res: newRes, timeline: newTimeline, fans: fansNow, promise: null });
+    /* Career counters for the achievements, then who your rival is after this week */
+    var newStats = tallyTournament(S.player.stats, ts.log, { bo: tier.bo, tierIdx: ts.tierIdx, wonTitle: wonTitle, rivalId: rivalNow ? rivalNow.id : null, promiseKept: !!(prom && prom.kept) });
+    var rv = updateRival(S.player, S.sNum, curEv ? (curEv.type === "gs" ? "Grand Slam " + curEv.gsNum : "Week " + wLabel) : "");
+    var settledRivals = S.player.settledRivals || [];
+    if (rv.settled) { newStats.rivalsSettled = (newStats.rivalsSettled || 0) + 1; settledRivals = settledRivals.concat([rv.settled.id]); }
+    var newP = Object.assign({}, S.player, { sp: newSP, ap: (S.player.ap||0)+pp, tr: Object.assign({}, S.player.tr, { tp: (S.player.tr.tp||0) + Math.floor(pp/4) + 15 + sponsor }), best: pb, res: newRes, timeline: newTimeline, fans: fansNow, promise: null,
+      stats: newStats, rival: rv.rival, settledRivals: settledRivals });
+    if (!rv.rival) delete newP.rival;
     /* Update NPC peak ranks */
     var tempS = Object.assign({}, S, { player: newP, npcs: newNpcs });
     var ranked = getRanked(tempS);
@@ -507,6 +534,14 @@ export default function Arena(props) {
     } catch (e) { console.error("News issue failed:", e); }
     if (issue) {
       issue.fans = { before: fansBefore, perf: perf.d, notes: perf.notes, promise: prom, sponsor: sponsor, after: fansNow };
+      /* The feud column: your rival's week, and what happened if you met */
+      var feudWho = rv.rival || rivalNow;
+      if (feudWho) {
+        var fb4 = rankMap(S), faf = rankMap(afterS), fl = (afterS.player.h2h || {})[feudWho.id] || [], fw = fl.filter(function(m){ return m.w; }).length;
+        issue.rival = { p: { id: feudWho.id, name: feudWho.name, emoji: feudWho.emoji || "" }, from: fb4[feudWho.id], to: faf[feudWho.id], lv: trainLog[feudWho.id] || 0,
+          h2h: { w: fw, l: fl.length - fw }, met: revengeWins ? "won" : rivalLoss ? "lost" : null, isNew: !!(rv.rival && (!rivalNow || rivalNow.id !== rv.rival.id)),
+          settled: rv.settled ? { name: rv.settled.name, emoji: rv.settled.emoji || "" } : null };
+      }
       afterS.news = [issue].concat(S.news || []).slice(0, 12);
     }
     save(afterS);
@@ -523,6 +558,7 @@ export default function Arena(props) {
   function startFinals() {
     if (!S) return;
     var st = mkFinals(S); setFS(st); setScr("finals");
+    if (pRankOf(S) <= 16) { var fst = Object.assign({}, S.player.stats || {}); fst.finals = (fst.finals || 0) + 1; save(Object.assign({}, S, { player: Object.assign({}, S.player, { stats: fst }) })); }
   }
   function mkFinals(S) {
     var ranked = getRanked(S);
@@ -569,14 +605,17 @@ export default function Arena(props) {
       for(var i=0;i<st.semis.length;i++){var sm=st.semis[i];if(sm.w)continue;if(sm.a.isP||sm.b.isP){st.pending=i;return;}sm.w=nW(sm.a,sm.b);} if(st.semis[0].w&&st.semis[1].w){st.final={a:st.semis[0].w,b:st.semis[1].w,w:null};st.phase="final";st.pending=null;advF(st);}
     } else if (st.phase==="final"&&st.final&&!st.final.w) { if(st.final.a.isP||st.final.b.isP){st.pending="final";return;} st.final.w=nW(st.final.a,st.final.b);st.champ=st.final.w; }
   }
-  function onFR(won) {
+  function onFR(won, myAvg, oppAvg, setScore, setSeq, xtra) {
     if (!fs) return;
+    /* Finals matches count towards the career counters too (S1 carries them into the champion save below) */
+    var S1 = S;
+    if (S && xtra) { var gst = Object.assign({}, S.player.stats || {}); gst.gold = (gst.gold || 0) + (xtra.gold || 0); gst.flawless = (gst.flawless || 0) + (xtra.flawless || 0); if (won) gst.wins = (gst.wins || 0) + 1; S1 = Object.assign({}, S, { player: Object.assign({}, S.player, { stats: gst }) }); save(S1); }
     var st = JSON.parse(JSON.stringify(fs)); var m, opp, winner, loser;
     delete st.match;
     if (st.phase==="groups") { m=st.gm[st.pending]; opp=m.a.isP?m.b:m.a; winner=won?(m.a.isP?m.a:m.b):(m.a.isP?m.b:m.a); loser=winner.id===m.a.id?m.b:m.a; m.w=winner; var h=st.houses[m.hi]; for(var x=0;x<h.length;x++){if(h[x].id===winner.id){h[x].gP+=3;h[x].gW++;}if(h[x].id===loser.id){h[x].gL++;}} st.gi++; }
     else if (st.phase==="semis") { m=st.semis[st.pending]; opp=m.a.isP?m.b:m.a; m.w=won?(m.a.isP?m.a:m.b):(m.a.isP?m.b:m.a); }
     else if (st.phase==="final") { m=st.final; opp=m.a.isP?m.b:m.a; winner=won?(m.a.isP?m.a:m.b):(m.a.isP?m.b:m.a); m.w=winner; st.champ=winner;
-      if(S){ var pb=Object.assign({},S.player.best||{}); pb.finals=(pb.finals||0)+1; save(Object.assign({},S,{player:Object.assign({},S.player,{best:pb}),champs:(S.champs||[]).concat([{name:winner.isP?S.pName:winner.name,s:S.sNum,isP:winner.isP}])})); }
+      if(S1){ var pb=Object.assign({},S1.player.best||{}); pb.finals=(pb.finals||0)+1; save(Object.assign({},S1,{player:Object.assign({},S1.player,{best:pb}),champs:(S1.champs||[]).concat([{name:winner.isP?S.pName:winner.name,s:S.sNum,isP:winner.isP}])})); }
     }
     st.log=st.log.concat([{phase:st.phase,opp:(opp&&opp.name)||"?",won:won}]); st.pending=null; advF(st); setFS(st);
   }
@@ -634,10 +673,12 @@ export default function Arena(props) {
       <motion.div key="hub" {...screenAnim} style={Object.assign({}, W, { background: C.page, padding: "10px 10px " + (NAV_HEIGHT + 28) + "px" })}>
         <style dangerouslySetInnerHTML={{__html:CSS}} />
         {confetti && (<Confetti />)}
-        {prof && (<Profile player={prof.p} rank={prof.rank} playerName={S.pName} h2h={!prof.p.isP && S.player.h2h ? (S.player.h2h[prof.p.id] || []) : null} timeline={prof.p.isP ? (S.player.timeline || []) : null} onClose={function(){setProf(null)}} />)}
+        {prof && (<Profile player={prof.p} rank={prof.rank} isRival={!!(S.player.rival && prof.p.id === S.player.rival.id)} playerName={S.pName} h2h={!prof.p.isP && S.player.h2h ? (S.player.h2h[prof.p.id] || []) : null} timeline={prof.p.isP ? (S.player.timeline || []) : null} onClose={function(){setProf(null)}} />)}
         {showHelp && (<HelpScreen onClose={function(){setHelp(false)}} />)}
         {picking && !seasonDone && (<TierSheet available={avTiers} wildcard={wildcardTier(S)} rank={pRank} onClose={function(){setPicking(false)}} onPick={function(ti){ setPicking(false); startTourney(ti); }} />)}
         {gala && (<SeasonGala S={S} champ={gala.champ} runnerUp={gala.runnerUp} champRank={gala.champRank} awards={gala.awards} you={gala.you} hall={gala.hall} goal={gala.goal} onDone={finishGala} />)}
+        {achQ.length > 0 && (<AchToast queue={achQ} onShown={function(){ setAchQ(function(q){ return q.slice(1); }); }} onOpen={function(){ setAchQ([]); setShowAch(true); }} />)}
+        {showAch && (<AchievementsSheet S={S} onClose={function(){ setShowAch(false); }} />)}
         {paper && (<DailyCluck issue={paper} onClose={function(){ setPaper(null); markNewsSeen(); }} />)}
         {interview && (<Interview iv={interview.iv} recentTones={S.player.lastTones || []} fans={fansOf(S.player)}
           onAnswer={onInterviewAnswer} onDone={function(issue){ setInterview(null); setPaper(issue || interview.issue); }} />)}
@@ -650,6 +691,9 @@ export default function Arena(props) {
             <HomeTab S={S} pRank={pRank} curEvent={curEvent} seasonDone={seasonDone}
               onPlay={playCurrent} onFinals={startFinals} onNextSeason={openGala}
               onReadPaper={function(){ goTab("news"); }}
+              ach={{ n: achCount(S), total: ACHIEVEMENTS.length }} onAch={function(){ setShowAch(true); }}
+              rival={S.player.rival ? { p: S.player.rival, rank: rankMap(S)[S.player.rival.id], rec: rivalRecord(S.player) } : null}
+              onRival={function(){ var rp = S.npcs.filter(function(n){ return n.id === S.player.rival.id; })[0]; if (rp) setProf({ p: rp, rank: rankMap(S)[rp.id] }); }}
               onTrain={function(){ goTab("train"); }}
               onOpenProfile={function(){ setProf({ p: Object.assign({}, S.player, { name: S.pName, emoji: "👵" }), rank: pRank }); }} />
           )}
@@ -838,6 +882,10 @@ export default function Arena(props) {
             return (
               <div>
                 {sectionTitle("More")}
+                <button onClick={function(){setShowAch(true)}} style={rowStyle}>
+                  <div><div style={labelStyle}>🏅 Achievements</div><div style={hintStyle}>{achCount(S)} of {ACHIEVEMENTS.length} badges earned</div></div>
+                  <span style={{color:C.goldInk,fontSize:20,fontWeight:900}}>›</span>
+                </button>
                 <button onClick={function(){setHelp(true)}} style={rowStyle}>
                   <div><div style={labelStyle}>❓ How to Play</div><div style={hintStyle}>Sets, strikes and training explained</div></div>
                   <span style={{color:C.goldInk,fontSize:20,fontWeight:900}}>›</span>
@@ -886,7 +934,7 @@ export default function Arena(props) {
       <motion.div key="tourney" {...screenAnim} style={Object.assign({}, W, { background: C.page })}>
         <style dangerouslySetInnerHTML={{__html:CSS}} />
         {confetti && (<Confetti />)}
-        {prof && (<Profile player={prof.p} rank={prof.rank} playerName={S.pName} h2h={!prof.p.isP && S.player.h2h ? (S.player.h2h[prof.p.id] || []) : null} timeline={prof.p.isP ? (S.player.timeline || []) : null} onClose={function(){setProf(null)}} />)}
+        {prof && (<Profile player={prof.p} rank={prof.rank} isRival={!!(S.player.rival && prof.p.id === S.player.rival.id)} playerName={S.pName} h2h={!prof.p.isP && S.player.h2h ? (S.player.h2h[prof.p.id] || []) : null} timeline={prof.p.isP ? (S.player.timeline || []) : null} onClose={function(){setProf(null)}} />)}
         {showHelp && (<HelpScreen onClose={function(){setHelp(false)}} />)}
         {showBracket && (<BracketView ts={ts} playerName={S.pName} onClose={function(){setShowBracket(false)}} />)}
         {showScout && scoutT && pm && ts.alive && (<ScoutSheet scout={scoutT} onClose={function(){setShowScout(false)}} />)}

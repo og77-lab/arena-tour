@@ -307,6 +307,31 @@ export function CluckPaper(props) {
           </section>
         )}
 
+        {/* The feud: your rival's week */}
+        {is.rival && (function () {
+          var R = is.rival, n = sh(R.p.name), moved = R.from && R.to ? R.from - R.to : 0;
+          var h = R.settled ? "Feud over! " + sh(R.settled.name) + " waves the white hanky"
+            : R.isNew ? pk(["A new rivalry is born: " + n, n + " has it in for " + (y ? y.name : "you"), "Pistols at dawn: meet " + n], v, 0)
+            : R.met === "won" ? pk(["Sweet revenge over " + n + "!", n + " gets her comeuppance", "Score settled with " + n + " — for now"], v, 1)
+            : R.met === "lost" ? pk([n + " strikes again", "The feud deepens: " + n + " wins round " + (R.h2h.w + R.h2h.l), n + " is insufferable this week"], v, 2)
+            : pk(["Meanwhile, " + n + " is watching", "What " + n + " did this week", "Keep your enemies closer: " + n], v, 3);
+          return (
+            <section>
+              <Kicker col="#be123c">The feud</Kicker>
+              <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+                <div style={{ minWidth: 0, flex: 1 }}>
+                  <Headline>{h}</Headline>
+                  <Body>{R.p.emoji} <b>{R.p.name}</b> {R.to ? "is world #" + R.to : ""}{moved > 0 ? ", up " + moved + " this week" : moved < 0 ? ", down " + (-moved) + " this week" : ""}. Head-to-head: <b>{R.h2h.w}–{R.h2h.l}</b>{R.h2h.w > R.h2h.l ? " to our granny." : R.h2h.w < R.h2h.l ? " to her." : ", dead level."}
+                    {R.lv > 0 ? " She was spotted at the gym too: +" + R.lv + (R.lv === 1 ? " level." : " levels.") : ""}
+                    {R.settled ? " Lead a rival by three and she stops bothering you — " + (R.isNew ? "but " + n + " has already stepped into the role." : "for now.") : ""}</Body>
+                  <Bubble by={n}>{pk(["I've been practising. Mostly glaring.", "Tell her I said hello. Rudely.", "I'll see her on the lanes, dear.", "She knows what she did."], v, R.h2h.l)}</Bubble>
+                </div>
+                <Photo w={86} tilt={2.5} caption={pk(["Seen sharpening her lance", "Not amused", "Plotting"], v, 1)}><div style={{ marginBottom: -3 }}><Rider palette={paletteFor(R.p.id, R.to)} width={82} pose={R.met === "won" ? "knocked" : "idle"} flip={true} /></div></Photo>
+              </div>
+            </section>
+          );
+        })()}
+
         {/* Riders at your level */}
         {(pe.climber || pe.faller || pe.gym) && (
           <section>
