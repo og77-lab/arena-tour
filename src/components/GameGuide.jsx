@@ -63,6 +63,7 @@ var CHAPTERS = [
   { id: "difficulty", icon: "📈", title: "Difficulty" },
   { id: "training", icon: "🏋️", title: "Stats & training" },
   { id: "money", icon: "💰", title: "Prize money" },
+  { id: "gear", icon: "🧰", title: "Lances & saddles" },
   { id: "fans", icon: "❤️", title: "Fans & the press" },
   { id: "paper", icon: "📰", title: "The Daily Cluck" },
   { id: "rivals", icon: "😤", title: "Rivals" },
@@ -121,8 +122,8 @@ function body(id) {
       <P>Each week several tournaments run at once in every tier, and all 1,000 riders play one of them. Tap a tier to see its events. Each card shows:</P>
       <List items={[
         <span key="n"><B>Name and lanes</B> — the conditions change the match for both riders:</span>,
-        <span key="c">☀️ <B>Classic</B>: no tricks. 🌧️ <B>Muddy lanes</B>: bar 10% faster, +10% points. 🌬️ <B>Windy coast</B>: gold zone 2% narrower, +25% prize money. 🔥 <B>Heatwave</B>: the bar speeds up 40% more each strike, +10% points. 🌼 <B>Village green</B>: gold zone 1.5% wider, but −20% points and money.</span>,
-        <span key="e"><B>Entrants (★)</B> — who signed up. ★★★ tough entrants: mostly the tier's top-ranked riders, +15% points. ★★ mixed. ★ weaker entrants: mostly lower-ranked riders, −15% points.</span>,
+        <span key="c">☀️ <B>Classic</B>: no tricks. 🌧️ <B>Muddy lanes</B>: bar 10% faster for both, Reflexes gaps count double. 🌬️ <B>Windy coast</B>: gold zone 2% narrower for both, Precision gaps count double, +10% prize money. 🔥 <B>Heatwave</B>: the bar speeds up 40% more each strike, Stamina gaps count double. 🌼 <B>Village green</B>: gold zone 1.5% wider, every stat gap counts half (an underdog's day out), −10% points and money.</span>,
+        <span key="e"><B>Entrants (★)</B> — who signed up. ★★★ tough entrants: mostly the tier's top-ranked riders, +10% points. ★★ mixed. ★ weaker entrants: mostly lower-ranked riders, −10% points.</span>,
         <span key="s"><B>Top seeds</B> — the two best-ranked riders in the draw, and what the champion takes home.</span>
       ]} />
       <P>Grand Slam weeks have a single named Slam (The Coop Open, The Swamp Slam, Wimbledon-on-Wold, The Gale Cup), each with its own lanes.</P>
@@ -213,6 +214,18 @@ function body(id) {
         <span key="b">The dark tick on each bar, and the "Vs rivals" line, show the average level of the riders ranked near you — ahead, behind or level.</span>,
         <span key="c">Every level you buy plays a quick gag: a swatted fly, a bullseye, a bounced pillow, a treadmill, a balance beam.</span>
       ]} />
+    </>);
+
+    case "gear": return (<>
+      <P>After you pick a tournament you land on <B>Get ready</B>. Choose a lance and a saddle from <B>your locker</B>, or buy new ones at <B>Mavis's shop</B>. Nothing is paid or used up until you press <B>Confirm & ride</B>, so change your mind as often as you like; ✕ goes back to the tournament list.</P>
+      <List items={[
+        <span key="a">The <B>🧹 Trusty Broom-Handle</B> and the <B>🫖 Tea-Cosy Saddle</B> are free, neutral and always yours.</span>,
+        <span key="b">Everything else lasts a set number of tournaments (1, 2, 3 or 5). Each tournament you enter with it uses one, however many rounds you play.</span>,
+        <span key="c">Prices follow the best tier you can enter: one tournament's worth costs about 6% of that tier's champion prize.</span>,
+        <span key="d">Gear changes <B>your</B> bar only, never your opponent's. After each strike the breakdown shows its points as <B>Gear</B>.</span>,
+        <span key="e">Every item helps one thing and hurts another, and the lanes shift the balance. Precise riders tend to love the needle; riders who miss a lot get more from the baguette.</span>
+      ]} />
+      <Table head={["Item", "Effect", "Lasts", "Lanes change it"]} rows={[["🧶 Knitting-Needle Lance","Gold zone 0.6% narrower, +3 points on gold hits","3","Wind: Gold zone 1% narrower · Heat: +4 points on gold hits"],["🥖 Day-Old Baguette","+3 points on misses, −2 points on gold hits","1","Mud: +1 points on misses · Heat: +4 points on misses"],["🪵 Grandpa's Oak Lance","Bar starts 9% faster, +2 points every strike","5","Wind: Gold zone 0.3% wider · Heat: Speeds up 12% more each strike"],["🎋 Featherlight Bamboo","Gold zone 1.2% wider, −2 points every strike","3","Wind: Gold zone 0.4% wider · Mud: Gold zone 1.4% wider"],["🏁 Racing Saddle","Bar starts 4% slower, Speeds up 20% more each strike","3","Mud: Bar starts 1% slower · Heat: Speeds up 35% more each strike · Green: Bar starts 3% slower"],["🪑 Rocking-Chair Saddle","Bar starts 3% faster, Speeds up 22% less each strike","5","Heat: Bar starts 5% faster · Mud: Speeds up 12% less each strike"],["🧽 Memory-Foam Cushion","Gold zone 0.5% wider, Bar starts 3% faster","2","Mud: Gold zone 0.1% wider · Green: Gold zone 0.7% wider"],["🛼 Roller-Skate Saddle","Gold zone 0.6% narrower, Bar starts 6% slower","1","Mud: Bar starts 1% slower · Wind: Gold zone 0.9% narrower"]]} />
     </>);
 
     case "money": return (<>

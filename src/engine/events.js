@@ -8,19 +8,19 @@ import { getRanked } from "../models/formulas";
 
 /* Lane conditions: what they do to the match (for both riders), what they pay, and how the arena looks */
 export var CONDITIONS = {
-  classic: { key: "classic", icon: "☀️", name: "Classic", effect: "No weather tricks", blurb: "Dry lanes, fair weather. Nothing to blame but your timing.", zone: 0, speed: 1, accel: 1, pts: 1, money: 1 },
-  mud: { key: "mud", icon: "🌧️", name: "Muddy lanes", effect: "Bar 10% faster", blurb: "The rooster slips and the bar runs 10% faster. Worth 10% more points.", zone: 0, speed: 1.1, accel: 1, pts: 1.1, money: 1 },
-  wind: { key: "wind", icon: "🌬️", name: "Windy coast", effect: "Gold zone 2% narrower", blurb: "Gusts narrow the gold zone by 2% of the bar. Sponsors pay 25% more prize money.", zone: -2, speed: 1, accel: 1, pts: 1, money: 1.25 },
-  heat: { key: "heat", icon: "🔥", name: "Heatwave", effect: "Bar speeds up 40% more", blurb: "Roosters wilt: the bar speeds up 40% more with every strike. Worth 10% more points.", zone: 0, speed: 1, accel: 1.4, pts: 1.1, money: 1 },
-  green: { key: "green", icon: "🌼", name: "Village green", effect: "Gold zone 1.5% wider", blurb: "Soft grass and a friendly crowd: the gold zone is 1.5% wider, but points and prize money are 20% lower.", zone: 1.5, speed: 1, accel: 1, pts: 0.8, money: 0.8 }
+  classic: { key: "classic", icon: "☀️", name: "Classic", effect: "No weather tricks", blurb: "Dry lanes, fair weather. Nothing to blame but your timing.", zone: 0, speed: 1, accel: 1, pts: 1, money: 1, w: {} },
+  mud: { key: "mud", icon: "🌧️", name: "Muddy lanes", effect: "Bar 10% faster · Reflexes count double", blurb: "The rooster slips: the bar runs 10% faster for both riders, and Reflexes count double — the sharper granny wins the slide.", zone: 0, speed: 1.1, accel: 1, pts: 1, money: 1, w: { r: 2 } },
+  wind: { key: "wind", icon: "🌬️", name: "Windy coast", effect: "Zone 2% narrower · Precision counts double", blurb: "Gusts narrow the gold zone by 2% for both riders, and Precision counts double. Seaside sponsors pay 10% more prize money.", zone: -2, speed: 1, accel: 1, pts: 1, money: 1.1, w: { p: 2 } },
+  heat: { key: "heat", icon: "🔥", name: "Heatwave", effect: "Speeds up 40% more · Stamina counts double", blurb: "Roosters wilt: the bar speeds up 40% more with every strike for both riders, and Stamina counts double.", zone: 0, speed: 1, accel: 1.4, pts: 1, money: 1, w: { s: 2 } },
+  green: { key: "green", icon: "🌼", name: "Village green", effect: "Zone 1.5% wider · stat gaps halved", blurb: "Soft grass and a friendly crowd: the gold zone is 1.5% wider for both riders and every stat gap counts half — an underdog's day out. Points and prize money are 10% lower.", zone: 1.5, speed: 1, accel: 1, pts: 0.9, money: 0.9, w: { r: 0.5, p: 0.5, f: 0.5, s: 0.5, g: 0.5 } }
 };
 var COND_KEYS = ["classic", "classic", "mud", "wind", "heat", "green"];
 
 /* Field strength: a field full of the tier's best pays more ranking points, a soft one less */
 export var FIELDS = {
-  strong: { key: "strong", label: "Tough entrants", stars: 3, pts: 1.15 },
+  strong: { key: "strong", label: "Tough entrants", stars: 3, pts: 1.1 },
   mixed: { key: "mixed", label: "Mixed entrants", stars: 2, pts: 1 },
-  soft: { key: "soft", label: "Weaker entrants", stars: 1, pts: 0.85 }
+  soft: { key: "soft", label: "Weaker entrants", stars: 1, pts: 0.9 }
 };
 
 var PLACES = ["Puddleby", "Little Clucking", "Bramblewick", "Lower Henswick", "Cobbleford", "Featherstone", "Marmalade Bay", "Thistledown", "Gooseberry Hill", "Kettlewell",

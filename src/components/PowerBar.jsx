@@ -13,7 +13,8 @@ import { PLAYER_PALETTE, paletteFor } from "./Rider";
 import { crowdRoar } from "../engine/fans";
 import { CoachBubble } from "./Coach";
 import FinalOutro from "./FinalOutro";
-import { conditionOf } from "../engine/events";
+import { conditionOf } from "../engine/events"
+import { kitFx } from "../engine/gear";
 import { enterMatch, leaveMatch, startBattle, stopBattle } from "../music";
 
 const { useState, useEffect, useRef } = React;
@@ -133,6 +134,7 @@ function StrikeReveal(props) {
               {r.why.kind === "Gold" ? "In the gold" : r.why.kind === "Floor" ? "Floor (Stubbornness)" : "Outside the gold"} {r.why.base}
             </span>
             {r.why.aim !== 0 && (<span style={{ color: r.why.aim > 0 ? "#4ade80" : "#f87171" }}> {r.why.aim > 0 ? "+" : "−"} {Math.abs(r.why.aim)} Aim</span>)}
+            {r.why.gear ? (<span style={{ color: r.why.gear > 0 ? "#4ade80" : "#f87171" }}> {r.why.gear > 0 ? "+" : "−"} {Math.abs(r.why.gear)} Gear</span>) : null}
             {r.why.capped && (<span style={{ color: "#94a3b8" }}> (max 100)</span>)}
             <span style={{ color: "#94a3b8" }}> = {r.you}</span>
           </span>
@@ -192,12 +194,15 @@ export default function PowerBar(props) {
   useEffect(function () { enterMatch(); return leaveMatch; }, []);
   var tr = props.tr || {}, otr = props.otr || {};
   var nR=(tr.r||0)-(otr.r||0), nP=(tr.p||0)-(otr.p||0), nF=(tr.f||0)-(otr.f||0), nS=(tr.s||0)-(otr.s||0), nG=(tr.g||0)-(otr.g||0);
-  /* The lane conditions (mud, wind, heat, village green) bend the bar for both riders */
-  var COND = conditionOf(props.cond);
-  var ctr = 72, swBase = Math.max(3, 13 - props.diff * 1.5 + nP * 1.2 + COND.zone), fb = nF * 1.5;
-  var accel = Math.max(0.03, 0.3 - nS * 0.015) * COND.accel, minSc = Math.max(0, 15 + nG * 1.5);
+  /* The lane conditions (mud, wind, heat, village green) bend the bar for both riders, and make one stat gap count more (or all of them less) */
+  var COND = conditionOf(props.cond), CW = COND.w || {};
+  nR *= CW.r || 1; nP *= CW.p || 1; nF *= CW.f || 1; nS *= CW.s || 1; nG *= CW.g || 1;
+  /* Your lance and saddle bend your own bar only (never hers) */
+  var KIT = kitFx(props.gear, props.cond);
+  var ctr = 72, swBase = Math.max(3, 13 - props.diff * 1.5 + nP * 1.2 + COND.zone + KIT.zone), fb = nF * 1.5;
+  var accel = Math.max(0.03, 0.3 - nS * 0.015) * COND.accel * KIT.accel, minSc = Math.max(0, 15 + nG * 1.5 + KIT.floor);
   /* Bar resets every set, but each new set starts a little faster (fatigue — Stamina softens it) */
-  var baseSpd = Math.max(0.8, 2.4 + props.diff * 0.4 - nR * 0.12) * COND.speed;
+  var baseSpd = Math.max(0.8, 2.4 + props.diff * 0.4 - nR * 0.12) * COND.speed * KIT.speed;
   function speedFor(setIdx, strikeIdx) { return baseSpd + setIdx * accel * 0.6 + strikeIdx * accel; }
   var spd = useRef(speedFor(init.sets.length, init.my.length));
   var dir = useRef(1);
@@ -254,10 +259,11 @@ export default function PowerBar(props) {
     var pos = posRef.current;
     var d = Math.abs(pos - ctr), inZ = d <= sw / 2;
     var base = strikeScore(d, sw / 2, minSc);
-    var sc = Math.round(Math.max(0, Math.min(100, base + fb)));
-    /* How the score was built, shown under it: where it landed + Aim */
-    var aimShown = Math.round(fb), capped = base + fb > 100;
-    var why = { kind: inZ ? "Gold" : base <= minSc + 1.01 ? "Floor" : "Outside", aim: aimShown, capped: capped, base: capped ? Math.round(base) : Math.round(sc) - aimShown };
+    var gearPts = KIT.aim + (inZ ? KIT.gold : KIT.miss);
+    var sc = Math.round(Math.max(0, Math.min(100, base + fb + gearPts)));
+    /* How the score was built, shown under it: where it landed + Aim + gear */
+    var aimShown = Math.round(fb), gearShown = Math.round(gearPts), capped = base + fb + gearPts > 100;
+    var why = { kind: inZ ? "Gold" : base <= minSc + 1.01 ? "Floor" : "Outside", aim: aimShown, gear: gearShown, capped: capped, base: capped ? Math.round(base) : Math.round(sc) - aimShown - gearShown };
     /* Her strike lands on the same bar. Talent sets how tightly she groups around the centre; the round's speed
        (and how far into the match it is) spreads her out just as it does you. Her training already works against
        you through the stat gaps above, so her own zone and floor are the plain ones for this round. */

@@ -18,6 +18,8 @@ import SeasonTab from "./components/SeasonTab";
 import SeasonGala from "./components/SeasonGala";
 import { seasonAwards, yourSeason, hallOfHelmets, nextGoal } from "./engine/awards";
 import TierSheet from "./components/TierSheet";
+import PrepScreen from "./components/PrepScreen";
+import { BY_ID as GEAR_BY_ID } from "./engine/gear";
 import BottomNav, { NAV_HEIGHT } from "./components/BottomNav";
 import MatchHeader from "./components/MatchHeader";
 import ScoutSheet from "./components/ScoutSheet";
@@ -108,6 +110,8 @@ export default function Arena(props) {
   var _ttab = useState("match"), ttab = _ttab[0], setTtab = _ttab[1];
   var _prof = useState(null), prof = _prof[0], setProf = _prof[1];
   var _picking = useState(false), picking = _picking[0], setPicking = _picking[1];
+  /* The tournament picked, waiting in the locker/shop screen until the kit is confirmed */
+  var _prep = useState(null), prep = _prep[0], setPrep = _prep[1];
   var _help = useState(false), showHelp = _help[0], setHelp = _help[1];
   var fileRef = useRef(null);
 
@@ -261,7 +265,7 @@ export default function Arena(props) {
     if (!ev) return;
     if (ev.type === "gs") {
       if (pRankOf(S) <= 64 || hasSlamWildcard(fansOf(S.player))) {
-        startTourney(5, weekEvents(S).filter(function(x){ return x.tier === 5; })[0]);
+        setPrep({ tier: 5, ev: weekEvents(S).filter(function(x){ return x.tier === 5; })[0] || null });
       } else {
         var cal = S.cal.slice();
         cal[S.calIdx].done = true;
@@ -315,7 +319,24 @@ export default function Arena(props) {
     return runBk(bk, round + 1, alive, maxRound);
   }
 
-  function startTourney(tierIdx, ev) {
+  /* Kit confirmed: pay for the basket, put it in the locker, use one tournament of each non-basic item, ride */
+  function confirmPrep(r) {
+    var p = Object.assign({}, S.player), locker = Object.assign({}, p.locker || {});
+    Object.keys(r.cart).forEach(function(id){ var g = GEAR_BY_ID[id]; if (g && !g.basic) locker[id] = (locker[id] || 0) + g.uses * r.cart[id]; });
+    [r.kit.lance, r.kit.saddle].forEach(function(id){ var g = GEAR_BY_ID[id]; if (g && !g.basic) { locker[id] = (locker[id] || 0) - 1; if (locker[id] <= 0) delete locker[id]; } });
+    p.locker = locker; p.kit = { lance: r.kit.lance, saddle: r.kit.saddle };
+    if (r.cost > 0) { p.money = Math.max(0, (p.money || 0) - r.cost); p.gearSpent = (p.gearSpent || 0) + r.cost; }
+    var nS = Object.assign({}, S, { player: p });
+    save(nS);
+    var pr = prep; setPrep(null);
+    startTourney(pr.tier, pr.ev, p.kit, nS);
+  }
+
+  function startTourney(tierIdx, ev, kit, Snow) {
+    var S0 = S; if (Snow) S = Snow;
+    try { return startTourneyIn(tierIdx, ev, kit); } finally { S = S0; }
+  }
+  function startTourneyIn(tierIdx, ev, kit) {
     if (!S) return;
     var tier = TIERS[tierIdx];
     var ranked = getRanked(S);
@@ -348,6 +369,7 @@ export default function Arena(props) {
     var bk = [r0]; bk._pts = tier.pts; bk._tier = tierIdx;
     var result = runBk(bk, 0, true, tier.rounds);
     var evInfo = ev ? { eventId: ev.id, eventName: ev.name, cond: ev.cond, field: ev.field, ptsMul: ev.ptsMul, moneyMul: ev.moneyMul } : {};
+    if (kit) evInfo.gear = { lance: kit.lance, saddle: kit.saddle };
     setTS(Object.assign({ bracket: result.bracket, round: result.round, pending: result.pending, done: result.done, alive: true, log: [], tierIdx: tierIdx }, evInfo));
     setTtab("match"); setScr("tourney");
   }
@@ -768,8 +790,9 @@ export default function Arena(props) {
         {hubTip && (<CoachCard key={hubTip} id={hubTip} vars={{ name: S.pName, rival: S.player.rival ? S.player.rival.name : null }} onDone={function(all){ markTip(hubTip, all); }} />)}
         {picking && !seasonDone && (<TierSheet available={avTiers} wildcard={wildcardTier(S)} rank={pRank} paid={paidEntryTier(S)}
           entry={(function(){ var top = Math.max.apply(null, availableTiers(S, true)), ti = top + 1; if (ti > 4 || paidEntryTier(S) >= 0) return null; var fee = entryFee(ti); return { tier: ti, fee: fee, used: !!weekInvestment(S), can: !weekInvestment(S) && (S.player.money || 0) >= fee, cash: S.player.money || 0 }; })()}
-          onBuyEntry={buyEntry} onClose={function(){setPicking(false)}} events={weekEvents(S)} onPickEvent={function(ev){ setPicking(false); startTourney(ev.tier, ev); }}
-          onPick={function(ti){ setPicking(false); startTourney(ti); }} />)}
+          onBuyEntry={buyEntry} onClose={function(){setPicking(false)}} events={weekEvents(S)} onPickEvent={function(ev){ setPicking(false); setPrep({ tier: ev.tier, ev: ev }); }}
+          onPick={function(ti){ setPicking(false); setPrep({ tier: ti, ev: null }); }} />)}
+        {prep && (<PrepScreen S={S} ev={prep.ev} tier={prep.tier} topTier={Math.max.apply(null, availableTiers(S))} onCancel={function(){ var t = prep.tier; setPrep(null); if (t < 5) setPicking(true); }} onConfirm={confirmPrep} />)}
         {gala && (<SeasonGala S={S} champ={gala.champ} runnerUp={gala.runnerUp} champRank={gala.champRank} awards={gala.awards} you={gala.you} hall={gala.hall} goal={gala.goal} onDone={finishGala} />)}
         {achQ.length > 0 && (<AchToast queue={achQ} onShown={function(){ setAchQ(function(q){ return q.slice(1); }); }} onOpen={function(){ setAchQ([]); setShowAch(true); }} />)}
         {showAch && (<AchievementsSheet S={S} onClose={function(){ setShowAch(false); }} />)}
@@ -1097,14 +1120,14 @@ export default function Arena(props) {
         {showBracket && (<BracketView ts={ts} playerName={S.pName} onClose={function(){setShowBracket(false)}} />)}
         {showScout && scoutT && pm && ts.alive && (<ScoutSheet scout={scoutT} onClose={function(){setShowScout(false)}} />)}
         <div style={{maxWidth:520,margin:"0 auto",textAlign:"left"}}>
-        <MatchHeader tierName={ts.eventName || tier.name} cond={ts.cond} tierColor={tier.col} roundLabel={ts.done ? (ts.alive ? "Champion" : "Tournament over") : rNames[Math.min(ts.round,tier.rounds-1)]}
+        <MatchHeader tierName={ts.eventName || tier.name} cond={ts.cond} gear={ts.gear || null} tierColor={tier.col} roundLabel={ts.done ? (ts.alive ? "Champion" : "Tournament over") : rNames[Math.min(ts.round,tier.rounds-1)]}
           bestOf={tier.bo || 3} rounds={rNames} roundIdx={ts.done ? (ts.alive ? tier.rounds : -1) : ts.round}
           onScout={pm && ts.alive && opp ? function(){ setShowScout(true); } : null}
           onBracket={function(){ setShowBracket(true); }} onHelp={function(){ setHelp(true); }} />
 
         {pm && ts.alive && opp && (
           <div>
-            <PowerBar key={"t-"+ts.round} tier={ts.tierIdx} cond={ts.cond} eventName={ts.eventName} road={ts.log.filter(function(m){ return m.won; }).map(function(m){ return { name: sh(m.opp), id: m.oppId, round: m.round }; })} coach={tipOn("match")} scout={scoutT} onDone={onTR} oppSkill={opp.skill||50} diff={roundDiff(ts.tierIdx, ts.round)} tr={S.player.tr} otr={opp.tr||{}} playerName={S.pName} playerEmoji="⚔️" oppName={sh(opp.name)} oppEmoji={opp.emoji||"👤"} oppId={opp.id} oppRank={oppRank} fans={fansOf(S.player)} tierColor={tier.col} roundLabel={rNames[ts.round]}
+            <PowerBar key={"t-"+ts.round} tier={ts.tierIdx} cond={ts.cond} gear={ts.gear || null} eventName={ts.eventName} road={ts.log.filter(function(m){ return m.won; }).map(function(m){ return { name: sh(m.opp), id: m.oppId, round: m.round }; })} coach={tipOn("match")} scout={scoutT} onDone={onTR} oppSkill={opp.skill||50} diff={roundDiff(ts.tierIdx, ts.round)} tr={S.player.tr} otr={opp.tr||{}} playerName={S.pName} playerEmoji="⚔️" oppName={sh(opp.name)} oppEmoji={opp.emoji||"👤"} oppId={opp.id} oppRank={oppRank} fans={fansOf(S.player)} tierColor={tier.col} roundLabel={rNames[ts.round]}
               tierName={ts.eventName || tier.name} youSub={"World #"+pRank} foeSub={"World #"+oppRank+" · "+talentLabel(opp.skill)}
               isFinal={ts.round >= tier.rounds-1} nextLabel={ts.round < tier.rounds-1 ? rNames[ts.round+1] : null} eliminated={true}
               stakes={{ pts: tier.pts[ts.round], money: (tier.money||[])[ts.round]||0 }}

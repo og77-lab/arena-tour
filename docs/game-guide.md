@@ -53,14 +53,14 @@ Each tournament is a knockout bracket (32 riders, 64 at a Slam). Every round you
 Each week several tournaments run at once in every tier, and all 1,000 riders play one of them. Tap a tier to see its events. Each card shows:
 - **Name and lanes.** The conditions change the match for both riders:
   - ☀️ **Classic:** no tricks.
-  - 🌧️ **Muddy lanes:** bar 10% faster, +10% points.
-  - 🌬️ **Windy coast:** gold zone 2% narrower, +25% prize money.
-  - 🔥 **Heatwave:** the bar speeds up 40% more each strike, +10% points.
-  - 🌼 **Village green:** gold zone 1.5% wider, but −20% points and money.
+  - 🌧️ **Muddy lanes:** bar 10% faster for both riders, and Reflexes gaps count double.
+  - 🌬️ **Windy coast:** gold zone 2% narrower for both, Precision gaps count double, +10% prize money.
+  - 🔥 **Heatwave:** the bar speeds up 40% more each strike, Stamina gaps count double.
+  - 🌼 **Village green:** gold zone 1.5% wider, every stat gap counts half (an underdog's day out), −10% points and money.
 - **Entrants (★).** Who signed up:
-  - ★★★ tough entrants: mostly the tier's top-ranked riders, +15% points.
+  - ★★★ tough entrants: mostly the tier's top-ranked riders, +10% points.
   - ★★ mixed entrants.
-  - ★ weaker entrants: mostly lower-ranked riders, −15% points.
+  - ★ weaker entrants: mostly lower-ranked riders, −10% points.
 - **Top seeds.** The two best-ranked riders in the draw, and what the champion takes home.
 
 Grand Slam weeks have a single named Slam (The Coop Open, The Swamp Slam, Wimbledon-on-Wold, The Gale Cup), each with its own lanes.
@@ -153,7 +153,28 @@ Each level costs more than the last: 15 TP for level 1, 30 for level 2, 45 for l
 - The dark tick on each bar, and the "Vs rivals" line, show the average level of the riders ranked near you — ahead, behind or level.
 - Every level you buy plays a quick gag: a swatted fly, a bullseye, a bounced pillow, a treadmill, a balance beam.
 
-## 9. Prize money
+## 9. Lances & saddles
+
+After you pick a tournament you land on **Get ready**. Choose a lance and a saddle from **your locker**, or buy new ones at **Mavis's shop**. Nothing is paid or used up until you press **Confirm & ride**, so change your mind as often as you like; ✕ goes back to the tournament list.
+
+- The **🧹 Trusty Broom-Handle** and the **🫖 Tea-Cosy Saddle** are free, neutral and always yours.
+- Everything else lasts a set number of tournaments (1, 2, 3 or 5). Each tournament you enter with it uses one, however many rounds you play.
+- Prices follow the best tier you can enter: one tournament's worth costs about 6% of that tier's champion prize.
+- Gear changes **your** bar only, never your opponent's. After each strike the breakdown shows its points as **Gear**.
+- Every item helps one thing and hurts another, and the lanes shift the balance. Precise riders tend to love the needle; riders who miss a lot get more from the baguette.
+
+| Item | Effect | Lasts | Lanes change it |
+|---|---|---|---|
+| 🧶 Knitting-Needle Lance | Gold zone 0.6% narrower, +3 points on gold hits | 3 | Wind: Gold zone 1% narrower · Heat: +4 points on gold hits |
+| 🥖 Day-Old Baguette | +3 points on misses, −2 points on gold hits | 1 | Mud: +1 points on misses · Heat: +4 points on misses |
+| 🪵 Grandpa's Oak Lance | Bar starts 9% faster, +2 points every strike | 5 | Wind: Gold zone 0.3% wider · Heat: Speeds up 12% more each strike |
+| 🎋 Featherlight Bamboo | Gold zone 1.2% wider, −2 points every strike | 3 | Wind: Gold zone 0.4% wider · Mud: Gold zone 1.4% wider |
+| 🏁 Racing Saddle | Bar starts 4% slower, Speeds up 20% more each strike | 3 | Mud: Bar starts 1% slower · Heat: Speeds up 35% more each strike · Green: Bar starts 3% slower |
+| 🪑 Rocking-Chair Saddle | Bar starts 3% faster, Speeds up 22% less each strike | 5 | Heat: Bar starts 5% faster · Mud: Speeds up 12% less each strike |
+| 🧽 Memory-Foam Cushion | Gold zone 0.5% wider, Bar starts 3% faster | 2 | Mud: Gold zone 0.1% wider · Green: Gold zone 0.7% wider |
+| 🛼 Roller-Skate Saddle | Gold zone 0.6% narrower, Bar starts 6% slower | 1 | Mud: Bar starts 1% slower · Wind: Gold zone 0.9% narrower |
+
+## 10. Prize money
 
 Prize money buys **one investment per tournament week**. After you make one, the rest lock until you play that week's tournament. Prices follow the prizes at your level, so they stay meaningful as you climb.
 
@@ -165,7 +186,7 @@ Prize money buys **one investment per tournament week**. After you make one, the
 
 The world leaderboard counts everything you've ever earned, so spending never costs you places there.
 
-## 10. Fans & the press
+## 11. Fans & the press
 
 Your **fans** (❤️, 0–100, starting at 20) are how much the crowd loves you.
 
@@ -188,7 +209,7 @@ Your **fans** (❤️, 0–100, starting at 20) are how much the crowd loves you
 
 **The press conference.** Pick one of three funny answers — cheeky digs at your rival, daft excuses, funny-but-sporting lines, or bold promises. Each outlet's audience has its own taste, nobody likes the same kind of joke twice in a row, and now and then an answer goes viral. There's no answer that always works.
 
-## 11. The Daily Cluck
+## 12. The Daily Cluck
 
 A new issue prints after every tournament, and you can read it any time in the News tab (with the archive of recent issues).
 - **The front page** goes to the week's biggest story — a Slam champion, a new world #1, a Cinderella title, a giant-killing, or you if you earned it.
@@ -199,14 +220,14 @@ A new issue prints after every tournament, and you can read it any time in the N
 
 When it opens after a tournament, tap **Fold the paper** to put it away.
 
-## 12. Rivals
+## 13. Rivals
 
 Your **arch-rival** is the granny you keep meeting — preferably the one who keeps beating you. She's picked from your head-to-head record after each tournament (at least two meetings and one loss to her).
 - She shows on Home, with a red banner before your matches, a badge on her profile, and her own column in the paper.
 - Beat her for **Sweet Revenge** (+3 fans).
 - Lead her head-to-head by three and the feud is **settled** — she stops bothering you, and the next grudge can take her place.
 
-## 13. Rankings & profiles
+## 14. Rankings & profiles
 
 The Ranks tab lists all 1,000 riders by season points and opens on your own row, with 25 above and below ("show 25 more" to see further). Switch to **Top 50** to see the leaders. Golden helmets mark the top ten; the world #1 wears the crown.
 
@@ -214,17 +235,17 @@ The Ranks tab lists all 1,000 riders by season points and opens on your own row,
 
 Tap your own card on Home for your profile. The ✏️ buttons rename your granny and your rooster.
 
-## 14. Achievements
+## 15. Achievements
 
 **35 achievements** in six groups — on the tour, with the lance, the ladder, feuds, crowd & press, and the gym. A badge slides down from the top when you earn one; Home and More show your collection, with progress bars on the counted ones and how to earn the ones you're missing.
 
-## 15. End of season
+## 16. End of season
 
 When the season is over, the **Grand Gala** plays: the world champion is crowned, the season's awards are handed out one envelope at a time (most titles, biggest climb, most training, your best quote, fan favourite — and the participation ribbon), your season in numbers, the hall of the golden helmets, and a goal for next season.
 
 Your training, prize money, badges, fans, rival and newspaper archive all carry over into the new season — and so do last season's points, which you'll defend week by week.
 
-## 16. Settings & saves
+## 17. Settings & saves
 
 | In More | What it does |
 |---|---|
@@ -240,7 +261,7 @@ Your training, prize money, badges, fans, rival and newspaper archive all carry 
 
 The game saves after every change — every strike, every level, every answer.
 
-## 17. Coach's tips
+## 18. Coach's tips
 
 - Aim for the white line, not just the gold. 100 against 86 is the difference between winning and losing a set.
 - If you keep overshooting, train Reflexes. If you land just next to the gold, train Steady Stride. If your misses are wild, Stubbornness.

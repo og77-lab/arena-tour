@@ -52,7 +52,7 @@ export function mkSeason(name, num, prev) {
   };
   /* The crowd, the press, the paper, your badges, career counters and grudges all carry over between seasons (no undefined fields: the cloud save rejects them) */
   if (prev) {
-    ["fans", "ivSeen", "lastTones", "goal", "ach", "stats", "rival", "settledRivals", "tips", "tutorial", "earned", "pedigree"].forEach(function (k) { if (prev.player[k] != null) S.player[k] = prev.player[k]; });
+    ["fans", "ivSeen", "lastTones", "goal", "ach", "stats", "rival", "settledRivals", "tips", "tutorial", "earned", "pedigree", "locker", "kit", "gearSpent"].forEach(function (k) { if (prev.player[k] != null) S.player[k] = prev.player[k]; });
     if (prev.news) S.news = prev.news;
     if (prev.newsSeenAt != null) S.newsSeenAt = prev.newsSeenAt;
   }

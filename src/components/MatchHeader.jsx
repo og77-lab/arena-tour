@@ -2,6 +2,7 @@
 
 import { C, FONT, display, label, card, button } from "../ui/theme";
 import { conditionOf } from "../engine/events";
+import { BY_ID } from "../engine/gear";
 
 var SHORT = { "Round of 64": "R64", "Round of 32": "R32", "Round of 16": "R16", "Quarterfinals": "QF", "Semifinals": "SF", "Final": "F", "Group Stage": "Groups", "Semifinal": "SF", "World Final": "Final" };
 
@@ -20,7 +21,12 @@ export default function MatchHeader(props) {
             {props.roundLabel}
             <span style={{ fontSize: 12, fontWeight: 800, color: C.textSoft, marginLeft: 8 }}>Best of {props.bestOf} sets</span>
           </div>
-          {cd && cd.key !== "classic" && (<div style={{ marginTop: 3, fontSize: 11.5, fontWeight: 900, color: C.redInk }}>{cd.icon} {cd.name}: {cd.effect}</div>)}
+          {((cd && cd.key !== "classic") || props.gear) && (
+            <div style={{ marginTop: 3, fontSize: 11.5, fontWeight: 900, display: "flex", gap: 8, alignItems: "center" }}>
+              {props.gear && (<span style={{ color: C.textSoft, flexShrink: 0 }}>Kit {(BY_ID[props.gear.lance] || {}).icon}{(BY_ID[props.gear.saddle] || {}).icon}</span>)}
+              {cd && cd.key !== "classic" && (<span style={{ color: C.redInk, minWidth: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{cd.icon} {cd.effect}</span>)}
+            </div>
+          )}
         </div>
         <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
           {props.onScout && (<button onClick={props.onScout} style={button("night", { padding: "7px 10px", fontSize: 12, letterSpacing: 0.5, boxShadow: "0 3px 0 " + C.nightDeep })}>ⓘ Scout</button>)}
