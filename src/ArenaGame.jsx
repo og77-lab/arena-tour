@@ -21,6 +21,8 @@ import TierSheet from "./components/TierSheet";
 import PrepScreen from "./components/PrepScreen";
 import { BY_ID as GEAR_BY_ID } from "./engine/gear";
 import { fitOf, putFit, afterMatches, recover, STAFF } from "./engine/fitness";
+import { npcKit, npcStaff, prizeFor, kitStrength } from "./engine/npcBrain";
+import { BY_ID as GEAR_ID } from "./engine/gear";
 import BottomNav, { NAV_HEIGHT } from "./components/BottomNav";
 import MatchHeader from "./components/MatchHeader";
 import ScoutSheet from "./components/ScoutSheet";
@@ -90,6 +92,15 @@ function fitRows(S, o) {
     { icon: "🐓", label: "Rooster fitness", what: "Tired roosters make the bar run faster", who: "fitness", you: me.r, foe: her.r }];
 }
 
+/* A rival's kit for this week's lanes (stable: the same answer wherever it's asked) */
+function weekKey(S) { return S.sNum * 100 + S.calIdx; }
+function kitOfNpc(S, n, cond, tier, rank) { return npcKit(n, cond || "classic", tier, rank, weekKey(S)); }
+function kitBonus(S, cond, tier) {
+  var rm = rankMap(S), cache = {};
+  return function (p) { if (!p || p.isP) return 0; if (cache[p.id] == null) cache[p.id] = kitStrength(kitOfNpc(S, p, cond, tier, rm[p.id]).ev); return cache[p.id]; };
+}
+function kitIcons(k) { return k && (k.lance !== "broom" || k.saddle !== "teacosy") ? (GEAR_ID[k.lance].icon + GEAR_ID[k.saddle].icon) : null; }
+
 function buildScout(S, o, oRank, d) {
   var mine = S.player.tr || {}, hers = o.tr || {};
   var meetings = (S.player.h2h && S.player.h2h[o.id]) || [];
@@ -99,6 +110,7 @@ function buildScout(S, o, oRank, d) {
     rooster: roosterName(o.id), trait: trait(o.id), standing: standing(oRank), titles: (o.best && o.best.titles) || 0,
     you: { rank: pRankOf(S), pts: S.player.sp || 0 },
     h2h: { w: w, l: meetings.length - w }, rival: !!(S.player.rival && S.player.rival.id === o.id),
+    kit: o._kit ? kitIcons(o._kit) : null,
     stats: STATS.filter(function (s) { return s.k !== "b"; }).map(function (s) { return { icon: s.icon, label: s.label, what: s.what, who: s.who, you: mine[s.k] || 0, foe: hers[s.k] || 0 }; })
       .concat(fitRows(S, o)),
     diff: diffInfo(d)
@@ -322,13 +334,13 @@ export default function Arena(props) {
   }
 
   /* ─── Bracket logic ─── */
-  function runBk(bk, round, alive, maxRound) {
+  function runBk(bk, round, alive, maxRound, kb) {
     var rd = bk[round]; if (!rd) return { bracket: bk, round: round, pending: null, done: true };
-    for (var i = 0; i < rd.length; i++) { var m = rd[i]; if (m.w) continue; if ((m.a.isP || m.b.isP) && alive) return { bracket: bk, round: round, pending: i, done: false }; var w = nW(m.a, m.b); w.tP = (w.tP||0) + (bk._pts ? bk._pts[round] : 0); m.w = w; }
+    for (var i = 0; i < rd.length; i++) { var m = rd[i]; if (m.w) continue; if ((m.a.isP || m.b.isP) && alive) return { bracket: bk, round: round, pending: i, done: false }; var w = nW(m.a, m.b, kb); w.tP = (w.tP||0) + (bk._pts ? bk._pts[round] : 0); m.w = w; }
     if (round >= maxRound - 1) return { bracket: bk, round: round, pending: null, done: true };
     var nx = []; for (var j = 0; j < rd.length; j += 2) { if (j+1 < rd.length) nx.push({ a: rd[j].w, b: rd[j+1].w, w: null }); }
     bk[round + 1] = nx;
-    return runBk(bk, round + 1, alive, maxRound);
+    return runBk(bk, round + 1, alive, maxRound, kb);
   }
 
   /* Kit confirmed: pay for the basket, put it in the locker, use one tournament of each non-basic item, ride */
@@ -379,7 +391,7 @@ export default function Arena(props) {
     if (pi > 0) { var tmp = pool[0]; pool[0] = pool[pi]; pool[pi] = tmp; }
     var r0 = []; for (var m = 0; m < pool.length; m += 2) r0.push({ a: pool[m], b: pool[m+1], w: null });
     var bk = [r0]; bk._pts = tier.pts; bk._tier = tierIdx;
-    var result = runBk(bk, 0, true, tier.rounds);
+    var result = runBk(bk, 0, true, tier.rounds, kitBonus(S, ev ? ev.cond : "classic", tierIdx));
     var evInfo = ev ? { eventId: ev.id, eventName: ev.name, cond: ev.cond, field: ev.field, ptsMul: ev.ptsMul, moneyMul: ev.moneyMul } : {};
     if (kit) evInfo.gear = { lance: kit.lance, saddle: kit.saddle };
     setTS(Object.assign({ bracket: result.bracket, round: result.round, pending: result.pending, done: result.done, alive: true, log: [], tierIdx: tierIdx }, evInfo));
@@ -395,7 +407,7 @@ export default function Arena(props) {
     winner.tP = (winner.tP||0) + tier.pts[ts.round]; m.w = winner;
     var oppRankNow = 0; var rk = getRanked(S); for (var rki = 0; rki < rk.length; rki++) { if (rk[rki].id === opp.id) { oppRankNow = rki + 1; break; } }
     var log = ts.log.concat([{ round: rNames[ts.round], opp: opp.name, oppId: opp.id, oppRank: oppRankNow, myRank: pRankOf(S), won: won, pts: won ? Math.round(tier.pts[ts.round] * (ts.ptsMul || 1)) : 0, sc: setScore || null, seq: setSeq || "", gold: (xtra && xtra.gold) || 0, flawless: (xtra && xtra.flawless) || 0 }]);
-    var r = runBk(bk, ts.round, won, tier.rounds);
+    var r = runBk(bk, ts.round, won, tier.rounds, kitBonus(S, ts.cond, ts.tierIdx));
     var nts = Object.assign({}, ts, { bracket: r.bracket, round: r.round, pending: r.pending, done: r.done, alive: won, log: log }); delete nts.match; /* no undefined fields in saves */
     setTS(nts);
     /* Record head-to-head vs this opponent */
@@ -528,7 +540,7 @@ export default function Arena(props) {
       var pt = TIERS[pti];
       var topWinner = null, tierUpset = null;
       for (var ev = 0; ev < numEvents; ev++) {
-        var evMul = tierEv[ev].ptsMul || 1;
+        var evMul = tierEv[ev].ptsMul || 1, evKb = kitBonus(S, tierEv[ev].cond, pti);
         var pool = tierEv[ev].ids.map(function(id){ return byId[id]; }).filter(Boolean);
         if (pool.length < 4) continue;
         /* One tournament per rider per week, even where tier rank ranges overlap */
@@ -545,7 +557,7 @@ export default function Arena(props) {
           var cur = brackets[brackets.length-1]; var nxt = [];
           for (var mi2 = 0; mi2 < cur.length; mi2 += 2) {
             if (mi2+1 < cur.length) {
-              var w2 = nW(cur[mi2], cur[mi2+1]);
+              var w2 = nW(cur[mi2], cur[mi2+1], evKb);
               var l2 = w2.id === cur[mi2].id ? cur[mi2+1] : cur[mi2];
               deepRound[w2.id] = rd2 + 1;
               var gap = (rkOf[w2.id] || 0) - (rkOf[l2.id] || 0);
@@ -559,7 +571,7 @@ export default function Arena(props) {
           brackets.push(nxt);
         }
         /* Matches each rider rode in this event (for fitness) */
-        for (var dpi = 0; dpi < pool.length; dpi++) weekRidden[pool[dpi].id] = { n: Math.min(brackets.length - 1, deepRound[pool[dpi].id] + 1), bo: pt.bo || 3 };
+        for (var dpi = 0; dpi < pool.length; dpi++) weekRidden[pool[dpi].id] = { n: Math.min(brackets.length - 1, deepRound[pool[dpi].id] + 1), bo: pt.bo || 3, tier: pti, cond: tierEv[ev].cond, mul: tierEv[ev].moneyMul || 1 };
         /* Winner gets full points + titles */
         var winner = brackets[brackets.length-1][0];
         if (winner) {
@@ -590,9 +602,22 @@ export default function Arena(props) {
     }
     /* ── FITNESS: every rider pays for the matches she rode this week, then recovers (double if she didn't ride) ── */
     var ridden = {};
-    for (var fbi = 0; fbi < ts.bracket.length; fbi++) { var fbr = ts.bracket[fbi]; if (!fbr) continue; for (var fmi = 0; fmi < fbr.length; fmi++) { [fbr[fmi].a, fbr[fmi].b].forEach(function(x){ if (x && !x.isP) ridden[x.id] = { n: ((ridden[x.id] || {}).n || 0) + 1, bo: tier.bo }; }); } }
+    for (var fbi = 0; fbi < ts.bracket.length; fbi++) { var fbr = ts.bracket[fbi]; if (!fbr) continue; for (var fmi = 0; fmi < fbr.length; fmi++) { [fbr[fmi].a, fbr[fmi].b].forEach(function(x){ if (x && !x.isP) ridden[x.id] = { n: ((ridden[x.id] || {}).n || 0) + 1, bo: tier.bo, tier: ts.tierIdx, cond: ts.cond || "classic", mul: ts.moneyMul || 1 }; }); } }
     Object.keys(weekRidden).forEach(function(id){ ridden[id] = weekRidden[id]; });
     newNpcs.forEach(function(n){ var rd = ridden[n.id]; var f = rd ? afterMatches(fitOf(n), rd.n, rd.bo) : fitOf(n); putFit(n, recover(f, (n.tr || {}).b, !rd)); });
+    /* ── PURSES: every rival is paid by the same prize table, pays for the kit she rode with, and books physio when worn out ── */
+    var rmWeek = rankMap(S), wk = weekKey(S), npcSpend = { kit: 0, staff: 0 };
+    newNpcs.forEach(function(n){
+      var cash = n.money || 0, rd = ridden[n.id];
+      if (rd) {
+        var kit = kitOfNpc(S, Object.assign({}, n, { money: cash }), rd.cond, rd.tier, rmWeek[n.id]);
+        cash = cash - kit.cost + prizeFor(rd.tier, rd.n, rd.mul); npcSpend.kit += kit.cost;
+      }
+      var tierNow = rd ? rd.tier : 0;
+      var ph = npcStaff(Object.assign({}, n, { money: cash }), rmWeek[n.id], tierNow, wk);
+      if (ph) { var f2 = fitOf(n); putFit(n, { g: f2.g + ph.staff.g, r: f2.r + ph.staff.r }); cash -= ph.price; npcSpend.staff += ph.price; }
+      n.money = Math.max(0, Math.round(cash));
+    });
     putFit(newP, recover(fitOf(S.player), (S.player.tr || {}).b, false));
     /* ── TRAINING: every rider earns and spends training points by the player's rules ── */
     var trainLog = {};
@@ -1139,7 +1164,7 @@ export default function Arena(props) {
     var opp = pm ? (pm.a.isP ? pm.b : pm.a) : null;
     var oppRank = 0; if (opp) { for (var oi = 0; oi < ranked.length; oi++) if (ranked[oi].id===opp.id){oppRank=oi+1;break;} }
     var matchDiff = roundDiff(ts.tierIdx, ts.round);
-    var scoutT = opp ? buildScout(S, Object.assign({}, opp, { _fit: afterMatches(fitOf(opp), ts.round, tier.bo) }), oppRank, matchDiff) : null;
+    var scoutT = opp ? buildScout(S, Object.assign({}, opp, { _fit: afterMatches(fitOf(opp), ts.round, tier.bo), _kit: kitOfNpc(S, opp, ts.cond, ts.tierIdx, rankMap(S)[opp.id]) }), oppRank, matchDiff) : null;
     return (
       <motion.div key="tourney" {...screenAnim} style={Object.assign({}, W, { background: C.page })}>
         <style dangerouslySetInnerHTML={{__html:CSS}} />
@@ -1156,7 +1181,7 @@ export default function Arena(props) {
 
         {pm && ts.alive && opp && (
           <div>
-            <PowerBar key={"t-"+ts.round} tier={ts.tierIdx} cond={ts.cond} gear={ts.gear || null} fit={fitOf(S.player)} oppFit={afterMatches(fitOf(opp), ts.round, tier.bo)} eventName={ts.eventName} road={ts.log.filter(function(m){ return m.won; }).map(function(m){ return { name: sh(m.opp), id: m.oppId, round: m.round }; })} coach={tipOn("match")} scout={scoutT} onDone={onTR} oppSkill={opp.skill||50} diff={roundDiff(ts.tierIdx, ts.round)} tr={S.player.tr} otr={opp.tr||{}} playerName={S.pName} playerEmoji="⚔️" oppName={sh(opp.name)} oppEmoji={opp.emoji||"👤"} oppId={opp.id} oppRank={oppRank} fans={fansOf(S.player)} tierColor={tier.col} roundLabel={rNames[ts.round]}
+            <PowerBar key={"t-"+ts.round} tier={ts.tierIdx} cond={ts.cond} gear={ts.gear || null} fit={fitOf(S.player)} oppFit={afterMatches(fitOf(opp), ts.round, tier.bo)} oppGear={kitOfNpc(S, opp, ts.cond, ts.tierIdx, rankMap(S)[opp.id])} eventName={ts.eventName} road={ts.log.filter(function(m){ return m.won; }).map(function(m){ return { name: sh(m.opp), id: m.oppId, round: m.round }; })} coach={tipOn("match")} scout={scoutT} onDone={onTR} oppSkill={opp.skill||50} diff={roundDiff(ts.tierIdx, ts.round)} tr={S.player.tr} otr={opp.tr||{}} playerName={S.pName} playerEmoji="⚔️" oppName={sh(opp.name)} oppEmoji={opp.emoji||"👤"} oppId={opp.id} oppRank={oppRank} fans={fansOf(S.player)} tierColor={tier.col} roundLabel={rNames[ts.round]}
               tierName={ts.eventName || tier.name} youSub={"World #"+pRank} foeSub={"World #"+oppRank+" · "+talentLabel(opp.skill)}
               isFinal={ts.round >= tier.rounds-1} nextLabel={ts.round < tier.rounds-1 ? rNames[ts.round+1] : null} eliminated={true}
               stakes={{ pts: tier.pts[ts.round], money: (tier.money||[])[ts.round]||0 }}

@@ -161,6 +161,7 @@ After you pick a tournament you land on **Get ready**. Choose a lance and a sadd
 - Everything else lasts a set number of tournaments (1, 2, 3 or 5). Each tournament you enter with it uses one, however many rounds you play.
 - Prices follow the best tier you can enter: one tournament's worth costs about 6% of that tier's champion prize.
 - Gear changes **your** bar only, never your opponent's. After each strike the breakdown shows its points as **Gear**.
+- **Rivals shop too**, with prize money they actually won: each picks the kit she thinks suits the lanes (the tour's best judge it well, lower ranks guess), keeps a reserve, and books physio when worn out. Her kit shows in the tale of the tape.
 - Every item helps one thing and hurts another, and the lanes shift the balance. Precise riders tend to love the needle; riders who miss a lot get more from the baguette.
 
 | Item | Effect | Lasts | Lanes change it |

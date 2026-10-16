@@ -203,6 +203,8 @@ export default function PowerBar(props) {
   var KIT = kitFx(props.gear, props.cond);
   /* Tiredness (granny: zone and misses; rooster: bar speed), yours and hers */
   var FT = fatigueFx(props.fit || { g: 100, r: 100 }), OFT = fatigueFx(props.oppFit || { g: 100, r: 100 });
+  /* Her kit bends her own strikes, exactly as yours bends yours */
+  var OKIT = kitFx(props.oppGear, props.cond);
   var ctr = 72, swBase = Math.max(3, 13 - props.diff * 1.5 + nP * 1.2 + COND.zone + KIT.zone + FT.zone), fb = nF * 1.5;
   var accel = Math.max(0.03, 0.3 - nS * 0.015) * COND.accel * KIT.accel * FT.accel, minSc = Math.max(0, 15 + nG * 1.5 + KIT.floor);
   /* Bar resets every set, but each new set starts a little faster (fatigue — Stamina softens it) */
@@ -271,11 +273,11 @@ export default function PowerBar(props) {
     /* Her strike lands on the same bar. Talent sets how tightly she groups around the centre; the round's speed
        (and how far into the match it is) spreads her out just as it does you. Her training already works against
        you through the stat gaps above, so her own zone and floor are the plain ones for this round. */
-    var oSw = Math.max(3, 13 - props.diff * 1.5 + COND.zone + OFT.zone);
-    var oSpd = ((2.4 + props.diff * 0.4) * COND.speed + (sets.length * 0.18 + myH.length * 0.3) * COND.accel * OFT.accel) * OFT.speed;
+    var oSw = Math.max(3, 13 - props.diff * 1.5 + COND.zone + OFT.zone + OKIT.zone);
+    var oSpd = ((2.4 + props.diff * 0.4) * COND.speed * OKIT.speed + (sets.length * 0.18 + myH.length * 0.3) * COND.accel * OFT.accel * OKIT.accel) * OFT.speed;
     var oSigma = Math.max(1.5, 9.5 - (props.oppSkill || 50) * 0.075) * oSpd / 2.4;
     var oPos = Math.max(0, Math.min(100, ctr + gauss() * oSigma));
-    var oD = Math.abs(oPos - ctr), osc = Math.round(Math.max(0, Math.min(100, strikeScore(oD, oSw / 2, 15) + (oD <= oSw / 2 ? 0 : OFT.miss))));
+    var oD = Math.abs(oPos - ctr), oIn = oD <= oSw / 2, osc = Math.round(Math.max(0, Math.min(100, strikeScore(oD, oSw / 2, 15 + OKIT.floor) + (oIn ? 0 : OFT.miss) + OKIT.aim + (oIn ? OKIT.gold : OKIT.miss))));
     var youWon = sc > osc, tie = sc === osc;
     var id = Date.now() + Math.random();
     var nm = myH.concat([sc]), no = opH.concat([osc]);

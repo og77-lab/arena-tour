@@ -87,6 +87,7 @@ function TaleOfTape(props) {
         <span>Difficulty <b style={{ color: sc.diff.colOnDark }}>{sc.diff.label}</b></span>
         <span>{h.w + h.l === 0 ? "First meeting" : "Head-to-head " + h.w + "–" + h.l}</span>
         {sc.rooster && (<span>🐓 {sc.rooster}</span>)}
+        {sc.kit && (<span>Her kit {sc.kit}</span>)}
       </div>
     </motion.div>
   );
