@@ -6,12 +6,14 @@ import { motion } from "framer-motion";
 import { CONDITIONS, FIELDS } from "../engine/events";
 import { TIERS } from "../models/constants";
 import { C, FONT, display, label, card, money } from "../ui/theme";
+import { effectsOf, EffectList, Legend } from "./Effect";
 
 export default function TierSheet(props) {
   var avail = props.available || [];
   var best = avail.length ? Math.max.apply(null, avail) : -1;
   var events = props.events || [];
   var [open, setOpen] = useState(props.paid >= 0 ? props.paid : best);
+  var [legend, setLegend] = useState(false);
   function evOf(ti) { return events.filter(function (x) { return x.tier === ti; }); }
   return createPortal(
     <div onClick={props.onClose} style={{ position: "fixed", inset: 0, zIndex: 900, background: "rgba(28,25,23,0.55)", display: "flex", alignItems: "flex-end", justifyContent: "center", fontFamily: FONT }}>
@@ -23,7 +25,11 @@ export default function TierSheet(props) {
           <span style={display(22)}>Choose your tournament</span>
           <button onClick={props.onClose} aria-label="Close" style={{ background: "none", border: "none", fontSize: 22, color: C.textSoft, cursor: "pointer", padding: 4 }}>✕</button>
         </div>
-        <div style={{ fontSize: 13, color: C.textSoft, margin: "2px 0 12px" }}>You're <b style={{ color: C.goldInk }}>#{props.rank}</b>. Tiers open up as your ranking climbs.</div>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, margin: "2px 0 10px" }}>
+          <span style={{ fontSize: 13, color: C.textSoft }}>You're <b style={{ color: C.goldInk }}>#{props.rank}</b>. Tiers open as you climb.</span>
+          <button onClick={function () { setLegend(!legend); }} style={{ fontFamily: FONT, fontSize: 12, fontWeight: 900, color: C.goldInk, background: "none", border: "none", cursor: "pointer", padding: 2, whiteSpace: "nowrap" }}>ⓘ {legend ? "Hide" : "What these mean"}</button>
+        </div>
+        {legend && (<Legend />)}
 
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {[4, 3, 2, 1, 0].filter(function (ti) { return avail.indexOf(ti) >= 0; }).concat([4, 3, 2, 1, 0].filter(function (ti) { return avail.indexOf(ti) < 0; })).map(function (ti) {
@@ -91,27 +97,27 @@ export default function TierSheet(props) {
   );
 }
 
-/* One named event: its lanes, who signed up, and what it pays. Every condition helps one thing and hurts another. */
+/* One named event: the lanes and the entrants as chips, the payout as numbers, the top seeds on one line */
 function EventCard(props) {
   var ev = props.ev, cd = CONDITIONS[ev.cond] || CONDITIONS.classic, fd = FIELDS[ev.field] || FIELDS.mixed;
+  var chips = effectsOf({ zone: cd.zone, speed: cd.speed, accel: cd.accel, w: cd.w, pts: ev.ptsMul, money: ev.moneyMul });
   return (
     <button onClick={props.onPick} style={Object.assign(card({ padding: "8px 10px", borderColor: props.col, boxShadow: "0 2px 0 " + props.col }), { width: "100%", textAlign: "left", cursor: "pointer", fontFamily: FONT, background: C.card, display: "block" })}>
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-        <span aria-hidden style={{ fontSize: 24, flexShrink: 0 }}>{cd.icon}</span>
+        <span aria-hidden style={{ fontSize: 26, flexShrink: 0 }}>{cd.icon}</span>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: 14, fontWeight: 900, color: C.text, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{ev.name}</div>
-          <div style={{ fontSize: 11, fontWeight: 800, color: C.textSoft }}>{cd.name} · <span style={{ color: C.goldInk }}>{"★".repeat(fd.stars)}<span style={{ opacity: 0.22 }}>{"★".repeat(3 - fd.stars)}</span></span> {fd.label}</div>
+          <div style={{ fontSize: 11.5, fontWeight: 800, color: C.textSoft }}>{cd.name} · <span style={{ color: C.goldInk }}>{"★".repeat(fd.stars)}<span style={{ opacity: 0.22 }}>{"★".repeat(3 - fd.stars)}</span></span> {fd.label}</div>
         </div>
         <div style={{ textAlign: "right", flexShrink: 0 }}>
-          <div style={{ fontSize: 13, fontWeight: 900, color: C.goldInk }}>{ev.champPts.toLocaleString()} pts</div>
-          <div style={{ fontSize: 11, fontWeight: 800, color: C.greenInk }}>{money(ev.champMoney)}</div>
+          <div style={{ fontSize: 14, fontWeight: 900, color: C.goldInk }}>{ev.champPts.toLocaleString()} pts</div>
+          <div style={{ fontSize: 12, fontWeight: 800, color: C.greenInk }}>{money(ev.champMoney)}</div>
         </div>
       </div>
-      <div style={{ fontSize: 11, color: C.textSoft, lineHeight: 1.35, marginTop: 4 }}>{cd.blurb}{fd.pts !== 1 ? " " + (fd.pts > 1 ? "Top-ranked riders signed up: +" : "Mostly lower-ranked riders: −") + Math.round(Math.abs(fd.pts - 1) * 100) + "% points." : ""}</div>
+      <div style={{ marginTop: 6 }}><EffectList list={chips} empty="☀️ Normal lanes — nothing changes" /></div>
       {ev.seeds && ev.seeds.length > 0 && (
-        <div style={{ fontSize: 11, color: C.text, marginTop: 4, display: "flex", gap: 10, flexWrap: "wrap" }}>
-          <span style={label()}>Top seeds</span>
-          {ev.seeds.map(function (sd) { return (<span key={sd.id} style={{ fontWeight: 800 }}>{sd.emoji} {sd.name} <span style={{ color: C.textMuted }}>#{sd.rank}</span></span>); })}
+        <div style={{ fontSize: 11.5, color: C.textSoft, marginTop: 5, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+          <b style={{ color: C.textMuted }}>Seeds </b>{ev.seeds.map(function (sd) { return sd.emoji + " " + (sd.name || "").split(" ")[0] + " #" + sd.rank; }).join("  ·  ")}
         </div>
       )}
     </button>

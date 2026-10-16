@@ -4,7 +4,8 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
-import { GEAR, BY_ID, BASIC, fxLines, condNotes, priceOf, usesLeft } from "../engine/gear";
+import { GEAR, BY_ID, BASIC, itemFx, kitFx, priceOf, usesLeft, COND_LABEL } from "../engine/gear";
+import { effectsOf, EffectList, Legend } from "./Effect";
 import { conditionOf, FIELDS } from "../engine/events";
 import { TIERS } from "../models/constants";
 import { C, FONT, display, label, card, button, money } from "../ui/theme";
@@ -29,6 +30,9 @@ export default function PrepScreen(props) {
   var [kit, setKit] = useState({ lance: ready(start.lance) ? start.lance : BASIC.lance, saddle: ready(start.saddle) ? start.saddle : BASIC.saddle });
   var [cart, setCart] = useState({});
   var [tab, setTab] = useState("locker");
+  var [slotTab, setSlotTab] = useState("lance");
+  var [legend, setLegend] = useState(false);
+  var condKey = ev ? ev.cond : "classic";
   var [quote] = useState(function () { return MAVIS[Math.floor(Math.random() * MAVIS.length)]; });
   var cash = p.money || 0;
   var cost = Object.keys(cart).reduce(function (a, id) { return a + priceOf(id, props.topTier) * cart[id]; }, 0);
@@ -58,8 +62,13 @@ export default function PrepScreen(props) {
         <div style={{ fontSize: 13, fontWeight: 900, color: C.text, marginTop: 2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
           {cd ? cd.icon + " " : ""}{ev ? ev.name : T.name} <span style={{ color: T.col }}>· {T.name}</span>
         </div>
-        {cd && (<div style={{ fontSize: 11.5, fontWeight: 800, color: C.textSoft }}>{cd.name}: {cd.effect} · {"★".repeat(fd.stars)} {fd.label}</div>)}
-        <div style={{ fontSize: 11.5, fontWeight: 800, color: C.textSoft }}>Fitness <FitnessMini player={p} /></div>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 11.5, fontWeight: 800, color: C.textSoft, marginTop: 2 }}>
+          {fd && (<span>{"★".repeat(fd.stars)} {fd.label}</span>)}
+          <span>Fitness <FitnessMini player={p} /></span>
+          <span style={{ flex: 1 }} />
+          <button onClick={function () { setLegend(!legend); }} style={{ fontFamily: FONT, fontSize: 12, fontWeight: 900, color: C.goldInk, background: "none", border: "none", cursor: "pointer", padding: 0, whiteSpace: "nowrap" }}>ⓘ {legend ? "Hide" : "What these mean"}</button>
+        </div>
+        {cd && (<div style={{ marginTop: 5 }}><EffectList list={effectsOf({ zone: cd.zone, speed: cd.speed, accel: cd.accel, w: cd.w })} empty="☀️ Classic lanes — nothing changes" /></div>)}
         <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
           {[["locker", "🎒 Your locker"], ["shop", "🛒 Mavis's shop"]].map(function (t) {
             var on = tab === t[0];
@@ -69,6 +78,7 @@ export default function PrepScreen(props) {
       </div>
 
       <div style={{ flex: 1, overflowY: "auto", padding: "10px 12px 16px" }}>
+        {legend && (<Legend />)}
         {tab === "locker" ? (
           <div>
             {["lance", "saddle"].map(function (slot) {
@@ -99,7 +109,7 @@ export default function PrepScreen(props) {
                       </button>
                     )}
                   </div>
-                  <Effects g={sel} />
+                  <Effects g={sel} cond={condKey} />
                 </div>
               );
             })}
@@ -107,29 +117,30 @@ export default function PrepScreen(props) {
         ) : (
           <div>
             {/* Mavis behind the counter */}
-            <div style={card({ display: "flex", gap: 10, alignItems: "center", padding: "10px 12px", marginBottom: 10, background: "#fdf2f8", borderColor: "#f9a8d4" })}>
-              <motion.div aria-hidden animate={REDUCED_MOTION ? {} : { rotate: [0, -6, 6, 0] }} transition={{ duration: 2.2, repeat: Infinity, repeatDelay: 1.5 }} style={{ fontSize: 42 }}>👵🏼</motion.div>
+            <div style={card({ display: "flex", gap: 10, alignItems: "center", padding: "6px 10px", marginBottom: 8, background: "#fdf2f8", borderColor: "#f9a8d4" })}>
+              <motion.div aria-hidden animate={REDUCED_MOTION ? {} : { rotate: [0, -6, 6, 0] }} transition={{ duration: 2.2, repeat: Infinity, repeatDelay: 1.5 }} style={{ fontSize: 34 }}>👵🏼</motion.div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 14, fontWeight: 900, color: C.text }}>Mavis Bodkin's Jousting Emporium</div>
-                <div style={{ fontSize: 12, fontStyle: "italic", color: C.textSoft, lineHeight: 1.35 }}>"{quote}"</div>
+                <div style={{ fontSize: 12, fontStyle: "italic", color: C.textSoft, lineHeight: 1.3 }}>"{quote}"</div>
+                <div style={{ fontSize: 11.5, fontWeight: 900, color: C.greenInk, marginTop: 2 }}>💰 You have {money(cash)}</div>
               </div>
             </div>
-            <div style={{ fontSize: 12, color: C.textSoft, margin: "0 2px 8px" }}>You have <b style={{ color: C.greenInk }}>{money(cash)}</b>. Each item lasts a set number of tournaments, one used per tournament you enter with it.</div>
-            {GEAR.filter(function (g) { return !g.basic; }).map(function (g, i) {
+            <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
+              {[["lance", "Lances"], ["saddle", "Saddles"]].map(function (t) { var on = slotTab === t[0]; return (<button key={t[0]} onClick={function () { setSlotTab(t[0]); }} style={button(on ? "gold" : "ghost", { flex: 1, padding: "7px 6px", fontSize: 12.5 })}>{t[1]}</button>); })}
+            </div>
+            <div style={{ fontSize: 11, fontWeight: 800, color: C.textMuted, margin: "0 2px 6px" }}>Cheapest per tournament first · effects shown for {COND_LABEL[condKey] || "these"} lanes</div>
+            {GEAR.filter(function (g) { return !g.basic && g.slot === slotTab; }).sort(function (a, b) { return priceOf(a.id, props.topTier) / a.uses - priceOf(b.id, props.topTier) / b.uses; }).map(function (g, i) {
               var n = cart[g.id] || 0, price = priceOf(g.id, props.topTier), own = locker[g.id] || 0;
               return (
                 <div key={g.id} style={card({ display: "flex", gap: 10, padding: "10px 10px", marginBottom: 8 })}>
                   <motion.div aria-hidden animate={REDUCED_MOTION ? {} : { rotate: [0, -7, 7, -3, 0], y: [0, -4, 0] }} transition={{ duration: 1.6, repeat: Infinity, repeatDelay: 2 + (i % 4) * 0.7, delay: i * 0.35 }}
                     style={{ fontSize: 46, width: 58, textAlign: "center", flexShrink: 0, alignSelf: "flex-start" }}>{g.icon}</motion.div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-                      <span style={{ fontSize: 14, fontWeight: 900, color: C.text }}>{g.name}</span>
-                      <span style={{ fontSize: 10.5, fontWeight: 800, color: C.textMuted }}>{g.slot}</span>
-                    </div>
-                    <div style={{ fontSize: 11.5, color: C.textSoft, lineHeight: 1.35, marginTop: 1 }}>{g.pitch}</div>
-                    <Effects g={g} compact />
+                    <div style={{ fontSize: 14, fontWeight: 900, color: C.text }}>{g.name}</div>
+                    <div style={{ fontSize: 11, fontStyle: "italic", color: C.textMuted, lineHeight: 1.3, marginTop: 1, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{g.pitch}</div>
+                    <Effects g={g} cond={condKey} compact />
                     <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 6 }}>
-                      <span style={{ fontSize: 11, fontWeight: 900, color: C.goldInk }}>Lasts {g.uses} tournament{g.uses > 1 ? "s" : ""}{own ? " · you own " + own : ""}</span>
+                      <span style={{ fontSize: 11, fontWeight: 900, color: C.goldInk, lineHeight: 1.25 }}>{g.uses} tournament{g.uses > 1 ? "s" : ""} · {money(Math.round(price / g.uses))} each{own ? <span style={{ display: "block", color: C.textMuted }}>you own {own}</span> : null}</span>
                       <span style={{ flex: 1 }} />
                       {n > 0 && (<button onClick={function () { addCart(g.id, -1); }} aria-label={"Remove " + g.name} style={button("ghost", { padding: "5px 10px", fontSize: 14 })}>−</button>)}
                       {n > 0 && (<span style={{ fontSize: 13, fontWeight: 900 }}>{n}</span>)}
@@ -150,6 +161,7 @@ export default function PrepScreen(props) {
           <span style={{ flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{BY_ID[kit.lance].name} + {BY_ID[kit.saddle].name}</span>
           {cost > 0 && (<span style={{ color: canPay ? C.text : C.redInk, fontWeight: 900 }}>Basket {money(cost)}</span>)}
         </div>
+        <div style={{ marginBottom: 7 }}><EffectList list={effectsOf(kitFx(kit, condKey))} empty="Your kit: no changes — the plain broom and tea-cosy." /></div>
         <button onClick={confirm} disabled={!canPay} style={button(canPay ? "gold" : "ghost", { width: "100%", padding: "12px 10px", fontSize: 16, opacity: canPay ? 1 : 0.6 })}>
           {canPay ? (cost > 0 ? "✅ Pay " + money(cost) + " & ride" : "✅ Confirm & ride") : "Not enough money — take something out"}
         </button>
@@ -159,20 +171,15 @@ export default function PrepScreen(props) {
   );
 }
 
-/* What an item does: its plain effects (green good, red bad), then how each lane changes it */
+/* What an item does in these lanes, as chips; the icons say which other lanes would change it */
 function Effects(props) {
   var g = props.g; if (!g) return null;
-  var lines = fxLines(Object.assign({ zone: 0, speed: 1, accel: 1, floor: 0, aim: 0, gold: 0, miss: 0 }, g.fx)), notes = condNotes(g.id);
-  if (g.basic) return (<div style={{ fontSize: 11.5, color: C.textMuted, marginTop: props.compact ? 4 : 8 }}>{g.pitch}</div>);
+  if (g.basic) return (<div style={{ fontSize: 11.5, fontWeight: 800, color: C.textMuted, marginTop: props.compact ? 4 : 8 }}>Neutral — changes nothing, in any lanes.</div>);
+  var others = Object.keys(g.cond || {}).filter(function (c) { return c !== props.cond; }).map(function (c) { return (COND_LABEL[c] || "").split(" ")[0]; }).join(" ");
   return (
-    <div style={{ marginTop: props.compact ? 4 : 8, fontSize: 11.5, lineHeight: 1.45 }}>
-      {!props.compact && (<div style={{ fontSize: 12, color: C.textSoft, marginBottom: 2 }}>{g.pitch}</div>)}
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "2px 10px" }}>
-        {lines.map(function (l) { return (<span key={l.text} style={{ fontWeight: 900, color: l.good ? C.greenInk : C.redInk }}>{l.good ? "▲" : "▼"} {l.text}</span>); })}
-      </div>
-      {notes.map(function (n) {
-        return (<div key={n.cond} style={{ color: C.textSoft }}><b>{n.label}:</b> {n.lines.map(function (l) { return l.text; }).join(", ")}</div>);
-      })}
+    <div style={{ marginTop: props.compact ? 5 : 8 }}>
+      <EffectList list={effectsOf(itemFx(g.id, props.cond))} />
+      {others && (<div style={{ fontSize: 10.5, fontWeight: 800, color: C.textMuted, marginTop: 3 }}>Works differently in {others}</div>)}
     </div>
   );
 }

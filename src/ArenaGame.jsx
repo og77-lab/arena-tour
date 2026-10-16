@@ -19,6 +19,7 @@ import SeasonGala from "./components/SeasonGala";
 import { seasonAwards, yourSeason, hallOfHelmets, nextGoal } from "./engine/awards";
 import TierSheet from "./components/TierSheet";
 import PrepScreen from "./components/PrepScreen";
+import { EffectList, statEffect } from "./components/Effect";
 import { BY_ID as GEAR_BY_ID } from "./engine/gear";
 import { fitOf, putFit, afterMatches, recover, STAFF } from "./engine/fitness";
 import { npcKit, npcStaff, prizeFor, kitStrength } from "./engine/npcBrain";
@@ -944,7 +945,7 @@ export default function Arena(props) {
                           })()}
                           <div style={{fontSize:13,color:C.text,fontWeight:700,lineHeight:1.4}}>{st.what}.</div>
                           <div style={{display:"grid",gridTemplateColumns:"auto 1fr",columnGap:8,rowGap:2,fontSize:12.5,color:C.textSoft,marginTop:4,lineHeight:1.35}}>
-                            <span style={{fontWeight:900,color:C.goldInk}}>Each level</span><span>{st.per}</span>
+                            <span style={{fontWeight:900,color:C.goldInk}}>Each level</span><span><EffectList list={statEffect(st.k)} /></span>
                             <span style={{fontWeight:900,color:C.goldInk}}>Train it if</span><span>{st.best.charAt(0).toLowerCase() + st.best.slice(1)}</span>
                             <span style={{fontWeight:900,color:C.goldInk}}>Vs rivals</span>
                             <span>{(function(){ var rv = rivalTr[st.k] || 0, gap = Math.round((lv - rv) * 10) / 10;
