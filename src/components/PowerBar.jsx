@@ -315,7 +315,7 @@ export default function PowerBar(props) {
   function finish() {
     if (!res || finished.current || Date.now() - doneAt.current < 1200) return;
     finished.current = true;
-    props.onDone(res.w, res.pa, res.oa, res.setsWon + "-" + res.setsLost, res.sets.map(function (s) { return s.won ? "W" : "L"; }).join(""), { gold: goldRef.current.total, flawless: goldRef.current.flawless });
+    props.onDone(res.w, res.pa, res.oa, res.setsWon + "-" + res.setsLost, res.sets.map(function (s) { return s.won ? "W" : "L"; }).join(""), { gold: goldRef.current.total, flawless: goldRef.current.flawless, sets: res.sets.map(function (s) { return [Math.round(avg(s.my)), Math.round(avg(s.op))]; }) });
   }
 
   /* Space / Enter drives every phase */

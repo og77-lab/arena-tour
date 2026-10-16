@@ -353,7 +353,7 @@ export default function Arena(props) {
         s: S.sNum, tier: ts.tierIdx, round: ts.round, w: won,
         ma: myAvg != null ? Math.round(myAvg) : null,
         oa: oppAvg != null ? Math.round(oppAvg) : null,
-        sc: setScore || null,
+        sc: setScore || null, sets: (xtra && xtra.sets) || null,
         name: opp.name, emoji: opp.emoji
       }]);
       h2h[opp.id] = entries.slice(-10); /* keep last 10 per opponent */
@@ -658,6 +658,11 @@ export default function Arena(props) {
     return true;
   }
   /* One investment per tournament week: a private session, a paid entry, or a pedigree certificate */
+  function renameRooster(n) {
+    n = (n || "").trim().slice(0, 24);
+    var np = Object.assign({}, S.player); if (n) np.roosterName = n; else delete np.roosterName; /* no undefined fields: the cloud save rejects them */
+    save(Object.assign({}, S, { player: np }));
+  }
   function bestOpenTier() { var a = availableTiers(S, true); return a.length ? Math.max.apply(null, a) : 0; }
   function bookCoach() {
     if (weekInvestment(S)) return;
@@ -733,7 +738,7 @@ export default function Arena(props) {
       <motion.div key="hub" {...screenAnim} style={Object.assign({}, W, { background: C.page, padding: "10px 10px " + (NAV_HEIGHT + 28) + "px" })}>
         <style dangerouslySetInnerHTML={{__html:CSS}} />
         {confetti && (<Confetti />)}
-        {prof && (<Profile player={prof.p} rank={prof.rank} isRival={!!(S.player.rival && prof.p.id === S.player.rival.id)} playerName={S.pName} h2h={!prof.p.isP && S.player.h2h ? (S.player.h2h[prof.p.id] || []) : null} timeline={prof.p.isP ? (S.player.timeline || []) : null} onClose={function(){setProf(null)}} />)}
+        {prof && (<Profile player={prof.p} rank={prof.rank} roosterName={S.player.roosterName} onRenameRooster={renameRooster} isRival={!!(S.player.rival && prof.p.id === S.player.rival.id)} playerName={S.pName} h2h={!prof.p.isP && S.player.h2h ? (S.player.h2h[prof.p.id] || []) : null} timeline={prof.p.isP ? (S.player.timeline || []) : null} onClose={function(){setProf(null)}} />)}
         {showHelp && (<HelpScreen onClose={function(){setHelp(false)}} />)}
         {hubTip && (<CoachCard key={hubTip} id={hubTip} vars={{ name: S.pName, rival: S.player.rival ? S.player.rival.name : null }} onDone={function(all){ markTip(hubTip, all); }} />)}
         {picking && !seasonDone && (<TierSheet available={avTiers} wildcard={wildcardTier(S)} rank={pRank} paid={paidEntryTier(S)}
@@ -813,7 +818,7 @@ export default function Arena(props) {
                       <TrainStage who={g.who} fx={trainFx && trainFx.who === g.who ? trainFx : null} w={112} h={80} />
                       <div>
                         <div style={display(20)}>{g.icon} {g.title}</div>
-                        <div style={label(C.textSoft)}>{g.sub}</div>
+                        <div style={label(C.textSoft)}>{g.who === "rooster" ? (S.player.roosterName || roosterName(1)) + " · " + g.sub : g.sub}</div>
                       </div>
                     </div>
                     {STATS.filter(function(st){ return st.who === g.who; }).map(function(st, si){
@@ -1052,7 +1057,7 @@ export default function Arena(props) {
       <motion.div key="tourney" {...screenAnim} style={Object.assign({}, W, { background: C.page })}>
         <style dangerouslySetInnerHTML={{__html:CSS}} />
         {confetti && (<Confetti />)}
-        {prof && (<Profile player={prof.p} rank={prof.rank} isRival={!!(S.player.rival && prof.p.id === S.player.rival.id)} playerName={S.pName} h2h={!prof.p.isP && S.player.h2h ? (S.player.h2h[prof.p.id] || []) : null} timeline={prof.p.isP ? (S.player.timeline || []) : null} onClose={function(){setProf(null)}} />)}
+        {prof && (<Profile player={prof.p} rank={prof.rank} roosterName={S.player.roosterName} onRenameRooster={renameRooster} isRival={!!(S.player.rival && prof.p.id === S.player.rival.id)} playerName={S.pName} h2h={!prof.p.isP && S.player.h2h ? (S.player.h2h[prof.p.id] || []) : null} timeline={prof.p.isP ? (S.player.timeline || []) : null} onClose={function(){setProf(null)}} />)}
         {showHelp && (<HelpScreen onClose={function(){setHelp(false)}} />)}
         {showBracket && (<BracketView ts={ts} playerName={S.pName} onClose={function(){setShowBracket(false)}} />)}
         {showScout && scoutT && pm && ts.alive && (<ScoutSheet scout={scoutT} onClose={function(){setShowScout(false)}} />)}

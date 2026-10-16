@@ -3,13 +3,17 @@
 import { TIERS, RN5, RN6, STATS } from "../models/constants";
 import { Rider, PLAYER_PALETTE, paletteFor } from "./Rider";
 import { roosterName, trait, quote, standing } from "../models/persona";
+import { useState } from "react";
 
 export default function Profile(props) {
+  var _ed = useState(false), editing = _ed[0], setEditing = _ed[1];
+  var _dr = useState(""), draft = _dr[0], setDraft = _dr[1];
   var p = props.player; var rank = props.rank; var onClose = props.onClose;
   if (!p) return null;
   var t = p.tr || {};
   var totalTr = (t.r||0)+(t.p||0)+(t.f||0)+(t.s||0)+(t.g||0);
   var b = p.best || {};
+  var myRooster = props.roosterName || roosterName(1);
   return (
     <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(15,23,42,0.5)", zIndex: 999, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }} onClick={onClose}>
       <div style={{ background: "#ffffff", borderRadius: 14, padding: 18, maxWidth: 360, width: "100%", border: "1px solid #e5e7eb", maxHeight: "80vh", overflowY: "auto" }} onClick={function(e){e.stopPropagation();}}>
@@ -26,6 +30,18 @@ export default function Profile(props) {
             {!p.isP && standing(rank) && (<div style={{ display: "inline-block", marginTop: 4, background: "#92400e", color: "#fff", fontSize: 11, fontWeight: 900, letterSpacing: 1.5, padding: "2px 10px", borderRadius: 12 }}>{standing(rank).icon} {standing(rank).tag.toUpperCase()} OF THE TOUR</div>)}
             {props.isRival && (<div style={{ display: "inline-block", marginTop: 4, marginLeft: 4, background: "#be123c", color: "#fff", fontSize: 11, fontWeight: 900, letterSpacing: 1.5, padding: "2px 10px", borderRadius: 12 }}>😤 YOUR ARCH-RIVAL</div>)}
             {!p.isP && (<div style={{ fontSize: 13, color: "#57534e", fontWeight: 700, marginTop: 4 }}>🐓 Rides <b style={{ color: "#1c1917" }}>{roosterName(p.id)}</b></div>)}
+            {p.isP && (editing ? (
+              <form onSubmit={function (e) { e.preventDefault(); props.onRenameRooster && props.onRenameRooster(draft); setEditing(false); }} style={{ display: "flex", justifyContent: "center", gap: 6, marginTop: 6 }}>
+                <input autoFocus value={draft} maxLength={24} onChange={function (e) { setDraft(e.target.value); }} placeholder="Your rooster's name"
+                  style={{ fontSize: 14, padding: "6px 10px", borderRadius: 8, border: "2px solid #3f2a1d", width: 170, fontWeight: 700 }} />
+                <button type="submit" style={{ fontSize: 13, fontWeight: 900, padding: "6px 12px", borderRadius: 8, border: "2px solid #3f2a1d", background: "#fde68a", color: "#3f2a1d", cursor: "pointer" }}>Save</button>
+              </form>
+            ) : (
+              <div style={{ fontSize: 13, color: "#57534e", fontWeight: 700, marginTop: 4 }}>
+                🐓 Rides <b style={{ color: "#1c1917" }}>{myRooster}</b>
+                {props.onRenameRooster && (<button onClick={function () { setDraft(myRooster); setEditing(true); }} aria-label="Rename your rooster" style={{ marginLeft: 6, background: "none", border: "none", cursor: "pointer", fontSize: 13, padding: 0 }}>✏️</button>)}
+              </div>
+            ))}
             {!p.isP && (<div style={{ fontSize: 13, color: "#57534e", fontStyle: "italic", marginTop: 2 }}>{trait(p.id)}</div>)}
           </div>
           {!p.isP && (
@@ -111,24 +127,28 @@ export default function Profile(props) {
                 var tierInfo = TIERS[e.tier] || TIERS[0];
                 var rNames6 = tierInfo.rounds === 6 ? RN6 : RN5;
                 var rName = rNames6[Math.min(e.round, tierInfo.rounds - 1)] || ("R" + (e.round + 1));
+                /* Line 1: the result in sets. Line 2: every set's average score (older matches only kept the match average) */
                 return (
-                  <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "4px 6px", borderRadius: 4, background: i % 2 === 0 ? "#f8fafc" : "transparent", marginBottom: 1 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 6, minWidth: 0, flex: 1 }}>
-                      <span style={{ width: 18, height: 18, borderRadius: 4, background: e.w ? "#22c55e" : "#ef4444", color: "#000", fontSize: 11, fontWeight: 900, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{e.w ? "W" : "L"}</span>
-                      <span style={{ fontSize: 12, color: tierInfo.col, fontWeight: 700 }}>{tierInfo.short}</span>
-                      <span style={{ fontSize: 12, color: "#475569" }}>{rName}</span>
-                      <span style={{ fontSize: 11, color: "#94a3b8" }}>S{e.s}</span>
+                  <div key={i} style={{ padding: "5px 6px", borderRadius: 6, background: i % 2 === 0 ? "#f8fafc" : "transparent", marginBottom: 1 }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 6 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 6, minWidth: 0, flex: 1 }}>
+                        <span style={{ width: 18, height: 18, borderRadius: 4, background: e.w ? "#22c55e" : "#ef4444", color: "#000", fontSize: 11, fontWeight: 900, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{e.w ? "W" : "L"}</span>
+                        <span style={{ fontSize: 12, color: tierInfo.col, fontWeight: 700 }}>{tierInfo.short}</span>
+                        <span style={{ fontSize: 12, color: "#475569" }}>{rName}</span>
+                        <span style={{ fontSize: 11, color: "#94a3b8" }}>S{e.s}</span>
+                      </div>
+                      {e.sc && (<span style={{ fontSize: 12.5, fontWeight: 900, color: e.w ? "#16a34a" : "#dc2626" }}>{e.w ? "Won" : "Lost"} {e.sc.replace("-", "–")}</span>)}
                     </div>
-                    {e.sc && (
-                      <span style={{ fontSize: 12, fontWeight: 900, color: e.w ? "#22c55e" : "#ef4444", marginRight: 6 }}>{e.sc.replace("-", "–")}</span>
-                    )}
-                    {e.ma != null && e.oa != null && (
-                      <span style={{ fontSize: e.sc ? 11 : 12, fontWeight: 700, color: "#334155", letterSpacing: 0.5, opacity: e.sc ? 0.6 : 1 }}>
-                        <span style={{ color: e.w ? "#22c55e" : "#334155" }}>{e.ma}</span>
-                        <span style={{ color: "#94a3b8", margin: "0 3px" }}>–</span>
-                        <span style={{ color: e.w ? "#334155" : "#ef4444" }}>{e.oa}</span>
-                      </span>
-                    )}
+                    {e.sets && e.sets.length ? (
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginTop: 4, paddingLeft: 24 }}>
+                        {e.sets.map(function (st, si) {
+                          var won = st[0] >= st[1];
+                          return (<span key={si} style={{ fontSize: 11, fontWeight: 800, padding: "1px 6px", borderRadius: 6, background: won ? "#dcfce7" : "#fee2e2", color: won ? "#166534" : "#991b1b" }}>Set {si + 1}: {st[0]}–{st[1]}</span>);
+                        })}
+                      </div>
+                    ) : e.ma != null && e.oa != null ? (
+                      <div style={{ fontSize: 11, color: "#64748b", marginTop: 2, paddingLeft: 24 }}>Average strike {e.ma} vs {e.oa} <span style={{ opacity: 0.7 }}>(set scores weren't recorded back then)</span></div>
+                    ) : null}
                   </div>
                 );
               })}
