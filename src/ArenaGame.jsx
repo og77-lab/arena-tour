@@ -27,6 +27,7 @@ import { buildIssue, buildSpecialEdition, rankMap } from "./engine/news";
 import { tallyTournament, checkAchievements } from "./engine/achievements";
 import { updateRival, rivalRecord } from "./engine/rivalry";
 import { uniqueNames, needsUniqueNames } from "./engine/migrate";
+import { weekEvents } from "./engine/events";
 import { ACHIEVEMENTS } from "./engine/achievements";
 import AchievementsSheet, { AchToast, achCount } from "./components/Achievements";
 import { CoachCard } from "./components/Coach";
@@ -260,7 +261,7 @@ export default function Arena(props) {
     if (!ev) return;
     if (ev.type === "gs") {
       if (pRankOf(S) <= 64 || hasSlamWildcard(fansOf(S.player))) {
-        startTourney(5);
+        startTourney(5, weekEvents(S).filter(function(x){ return x.tier === 5; })[0]);
       } else {
         var cal = S.cal.slice();
         cal[S.calIdx].done = true;
@@ -314,16 +315,23 @@ export default function Arena(props) {
     return runBk(bk, round + 1, alive, maxRound);
   }
 
-  function startTourney(tierIdx) {
+  function startTourney(tierIdx, ev) {
     if (!S) return;
     var tier = TIERS[tierIdx];
     var ranked = getRanked(S);
     var pool = [];
-    for (var i = 0; i < ranked.length && pool.length < tier.size; i++) {
-      var r = i + 1;
-      if (r >= tier.rankRange[0] && r <= tier.rankRange[1]) pool.push(Object.assign({}, ranked[i], { tP: 0 }));
+    if (ev) {
+      /* The event's own field; the player takes the place of its lowest-ranked entrant */
+      var npcById = {}; ranked.forEach(function(p){ if (!p.isP) npcById[p.id] = p; });
+      pool = ev.ids.map(function(id){ return npcById[id] ? Object.assign({}, npcById[id], { tP: 0 }) : null; }).filter(Boolean).slice(0, tier.size);
+    } else {
+      for (var i = 0; i < ranked.length && pool.length < tier.size; i++) {
+        var r = i + 1;
+        if (r >= tier.rankRange[0] && r <= tier.rankRange[1]) pool.push(Object.assign({}, ranked[i], { tP: 0 }));
+      }
     }
     /* Ensure player is in pool */
+    if (ev) pool.sort(function(a, b){ return (b.sp||0) - (a.sp||0); });
     var hasP = pool.some(function(p){return p.isP;});
     if (!hasP) { pool[pool.length - 1] = Object.assign({}, S.player, { name: S.pName, tP: 0 }); }
     /* Fill if needed */
@@ -339,7 +347,8 @@ export default function Arena(props) {
     var r0 = []; for (var m = 0; m < pool.length; m += 2) r0.push({ a: pool[m], b: pool[m+1], w: null });
     var bk = [r0]; bk._pts = tier.pts; bk._tier = tierIdx;
     var result = runBk(bk, 0, true, tier.rounds);
-    setTS({ bracket: result.bracket, round: result.round, pending: result.pending, done: result.done, alive: true, log: [], tierIdx: tierIdx });
+    var evInfo = ev ? { eventId: ev.id, eventName: ev.name, cond: ev.cond, field: ev.field, ptsMul: ev.ptsMul, moneyMul: ev.moneyMul } : {};
+    setTS(Object.assign({ bracket: result.bracket, round: result.round, pending: result.pending, done: result.done, alive: true, log: [], tierIdx: tierIdx }, evInfo));
     setTtab("match"); setScr("tourney");
   }
 
@@ -351,9 +360,10 @@ export default function Arena(props) {
     var winner = won ? (m.a.isP ? m.a : m.b) : (m.a.isP ? m.b : m.a);
     winner.tP = (winner.tP||0) + tier.pts[ts.round]; m.w = winner;
     var oppRankNow = 0; var rk = getRanked(S); for (var rki = 0; rki < rk.length; rki++) { if (rk[rki].id === opp.id) { oppRankNow = rki + 1; break; } }
-    var log = ts.log.concat([{ round: rNames[ts.round], opp: opp.name, oppId: opp.id, oppRank: oppRankNow, myRank: pRankOf(S), won: won, pts: won ? tier.pts[ts.round] : 0, sc: setScore || null, seq: setSeq || "", gold: (xtra && xtra.gold) || 0, flawless: (xtra && xtra.flawless) || 0 }]);
+    var log = ts.log.concat([{ round: rNames[ts.round], opp: opp.name, oppId: opp.id, oppRank: oppRankNow, myRank: pRankOf(S), won: won, pts: won ? Math.round(tier.pts[ts.round] * (ts.ptsMul || 1)) : 0, sc: setScore || null, seq: setSeq || "", gold: (xtra && xtra.gold) || 0, flawless: (xtra && xtra.flawless) || 0 }]);
     var r = runBk(bk, ts.round, won, tier.rounds);
-    setTS({ bracket: r.bracket, round: r.round, pending: r.pending, done: r.done, alive: won, log: log, tierIdx: ts.tierIdx });
+    var nts = Object.assign({}, ts, { bracket: r.bracket, round: r.round, pending: r.pending, done: r.done, alive: won, log: log }); delete nts.match; /* no undefined fields in saves */
+    setTS(nts);
     /* Record head-to-head vs this opponent */
     if (opp && opp.id) {
       var h2h = Object.assign({}, S.player.h2h || {});
@@ -378,7 +388,8 @@ export default function Arena(props) {
   function finishT() {
     if (!S || !ts) return;
     var tier = TIERS[ts.tierIdx]; var isGS = ts.tierIdx === 5;
-    var tally = function(pid) { var p = 0; for (var ri = 0; ri < ts.bracket.length; ri++) { var rd = ts.bracket[ri]; if (rd) for (var mi = 0; mi < rd.length; mi++) { if (rd[mi].w && rd[mi].w.id === pid) p += tier.pts[ri]; } } return p; };
+    var evPts = ts.ptsMul || 1, evMoney = ts.moneyMul || 1;
+    var tally = function(pid) { var p = 0; for (var ri = 0; ri < ts.bracket.length; ri++) { var rd = ts.bracket[ri]; if (rd) for (var mi = 0; mi < rd.length; mi++) { if (rd[mi].w && rd[mi].w.id === pid) p += tier.pts[ri]; } } return Math.round(p * evPts); };
     var pp = tally(1);
     /* No points for R1 losers — you must win to earn */
     var pRound = 0; for (var ri = 0; ri < ts.bracket.length; ri++) { var rd = ts.bracket[ri]; if (rd) for (var mi = 0; mi < rd.length; mi++) { var mm = rd[mi]; if ((mm.a && mm.a.id===1)||(mm.b && mm.b.id===1)) pRound = ri; } }
@@ -414,6 +425,7 @@ export default function Arena(props) {
     /* Compute money earned here so timeline has it */
     var tlMoney = 0;
     for (var tlmi = 0; tlmi <= pRound; tlmi++) { tlMoney += (tier.money || [])[tlmi] || 0; }
+    tlMoney = Math.round(tlMoney * (ts.moneyMul || 1));
     if (wonTitle) {
       tlNew.push({ type: "title", s: S.sNum, w: wLabel, tier: ts.tierIdx, pts: pp, money: tlMoney });
     } else if (isGS && pRound >= 2) {
@@ -469,27 +481,20 @@ export default function Arena(props) {
       for (var bmi = 0; bmi < brd.length; bmi++) { if (brd[bmi].a) playedIds[brd[bmi].a.id] = true; if (brd[bmi].b) playedIds[brd[bmi].b.id] = true; }
     }
     /* Run multiple tournaments at each tier for remaining NPCs */
-    var tierCounts = isGSweek ? [0,0,0,0,0,1] : [10,5,3,2,1,0];
+    /* The week's other named events (same fields the player saw in the list), each simulated with its own point multiplier */
+    var weekEv = weekEvents(S), byId = {};
+    tempRanked.forEach(function(p){ if (!p.isP) byId[p.id] = p; });
     for (var pti = 0; pti < 6; pti++) {
-      var numEvents = tierCounts[pti];
-      /* The player's tournament is one of this tier's events; the rest of the tier still plays its own */
-      if (pti === ts.tierIdx) { parallelResults.push({ tier: pti, playerEvent: true, count: 1 }); numEvents -= 1; }
+      var tierEv = weekEv.filter(function(x){ return x.tier === pti && x.id !== ts.eventId; });
+      if (pti === ts.tierIdx) parallelResults.push({ tier: pti, playerEvent: true, count: 1, name: ts.eventName || null });
+      var numEvents = tierEv.length;
       if (numEvents <= 0) continue;
       var pt = TIERS[pti];
-      /* Collect eligible NPCs not in player's tournament */
-      var eligible = [];
-      for (var ei = 0; ei < tempRanked.length; ei++) {
-        var er = ei + 1;
-        if (!tempRanked[ei].isP && !playedIds[tempRanked[ei].id] && er >= pt.rankRange[0] && er <= pt.rankRange[1]) eligible.push(tempRanked[ei]);
-      }
-      if (eligible.length < 8) continue;
-      /* Shuffle eligible pool */
-      for (var ek = eligible.length - 1; ek > 0; ek--) { var ej = Math.floor(Math.random()*(ek+1)); var et = eligible[ek]; eligible[ek] = eligible[ej]; eligible[ej] = et; }
       var topWinner = null, tierUpset = null;
       for (var ev = 0; ev < numEvents; ev++) {
-        var poolStart = ev * pt.size;
-        var pool = eligible.slice(poolStart, poolStart + pt.size);
-        if (pool.length < 4) break;
+        var evMul = tierEv[ev].ptsMul || 1;
+        var pool = tierEv[ev].ids.map(function(id){ return byId[id]; }).filter(Boolean);
+        if (pool.length < 4) continue;
         /* One tournament per rider per week, even where tier rank ranges overlap */
         pool = pool.filter(function(p){ return !playedIds[p.id]; });
         pool.forEach(function(p){ playedIds[p.id] = true; });
@@ -511,7 +516,7 @@ export default function Arena(props) {
               if (gap > 0 && (!shock || gap * (1 + pti * 0.6) > shock.gap * (1 + shock.tier * 0.6))) shock = { tier: pti, round: (pt.rounds === 6 ? RN6 : RN5)[rd2], w: brief(w2), l: brief(l2), wRank: rkOf[w2.id], lRank: rkOf[l2.id], gap: gap };
               /* Loser gets points for round reached */
               var loserNpc = newNpcs.find(function(n){return n.id===l2.id;});
-              if (loserNpc && rd2 > 0) { var lPts = Math.round(pt.pts[rd2-1] * 0.6); loserNpc.sp = (loserNpc.sp||0)+lPts; loserNpc.ap = (loserNpc.ap||0)+lPts; }
+              if (loserNpc && rd2 > 0) { var lPts = Math.round(pt.pts[rd2-1] * 0.6 * evMul); loserNpc.sp = (loserNpc.sp||0)+lPts; loserNpc.ap = (loserNpc.ap||0)+lPts; }
               nxt.push(w2);
             } else { nxt.push(cur[mi2]); }
           }
@@ -522,11 +527,11 @@ export default function Arena(props) {
         if (winner) {
           var wNpc = newNpcs.find(function(n){return n.id===winner.id;});
           if (wNpc) {
-            var totalWin = 0; for (var wp = 0; wp < pt.pts.length; wp++) totalWin += pt.pts[wp];
+            var totalWin = 0; for (var wp = 0; wp < pt.pts.length; wp++) totalWin += pt.pts[wp]; totalWin = Math.round(totalWin * evMul);
             wNpc.sp = (wNpc.sp||0)+totalWin; wNpc.ap = (wNpc.ap||0)+totalWin;
             wNpc.best = Object.assign({},wNpc.best||{}); wNpc.best.titles = (wNpc.best.titles||0)+1;
             if (pti === 5) wNpc.best.gsTitles = (wNpc.best.gsTitles||0)+1;
-            if (!topWinner || totalWin > (topWinner.pts||0)) topWinner = { name: winner.name, emoji: winner.emoji, id: winner.id, pts: totalWin };
+            if (!topWinner || totalWin > (topWinner.pts||0)) topWinner = { name: winner.name, emoji: winner.emoji, id: winner.id, pts: totalWin, event: tierEv[ev].name };
             /* How unlikely was this champion? Compare her to the event's top seed */
             var fav = pool.reduce(function(a, p){ return (rkOf[p.id] || 9999) < (rkOf[a.id] || 9999) ? p : a; }, pool[0]);
             var seedGap = (rkOf[winner.id] || 0) - (rkOf[fav.id] || 0);
@@ -537,7 +542,7 @@ export default function Arena(props) {
             var semis2 = brackets[brackets.length - 2];
             for (var si2 = 0; si2 < semis2.length; si2++) {
               var sNpc = newNpcs.find(function(n){return n.id===semis2[si2].id && n.id!==winner.id;});
-              if (sNpc) { var sPts = Math.round(pt.pts[pt.pts.length-2] * 0.7); sNpc.sp=(sNpc.sp||0)+sPts; sNpc.ap=(sNpc.ap||0)+sPts; }
+              if (sNpc) { var sPts = Math.round(pt.pts[pt.pts.length-2] * 0.7 * evMul); sNpc.sp=(sNpc.sp||0)+sPts; sNpc.ap=(sNpc.ap||0)+sPts; }
             }
           }
         }
@@ -556,8 +561,10 @@ export default function Arena(props) {
     /* Calculate money earned */
     var moneyEarned = 0;
     for (var mri = 0; mri <= pRound; mri++) { moneyEarned += (tier.money || [])[mri] || 0; }
-    var hist = (S.tHist||[]).concat([{ num: (S.tHist||[]).length + 1, season: S.sNum, tier: ts.tierIdx, tierName: tier.name, pPts: pp, defending: defending, netChange: netChange, pRound: pRound, roundName: rNames[pRound], money: moneyEarned, winner: champW ? { name: champW.isP ? S.pName : champW.name, emoji: champW.emoji||"👑", isP: champW.isP } : null }]);
+    moneyEarned = Math.round(moneyEarned * evMoney);
+    var hist = (S.tHist||[]).concat([{ num: (S.tHist||[]).length + 1, season: S.sNum, tier: ts.tierIdx, tierName: tier.name, eventName: ts.eventName || null, cond: ts.cond || null, pPts: pp, defending: defending, netChange: netChange, pRound: pRound, roundName: rNames[pRound], money: moneyEarned, winner: champW ? { name: champW.isP ? S.pName : champW.name, emoji: champW.emoji||"👑", isP: champW.isP } : null }]);
     var cal = S.cal.slice(); cal[S.calIdx].done = true; cal[S.calIdx].tier = ts.tierIdx; cal[S.calIdx].result = { pPts: pp, defending: defending, net: netChange, pRound: pRound, won: !!wonTitle, parallel: parallelResults };
+    if (ts.eventName) { cal[S.calIdx].result.eventName = ts.eventName; cal[S.calIdx].result.cond = ts.cond || "classic"; }
     newP.earned = (S.player.earned != null ? S.player.earned : (S.player.money || 0)) + moneyEarned;
     newP.money = (newP.money || 0) + moneyEarned;
     newP.seasonMoney = (newP.seasonMoney || 0) + moneyEarned;
@@ -568,7 +575,7 @@ export default function Arena(props) {
     var afterS = Object.assign({}, S, { player: newP, npcs: newNpcs, tHist: hist, cal: cal, calIdx: S.calIdx + 1, activeT: null, activeF: null });
     var issue = null;
     try {
-      issue = buildIssue({ before: S, after: afterS, bracket: ts.bracket, roundNames: rNames, tierIdx: ts.tierIdx, tierName: tier.name, pRound: pRound, wonTitle: wonTitle,
+      issue = buildIssue({ before: S, after: afterS, bracket: ts.bracket, roundNames: rNames, tierIdx: ts.tierIdx, tierName: ts.eventName || tier.name, pRound: pRound, wonTitle: wonTitle,
         pts: pp, net: netChange, money: moneyEarned, champ: champW, parallel: parallelResults, shock: shock, trainLog: trainLog, weekLabel: curEv && curEv.type === "gs" ? "Grand Slam " + curEv.gsNum : "Week " + wLabel });
     } catch (e) { console.error("News issue failed:", e); }
     if (issue) {
@@ -761,7 +768,8 @@ export default function Arena(props) {
         {hubTip && (<CoachCard key={hubTip} id={hubTip} vars={{ name: S.pName, rival: S.player.rival ? S.player.rival.name : null }} onDone={function(all){ markTip(hubTip, all); }} />)}
         {picking && !seasonDone && (<TierSheet available={avTiers} wildcard={wildcardTier(S)} rank={pRank} paid={paidEntryTier(S)}
           entry={(function(){ var top = Math.max.apply(null, availableTiers(S, true)), ti = top + 1; if (ti > 4 || paidEntryTier(S) >= 0) return null; var fee = entryFee(ti); return { tier: ti, fee: fee, used: !!weekInvestment(S), can: !weekInvestment(S) && (S.player.money || 0) >= fee, cash: S.player.money || 0 }; })()}
-          onBuyEntry={buyEntry} onClose={function(){setPicking(false)}} onPick={function(ti){ setPicking(false); startTourney(ti); }} />)}
+          onBuyEntry={buyEntry} onClose={function(){setPicking(false)}} events={weekEvents(S)} onPickEvent={function(ev){ setPicking(false); startTourney(ev.tier, ev); }}
+          onPick={function(ti){ setPicking(false); startTourney(ti); }} />)}
         {gala && (<SeasonGala S={S} champ={gala.champ} runnerUp={gala.runnerUp} champRank={gala.champRank} awards={gala.awards} you={gala.you} hall={gala.hall} goal={gala.goal} onDone={finishGala} />)}
         {achQ.length > 0 && (<AchToast queue={achQ} onShown={function(){ setAchQ(function(q){ return q.slice(1); }); }} onOpen={function(){ setAchQ([]); setShowAch(true); }} />)}
         {showAch && (<AchievementsSheet S={S} onClose={function(){ setShowAch(false); }} />)}
@@ -1089,15 +1097,15 @@ export default function Arena(props) {
         {showBracket && (<BracketView ts={ts} playerName={S.pName} onClose={function(){setShowBracket(false)}} />)}
         {showScout && scoutT && pm && ts.alive && (<ScoutSheet scout={scoutT} onClose={function(){setShowScout(false)}} />)}
         <div style={{maxWidth:520,margin:"0 auto",textAlign:"left"}}>
-        <MatchHeader tierName={tier.name} tierColor={tier.col} roundLabel={ts.done ? (ts.alive ? "Champion" : "Tournament over") : rNames[Math.min(ts.round,tier.rounds-1)]}
+        <MatchHeader tierName={ts.eventName || tier.name} cond={ts.cond} tierColor={tier.col} roundLabel={ts.done ? (ts.alive ? "Champion" : "Tournament over") : rNames[Math.min(ts.round,tier.rounds-1)]}
           bestOf={tier.bo || 3} rounds={rNames} roundIdx={ts.done ? (ts.alive ? tier.rounds : -1) : ts.round}
           onScout={pm && ts.alive && opp ? function(){ setShowScout(true); } : null}
           onBracket={function(){ setShowBracket(true); }} onHelp={function(){ setHelp(true); }} />
 
         {pm && ts.alive && opp && (
           <div>
-            <PowerBar key={"t-"+ts.round} tier={ts.tierIdx} road={ts.log.filter(function(m){ return m.won; }).map(function(m){ return { name: sh(m.opp), id: m.oppId, round: m.round }; })} coach={tipOn("match")} scout={scoutT} onDone={onTR} oppSkill={opp.skill||50} diff={roundDiff(ts.tierIdx, ts.round)} tr={S.player.tr} otr={opp.tr||{}} playerName={S.pName} playerEmoji="⚔️" oppName={sh(opp.name)} oppEmoji={opp.emoji||"👤"} oppId={opp.id} oppRank={oppRank} fans={fansOf(S.player)} tierColor={tier.col} roundLabel={rNames[ts.round]}
-              tierName={tier.name} youSub={"World #"+pRank} foeSub={"World #"+oppRank+" · "+talentLabel(opp.skill)}
+            <PowerBar key={"t-"+ts.round} tier={ts.tierIdx} cond={ts.cond} eventName={ts.eventName} road={ts.log.filter(function(m){ return m.won; }).map(function(m){ return { name: sh(m.opp), id: m.oppId, round: m.round }; })} coach={tipOn("match")} scout={scoutT} onDone={onTR} oppSkill={opp.skill||50} diff={roundDiff(ts.tierIdx, ts.round)} tr={S.player.tr} otr={opp.tr||{}} playerName={S.pName} playerEmoji="⚔️" oppName={sh(opp.name)} oppEmoji={opp.emoji||"👤"} oppId={opp.id} oppRank={oppRank} fans={fansOf(S.player)} tierColor={tier.col} roundLabel={rNames[ts.round]}
+              tierName={ts.eventName || tier.name} youSub={"World #"+pRank} foeSub={"World #"+oppRank+" · "+talentLabel(opp.skill)}
               isFinal={ts.round >= tier.rounds-1} nextLabel={ts.round < tier.rounds-1 ? rNames[ts.round+1] : null} eliminated={true}
               stakes={{ pts: tier.pts[ts.round], money: (tier.money||[])[ts.round]||0 }}
               titleStakes={{ pts: tier.pts.reduce(function(a,b){ return a+b; },0), money: (tier.money||[]).reduce(function(a,b){ return a+b; },0) }}

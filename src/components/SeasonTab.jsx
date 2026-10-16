@@ -166,7 +166,7 @@ export default function SeasonTab(props) {
                     <span style={{ width: 92, flexShrink: 0, fontSize: 13, fontWeight: 900, color: gs ? C.goldInk : C.text }}>{gs ? "👑 Slam " + e.gsNum : "Week " + e.block + "." + e.week}</span>
                     <span style={{ flex: 1, minWidth: 0, fontSize: 12.5, color: C.textSoft, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {e.done
-                        ? (skipped(e) ? "Not qualified" : (<span><span aria-hidden style={{ display: "inline-block", width: 7, height: 7, borderRadius: "50%", background: t ? t.col : "#ccc", marginRight: 5 }} />{t ? t.name : ""} · <b style={{ color: r && r.won ? C.goldInk : C.text }}>{roundName(e)}</b></span>))
+                        ? (skipped(e) ? "Not qualified" : (<span><span aria-hidden style={{ display: "inline-block", width: 7, height: 7, borderRadius: "50%", background: t ? t.col : "#ccc", marginRight: 5 }} />{r && r.eventName ? r.eventName : t ? t.name : ""} · <b style={{ color: r && r.won ? C.goldInk : C.text }}>{roundName(e)}</b></span>))
                         : cur ? (<b style={{ color: C.text }}>This week — tap to play</b>) : gs ? "64 riders · best of 5" : "Open week"}
                     </span>
                     <span style={{ textAlign: "right", flexShrink: 0, fontSize: 12.5, fontWeight: 900, lineHeight: 1.15 }}>

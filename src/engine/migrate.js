@@ -1,4 +1,4 @@
-/* ═══ Engine / Migrate ═══ Older tours reused first names ("two Lunas"). Give every NPC her unique full name, keeping
+/* ═══ Engine / Migrate ═══ Older tours reused first names ("two Lunas"). Give every NPC a first name of her own, keeping
    her title ("…the Bold"), and update every place the save mentions her: brackets, head-to-head, rival, the paper. */
 
 import { npcName } from "../models/persona";
@@ -7,7 +7,7 @@ import { sh } from "../models/formulas";
 export function needsUniqueNames(S) {
   if (!S || !S.npcs) return false;
   var seen = {};
-  for (var i = 0; i < S.npcs.length; i++) { var k = sh(S.npcs[i].name); if (seen[k]) return true; seen[k] = 1; }
+  for (var i = 0; i < S.npcs.length; i++) { var k = sh(S.npcs[i].name).split(" ")[0].toLowerCase(); if (seen[k]) return true; seen[k] = 1; }
   return false;
 }
 

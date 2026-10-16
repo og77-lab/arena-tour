@@ -117,6 +117,15 @@ function body(id) {
         ["Grand Slam", "1–64", "Best of 5", "15,750", "$1.6M"]
       ]} />
       <P>Each tournament is a knockout bracket (32 riders, 64 at a Slam). Every round you win adds points and prize money; the totals above are for winning the whole thing. Lose and your week is over.</P>
+      <H>Named events: pick your week</H>
+      <P>Each week several tournaments run at once in every tier, and all 1,000 riders play one of them. Tap a tier to see its events. Each card shows:</P>
+      <List items={[
+        <span key="n"><B>Name and lanes</B> — the conditions change the match for both riders:</span>,
+        <span key="c">☀️ <B>Classic</B>: no tricks. 🌧️ <B>Muddy lanes</B>: bar 10% faster, +10% points. 🌬️ <B>Windy coast</B>: gold zone 2% narrower, +25% prize money. 🔥 <B>Heatwave</B>: the bar speeds up 40% more each strike, +10% points. 🌼 <B>Village green</B>: gold zone 1.5% wider, but −20% points and money.</span>,
+        <span key="e"><B>Entrants (★)</B> — who signed up. ★★★ tough entrants: mostly the tier's top-ranked riders, +15% points. ★★ mixed. ★ weaker entrants: mostly lower-ranked riders, −15% points.</span>,
+        <span key="s"><B>Top seeds</B> — the two best-ranked riders in the draw, and what the champion takes home.</span>
+      ]} />
+      <P>Grand Slam weeks have a single named Slam (The Coop Open, The Swamp Slam, Wimbledon-on-Wold, The Gale Cup), each with its own lanes.</P>
       <H>Getting into a higher tier early</H>
       <List items={[
         <span key="a"><B>Fan wildcard:</B> with 70+ fans the tier above your normal range opens for free.</span>,

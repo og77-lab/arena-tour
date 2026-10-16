@@ -1,13 +1,18 @@
 /* ═══ TierSheet ═══ Bottom sheet for choosing this week's tournament tier */
 
 import { createPortal } from "react-dom";
+import { useState } from "react";
 import { motion } from "framer-motion";
+import { CONDITIONS, FIELDS } from "../engine/events";
 import { TIERS } from "../models/constants";
 import { C, FONT, display, label, card, money } from "../ui/theme";
 
 export default function TierSheet(props) {
   var avail = props.available || [];
   var best = avail.length ? Math.max.apply(null, avail) : -1;
+  var events = props.events || [];
+  var [open, setOpen] = useState(props.paid >= 0 ? props.paid : best);
+  function evOf(ti) { return events.filter(function (x) { return x.tier === ti; }); }
   return createPortal(
     <div onClick={props.onClose} style={{ position: "fixed", inset: 0, zIndex: 900, background: "rgba(28,25,23,0.55)", display: "flex", alignItems: "flex-end", justifyContent: "center", fontFamily: FONT }}>
       <motion.div onClick={function (e) { e.stopPropagation(); }}
@@ -25,7 +30,8 @@ export default function TierSheet(props) {
             var t = TIERS[ti], ok = avail.indexOf(ti) >= 0;
             var top = t.pts[t.pts.length - 1], prize = t.money[t.money.length - 1];
             return (
-              <button key={ti} disabled={!ok} onClick={function () { if (ok) props.onPick(ti); }}
+              <div key={ti}>
+              <button disabled={!ok} onClick={function () { if (!ok) return; if (evOf(ti).length && props.onPickEvent) setOpen(open === ti ? -1 : ti); else props.onPick(ti); }}
                 style={Object.assign(card({ padding: "10px 12px", borderColor: ok ? t.col : C.line, boxShadow: ok ? "0 3px 0 " + t.col : "none", opacity: ok ? 1 : 0.55 }), { display: "flex", alignItems: "center", gap: 12, textAlign: "left", width: "100%", cursor: ok ? "pointer" : "default", fontFamily: FONT, background: ok ? C.card : C.cardWarm })}>
                 <div style={{ width: 44, height: 44, borderRadius: 12, background: t.col, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, fontSize: 13, flexShrink: 0, border: "2px solid " + C.ink, textShadow: "0 1px 2px rgba(0,0,0,0.6)" }}>{t.short}</div>
                 <div style={{ flex: 1, minWidth: 0 }}>
@@ -41,11 +47,18 @@ export default function TierSheet(props) {
                   {!ok && (<div style={{ fontSize: 11, fontWeight: 800, color: C.redInk, marginTop: 2 }}>🔒 Not open at #{props.rank}</div>)}
                 </div>
                 <div style={{ textAlign: "right", flexShrink: 0 }}>
+                  {ok && evOf(ti).length > 0 ? (<span style={{ fontSize: 12, fontWeight: 900, color: t.col }}>{evOf(ti).length} event{evOf(ti).length > 1 ? "s" : ""} {open === ti ? "▲" : "▼"}</span>) : (<span>
                   <div style={label()}>Champion</div>
                   <div style={{ fontSize: 15, fontWeight: 900, color: C.goldInk }}>{top.toLocaleString()} pts</div>
-                  <div style={{ fontSize: 12, fontWeight: 800, color: C.greenInk }}>{money(prize)}</div>
+                  <div style={{ fontSize: 12, fontWeight: 800, color: C.greenInk }}>{money(prize)}</div></span>)}
                 </div>
               </button>
+              {ok && open === ti && evOf(ti).length > 0 && (
+                <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} style={{ display: "flex", flexDirection: "column", gap: 6, margin: "6px 0 4px 14px", paddingLeft: 10, borderLeft: "3px solid " + t.col }}>
+                  {evOf(ti).map(function (ev) { return (<EventCard key={ev.id} ev={ev} col={t.col} bo={t.bo || 3} onPick={function () { props.onPickEvent(ev); }} />); })}
+                </motion.div>
+              )}
+              </div>
             );
           })}
         </div>
@@ -75,5 +88,32 @@ export default function TierSheet(props) {
       </motion.div>
     </div>,
     document.body
+  );
+}
+
+/* One named event: its lanes, who signed up, and what it pays. Every condition helps one thing and hurts another. */
+function EventCard(props) {
+  var ev = props.ev, cd = CONDITIONS[ev.cond] || CONDITIONS.classic, fd = FIELDS[ev.field] || FIELDS.mixed;
+  return (
+    <button onClick={props.onPick} style={Object.assign(card({ padding: "8px 10px", borderColor: props.col, boxShadow: "0 2px 0 " + props.col }), { width: "100%", textAlign: "left", cursor: "pointer", fontFamily: FONT, background: C.card, display: "block" })}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <span aria-hidden style={{ fontSize: 24, flexShrink: 0 }}>{cd.icon}</span>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 14, fontWeight: 900, color: C.text, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{ev.name}</div>
+          <div style={{ fontSize: 11, fontWeight: 800, color: C.textSoft }}>{cd.name} · <span style={{ color: C.goldInk }}>{"★".repeat(fd.stars)}<span style={{ opacity: 0.22 }}>{"★".repeat(3 - fd.stars)}</span></span> {fd.label}</div>
+        </div>
+        <div style={{ textAlign: "right", flexShrink: 0 }}>
+          <div style={{ fontSize: 13, fontWeight: 900, color: C.goldInk }}>{ev.champPts.toLocaleString()} pts</div>
+          <div style={{ fontSize: 11, fontWeight: 800, color: C.greenInk }}>{money(ev.champMoney)}</div>
+        </div>
+      </div>
+      <div style={{ fontSize: 11, color: C.textSoft, lineHeight: 1.35, marginTop: 4 }}>{cd.blurb}{fd.pts !== 1 ? " " + (fd.pts > 1 ? "Top-ranked riders signed up: +" : "Mostly lower-ranked riders: −") + Math.round(Math.abs(fd.pts - 1) * 100) + "% points." : ""}</div>
+      {ev.seeds && ev.seeds.length > 0 && (
+        <div style={{ fontSize: 11, color: C.text, marginTop: 4, display: "flex", gap: 10, flexWrap: "wrap" }}>
+          <span style={label()}>Top seeds</span>
+          {ev.seeds.map(function (sd) { return (<span key={sd.id} style={{ fontWeight: 800 }}>{sd.emoji} {sd.name} <span style={{ color: C.textMuted }}>#{sd.rank}</span></span>); })}
+        </div>
+      )}
+    </button>
   );
 }

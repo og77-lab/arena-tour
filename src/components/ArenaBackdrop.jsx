@@ -103,15 +103,18 @@ export default function ArenaBackdrop(props) {
   }, [W, tier]);
 
   var mood = props.cheer === "groan" ? "groan" : props.cheer === "party" ? "party" : props.cheer === "big" ? "big" : props.cheer ? "cheer" : null;
-  var sky = L.gold ? "linear-gradient(180deg,#1e1b4b 0%,#4c1d95 45%,#fde68a 100%)" : tier >= 5 ? "linear-gradient(180deg,#7dd3fc 0%,#bae6fd 40%,#fef3c7 100%)" : "linear-gradient(180deg,#bae6fd 0%,#e0f2fe 30%,#fef3c7 70%,#fde68a 100%)";
+  var cond = props.cond || "classic";
+  var sky = cond === "mud" ? "linear-gradient(180deg,#94a3b8 0%,#cbd5e1 55%,#e2e8f0 100%)" : cond === "heat" ? "linear-gradient(180deg,#fb923c 0%,#fdba74 35%,#fde68a 75%,#fef3c7 100%)" : L.gold ? "linear-gradient(180deg,#1e1b4b 0%,#4c1d95 45%,#fde68a 100%)" : tier >= 5 ? "linear-gradient(180deg,#7dd3fc 0%,#bae6fd 40%,#fef3c7 100%)" : "linear-gradient(180deg,#bae6fd 0%,#e0f2fe 30%,#fef3c7 70%,#fde68a 100%)";
   var wood = tier >= 4 ? "repeating-linear-gradient(180deg,#475569 0 3px,#334155 3px 4px,#64748b 4px " + rowH + "px)" : "repeating-linear-gradient(180deg,#b45309 0 3px,#92400e 3px 4px,#c2621a 4px " + rowH + "px)";
 
   return (
     <div aria-hidden style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none" }}>
       <div style={{ position: "absolute", inset: 0, background: sky }} />
-      {!L.gold && [0, 1].map(function (i) {
+      {cond === "heat" && (<div style={{ position: "absolute", right: "12%", top: 3, width: 26, height: 26, borderRadius: "50%", background: "radial-gradient(circle,#fffbeb 0%,#fde047 45%,#f59e0b 100%)", boxShadow: "0 0 24px 10px rgba(253,224,71,0.6)" }} />)}
+      {!L.gold && cond !== "heat" && [0, 1].map(function (i) {
         return (<div key={i} style={{ position: "absolute", top: 4 + i * 7, left: i ? "55%" : "8%", width: 46, height: 12, borderRadius: 10, background: "rgba(255,255,255,0.85)", boxShadow: "14px -4px 0 -2px rgba(255,255,255,0.85), -12px 2px 0 -3px rgba(255,255,255,0.8)",
-          animation: REDUCED_MOTION ? "none" : "cloudDrift " + (38 + i * 14) + "s linear " + (-i * 17) + "s infinite" }} />);
+          background: cond === "mud" ? "rgba(100,116,139,0.85)" : "rgba(255,255,255,0.85)",
+          animation: REDUCED_MOTION ? "none" : "cloudDrift " + ((cond === "wind" ? 9 : 38) + i * (cond === "wind" ? 4 : 14)) + "s linear " + (-i * 17) + "s infinite" }} />);
       })}
       {/* Spotlights for the biggest nights */}
       {tier >= 5 && [0, 1].map(function (i) {

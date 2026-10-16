@@ -48,6 +48,23 @@ Tap **Choose tournament** on Home or Season. Your rank decides which tiers are o
 
 Each tournament is a knockout bracket (32 riders, 64 at a Slam). Every round you win adds points and prize money; the totals above are for winning the whole thing. Lose and your week is over.
 
+**Named events: pick your week**
+
+Each week several tournaments run at once in every tier, and all 1,000 riders play one of them. Tap a tier to see its events. Each card shows:
+- **Name and lanes.** The conditions change the match for both riders:
+  - ☀️ **Classic:** no tricks.
+  - 🌧️ **Muddy lanes:** bar 10% faster, +10% points.
+  - 🌬️ **Windy coast:** gold zone 2% narrower, +25% prize money.
+  - 🔥 **Heatwave:** the bar speeds up 40% more each strike, +10% points.
+  - 🌼 **Village green:** gold zone 1.5% wider, but −20% points and money.
+- **Entrants (★).** Who signed up:
+  - ★★★ tough entrants: mostly the tier's top-ranked riders, +15% points.
+  - ★★ mixed entrants.
+  - ★ weaker entrants: mostly lower-ranked riders, −15% points.
+- **Top seeds.** The two best-ranked riders in the draw, and what the champion takes home.
+
+Grand Slam weeks have a single named Slam (The Coop Open, The Swamp Slam, Wimbledon-on-Wold, The Gale Cup), each with its own lanes.
+
 **Getting into a higher tier early**
 - **Fan wildcard:** with 70+ fans the tier above your normal range opens for free.
 - **Paid entry:** at the bottom of the tournament list you can buy your way into the tier above for this week only (it uses this week's investment).
