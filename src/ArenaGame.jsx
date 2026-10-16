@@ -5,7 +5,7 @@ import { syncAchievements, saveGameToCloud, loadGameFromCloud } from "./firebase
 import { playTitle, playRankUp, isMuted, setMuted } from "./sounds";
 import { isMusicOn, setMusicOn } from "./music";
 import { W, CSS, EMO, TIERS, RN5, RN6, HN, HC, HI, TOTAL_EVENTS, FINALS_BO, STATS, STAT_GROUPS, screenAnim } from "./models/constants";
-import { sh, bs, nW, pRankOf, getRanked, getARanked, trainCost } from "./models/formulas";
+import { sh, bs, nW, pRankOf, getRanked, getARanked, trainCost, weeklyTP } from "./models/formulas";
 import { sSet, sGet, stamp, pickNewest, queueCloudSave, cancelCloudSave } from "./engine/persistence";
 import { mkSeason } from "./engine/seasonManager";
 import PowerBar from "./components/PowerBar";
@@ -73,6 +73,9 @@ function diffInfo(d) {
     what: "Later rounds and bigger events mean a faster bar and a smaller gold zone"
   };
 }
+
+/* How hard a round plays: each tier starts a step up, and each round within a tournament adds a little (it used to add a full step) */
+function roundDiff(tierIdx, round) { return [0, 1, 2, 3, 4, 3][tierIdx] + round * 0.6; }
 
 function buildScout(S, o, oRank, d) {
   var mine = S.player.tr || {}, hers = o.tr || {};
@@ -432,7 +435,7 @@ export default function Arena(props) {
     var rv = updateRival(S.player, S.sNum, curEv ? (curEv.type === "gs" ? "Grand Slam " + curEv.gsNum : "Week " + wLabel) : "");
     var settledRivals = S.player.settledRivals || [];
     if (rv.settled) { newStats.rivalsSettled = (newStats.rivalsSettled || 0) + 1; settledRivals = settledRivals.concat([rv.settled.id]); }
-    var newP = Object.assign({}, S.player, { sp: newSP, ap: (S.player.ap||0)+pp, tr: Object.assign({}, S.player.tr, { tp: (S.player.tr.tp||0) + Math.floor(pp/4) + 15 + sponsor }), best: pb, res: newRes, timeline: newTimeline, fans: fansNow, promise: null,
+    var newP = Object.assign({}, S.player, { sp: newSP, ap: (S.player.ap||0)+pp, tr: Object.assign({}, S.player.tr, { tp: (S.player.tr.tp||0) + weeklyTP(pp) + sponsor }), best: pb, res: newRes, timeline: newTimeline, fans: fansNow, promise: null,
       stats: newStats, rival: rv.rival, settledRivals: settledRivals });
     if (!rv.rival) delete newP.rival;
     /* Update NPC peak ranks */
@@ -541,7 +544,8 @@ export default function Arena(props) {
     var trainLog = {};
     newNpcs.forEach(function(n){
       var earned = Math.max(0, (n.sp || 0) - (spBefore[n.id] || 0));
-      var bought = npcTrainWeek(n, playedIds[n.id] ? 15 + Math.floor(earned / 4) : 10);
+      /* Every rival earns training points by your rule: results buy training */
+      var bought = npcTrainWeek(n, weeklyTP(earned));
       if (bought) trainLog[n.id] = bought;
     });
     /* Calculate money earned */
@@ -658,6 +662,15 @@ export default function Arena(props) {
     return true;
   }
   /* One investment per tournament week: a private session, a paid entry, or a pedigree certificate */
+  function renamePlayer(n) {
+    n = (n || "").trim().slice(0, 20); if (!n) return;
+    save(Object.assign({}, S, { pName: n }));
+  }
+  /* Coach Hettie again from the top, on this same save (nothing else is touched) */
+  function replayTips() {
+    save(Object.assign({}, S, { player: Object.assign({}, S.player, { tips: {}, tutorial: true }) }));
+    setScr("hub"); setTab("home");
+  }
   function renameRooster(n) {
     n = (n || "").trim().slice(0, 24);
     var np = Object.assign({}, S.player); if (n) np.roosterName = n; else delete np.roosterName; /* no undefined fields: the cloud save rejects them */
@@ -738,7 +751,7 @@ export default function Arena(props) {
       <motion.div key="hub" {...screenAnim} style={Object.assign({}, W, { background: C.page, padding: "10px 10px " + (NAV_HEIGHT + 28) + "px" })}>
         <style dangerouslySetInnerHTML={{__html:CSS}} />
         {confetti && (<Confetti />)}
-        {prof && (<Profile player={prof.p} rank={prof.rank} roosterName={S.player.roosterName} onRenameRooster={renameRooster} isRival={!!(S.player.rival && prof.p.id === S.player.rival.id)} playerName={S.pName} h2h={!prof.p.isP && S.player.h2h ? (S.player.h2h[prof.p.id] || []) : null} timeline={prof.p.isP ? (S.player.timeline || []) : null} onClose={function(){setProf(null)}} />)}
+        {prof && (<Profile player={prof.p} rank={prof.rank} roosterName={S.player.roosterName} onRenameRooster={renameRooster} onRenamePlayer={renamePlayer} isRival={!!(S.player.rival && prof.p.id === S.player.rival.id)} playerName={S.pName} h2h={!prof.p.isP && S.player.h2h ? (S.player.h2h[prof.p.id] || []) : null} timeline={prof.p.isP ? (S.player.timeline || []) : null} onClose={function(){setProf(null)}} />)}
         {showHelp && (<HelpScreen onClose={function(){setHelp(false)}} />)}
         {hubTip && (<CoachCard key={hubTip} id={hubTip} vars={{ name: S.pName, rival: S.player.rival ? S.player.rival.name : null }} onDone={function(all){ markTip(hubTip, all); }} />)}
         {picking && !seasonDone && (<TierSheet available={avTiers} wildcard={wildcardTier(S)} rank={pRank} paid={paidEntryTier(S)}
@@ -1005,6 +1018,10 @@ export default function Arena(props) {
                   <div><div style={labelStyle}>🏅 Achievements</div><div style={hintStyle}>{achCount(S)} of {ACHIEVEMENTS.length} badges earned</div></div>
                   <span style={{color:C.goldInk,fontSize:20,fontWeight:900}}>›</span>
                 </button>
+                <button onClick={replayTips} style={rowStyle}>
+                  <div><div style={labelStyle}>🎓 Replay the tutorial</div><div style={hintStyle}>Coach Hettie's tips again, on this save — your season isn't touched</div></div>
+                  <span style={{color:C.goldInk,fontSize:20,fontWeight:900}}>›</span>
+                </button>
                 <button onClick={function(){setHelp(true)}} style={rowStyle}>
                   <div><div style={labelStyle}>❓ How to Play</div><div style={hintStyle}>Sets, strikes and training explained</div></div>
                   <span style={{color:C.goldInk,fontSize:20,fontWeight:900}}>›</span>
@@ -1051,13 +1068,13 @@ export default function Arena(props) {
     var pm = ts.pending != null && ts.bracket[ts.round] ? ts.bracket[ts.round][ts.pending] : null;
     var opp = pm ? (pm.a.isP ? pm.b : pm.a) : null;
     var oppRank = 0; if (opp) { for (var oi = 0; oi < ranked.length; oi++) if (ranked[oi].id===opp.id){oppRank=oi+1;break;} }
-    var matchDiff = ts.round + [0,1,2,3,4,3][ts.tierIdx];
+    var matchDiff = roundDiff(ts.tierIdx, ts.round);
     var scoutT = opp ? buildScout(S, opp, oppRank, matchDiff) : null;
     return (
       <motion.div key="tourney" {...screenAnim} style={Object.assign({}, W, { background: C.page })}>
         <style dangerouslySetInnerHTML={{__html:CSS}} />
         {confetti && (<Confetti />)}
-        {prof && (<Profile player={prof.p} rank={prof.rank} roosterName={S.player.roosterName} onRenameRooster={renameRooster} isRival={!!(S.player.rival && prof.p.id === S.player.rival.id)} playerName={S.pName} h2h={!prof.p.isP && S.player.h2h ? (S.player.h2h[prof.p.id] || []) : null} timeline={prof.p.isP ? (S.player.timeline || []) : null} onClose={function(){setProf(null)}} />)}
+        {prof && (<Profile player={prof.p} rank={prof.rank} roosterName={S.player.roosterName} onRenameRooster={renameRooster} onRenamePlayer={renamePlayer} isRival={!!(S.player.rival && prof.p.id === S.player.rival.id)} playerName={S.pName} h2h={!prof.p.isP && S.player.h2h ? (S.player.h2h[prof.p.id] || []) : null} timeline={prof.p.isP ? (S.player.timeline || []) : null} onClose={function(){setProf(null)}} />)}
         {showHelp && (<HelpScreen onClose={function(){setHelp(false)}} />)}
         {showBracket && (<BracketView ts={ts} playerName={S.pName} onClose={function(){setShowBracket(false)}} />)}
         {showScout && scoutT && pm && ts.alive && (<ScoutSheet scout={scoutT} onClose={function(){setShowScout(false)}} />)}
@@ -1069,7 +1086,7 @@ export default function Arena(props) {
 
         {pm && ts.alive && opp && (
           <div>
-            <PowerBar key={"t-"+ts.round} coach={tipOn("match")} scout={scoutT} onDone={onTR} oppSkill={opp.skill||50} diff={ts.round + [0,1,2,3,4,3][ts.tierIdx]} tr={S.player.tr} otr={opp.tr||{}} playerName={S.pName} playerEmoji="⚔️" oppName={sh(opp.name)} oppEmoji={opp.emoji||"👤"} oppId={opp.id} oppRank={oppRank} fans={fansOf(S.player)} tierColor={tier.col} roundLabel={rNames[ts.round]}
+            <PowerBar key={"t-"+ts.round} coach={tipOn("match")} scout={scoutT} onDone={onTR} oppSkill={opp.skill||50} diff={roundDiff(ts.tierIdx, ts.round)} tr={S.player.tr} otr={opp.tr||{}} playerName={S.pName} playerEmoji="⚔️" oppName={sh(opp.name)} oppEmoji={opp.emoji||"👤"} oppId={opp.id} oppRank={oppRank} fans={fansOf(S.player)} tierColor={tier.col} roundLabel={rNames[ts.round]}
               tierName={tier.name} youSub={"World #"+pRank} foeSub={"World #"+oppRank+" · "+talentLabel(opp.skill)}
               isFinal={ts.round >= tier.rounds-1} nextLabel={ts.round < tier.rounds-1 ? rNames[ts.round+1] : null} eliminated={true}
               stakes={{ pts: tier.pts[ts.round], money: (tier.money||[])[ts.round]||0 }}

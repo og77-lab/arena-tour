@@ -20,7 +20,7 @@ export var TIPS = {
     { t: "Your first step", b: "Tap Choose tournament and pick one. I'll be right there for your first joust." }
   ],
   tiers: [{ t: "Picking a tournament", b: "You can only enter tiers that suit your rank. Bigger tiers pay more points, but the grannies there are tougher. Everyone starts at the bottom, dear — pick the one on offer." }],
-  train: [{ t: "The gym", b: "Every tournament earns you training points (TP) — spend them here. A level only counts against your opponent's level in the same stat: if you both have 5 Aim, it cancels out. The dark tick on each bar is what the riders near you have." }],
+  train: [{ t: "The gym", b: "Every tournament earns you training points (TP), and the deeper you go the more you get — everyone on tour earns them by the same rule. Spend them here. A level only counts against your opponent's level in the same stat: if you both have 5 Aim, it cancels out. The dark tick on each bar is what the riders near you have." }],
   season: [{ t: "Your road map", b: "Every week of the season, the points you're defending from last season, and what you're chasing: a Grand Slam spot and the Finals. Tap this week's row to play." }],
   rankings: [{ t: "The rankings", b: "Your rank is your season points. Points you won at a week last season drop off when that week comes round again — so you have to keep winning just to stay put. Tap any granny for her profile." }],
   news: [{ t: "The Daily Cluck", b: "A fresh issue prints after every tournament: your week, your rival, the upsets and the world's best. The front page goes to the biggest story of the week — make it you." }],

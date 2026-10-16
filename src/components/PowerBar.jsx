@@ -175,7 +175,7 @@ export default function PowerBar(props) {
   useEffect(function () { enterMatch(); return leaveMatch; }, []);
   var tr = props.tr || {}, otr = props.otr || {};
   var nR=(tr.r||0)-(otr.r||0), nP=(tr.p||0)-(otr.p||0), nF=(tr.f||0)-(otr.f||0), nS=(tr.s||0)-(otr.s||0), nG=(tr.g||0)-(otr.g||0);
-  var ctr = 72, swBase = Math.max(3, 12 - props.diff * 1.5 + nP * 1.2), fb = nF * 1.5;
+  var ctr = 72, swBase = Math.max(3, 13 - props.diff * 1.5 + nP * 1.2), fb = nF * 1.5;
   var accel = Math.max(0.03, 0.3 - nS * 0.015), minSc = Math.max(0, 15 + nG * 1.5);
   /* Bar resets every set, but each new set starts a little faster (fatigue — Stamina softens it) */
   var baseSpd = Math.max(0.8, 2.4 + props.diff * 0.4 - nR * 0.12);

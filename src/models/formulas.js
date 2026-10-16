@@ -39,6 +39,12 @@ export function nW(a, b) {
   return (sA + Math.random() * 14 - 5) >= (sB + Math.random() * 14 - 5) ? a : b;
 }
 
+/* Training points a rider earns in a week — the same rule for you and every rival: a small base for turning up,
+   plus a third of the ranking points won. A deep run buys a few levels on the riders who went out early;
+   the edge fades once you move up to a tier where everyone is winning that much */
+export var TP_BASE = 8;
+export function weeklyTP(pts) { return TP_BASE + Math.floor((pts || 0) / 3); }
+
 /* Training point cost for next level of a stat */
 export function trainCost(lv) {
   return (lv + 1) * 15 + Math.max(0, lv - 8) * 15;

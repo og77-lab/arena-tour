@@ -8,6 +8,8 @@ import { useState } from "react";
 export default function Profile(props) {
   var _ed = useState(false), editing = _ed[0], setEditing = _ed[1];
   var _dr = useState(""), draft = _dr[0], setDraft = _dr[1];
+  var _en = useState(false), editingName = _en[0], setEditingName = _en[1];
+  var _nd = useState(""), nameDraft = _nd[0], setNameDraft = _nd[1];
   var p = props.player; var rank = props.rank; var onClose = props.onClose;
   if (!p) return null;
   var t = p.tr || {};
@@ -26,7 +28,18 @@ export default function Profile(props) {
             </div>
           </div>
           <div style={{ textAlign: "center", marginTop: 4 }}>
-            <div style={{ fontSize: 21, fontWeight: 900, fontStyle: "italic", color: "#1c1917", lineHeight: 1.1 }}>{p.isP ? (props.playerName || "You") : (p.emoji || "") + " " + p.name}</div>
+            {p.isP && editingName ? (
+              <form onSubmit={function (e) { e.preventDefault(); if (nameDraft.trim()) { props.onRenamePlayer && props.onRenamePlayer(nameDraft); } setEditingName(false); }} style={{ display: "flex", justifyContent: "center", gap: 6 }}>
+                <input autoFocus value={nameDraft} maxLength={20} onChange={function (e) { setNameDraft(e.target.value); }} placeholder="Your granny's name"
+                  style={{ fontSize: 16, padding: "6px 10px", borderRadius: 8, border: "2px solid #3f2a1d", width: 180, fontWeight: 800 }} />
+                <button type="submit" style={{ fontSize: 13, fontWeight: 900, padding: "6px 12px", borderRadius: 8, border: "2px solid #3f2a1d", background: "#fde68a", color: "#3f2a1d", cursor: "pointer" }}>Save</button>
+              </form>
+            ) : (
+              <div style={{ fontSize: 21, fontWeight: 900, fontStyle: "italic", color: "#1c1917", lineHeight: 1.1 }}>
+                {p.isP ? (props.playerName || "You") : (p.emoji || "") + " " + p.name}
+                {p.isP && props.onRenamePlayer && (<button onClick={function () { setNameDraft(props.playerName || ""); setEditingName(true); }} aria-label="Rename your granny" style={{ marginLeft: 6, background: "none", border: "none", cursor: "pointer", fontSize: 15, padding: 0, fontStyle: "normal" }}>✏️</button>)}
+              </div>
+            )}
             {!p.isP && standing(rank) && (<div style={{ display: "inline-block", marginTop: 4, background: "#92400e", color: "#fff", fontSize: 11, fontWeight: 900, letterSpacing: 1.5, padding: "2px 10px", borderRadius: 12 }}>{standing(rank).icon} {standing(rank).tag.toUpperCase()} OF THE TOUR</div>)}
             {props.isRival && (<div style={{ display: "inline-block", marginTop: 4, marginLeft: 4, background: "#be123c", color: "#fff", fontSize: 11, fontWeight: 900, letterSpacing: 1.5, padding: "2px 10px", borderRadius: 12 }}>😤 YOUR ARCH-RIVAL</div>)}
             {!p.isP && (<div style={{ fontSize: 13, color: "#57534e", fontWeight: 700, marginTop: 4 }}>🐓 Rides <b style={{ color: "#1c1917" }}>{roosterName(p.id)}</b></div>)}
