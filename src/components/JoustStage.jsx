@@ -3,6 +3,7 @@
 import * as React from "react";
 import { Rider, Feathers } from "./Rider";
 import { REDUCED_MOTION } from "./fx";
+import ArenaBackdrop from "./ArenaBackdrop";
 
 const { useState, useEffect, useRef } = React;
 
@@ -37,7 +38,8 @@ export default function JoustStage(props) {
 
   var rw = Math.round(Math.min(130, Math.max(92, W * 0.38)));
   var k = rw / 140;
-  var H = Math.round(112 * k) + 30 + GROUND;
+  /* Room above the riders for the stands and the crowd */
+  var H = Math.round(112 * k) + 56 + GROUND;
   /* Left glove tip (x≈134) meets the right granny's torso (x≈56, mirrored) */
   var meet = Math.max(IDLE_X, (W - 190 * k) / 2);
 
@@ -85,7 +87,8 @@ export default function JoustStage(props) {
 
   return (
     <div ref={ref} style={{ position: "relative", height: H, margin: "2px -2px 0", overflow: "hidden", borderRadius: 10 }}>
-      <div aria-hidden style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg,rgba(255,255,255,0.0) 0%,rgba(255,255,255,0.35) 70%)" }} />
+      <ArenaBackdrop W={W} groundTop={groundTop} tierColor={props.tierColor} cheerId={a ? a.id : 0}
+        cheer={impact ? (a.big ? "big" : "small") : (!a && v) ? "big" : null} />
       <Bunting color={props.tierColor || "#f59e0b"} />
       <div aria-hidden style={{ position: "absolute", left: 0, right: 0, top: groundTop, height: GROUND, background: "linear-gradient(180deg,#c8a46b,#a57c45)", borderTop: "2px solid #8b6435" }} />
       <div aria-hidden style={{ position: "absolute", left: 0, right: 0, top: groundTop + 5, height: 2, background: "repeating-linear-gradient(90deg,rgba(63,42,29,0.25) 0 6px,transparent 6px 18px)" }} />

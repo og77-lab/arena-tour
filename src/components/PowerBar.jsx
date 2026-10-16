@@ -517,12 +517,20 @@ export default function PowerBar(props) {
         </div>
       </div>
 
-      <div style={{ marginTop: 8, textAlign: "center", minHeight: 74 }}>
+      {/* Fixed-size slot: the big round STRIKE button never moves or resizes the page */}
+      <div style={{ marginTop: 8, textAlign: "center", height: 124 }}>
         <button
           onPointerDown={function (e) { e.preventDefault(); doStrike(); }}
           disabled={ph !== "go"}
-          style={{ background: "linear-gradient(135deg,#dc2626,#b91c1c)", color: "#fff", border: "none", borderRadius: 8, fontWeight: 900, textTransform: "uppercase", fontSize: 16, padding: "14px 28px", letterSpacing: 2, touchAction: "manipulation", boxShadow: "0 4px 14px rgba(220,38,38,0.5)", animation: ph === "go" && !REDUCED_MOTION ? "pulse 0.5s ease infinite" : "none", opacity: ph === "go" ? 1 : 0.4, cursor: ph === "go" ? "pointer" : "default" }}>
-          ⚡ STRIKE!
+          aria-label="Strike"
+          style={{ width: 100, height: 100, borderRadius: "50%", display: "inline-flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 1,
+            background: "radial-gradient(circle at 35% 30%,#fca5a5 0%,#ef4444 38%,#b91c1c 75%,#7f1d1d 100%)", color: "#fff", border: "3px solid #450a0a",
+            boxShadow: ph === "go" ? "0 6px 0 #450a0a, 0 0 0 5px rgba(239,68,68,0.25), 0 10px 22px rgba(220,38,38,0.45)" : "0 4px 0 #450a0a",
+            fontWeight: 900, textTransform: "uppercase", letterSpacing: 1.5, fontSize: 15, textShadow: "0 2px 0 rgba(0,0,0,0.35)",
+            touchAction: "manipulation", WebkitTapHighlightColor: "transparent", animation: ph === "go" && !REDUCED_MOTION ? "pulse 0.5s ease infinite" : "none",
+            opacity: ph === "go" ? 1 : 0.45, cursor: ph === "go" ? "pointer" : "default", fontFamily: "inherit" }}>
+          <span aria-hidden style={{ fontSize: 26, lineHeight: 1 }}>⚡</span>
+          STRIKE
         </button>
         <div style={{ fontSize: 11, color: "#64748b", marginTop: 6 }}>Tap the arena, the button, or press Space</div>
       </div>
