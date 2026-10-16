@@ -65,6 +65,7 @@ function AwardCard(props) {
           <div style={{ textAlign: "left", minWidth: 0 }}>
             <div style={{ fontSize: 18, fontWeight: 900, lineHeight: 1.1 }}>{a.who.isP ? "YOU!" : a.who.emoji + " " + sh(a.who.name)}</div>
             {a.who.isP && (<div style={{ fontSize: 12, fontWeight: 800, color: "#57534e" }}>{a.who.name}</div>)}
+            {a.who.rank && (<div style={{ fontSize: 12, fontWeight: 800, color: "#57534e" }}>World #{a.who.rank}</div>)}
             <div style={{ fontSize: 16, fontWeight: 900, color: "#b45309", marginTop: 3 }}>{a.stat}</div>
           </div>
         </div>
@@ -134,6 +135,7 @@ export default function SeasonGala(props) {
                 <motion.div initial={{ scale: 0.4, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ delay: 0.75, type: "spring", stiffness: 300, damping: 14 }}>
                   <Big size={champ.isP ? 40 : 34}>{champ.isP ? "IT'S YOU!" : (champ.emoji || "") + " " + champ.name.toUpperCase()}</Big>
                 </motion.div>
+                <div style={{ display: "inline-block", marginTop: 10, fontSize: 13, fontWeight: 900, letterSpacing: 1.5, color: "#1c1917", background: GOLD, borderRadius: 14, padding: "3px 12px" }}>WORLD #{champRank}</div>
                 <div style={{ fontSize: 14, color: SOFT, marginTop: 12, lineHeight: 1.5 }}>
                   {champ.isP ? S.pName + " is the champion of the world. Somebody fetch the good sherry." : "Crowned in the Season Finals" + (props.runnerUp ? ", beating " + (props.runnerUp.isP ? "you" : sh(props.runnerUp.name)) + " in the final." : ".")}
                 </div>

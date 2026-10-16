@@ -1,6 +1,6 @@
 /* ═══ FinalReveal ═══ Played before a final, and only a final: the trophy rises out of the dark, the road you took to get
    here flashes past, then a silhouette waits in the spotlight… a flash, and the opponent is revealed — name, rank,
-   titles, her words. Then the usual VS and countdown take over. About seven seconds, nothing to tap. */
+   titles, her words. Then the usual VS and countdown take over. About eleven seconds — slow enough to take it all in. */
 
 import * as React from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -30,14 +30,15 @@ export default function FinalReveal(props) {
 
   useEffect(function () {
     var t = 0;
-    playWhoosh(); later(playHeartbeat, 250); later(playHeartbeat, 1000);
-    t = 2100;
-    if (road.length) { later(function () { setSt("road"); playWhoosh(); }, t); t += 1500; }
+    playWhoosh(); later(playHeartbeat, 300); later(playHeartbeat, 1200); later(function () { playClang(); }, 1700);
+    t = 3500;
+    if (road.length) { later(function () { setSt("road"); playWhoosh(); }, t); t += 1000 + road.length * 420; }
     later(function () { setSt("shadow"); playHeartbeat(); }, t);
-    later(playHeartbeat, t + 650);
-    later(function () { setSt("reveal"); playImpact(true); playClang(); vibrate([40, 60, 80]); }, t + 1350);
-    later(playTitle, t + 1700);
-    later(function () { doneRef.current(); }, t + 3300);
+    later(playHeartbeat, t + 900);
+    later(playHeartbeat, t + 1600);
+    later(function () { setSt("reveal"); playImpact(true); playClang(); vibrate([40, 60, 80]); }, t + 2300);
+    later(playTitle, t + 2700);
+    later(function () { doneRef.current(); }, t + 5600);
     return function () { timers.current.forEach(clearTimeout); };
   }, []);
 
@@ -50,13 +51,17 @@ export default function FinalReveal(props) {
         {st === "trophy" && (
           <motion.div key="trophy" exit={{ opacity: 0, scale: 1.1 }} transition={{ duration: 0.35 }} style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
             {!REDUCED_MOTION && <Rays />}
-            <motion.div initial={{ y: 120, opacity: 0, scale: 0.6 }} animate={{ y: 0, opacity: 1, scale: 1 }} transition={{ duration: 1, ease: [0.2, 0.8, 0.3, 1] }}
+            {/* Fireworks over the trophy */}
+            <div style={{ position: "absolute", left: "26%", top: "22%" }}><Sparks count={26} spread={170} delay={1.7} colors={["#fbbf24", "#fde68a", "#ffffff"]} zIndex={1} /></div>
+            <div style={{ position: "absolute", right: "26%", top: "18%" }}><Sparks count={26} spread={170} delay={2.3} colors={["#f472b6", "#fbbf24", "#ffffff"]} zIndex={1} /></div>
+            <div style={{ position: "absolute", left: "50%", top: "30%" }}><Sparks count={30} spread={220} delay={2.9} colors={["#60a5fa", "#fbbf24", "#ffffff"]} zIndex={1} /></div>
+            <motion.div initial={{ y: 120, opacity: 0, scale: 0.6 }} animate={{ y: 0, opacity: 1, scale: 1 }} transition={{ duration: 1.6, ease: [0.2, 0.8, 0.3, 1] }}
               style={{ fontSize: 96, lineHeight: 1, filter: "drop-shadow(0 0 24px rgba(251,191,36,0.85))", position: "relative" }}>🏆</motion.div>
-            <motion.div initial={{ opacity: 0, letterSpacing: "18px" }} animate={{ opacity: 1, letterSpacing: "6px" }} transition={{ delay: 0.6, duration: 0.9 }}
+            <motion.div initial={{ opacity: 0, letterSpacing: "18px" }} animate={{ opacity: 1, letterSpacing: "6px" }} transition={{ delay: 1.1, duration: 1.1 }}
               style={{ marginTop: 18, fontSize: 13, fontWeight: 900, color: "#fde68a", textTransform: "uppercase", position: "relative" }}>{props.tierName}</motion.div>
-            <motion.div initial={{ opacity: 0, scale: 2.2 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.9, type: "spring", stiffness: 260, damping: 14 }}
+            <motion.div initial={{ opacity: 0, scale: 2.2 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 1.6, type: "spring", stiffness: 220, damping: 14 }}
               style={{ fontSize: 54, fontWeight: 900, fontStyle: "italic", lineHeight: 1.05, position: "relative", textShadow: "0 2px 0 #fde68a, 0 4px 0 #f59e0b, 0 7px 0 #b45309, 0 10px 22px rgba(0,0,0,0.6)" }}>THE FINAL</motion.div>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 0.85 }} transition={{ delay: 1.4 }} style={{ marginTop: 10, fontSize: 14, fontWeight: 700, position: "relative" }}>{props.you.name}, you made it.</motion.div>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 0.85 }} transition={{ delay: 2.4 }} style={{ marginTop: 10, fontSize: 14, fontWeight: 700, position: "relative" }}>{props.you.name}, you made it.</motion.div>
           </motion.div>
         )}
 
@@ -67,7 +72,7 @@ export default function FinalReveal(props) {
             <div style={{ display: "flex", flexDirection: "column", gap: 7, marginTop: 14, width: "min(100%, 320px)" }}>
               {road.map(function (r, i) {
                 return (
-                  <motion.div key={i} initial={{ x: i % 2 ? 80 : -80, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.12 + i * 0.16, type: "spring", stiffness: 340, damping: 22 }}
+                  <motion.div key={i} initial={{ x: i % 2 ? 80 : -80, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.35 + i * 0.4, type: "spring", stiffness: 300, damping: 22 }}
                     style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, padding: "8px 12px", borderRadius: 10, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(251,191,36,0.3)" }}>
                     <span style={{ fontSize: 11, fontWeight: 800, color: "#a8a29e", textTransform: "uppercase", letterSpacing: 1 }}>{r.round}</span>
                     <span style={{ fontSize: 15, fontWeight: 900 }}>{r.name} <span style={{ color: "#4ade80" }}>✓</span></span>
@@ -97,12 +102,12 @@ export default function FinalReveal(props) {
                 style={{ fontSize: 34, fontWeight: 900, fontStyle: "italic", lineHeight: 1.05, marginTop: 4, color: "#fff1f2", textShadow: "0 2px 0 #fca5a5, 0 4px 0 #ef4444, 0 7px 0 #7f1d1d, 0 10px 20px rgba(0,0,0,0.6)" }}>
                 {(foe.emoji ? foe.emoji + " " : "") + String(foe.name || "").toUpperCase()}
               </motion.div>
-              <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 6, marginTop: 10 }}>
+              <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }} style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 6, marginTop: 10 }}>
                 {[sc.rank ? "World #" + sc.rank : null, sc.titles ? sc.titles + (sc.titles === 1 ? " title" : " titles") : "Hungry for a first title", sc.standing ? sc.standing.icon + " " + sc.standing.tag : null].filter(Boolean).map(function (t, i) {
                   return (<span key={i} style={{ fontSize: 12, fontWeight: 900, padding: "4px 9px", borderRadius: 12, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.18)" }}>{t}</span>);
                 })}
               </motion.div>
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.55 }}
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.3 }}
                 style={{ marginTop: 12, maxWidth: 320, fontFamily: "Georgia, serif", fontStyle: "italic", fontSize: 14, color: "#e7e5e4" }}>“{words}”</motion.div>
             </>)}
           </motion.div>

@@ -47,6 +47,8 @@ export function seasonAwards(S) {
   var last = ranked[ranked.length - 1];
   if (last && !last.isP) out.push({ key: "snail", icon: "🐌", title: "The Participation Ribbon", sub: "For turning up. Every week. Bless her.", who: who(last, S), stat: "#" + ranked.length,
     blurb: ["Her rooster is mostly decorative.", "She says she's \"playing the long game\". Very long.", "She's been asked to stop bringing a deckchair to the lanes."] });
+  /* Every winner carries her world rank onto the stage */
+  out.forEach(function (a) { a.who.rank = rankNow[a.who.isP ? 1 : a.who.id]; });
   return out;
 }
 

@@ -96,6 +96,17 @@ export function playFightVoice() {
   try { fightVoice.currentTime = 0; var p = fightVoice.play(); if (p && p.catch) p.catch(function () {}); } catch (e) {}
 }
 
+/* A stadium crowd swelling to a roar (big events) */
+export function playCrowdRoar() {
+  noise({ filter: "bandpass", freq: 500, freqEnd: 1400, duration: 2.2, volume: 0.16, q: 0.5, attack: 0.9 });
+  setTimeout(function () { noise({ filter: "bandpass", freq: 900, freqEnd: 2400, duration: 1.6, volume: 0.11, q: 0.6, attack: 0.3 }); }, 700);
+}
+/* Floodlights switching on: a heavy electrical clunk */
+export function playFloodlight() {
+  tone({ freq: 90, freqEnd: 55, duration: 0.25, volume: 0.3, type: "square" });
+  noise({ filter: "lowpass", freq: 300, duration: 0.18, volume: 0.18 });
+}
+
 export function playWhoosh() {
   noise({ filter: "bandpass", freq: 300, freqEnd: 3200, duration: 0.4, volume: 0.22, q: 0.8, attack: 0.15 });
 }

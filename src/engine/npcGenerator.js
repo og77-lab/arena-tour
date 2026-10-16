@@ -1,14 +1,12 @@
 /* ═══ Engine / NPC Generator ═══ Create the 999-NPC field with skill distribution and seeded SP */
 
 import { EMO, TT } from "../models/constants";
-import { GRANNY_NAMES as FN } from "../models/persona";
+import { npcName } from "../models/persona";
 
 export function mkNPCs() {
   var npcs = [];
   for (var i = 0; i < 999; i++) {
-    var fi = i % FN.length, ti = Math.floor(i / FN.length) % TT.length;
-    var suffix = Math.floor(i / (FN.length * TT.length));
-    var name = FN[fi] + " the " + TT[ti] + (suffix > 0 ? " " + (suffix + 1) : "");
+    var name = npcName(i) + " the " + TT[(i * 13) % TT.length]; /* unique full name + a title */
     var pct = i / 999;
     var skill = pct < 0.03 ? 82 + Math.random() * 10
               : pct < 0.1  ? 70 + Math.random() * 14

@@ -26,11 +26,13 @@ import { roosterName, trait, standing } from "./models/persona";
 import { buildIssue, buildSpecialEdition, rankMap } from "./engine/news";
 import { tallyTournament, checkAchievements } from "./engine/achievements";
 import { updateRival, rivalRecord } from "./engine/rivalry";
+import { uniqueNames, needsUniqueNames } from "./engine/migrate";
 import { ACHIEVEMENTS } from "./engine/achievements";
 import AchievementsSheet, { AchToast, achCount } from "./components/Achievements";
 import { CoachCard } from "./components/Coach";
 import TrainStage from "./components/TrainingAnim";
 import Leaderboard from "./Leaderboard";
+import GameGuide from "./components/GameGuide";
 import { COACH_TP, coachPrice, entryFee, nextPedigree, statCap, weekInvestment, stampInvestment, paidEntryTier } from "./engine/investments";
 import { fansOf, clampFans, weeklyDrift, performanceDelta, sponsorTP, hasTierWildcard, hasSlamWildcard } from "./engine/fans";
 import { makeInterview, resolvePromise } from "./engine/interview";
@@ -113,6 +115,8 @@ export default function Arena(props) {
     function fin(d) {
       if (done) return; done = true;
       if (!d || !d.player) { setScr("title"); return; }
+      /* Older tours reused first names: give every rider her own (once, then save) */
+      if (needsUniqueNames(d)) { d = uniqueNames(d); try { sSet(d); } catch (e) {} }
       setS(d);
       if (d.activeT) { setTS(d.activeT); setScr("tourney"); }
       else if (d.activeF) { setFS(d.activeF); setScr("finals"); }
@@ -144,7 +148,7 @@ export default function Arena(props) {
     queueCloudSave(userId, snap, saveGameToCloud);
   }, [ts, fs]);
   function exportSave() { if (!S) return; var b = new Blob([JSON.stringify(S)],{type:"application/json"}); var u = URL.createObjectURL(b); var a = document.createElement("a"); a.href = u; a.download = "arena-"+S.pName+"-s"+S.sNum+".json"; a.click(); URL.revokeObjectURL(u); }
-  function importSave(e) { var f = e.target.files && e.target.files[0]; if (!f) return; var r = new FileReader(); r.onload = function(ev){ try { var d = JSON.parse(ev.target.result); if (d && d.player) { save(d); setScr("hub"); } } catch(err){} }; r.readAsText(f); }
+  function importSave(e) { var f = e.target.files && e.target.files[0]; if (!f) return; var r = new FileReader(); r.onload = function(ev){ try { var d = JSON.parse(ev.target.result); if (d && d.player) { save(uniqueNames(d)); setScr("hub"); } } catch(err){} }; r.readAsText(f); }
   var _syncing = useState(false), syncing = _syncing[0], setSyncing = _syncing[1];
   var _syncMsg = useState(""), syncMsg = _syncMsg[0], setSyncMsg = _syncMsg[1];
   var _mutedState = useState(isMuted()), mutedState = _mutedState[0], setMutedState = _mutedState[1];
@@ -160,6 +164,7 @@ export default function Arena(props) {
   var _gala = useState(null), gala = _gala[0], setGala = _gala[1];
   var _trainFx = useState(null), trainFx = _trainFx[0], setTrainFx = _trainFx[1];
   var _showLb = useState(false), showLb = _showLb[0], setShowLb = _showLb[1];
+  var _showGuide = useState(false), showGuide = _showGuide[0], setShowGuide = _showGuide[1];
   var _achQ = useState([]), achQ = _achQ[0], setAchQ = _achQ[1];
   var _showAch = useState(false), showAch = _showAch[0], setShowAch = _showAch[1];
   /* Achievements: whenever the save changes on the hub, award anything newly earned (only on the hub, so a save never
@@ -760,6 +765,7 @@ export default function Arena(props) {
         {gala && (<SeasonGala S={S} champ={gala.champ} runnerUp={gala.runnerUp} champRank={gala.champRank} awards={gala.awards} you={gala.you} hall={gala.hall} goal={gala.goal} onDone={finishGala} />)}
         {achQ.length > 0 && (<AchToast queue={achQ} onShown={function(){ setAchQ(function(q){ return q.slice(1); }); }} onOpen={function(){ setAchQ([]); setShowAch(true); }} />)}
         {showAch && (<AchievementsSheet S={S} onClose={function(){ setShowAch(false); }} />)}
+        {showGuide && (<GameGuide onClose={function(){ setShowGuide(false); }} />)}
         {showLb && createPortal(
           <div style={{position:"fixed",inset:0,zIndex:960,background:"#f8fafc",overflowY:"auto"}}>
             <div style={{position:"sticky",top:0,zIndex:2,display:"flex",justifyContent:"flex-end",padding:"calc(env(safe-area-inset-top) + 8px) 10px 0"}}>
@@ -1018,6 +1024,10 @@ export default function Arena(props) {
                   <div><div style={labelStyle}>🏅 Achievements</div><div style={hintStyle}>{achCount(S)} of {ACHIEVEMENTS.length} badges earned</div></div>
                   <span style={{color:C.goldInk,fontSize:20,fontWeight:900}}>›</span>
                 </button>
+                <button onClick={function(){ setShowGuide(true); }} style={Object.assign({}, rowStyle, {background:"linear-gradient(180deg,#fff,#fffbeb)",borderColor:C.lineStrong})}>
+                  <div><div style={labelStyle}>📖 Game Guide</div><div style={hintStyle}>Every tab, rule and number, explained</div></div>
+                  <span style={{color:C.goldInk,fontSize:20,fontWeight:900}}>›</span>
+                </button>
                 <button onClick={replayTips} style={rowStyle}>
                   <div><div style={labelStyle}>🎓 Replay the tutorial</div><div style={hintStyle}>Coach Hettie's tips again, on this save — your season isn't touched</div></div>
                   <span style={{color:C.goldInk,fontSize:20,fontWeight:900}}>›</span>
@@ -1090,6 +1100,7 @@ export default function Arena(props) {
               tierName={tier.name} youSub={"World #"+pRank} foeSub={"World #"+oppRank+" · "+talentLabel(opp.skill)}
               isFinal={ts.round >= tier.rounds-1} nextLabel={ts.round < tier.rounds-1 ? rNames[ts.round+1] : null} eliminated={true}
               stakes={{ pts: tier.pts[ts.round], money: (tier.money||[])[ts.round]||0 }}
+              titleStakes={{ pts: tier.pts.reduce(function(a,b){ return a+b; },0), money: (tier.money||[]).reduce(function(a,b){ return a+b; },0) }}
               bestOf={tier.bo || 3} initialProgress={ts.match}
               onProgress={function(p){ setTS(function(prev){ return prev ? Object.assign({}, prev, { match: p }) : prev; }); }} />
           </div>

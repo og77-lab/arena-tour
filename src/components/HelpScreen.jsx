@@ -52,7 +52,7 @@ export default function HelpScreen(props) {
             Win the majority of sets to win the match: <b style={{color:"#0f172a"}}>best of 3</b> in Futures → Tour 500, <b style={{color:"#0f172a"}}>best of 5</b> in Masters, Grand Slams and the Season Finals.
           </div>
           <div style={{ fontSize: 13, color: "#64748b", lineHeight: 1.5, marginTop: 6 }}>
-            Progress is saved after every strike — close the game mid-match and you'll pick up exactly where you left off.
+            Progress is saved after every strike — close the game mid-match and you'll pick up exactly where you left off. For every rule and number, open <b style={{color:"#0f172a"}}>📖 Game Guide</b> in the More tab.
           </div>
         </div>
 

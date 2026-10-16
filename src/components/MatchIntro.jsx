@@ -8,6 +8,7 @@ import { playWhoosh, playImpact, playBeep, playFight, playFightVoice, preloadFig
 import { Sparks, vibrate, REDUCED_MOTION } from "./fx";
 import { Rider, Face } from "./Rider";
 import FinalReveal from "./FinalReveal";
+import SlamIntro from "./SlamIntro";
 
 const { useState, useEffect, useRef } = React;
 
@@ -126,7 +127,7 @@ export default function MatchIntro(props) {
   }, []);
 
   /* A final gets its own build-up first (trophy, your road, the opponent revealed), then the usual VS and countdown */
-  function startShow() { clearAll(); if (props.isFinal && !props.resumeSet) setStage("final"); else startCinematic(); }
+  function startShow() { clearAll(); if (props.isFinal && !props.resumeSet) setStage("final"); else if (props.isSlam && !props.resumeSet) setStage("slamIntro"); else startCinematic(); }
 
   /* Only the scouting report waits for the player */
   function advance() { if (stage === "scout") startShow(); }
@@ -178,10 +179,11 @@ export default function MatchIntro(props) {
         </div>
       )}
 
+      {stage === "slamIntro" && (<SlamIntro you={props.you} foe={props.foe} roundLabel={props.roundLabel} slamLabel={props.tierName} onDone={startCinematic} />)}
       {stage === "final" && (<FinalReveal you={props.you} foe={props.foe} scout={props.scout} road={props.road} tierName={props.tierName} oppId={props.oppId} onDone={startCinematic} />)}
 
       {/* 2 · The cinematic, mounted fresh so every animation plays from the start */}
-      {stage !== "scout" && stage !== "final" && (
+      {stage !== "scout" && stage !== "final" && stage !== "slamIntro" && (
       <div style={{ position: "absolute", inset: 0, animation: REDUCED_MOTION ? "none" : "arenaShakeHard 0.45s ease 0.42s" }}>
         {/* Diagonal split halves */}
         <motion.div initial={{ x: "-100%" }} animate={{ x: 0 }} transition={{ type: "spring", stiffness: 200, damping: 26 }}

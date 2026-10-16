@@ -12,6 +12,7 @@ import JoustStage from "./JoustStage";
 import { PLAYER_PALETTE, paletteFor } from "./Rider";
 import { crowdRoar } from "../engine/fans";
 import { CoachBubble } from "./Coach";
+import FinalOutro from "./FinalOutro";
 import { enterMatch, leaveMatch, startBattle, stopBattle } from "../music";
 
 const { useState, useEffect, useRef } = React;
@@ -47,13 +48,13 @@ function Fighter(props) {
         {!isYou && props.emoji ? props.emoji + " " : ""}{props.name}
       </div>
       <div style={{ display: "flex", justifyContent: "center", gap: 4, marginTop: 4 }}>
-        {[0,1,2].map(function (i) {
+        {Array.from({ length: Math.max(3, strikes.length) }).map(function (_, i) {
           var v = strikes[i], filled = v != null;
-          var won = filled && v >= other[i];
+          var won = filled && v > other[i];
           var c = filled ? orbColor(v) : "#e5e7eb";
           return (
             <div key={i} style={{
-              width: 22, height: 22, borderRadius: "50%",
+              width: strikes.length > 3 ? 18 : 22, height: strikes.length > 3 ? 18 : 22, borderRadius: "50%",
               background: filled ? "radial-gradient(circle at 30% 30%,#fff," + c + " 80%)" : "#f1f5f9",
               border: "2px solid " + c,
               boxShadow: won ? "0 0 8px " + c : "none",
@@ -111,8 +112,8 @@ function StrikeReveal(props) {
         <div style={{ height: 22, display: "flex", alignItems: "center", justifyContent: "center" }}>
           {r.stamped ? (
             <motion.div initial={{ scale: 2.4, opacity: 0, rotate: -14 }} animate={{ scale: 1, opacity: 1, rotate: -5 }} transition={{ type: "spring", stiffness: 520, damping: 16 }}
-              style={{ padding: "0 8px", border: "2px solid " + (r.youWon ? "#facc15" : "#f87171"), color: r.youWon ? "#facc15" : "#f87171", fontSize: 15, fontWeight: 900, letterSpacing: 1.5, borderRadius: 5, lineHeight: "18px" }}>
-              {gap >= 0 ? "+" + gap : "−" + Math.abs(gap)}
+              style={{ padding: "0 8px", border: "2px solid " + (r.tie ? "#e2e8f0" : r.youWon ? "#facc15" : "#f87171"), color: r.tie ? "#e2e8f0" : r.youWon ? "#facc15" : "#f87171", fontSize: 15, fontWeight: 900, letterSpacing: 1.5, borderRadius: 5, lineHeight: "18px" }}>
+              {r.tie ? "TIE" : gap >= 0 ? "+" + gap : "−" + Math.abs(gap)}
             </motion.div>
           ) : (
             <span style={{ fontSize: 11, fontWeight: 900, letterSpacing: 2, color: orbColorOnDark(r.you) }}>{r.label}</span>
@@ -123,6 +124,19 @@ function StrikeReveal(props) {
         style={{ fontSize: 30, fontWeight: 900, color: "#f87171", textShadow: "0 0 14px rgba(239,68,68,0.5)", width: 52, textAlign: "right", lineHeight: 1.1 }}>
         <CountUp to={r.opp} duration={360} />
       </motion.div>
+      {/* Where your score came from: the landing spot, then Aim on top */}
+      {r.why && (
+        <div style={{ position: "absolute", left: 0, right: 0, top: "100%", marginTop: 3, display: "flex", justifyContent: "center" }}>
+          <span style={{ fontSize: 10.5, fontWeight: 800, color: "#e2e8f0", background: "rgba(15,23,42,0.88)", borderRadius: 8, padding: "2px 8px", whiteSpace: "nowrap" }}>
+            <span style={{ color: r.why.kind === "Gold" ? "#facc15" : r.why.kind === "Floor" ? "#c4b5fd" : "#fb923c" }}>
+              {r.why.kind === "Gold" ? "In the gold" : r.why.kind === "Floor" ? "Floor (Stubbornness)" : "Outside the gold"} {r.why.base}
+            </span>
+            {r.why.aim !== 0 && (<span style={{ color: r.why.aim > 0 ? "#4ade80" : "#f87171" }}> {r.why.aim > 0 ? "+" : "−"} {Math.abs(r.why.aim)} Aim</span>)}
+            {r.why.capped && (<span style={{ color: "#94a3b8" }}> (max 100)</span>)}
+            <span style={{ color: "#94a3b8" }}> = {r.you}</span>
+          </span>
+        </div>
+      )}
     </motion.div>
   );
 }
@@ -159,6 +173,8 @@ export default function PowerBar(props) {
   var _marks = useState([]), marks = _marks[0], setMarks = _marks[1];
   var _res = useState(initRes), res = _res[0], setRes = _res[1];
   var _fx = useState(null), fx = _fx[0], setFx = _fx[1];
+  var _tieAlert = useState(null), tieAlert = _tieAlert[0], setTieAlert = _tieAlert[1];
+  var _finalOut = useState(false), finalOutDone = _finalOut[0], setFinalOutDone = _finalOut[1];
   var _reveal = useState(null), reveal = _reveal[0], setReveal = _reveal[1];
   var _joust = useState(null), joust = _joust[0], setJoust = _joust[1];
   var _skip = useState(0), skip = _skip[0], setSkip = _skip[1];
@@ -188,7 +204,7 @@ export default function PowerBar(props) {
   var cnt = myH.length;
   var deciding = setsWon === need - 1 && setsLost === need - 1;
   /* Crowd roar: on the last strike of a set with the match on the line, a fan favourite gets a wider gold zone */
-  var onTheLine = cnt === STRIKES_PER_SET - 1 && (setsWon === need - 1 || setsLost === need - 1);
+  var onTheLine = cnt >= STRIKES_PER_SET - 1 && (setsWon === need - 1 || setsLost === need - 1);
   var roar = onTheLine ? crowdRoar(props.fans || 0) : 0;
   var sw = swBase + roar;
 
@@ -234,7 +250,11 @@ export default function PowerBar(props) {
     if (raf.current) cancelAnimationFrame(raf.current);
     var pos = posRef.current;
     var d = Math.abs(pos - ctr), inZ = d <= sw / 2;
-    var sc = Math.max(0, Math.min(100, strikeScore(d, sw / 2, minSc) + fb));
+    var base = strikeScore(d, sw / 2, minSc);
+    var sc = Math.round(Math.max(0, Math.min(100, base + fb)));
+    /* How the score was built, shown under it: where it landed + Aim */
+    var aimShown = Math.round(fb), capped = base + fb > 100;
+    var why = { kind: inZ ? "Gold" : base <= minSc + 1.01 ? "Floor" : "Outside", aim: aimShown, capped: capped, base: capped ? Math.round(base) : Math.round(sc) - aimShown };
     /* Her strike lands on the same bar. Talent sets how tightly she groups around the centre; the round's speed
        (and how far into the match it is) spreads her out just as it does you. Her training already works against
        you through the stat gaps above, so her own zone and floor are the plain ones for this round. */
@@ -242,15 +262,17 @@ export default function PowerBar(props) {
     var oSpd = 2.4 + props.diff * 0.4 + sets.length * 0.18 + myH.length * 0.3;
     var oSigma = Math.max(1.5, 9.5 - (props.oppSkill || 50) * 0.075) * oSpd / 2.4;
     var oPos = Math.max(0, Math.min(100, ctr + gauss() * oSigma));
-    var osc = Math.max(0, Math.min(100, strikeScore(Math.abs(oPos - ctr), oSw / 2, 15)));
-    var youWon = sc >= osc;
+    var osc = Math.round(Math.max(0, Math.min(100, strikeScore(Math.abs(oPos - ctr), oSw / 2, 15))));
+    var youWon = sc > osc, tie = sc === osc;
     var id = Date.now() + Math.random();
     var nm = myH.concat([sc]), no = opH.concat([osc]);
-    var setDone = nm.length >= STRIKES_PER_SET;
+    var sumMy = nm.reduce(function (a, b) { return a + b; }, 0), sumOp = no.reduce(function (a, b) { return a + b; }, 0);
+    var setDone = nm.length >= STRIKES_PER_SET && sumMy !== sumOp;
+    var goesToTieBreak = nm.length >= STRIKES_PER_SET && sumMy === sumOp;
     var g = goldRef.current;
     if (inZ) { g.total++; g.set++; }
-    if (setDone) { if (g.set >= STRIKES_PER_SET && avg(nm) >= avg(no)) g.flawless++; g.set = 0; }
-    var newSets = setDone ? sets.concat([{ my: nm, op: no, won: avg(nm) >= avg(no) }]) : sets;
+    if (setDone) { if (g.set >= STRIKES_PER_SET && sumMy > sumOp) g.flawless++; g.set = 0; }
+    var newSets = setDone ? sets.concat([{ my: nm, op: no, won: sumMy > sumOp }]) : sets;
     var result = setDone ? matchResult(newSets, need) : null;
 
     /* Persist before any animation so a reload can't undo this strike */
@@ -260,16 +282,17 @@ export default function PowerBar(props) {
        On the match-deciding strike the clash follows the match result, not this strike: the match loser is unseated
        (850ms), hits the dirt, and the moment holds before the outro (2700ms). */
     var big = Math.max(sc, osc) >= 85 || Math.abs(sc - osc) >= 15;
-    var word = youWon
+    var word = tie ? "DEADLOCK!" : youWon
       ? (sc >= 85 ? "BONK!" : big ? "WHAM!" : "TAP!")
       : (sc < 60 ? "WHIFF!" : big ? "OOF!" : "BLOCKED!");
+    if (tie) big = false;
     var joustWon = youWon;
     if (result) { joustWon = result.w; big = true; word = result.w ? "KNOCKOUT!" : "UNSEATED!"; }
     function joustPhase(phase) { setJoust(function (j) { return j && j.id === id ? Object.assign({}, j, { phase: phase }) : j; }); }
 
     setPh("hitstop");
     setMarks(marks.concat([{ pos: pos, sc: sc, opos: oPos }]));
-    setReveal({ id: id, you: Math.round(sc), opp: Math.round(osc), youWon: youWon, label: strikeLabel(sc), set: setNum, strike: nm.length, stamped: false });
+    setReveal({ id: id, you: sc, opp: osc, youWon: youWon, tie: tie, label: strikeLabel(sc), set: setNum, strike: nm.length, stamped: false, why: why });
     setJoust({ id: id, phase: "charge", youWon: joustWon, big: big, word: word });
     playStrike(sc);
     playGallop();
@@ -277,9 +300,9 @@ export default function PowerBar(props) {
 
     setTimeout(function () {
       setReveal(function (r) { return r && r.id === id ? Object.assign({}, r, { stamped: true }) : r; });
-      setFx({ id: id, kind: youWon ? (sc >= 85 ? "crit" : "hit") : "miss", youWon: youWon });
+      setFx({ id: id, kind: tie ? "hit" : youWon ? (sc >= 85 ? "crit" : "hit") : "miss", youWon: youWon });
       joustPhase("impact");
-      playClash(youWon);
+      playClash(youWon || tie);
       playCluck();
       if (big) playClang();
       vibrate(youWon ? (sc >= 85 ? [20, 30, 50] : 30) : [50, 30, 50]);
@@ -305,6 +328,9 @@ export default function PowerBar(props) {
     setTimeout(function () {
       if (setDone) {
         setSets(newSets); setPh("setbreak");
+      } else if (goesToTieBreak) {
+        setTieAlert(id); playHeartbeat(); vibrate([30, 60, 30]);
+        setTimeout(function () { setTieAlert(null); spd.current += accel; posRef.current = 0; dir.current = 1; busy.current = false; setPh("go"); }, 1300);
       } else {
         spd.current += accel;
         posRef.current = 0; dir.current = 1; busy.current = false; setPh("go");
@@ -378,7 +404,8 @@ export default function PowerBar(props) {
   }
 
   /* Banner for strike 3 of a set */
-  var finalStrike = cnt === STRIKES_PER_SET - 1 && ph === "go";
+  var tieBreaking = cnt >= STRIKES_PER_SET;
+  var finalStrike = cnt >= STRIKES_PER_SET - 1 && ph === "go";
   var banner = null;
   if (finalStrike) {
     var gapSoFar = 0; for (var gi = 0; gi < cnt; gi++) gapSoFar += myH[gi] - opH[gi];
@@ -386,7 +413,8 @@ export default function PowerBar(props) {
       ? "Protect your " + Math.round(gapSoFar) + "-pt lead"
       : -gapSoFar > 60 ? "Set is out of reach — finish strong"
       : "Outscore them by " + Math.ceil(-gapSoFar) + "+ to take the set";
-    if (deciding) banner = { tag: "🔥 All on the line", col: INK_RED, target: target };
+    if (tieBreaking) banner = { tag: "⚠ Tie-break " + (cnt - STRIKES_PER_SET + 1), col: INK_RED, target: "Outscore her on this strike to take the set" };
+    else if (deciding) banner = { tag: "🔥 All on the line", col: INK_RED, target: target };
     else if (setsWon === need - 1) banner = { tag: "⚡ Match point", col: INK_GOLD, target: target };
     else if (setsLost === need - 1) banner = { tag: "⚠ Save the match", col: INK_RED, target: target };
     else banner = { tag: "⚠ Set point", col: INK_RED, target: target };
@@ -418,7 +446,7 @@ export default function PowerBar(props) {
           you={{ name: youName, emoji: youEmoji, sub: props.youSub, palette: youPal }}
           foe={{ name: oppName, emoji: oppEmoji, sub: props.foeSub, palette: foePal }}
           roundLabel={props.roundLabel} tierName={props.tierName} tierColor={tierColor}
-          bestOf={bestOf} resumeSet={sets.length > 0 || myH.length > 0 ? setNum : null} scout={props.scout} coach={props.coach} isFinal={!!props.isFinal} road={props.road} oppId={props.oppId} oppRank={props.oppRank}
+          bestOf={bestOf} resumeSet={sets.length > 0 || myH.length > 0 ? setNum : null} scout={props.scout} coach={props.coach} isFinal={!!props.isFinal} isSlam={props.tier >= 5} road={props.road} oppId={props.oppId} oppRank={props.oppRank}
           skipSignal={skip}
           onDone={function () { setPh(sets.length > 0 && myH.length === 0 ? "setintro" : "go"); if (sets.length > 0 && myH.length === 0) setTimeout(function () { setPh("go"); }, 1100); }} />
       )}
@@ -427,7 +455,11 @@ export default function PowerBar(props) {
           youName={youName} foeName={oppName} eliminated={props.eliminated !== false}
           continueSignal={cont} onContinue={startNextSet} />
       )}
-      {isDone && (
+      {isDone && props.isFinal && !finalOutDone && (
+        <FinalOutro won={res.w} tierName={props.tierName} youPalette={youPal} foePalette={foePal} foeName={oppName}
+          pts={props.titleStakes ? props.titleStakes.pts : null} money={props.titleStakes ? props.titleStakes.money : null} onDone={function () { setFinalOutDone(true); }} />
+      )}
+      {isDone && (!props.isFinal || finalOutDone) && (
         <MatchOutro
           won={res.w} champion={res.w && !!props.isFinal} eliminated={!res.w && props.eliminated !== false}
           pa={res.pa} oa={res.oa} sets={res.sets} setsWon={res.setsWon} setsLost={res.setsLost}
@@ -482,6 +514,16 @@ export default function PowerBar(props) {
 
         <CoachBubble text={coachText} />
         {reveal && (<StrikeReveal key={reveal.id} reveal={reveal} />)}
+        {/* TIE-BREAK alert: the set is level after three strikes, so one more each until someone pulls ahead */}
+        {tieAlert && (
+          <motion.div key={"tb-" + tieAlert} initial={{ scale: 2.4, opacity: 0, rotate: -8 }} animate={{ scale: 1, opacity: 1, rotate: -3 }} transition={{ type: "spring", stiffness: 420, damping: 14 }}
+            style={{ position: "absolute", left: 0, right: 0, top: "34%", zIndex: 40, display: "flex", flexDirection: "column", alignItems: "center", pointerEvents: "none" }}>
+            <div style={{ background: "repeating-linear-gradient(135deg,#facc15 0 12px,#1c1917 12px 24px)", padding: 4, borderRadius: 10, boxShadow: "0 8px 22px rgba(0,0,0,0.35)", animation: REDUCED_MOTION ? "none" : "pulse 0.4s ease infinite" }}>
+              <div style={{ background: "#b91c1c", color: "#fff", fontWeight: 900, fontSize: 24, letterSpacing: 3, padding: "6px 16px", borderRadius: 7, fontStyle: "italic", textShadow: "0 2px 0 #450a0a" }}>⚠ TIE-BREAK!</div>
+            </div>
+            <div style={{ marginTop: 6, fontSize: 11.5, fontWeight: 900, color: "#7f1d1d", background: "rgba(255,255,255,0.9)", borderRadius: 8, padding: "2px 8px" }}>Dead level — one more strike each</div>
+          </motion.div>
+        )}
         {ph === "setintro" && (<SetIntroCard setNum={setNum} tag={setTag} tagColor={setTagColor} />)}
       </div>
 

@@ -41,4 +41,18 @@ export function standing(rank) {
 }
 
 /* Granny names for newly generated tours (existing saves keep their riders) */
-export var GRANNY_NAMES = ["Ethel", "Mabel", "Gladys", "Doris", "Edna", "Agnes", "Bertha", "Dolores", "Mildred", "Phyllis", "Beryl", "Hilda", "Irma", "Rosa", "Wilma", "Muriel", "Florence", "Ida", "Gertrude", "Myrtle", "Peggy", "Shirley", "Vera", "Nora", "Ruth", "Esther", "Lorraine", "Marge", "Thelma", "Constance", "Winifred", "Bea", "Opal", "Hazel", "Maud", "Pearl", "Ingrid", "Greta", "Carmen", "Lupe", "Fumiko", "Mei", "Olga", "Babushka Ana", "Nonna Lucia", "Oma Heidi", "Savta Rina", "Abuela Inés", "Yaya Eleni", "Granny Rose"];
+export var GRANNY_NAMES = ["Ethel", "Mabel", "Gladys", "Doris", "Edna", "Agnes", "Bertha", "Dolores", "Mildred", "Phyllis", "Beryl", "Hilda", "Irma", "Rosa", "Wilma", "Muriel", "Florence", "Ida", "Gertrude", "Myrtle", "Peggy", "Shirley", "Vera", "Nora", "Ruth", "Esther", "Lorraine", "Marge", "Thelma", "Constance", "Winifred", "Bea", "Opal", "Hazel", "Maud", "Pearl", "Ingrid", "Greta", "Carmen", "Lupe", "Fumiko", "Mei", "Olga", "Babushka Ana", "Nonna Lucia", "Oma Heidi", "Savta Rina", "Abuela Inés", "Yaya Eleni", "Granny Rose",
+  "Agatha", "Blanche", "Cora", "Dottie", "Elsie", "Fanny", "Gwendolyn", "Harriet", "Imelda", "Josephine", "Kitty", "Lavinia", "Matilda", "Nellie", "Ottilie", "Prudence", "Queenie", "Rosalind", "Sybil", "Tabitha",
+  "Ursula", "Violet", "Wanda", "Xenia", "Yvonne", "Zelda", "Augusta", "Bernadette", "Clementine", "Delphine", "Eunice", "Flossie", "Georgina", "Henrietta", "Iris", "Jemima", "Loretta", "Marigold", "Nancy", "Ophelia",
+  "Petunia", "Rosemary", "Sadie", "Trudy", "Una", "Velma", "Winnie", "Adelaide", "Bunty", "Cecily", "Dora", "Edwina", "Fern", "Gilda", "Hattie", "Ivy", "June", "Kathleen", "Lottie", "Minnie", "Odette", "Patsy", "Renata", "Selma", "Tilly"];
+
+/* Surnames: every granny on tour gets a full name of her own, so no two are ever confused */
+export var SURNAMES = ["Crumble", "Pickering", "Featherstone", "Bramble", "Cobblepot", "Puddleby", "Thistlewood", "Mapleton", "Biscuit", "Pennyworth", "Tumble", "Wigglesworth", "Butterfield", "Kettle", "Marmalade", "Honeycutt", "Ashby", "Primrose", "Blackwood", "Sparrow",
+  "Hollyhock", "Gingersnap", "Wimble", "Crumpet", "Fernsby", "Pudding", "Rosewater", "Thimble", "Hawthorne", "Nettlebed", "Quill", "Saffron", "Tinker", "Bumble", "Larkspur", "Mossbottom", "Plum", "Whistledown", "Peppercorn", "Clatterbuck",
+  "Fiddlestick", "Gooseberry", "Higgins", "Muffin", "Noodle", "Oddsock", "Pickles", "Rumble", "Snodgrass", "Teacake"];
+
+/* The i-th rider's unique "First Surname" (i = 0…998). First names cycle; the surname step is coprime with the list sizes, so a pair never repeats */
+export function npcName(i) {
+  var F = GRANNY_NAMES.length, S = SURNAMES.length, k = Math.floor(i / F);
+  return GRANNY_NAMES[i % F] + " " + SURNAMES[((i % F) * 7 + k * (7 * F + 3)) % S];
+}
