@@ -6,6 +6,7 @@ import { sh } from "../models/formulas";
 import { C, FONT, display, label, card, button, pill, money } from "../ui/theme";
 import { Rider, Face, PLAYER_PALETTE, paletteFor } from "./Rider";
 import RankSparkline from "./RankSparkline";
+import { FitnessCard } from "./Fitness";
 
 function Bunting(props) {
   var n = 18, flags = [];
@@ -112,6 +113,8 @@ export default function HomeTab(props) {
           <SeasonStrip S={S} />
         </div>
       </motion.div>
+
+      <FitnessCard player={S.player} roosterName={S.player.roosterName} onTrain={props.onTrain} />
 
       {/* Training nudge when points are waiting */}
       {(tr.tp || 0) >= 15 && (

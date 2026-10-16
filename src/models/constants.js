@@ -44,11 +44,14 @@ export const STATS = [
   { k: "s", icon: "🫀", label: "Stamina", who: "rooster", col: "#ea580c", what: "The bar speeds up less as a match goes on — strike after strike, set after set",
     per: "About 5% less speed-up each strike", best: "Long best-of-5 matches get away from you late on" },
   { k: "p", icon: "🐾", label: "Steady Stride", who: "rooster", col: "#db2777", what: "A wider gold zone — a steady mount is easier to aim from",
-    per: "Gold zone +1.2% of the bar wider", best: "You often stop just next to the gold" }
+    per: "Gold zone +1.2% of the bar wider", best: "You often stop just next to the gold" },
+  { k: "b", icon: "🔋", label: "Bounce-back", who: "recovery", col: "#0d9488", what: "Granny and rooster win back more fitness between tournaments. It counts on its own, not against your opponent",
+    per: "+1.25% fitness back after every tournament", best: "Deep runs leave you running on empty the week after" }
 ];
 export const STAT_GROUPS = [
   { who: "granny", icon: "👵", title: "Granny", sub: "Rider skills" },
-  { who: "rooster", icon: "🐓", title: "Rooster", sub: "Mount conditioning" }
+  { who: "rooster", icon: "🐓", title: "Rooster", sub: "Mount conditioning" },
+  { who: "recovery", icon: "🔋", title: "Recovery", sub: "Fitness between tournaments" }
 ];
 
 /* Every match in the Season Finals is best of 5 sets */

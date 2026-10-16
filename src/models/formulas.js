@@ -30,12 +30,16 @@ export function pRankOf(S) {
 }
 
 /* NPC vs NPC bracket resolution — skill + training with a random roll */
+import { fatiguePenalty } from "../engine/fitness";
+
 export function nW(a, b) {
   var ta = a.tr || {}, tb = b.tr || {};
   var bA = ((ta.r||0)+(ta.p||0)+(ta.f||0)+(ta.s||0)+(ta.g||0)) * 0.9;
   var bB = ((tb.r||0)+(tb.p||0)+(tb.f||0)+(tb.s||0)+(tb.g||0)) * 0.9;
   var sA = Math.min(95, 55 + ((a.skill||50)+bA) * 0.4);
   var sB = Math.min(95, 55 + ((b.skill||50)+bB) * 0.4);
+  /* Tired riders lose a little (same tiredness rules as the player's matches) */
+  sA -= fatiguePenalty(a); sB -= fatiguePenalty(b);
   return (sA + Math.random() * 14 - 5) >= (sB + Math.random() * 14 - 5) ? a : b;
 }
 

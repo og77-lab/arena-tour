@@ -9,6 +9,7 @@ import { conditionOf, FIELDS } from "../engine/events";
 import { TIERS } from "../models/constants";
 import { C, FONT, display, label, card, button, money } from "../ui/theme";
 import { REDUCED_MOTION } from "./fx";
+import { FitnessMini } from "./Fitness";
 
 var MAVIS = [
   "No refunds. No crying. Biscuits for regulars.",
@@ -58,6 +59,7 @@ export default function PrepScreen(props) {
           {cd ? cd.icon + " " : ""}{ev ? ev.name : T.name} <span style={{ color: T.col }}>· {T.name}</span>
         </div>
         {cd && (<div style={{ fontSize: 11.5, fontWeight: 800, color: C.textSoft }}>{cd.name}: {cd.effect} · {"★".repeat(fd.stars)} {fd.label}</div>)}
+        <div style={{ fontSize: 11.5, fontWeight: 800, color: C.textSoft }}>Fitness <FitnessMini player={p} /></div>
         <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
           {[["locker", "🎒 Your locker"], ["shop", "🛒 Mavis's shop"]].map(function (t) {
             var on = tab === t[0];

@@ -64,6 +64,7 @@ var CHAPTERS = [
   { id: "training", icon: "🏋️", title: "Stats & training" },
   { id: "money", icon: "💰", title: "Prize money" },
   { id: "gear", icon: "🧰", title: "Lances & saddles" },
+  { id: "fitness", icon: "💪", title: "Fitness & physio" },
   { id: "fans", icon: "❤️", title: "Fans & the press" },
   { id: "paper", icon: "📰", title: "The Daily Cluck" },
   { id: "rivals", icon: "😤", title: "Rivals" },
@@ -226,6 +227,19 @@ function body(id) {
         <span key="e">Every item helps one thing and hurts another, and the lanes shift the balance. Precise riders tend to love the needle; riders who miss a lot get more from the baguette.</span>
       ]} />
       <Table head={["Item", "Effect", "Lasts", "Lanes change it"]} rows={[["🧶 Knitting-Needle Lance","Gold zone 0.6% narrower, +3 points on gold hits","3","Wind: Gold zone 1% narrower · Heat: +4 points on gold hits"],["🥖 Day-Old Baguette","+3 points on misses, −2 points on gold hits","1","Mud: +1 points on misses · Heat: +4 points on misses"],["🪵 Grandpa's Oak Lance","Bar starts 9% faster, +2 points every strike","5","Wind: Gold zone 0.3% wider · Heat: Speeds up 12% more each strike"],["🎋 Featherlight Bamboo","Gold zone 1.2% wider, −2 points every strike","3","Wind: Gold zone 0.4% wider · Mud: Gold zone 1.4% wider"],["🏁 Racing Saddle","Bar starts 4% slower, Speeds up 20% more each strike","3","Mud: Bar starts 1% slower · Heat: Speeds up 35% more each strike · Green: Bar starts 3% slower"],["🪑 Rocking-Chair Saddle","Bar starts 3% faster, Speeds up 22% less each strike","5","Heat: Bar starts 5% faster · Mud: Speeds up 12% less each strike"],["🧽 Memory-Foam Cushion","Gold zone 0.5% wider, Bar starts 3% faster","2","Mud: Gold zone 0.1% wider · Green: Gold zone 0.7% wider"],["🛼 Roller-Skate Saddle","Gold zone 0.6% narrower, Bar starts 6% slower","1","Mud: Bar starts 1% slower · Wind: Gold zone 0.9% narrower"]]} />
+    </>);
+
+    case "fitness": return (<>
+      <P>You have <B>two fitness meters</B>, 0–100%: 👵 the granny's and 🐓 the rooster's. They're on Home, in the Get ready screen, in the match header and in the tale of the tape (hers too).</P>
+      <List items={[
+        <span key="a"><B>Every match tires both of you:</B> −5% granny and −6% rooster (best of 5: −7.5% and −9%). A deep run leaves you tired in the later rounds — and so is the rider who got there with you.</span>,
+        <span key="b"><B>A tired granny:</B> the gold zone gets narrower (up to −2.5% at 0) and misses score less (up to −6). The strike breakdown shows it as <B>Tired</B>.</span>,
+        <span key="c"><B>A tired rooster:</B> the bar starts faster (up to +10%) and speeds up more after every strike (up to +35%).</span>,
+        <span key="d"><B>Fitness only comes back between tournaments:</B> +25% after every tournament, plus 1.25% per level of 🔋 <B>Bounce-back</B>. A week off (a Grand Slam you don't play) recovers double.</span>,
+        <span key="e"><B>🔋 Bounce-back</B> is the sixth stat (0–20). Unlike the others it counts on its own, not against your opponent.</span>,
+        <span key="f"><B>Physio staff</B> (Train tab, as the week's one investment): 👩‍⚕️ Nurse Nellie +35% granny, 🩺 Dr. Featherby the rooster chiropractor +35% rooster, 🛁 a spa weekend at Bingo-on-Sea +20% both — straight away.</span>,
+        <span key="g">Every rider on tour plays by the same fitness rules.</span>
+      ]} />
     </>);
 
     case "money": return (<>

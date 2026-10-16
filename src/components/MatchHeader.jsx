@@ -3,6 +3,7 @@
 import { C, FONT, display, label, card, button } from "../ui/theme";
 import { conditionOf } from "../engine/events";
 import { BY_ID } from "../engine/gear";
+import { FitnessMini } from "./Fitness";
 
 var SHORT = { "Round of 64": "R64", "Round of 32": "R32", "Round of 16": "R16", "Quarterfinals": "QF", "Semifinals": "SF", "Final": "F", "Group Stage": "Groups", "Semifinal": "SF", "World Final": "Final" };
 
@@ -21,9 +22,10 @@ export default function MatchHeader(props) {
             {props.roundLabel}
             <span style={{ fontSize: 12, fontWeight: 800, color: C.textSoft, marginLeft: 8 }}>Best of {props.bestOf} sets</span>
           </div>
-          {((cd && cd.key !== "classic") || props.gear) && (
+          {((cd && cd.key !== "classic") || props.gear || props.fit) && (
             <div style={{ marginTop: 3, fontSize: 11.5, fontWeight: 900, display: "flex", gap: 8, alignItems: "center" }}>
-              {props.gear && (<span style={{ color: C.textSoft, flexShrink: 0 }}>Kit {(BY_ID[props.gear.lance] || {}).icon}{(BY_ID[props.gear.saddle] || {}).icon}</span>)}
+              {props.fit && (<span style={{ flexShrink: 0 }}><FitnessMini fit={props.fit} /></span>)}
+              {props.gear && (<span style={{ color: C.textSoft, flexShrink: 0 }}>{(BY_ID[props.gear.lance] || {}).icon}{(BY_ID[props.gear.saddle] || {}).icon}</span>)}
               {cd && cd.key !== "classic" && (<span style={{ color: C.redInk, minWidth: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{cd.icon} {cd.effect}</span>)}
             </div>
           )}

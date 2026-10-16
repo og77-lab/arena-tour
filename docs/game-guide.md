@@ -174,7 +174,19 @@ After you pick a tournament you land on **Get ready**. Choose a lance and a sadd
 | 🧽 Memory-Foam Cushion | Gold zone 0.5% wider, Bar starts 3% faster | 2 | Mud: Gold zone 0.1% wider · Green: Gold zone 0.7% wider |
 | 🛼 Roller-Skate Saddle | Gold zone 0.6% narrower, Bar starts 6% slower | 1 | Mud: Bar starts 1% slower · Wind: Gold zone 0.9% narrower |
 
-## 10. Prize money
+## 10. Fitness & physio
+
+You have **two fitness meters**, 0–100%: 👵 the granny's and 🐓 the rooster's. They're on Home, in the Get ready screen, in the match header and in the tale of the tape (hers too).
+
+- **Every match tires both of you:** −5% granny and −6% rooster (best of 5: −7.5% and −9%). A deep run leaves you tired in the later rounds — and so is the rider who got there with you.
+- **A tired granny:** the gold zone gets narrower (up to −2.5% at 0) and misses score less (up to −6). The strike breakdown shows it as **Tired**.
+- **A tired rooster:** the bar starts faster (up to +10%) and speeds up more after every strike (up to +35%).
+- **Fitness only comes back between tournaments:** +25% after every tournament, plus 1.25% per level of 🔋 **Bounce-back**. A week off (a Grand Slam you don't play) recovers double.
+- **🔋 Bounce-back** is the sixth stat (0–20). Unlike the others it counts on its own, not against your opponent.
+- **Physio staff** (Train tab, as the week's one investment): 👩‍⚕️ Nurse Nellie +35% granny, 🩺 Dr. Featherby the rooster chiropractor +35% rooster, 🛁 a spa weekend at Bingo-on-Sea +20% both — straight away.
+- Every rider on tour plays by the same fitness rules.
+
+## 11. Prize money
 
 Prize money buys **one investment per tournament week**. After you make one, the rest lock until you play that week's tournament. Prices follow the prizes at your level, so they stay meaningful as you climb.
 
@@ -186,7 +198,7 @@ Prize money buys **one investment per tournament week**. After you make one, the
 
 The world leaderboard counts everything you've ever earned, so spending never costs you places there.
 
-## 11. Fans & the press
+## 12. Fans & the press
 
 Your **fans** (❤️, 0–100, starting at 20) are how much the crowd loves you.
 
@@ -209,7 +221,7 @@ Your **fans** (❤️, 0–100, starting at 20) are how much the crowd loves you
 
 **The press conference.** Pick one of three funny answers — cheeky digs at your rival, daft excuses, funny-but-sporting lines, or bold promises. Each outlet's audience has its own taste, nobody likes the same kind of joke twice in a row, and now and then an answer goes viral. There's no answer that always works.
 
-## 12. The Daily Cluck
+## 13. The Daily Cluck
 
 A new issue prints after every tournament, and you can read it any time in the News tab (with the archive of recent issues).
 - **The front page** goes to the week's biggest story — a Slam champion, a new world #1, a Cinderella title, a giant-killing, or you if you earned it.
@@ -220,14 +232,14 @@ A new issue prints after every tournament, and you can read it any time in the N
 
 When it opens after a tournament, tap **Fold the paper** to put it away.
 
-## 13. Rivals
+## 14. Rivals
 
 Your **arch-rival** is the granny you keep meeting — preferably the one who keeps beating you. She's picked from your head-to-head record after each tournament (at least two meetings and one loss to her).
 - She shows on Home, with a red banner before your matches, a badge on her profile, and her own column in the paper.
 - Beat her for **Sweet Revenge** (+3 fans).
 - Lead her head-to-head by three and the feud is **settled** — she stops bothering you, and the next grudge can take her place.
 
-## 14. Rankings & profiles
+## 15. Rankings & profiles
 
 The Ranks tab lists all 1,000 riders by season points and opens on your own row, with 25 above and below ("show 25 more" to see further). Switch to **Top 50** to see the leaders. Golden helmets mark the top ten; the world #1 wears the crown.
 
@@ -235,17 +247,17 @@ The Ranks tab lists all 1,000 riders by season points and opens on your own row,
 
 Tap your own card on Home for your profile. The ✏️ buttons rename your granny and your rooster.
 
-## 15. Achievements
+## 16. Achievements
 
 **35 achievements** in six groups — on the tour, with the lance, the ladder, feuds, crowd & press, and the gym. A badge slides down from the top when you earn one; Home and More show your collection, with progress bars on the counted ones and how to earn the ones you're missing.
 
-## 16. End of season
+## 17. End of season
 
 When the season is over, the **Grand Gala** plays: the world champion is crowned, the season's awards are handed out one envelope at a time (most titles, biggest climb, most training, your best quote, fan favourite — and the participation ribbon), your season in numbers, the hall of the golden helmets, and a goal for next season.
 
 Your training, prize money, badges, fans, rival and newspaper archive all carry over into the new season — and so do last season's points, which you'll defend week by week.
 
-## 17. Settings & saves
+## 18. Settings & saves
 
 | In More | What it does |
 |---|---|
@@ -261,7 +273,7 @@ Your training, prize money, badges, fans, rival and newspaper archive all carry 
 
 The game saves after every change — every strike, every level, every answer.
 
-## 18. Coach's tips
+## 19. Coach's tips
 
 - Aim for the white line, not just the gold. 100 against 86 is the difference between winning and losing a set.
 - If you keep overshooting, train Reflexes. If you land just next to the gold, train Steady Stride. If your misses are wild, Stubbornness.
