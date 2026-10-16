@@ -87,7 +87,7 @@ export default function JoustStage(props) {
           return (<div key={i} aria-hidden style={{ position: "absolute", bottom: 4, [isYou ? "left" : "right"]: rw * (0.25 + i * 0.06), width: 5, height: 5, borderRadius: "50%", background: "#4a3519",
             animation: "mudSplash 0.45s ease-out " + (i * 0.12) + "s infinite", transform: isYou ? "none" : "scaleX(-1)" }} />);
         })}
-        <Rider palette={pal} width={rw} flip={!isYou} pose={st.pose} running={st.running} hatOff={st.hatOff} />
+        <Rider palette={pal} width={rw} flip={!isYou} pose={st.pose} running={st.running} hatOff={st.hatOff} lance={((isYou ? props.youKit : props.foeKit) || {}).lance || "broom"} saddle={((isYou ? props.youKit : props.foeKit) || {}).saddle || "teacosy"} />
       </div>
     );
   }

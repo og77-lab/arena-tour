@@ -163,6 +163,100 @@ function Accessory(props) {
   return null;
 }
 
+/* ── Kit: what the lance shaft and the saddle look like (no lance given = the classic striped lance) ── */
+function LanceShaft(props) {
+  var id = props.id;
+  var vamp = (<polygon points="70,50 78,55.5 71,62" fill="#e5e7eb" stroke={INK} strokeWidth="1.8" strokeLinejoin="round" />);
+  var pennant = (<path d="M84 53.2 L99 49 L86 59 Z" fill={props.plume} stroke={INK} strokeWidth="1.5" strokeLinejoin="round" />);
+  function shaft(w, col) { return (<g><line x1="44" y1="60" x2="122" y2="50" stroke={INK} strokeWidth={w + 2.6} strokeLinecap="round" /><line x1="44" y1="60" x2="122" y2="50" stroke={col} strokeWidth={w} strokeLinecap="round" /></g>); }
+  if (id === "broom") return (
+    <g>
+      {/* straw head at the back end */}
+      <path d="M45 56 L28 52 L26 66 L45 63 Z" fill="#facc15" stroke={INK} strokeWidth="1.6" strokeLinejoin="round" />
+      <path d="M30 55 L44 58 M29 59 L44 60 M29 63 L44 62" stroke="#a16207" strokeWidth="0.9" />
+      <rect x="42" y="55.5" width="5" height="8" rx="1" fill="#dc2626" stroke={INK} strokeWidth="1.2" transform="rotate(-7 44.5 59.5)" />
+      {shaft(3.2, "#b45309")}{vamp}{pennant}
+    </g>);
+  if (id === "needle") return (
+    <g>
+      {shaft(1.6, "#cbd5e1")}
+      <circle cx="44" cy="60" r="7" fill="#ec4899" stroke={INK} strokeWidth="1.6" />
+      <path d="M38.5 57 Q44 60 49.5 57 M38 61 Q44 64 50 61 M41 54.5 Q44 60 41 65.5" fill="none" stroke="#9d174d" strokeWidth="0.9" />
+      <path d="M44 67 Q48 74 54 72" fill="none" stroke="#ec4899" strokeWidth="1.2" />
+    </g>);
+  if (id === "baguette") return (
+    <g>
+      {shaft(7, "#d97706")}
+      <path d="M56 56.6 L61 59.8 M70 54.8 L75 58 M84 53 L89 56.2 M98 51.2 L103 54.4" stroke="#fde68a" strokeWidth="1.6" strokeLinecap="round" />
+      <circle cx="64" cy="57.6" r="0.6" fill="#78350f" /><circle cx="92" cy="54.1" r="0.6" fill="#78350f" />
+    </g>);
+  if (id === "oak") return (
+    <g>
+      {shaft(5.4, "#78350f")}
+      <path d="M50 58.6 Q66 55.6 80 55.2 M90 53.4 Q104 51.6 116 51" fill="none" stroke="#a16207" strokeWidth="0.9" opacity="0.8" />
+      <ellipse cx="73" cy="56.2" rx="2" ry="1.4" fill="#451a03" /><ellipse cx="101" cy="52.7" rx="1.6" ry="1.1" fill="#451a03" />
+      {vamp}
+    </g>);
+  if (id === "bamboo") return (
+    <g>
+      {shaft(3.4, "#65a30d")}
+      {[58, 74, 90, 106].map(function (x) { var y = 60 - (x - 44) * 10 / 78; return (<line key={x} x1={x - 0.6} y1={y - 2.6} x2={x + 0.6} y2={y + 2.6} stroke="#365314" strokeWidth="1.5" />); })}
+      <path d="M90 54 Q96 44 104 46 Q98 50 90 54 Z" fill="#84cc16" stroke={INK} strokeWidth="1.2" strokeLinejoin="round" />
+    </g>);
+  return (
+    <g>
+      {shaft(3.4, "#b45309")}
+      {props.knit && (<g><line x1="80" y1="55.4" x2="84" y2="54.9" stroke="#f472b6" strokeWidth="3.4" /><line x1="92" y1="53.9" x2="96" y2="53.4" stroke="#22d3ee" strokeWidth="3.4" /><line x1="104" y1="52.4" x2="108" y2="51.9" stroke="#facc15" strokeWidth="3.4" /></g>)}
+      {vamp}{pennant}
+    </g>);
+}
+
+/* Saddles hang down the rooster's side below the granny's skirt */
+function Saddle(props) {
+  var id = props.id;
+  if (id === "teacosy") return (
+    <g stroke={INK} strokeWidth="1.8" strokeLinejoin="round">
+      <path d="M38 68 Q56 62 76 68 L74 86 Q56 92 40 86 Z" fill="#f472b6" />
+      <path d="M41 74 Q56 70 75 74 M40.5 80 Q56 76 74.5 80" fill="none" stroke="#fbcfe8" strokeWidth="2" />
+      <circle cx="41" cy="88" r="3.2" fill="#fde047" />
+    </g>);
+  if (id === "racing") return (
+    <g stroke={INK} strokeWidth="1.8" strokeLinejoin="round">
+      <path d="M38 68 Q56 62 76 68 L74 86 Q56 92 40 86 Z" fill="#f8fafc" />
+      <path d="M44 66 L48 89 M52 64.6 L56 90.4" stroke="#dc2626" strokeWidth="3" />
+      <circle cx="66" cy="78" r="5.2" fill="#facc15" />
+      <text x="66" y="81" fontSize="7" fontWeight="900" textAnchor="middle" fill={INK} stroke="none">7</text>
+    </g>);
+  if (id === "rocking") return (
+    <g stroke={INK} strokeWidth="1.8" strokeLinejoin="round" strokeLinecap="round">
+      {/* chair back behind her, rockers under the seat */}
+      <path d="M36 70 L32 40 M42 69 L39 42" fill="none" stroke="#92400e" strokeWidth="3.4" />
+      <path d="M31 42 Q36 38 41 42" fill="none" stroke="#92400e" strokeWidth="3.4" />
+      <path d="M32 50 L40 49 M33 58 L41 57" stroke="#b45309" strokeWidth="2" />
+      <path d="M34 72 Q56 64 78 72 L77 76 Q56 69 35 76 Z" fill="#b45309" />
+      <path d="M30 80 Q56 92 82 80" fill="none" stroke="#92400e" strokeWidth="3" />
+    </g>);
+  if (id === "foam") return (
+    <g stroke={INK} strokeWidth="1.8" strokeLinejoin="round">
+      <rect x="33" y="64" width="46" height="13" rx="5" fill="#fde047" />
+      {[[39, 68], [47, 72], [57, 68], [66, 72], [73, 68]].map(function (c, i) { return (<circle key={i} cx={c[0]} cy={c[1]} r="1.5" fill="#ca8a04" stroke="none" />); })}
+    </g>);
+  if (id === "skates") return (
+    <g stroke={INK} strokeWidth="1.8" strokeLinejoin="round">
+      <path d="M38 68 Q56 62 76 68 L74 84 Q56 90 40 84 Z" fill="#a855f7" />
+      <path d="M46 72 L50 70 L48 76 L53 74" fill="none" stroke="#fde047" strokeWidth="1.8" />
+    </g>);
+  return null;
+}
+function Skate(props) {
+  var x = props.x;
+  return (
+    <g stroke={INK} strokeWidth="1.2">
+      <rect x={x - 7} y={104} width="14" height="4" rx="1.5" fill="#a855f7" />
+      <circle cx={x - 4.5} cy={110} r="2.2" fill="#fde047" /><circle cx={x + 4.5} cy={110} r="2.2" fill="#fde047" />
+    </g>);
+}
+
 /* pose: idle | charge | deflect | knocked | fallen | cheer */
 export function Rider(props) {
   var p = props.palette || PLAYER_PALETTE, ch = p.chicken, L = p.look || PLAYER_PALETTE.look;
@@ -184,8 +278,8 @@ export function Rider(props) {
           <ellipse cx="27" cy="76" rx="10" ry="4.5" fill={ch.tail} transform="rotate(18 27 76)" />
         </g>
         <g fill="none" stroke="#ea580c" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
-          <g style={Object.assign(svgT("68px 88px"), { animation: legB })}><path d="M68 88 L68 104 M63 107 L68 104 L73 107 M68 104 L69 108" /></g>
-          <g style={Object.assign(svgT("56px 88px"), { animation: legA })}><path d="M56 88 L56 104 M51 107 L56 104 L61 107 M56 104 L57 108" /></g>
+          <g style={Object.assign(svgT("68px 88px"), { animation: legB })}><path d="M68 88 L68 104 M63 107 L68 104 L73 107 M68 104 L69 108" />{props.saddle === "skates" && (<Skate x={68} />)}</g>
+          <g style={Object.assign(svgT("56px 88px"), { animation: legA })}><path d="M56 88 L56 104 M51 107 L56 104 L61 107 M56 104 L57 108" />{props.saddle === "skates" && (<Skate x={56} />)}</g>
         </g>
         <g stroke={INK} strokeWidth="2" strokeLinejoin="round">
           <ellipse cx="87" cy="60" rx="10" ry="15" fill={neck} transform="rotate(22 87 60)" />
@@ -204,6 +298,8 @@ export function Rider(props) {
           <path d="M42 66 Q58 60 73 70 Q66 82 50 80 Q40 76 42 66 Z" fill={ch.wing} stroke={INK} strokeWidth="2" strokeLinejoin="round" />
           <path d="M50 79 Q53 73 51 68 M57 80 Q61 74 59 68 M64 78 Q67 73 66 69" fill="none" stroke={INK} strokeWidth="1.3" strokeLinecap="round" opacity="0.55" />
         </g>
+
+        {props.saddle && (<Saddle id={props.saddle} />)}
 
         {/* ── Granny ── */}
         <g style={Object.assign(svgT("56px 64px", GRANNY_POSE[pose], pose === "fallen" ? "transform 0.55s cubic-bezier(.5,-0.3,.6,1)" : "transform 0.22s cubic-bezier(.3,1.6,.5,1)"), { display: props.noRider ? "none" : undefined })}>
@@ -237,11 +333,7 @@ export function Rider(props) {
 
           {/* Lance with a boxing-glove tip */}
           <g style={svgT("68px 56px", "rotate(" + (LANCE_ANGLE[pose] != null ? LANCE_ANGLE[pose] : -24) + "deg)", pose === "charge" ? "transform 0.18s ease-in" : "transform 0.3s cubic-bezier(.3,1.5,.5,1)")}>
-            <line x1="44" y1="60" x2="122" y2="50" stroke={INK} strokeWidth="6" strokeLinecap="round" />
-            <line x1="44" y1="60" x2="122" y2="50" stroke="#b45309" strokeWidth="3.4" strokeLinecap="round" />
-            {L.knit && (<g><line x1="80" y1="55.4" x2="84" y2="54.9" stroke="#f472b6" strokeWidth="3.4" /><line x1="92" y1="53.9" x2="96" y2="53.4" stroke="#22d3ee" strokeWidth="3.4" /><line x1="104" y1="52.4" x2="108" y2="51.9" stroke="#facc15" strokeWidth="3.4" /></g>)}
-            <polygon points="70,50 78,55.5 71,62" fill="#e5e7eb" stroke={INK} strokeWidth="1.8" strokeLinejoin="round" />
-            <path d="M84 53.2 L99 49 L86 59 Z" fill={p.plume} stroke={INK} strokeWidth="1.5" strokeLinejoin="round" />
+            <LanceShaft id={props.lance} knit={L.knit} plume={p.plume} />
             <rect x="117" y="46" width="5" height="8" rx="1.5" fill="#fff" stroke={INK} strokeWidth="1.6" />
             <ellipse cx="127" cy="50" rx="7" ry="6" fill="#dc2626" stroke={INK} strokeWidth="1.8" />
             <ellipse cx="124" cy="44.6" rx="2.8" ry="2.1" fill="#dc2626" stroke={INK} strokeWidth="1.5" />

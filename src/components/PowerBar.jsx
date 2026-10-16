@@ -506,7 +506,7 @@ export default function PowerBar(props) {
           </span>
         </div>
 
-        <JoustStage tier={props.tier} cond={props.cond} you={youPal} foe={foePal} action={joust} verdict={isDone ? (res.w ? "won" : "lost") : null} tierColor={tierColor} />
+        <JoustStage tier={props.tier} cond={props.cond} youKit={props.gear || null} foeKit={props.oppGear || null} you={youPal} foe={foePal} action={joust} verdict={isDone ? (res.w ? "won" : "lost") : null} tierColor={tierColor} />
 
         <div style={{ display: "flex", justifyContent: "space-around", alignItems: "flex-start", gap: 4, marginTop: 4, marginBottom: 6 }}>
           <Fighter isYou={true} name={youName} emoji={youEmoji} strikes={myH} other={opH} verdict={isDone ? (res.w ? "won" : "lost") : null} />
