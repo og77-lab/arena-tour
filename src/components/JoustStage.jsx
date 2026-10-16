@@ -87,8 +87,9 @@ export default function JoustStage(props) {
 
   return (
     <div ref={ref} style={{ position: "relative", height: H, margin: "2px -2px 0", overflow: "hidden", borderRadius: 10 }}>
-      <ArenaBackdrop W={W} groundTop={groundTop} tierColor={props.tierColor} cheerId={a ? a.id : 0}
-        cheer={impact ? (a.big ? "big" : "small") : (!a && v) ? "big" : null} />
+      {/* The crowd: cheers when you win the clash, groans when she does, parties when you win the match */}
+      <ArenaBackdrop W={W} groundTop={groundTop} tierColor={props.tierColor} tier={props.tier} cheerId={a ? a.id : 0}
+        cheer={phase === "finale" ? (a.youWon ? "party" : "groan") : impact ? (a.youWon ? (a.big ? "big" : "cheer") : "groan") : (!a && v === "won") ? "party" : null} />
       <Bunting color={props.tierColor || "#f59e0b"} />
       <div aria-hidden style={{ position: "absolute", left: 0, right: 0, top: groundTop, height: GROUND, background: "linear-gradient(180deg,#c8a46b,#a57c45)", borderTop: "2px solid #8b6435" }} />
       <div aria-hidden style={{ position: "absolute", left: 0, right: 0, top: groundTop + 5, height: 2, background: "repeating-linear-gradient(90deg,rgba(63,42,29,0.25) 0 6px,transparent 6px 18px)" }} />

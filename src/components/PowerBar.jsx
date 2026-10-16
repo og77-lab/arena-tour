@@ -418,7 +418,7 @@ export default function PowerBar(props) {
           you={{ name: youName, emoji: youEmoji, sub: props.youSub, palette: youPal }}
           foe={{ name: oppName, emoji: oppEmoji, sub: props.foeSub, palette: foePal }}
           roundLabel={props.roundLabel} tierName={props.tierName} tierColor={tierColor}
-          bestOf={bestOf} resumeSet={sets.length > 0 || myH.length > 0 ? setNum : null} scout={props.scout} coach={props.coach}
+          bestOf={bestOf} resumeSet={sets.length > 0 || myH.length > 0 ? setNum : null} scout={props.scout} coach={props.coach} isFinal={!!props.isFinal} road={props.road} oppId={props.oppId} oppRank={props.oppRank}
           skipSignal={skip}
           onDone={function () { setPh(sets.length > 0 && myH.length === 0 ? "setintro" : "go"); if (sets.length > 0 && myH.length === 0) setTimeout(function () { setPh("go"); }, 1100); }} />
       )}
@@ -459,7 +459,7 @@ export default function PowerBar(props) {
           </span>
         </div>
 
-        <JoustStage you={youPal} foe={foePal} action={joust} verdict={isDone ? (res.w ? "won" : "lost") : null} tierColor={tierColor} />
+        <JoustStage tier={props.tier} you={youPal} foe={foePal} action={joust} verdict={isDone ? (res.w ? "won" : "lost") : null} tierColor={tierColor} />
 
         <div style={{ display: "flex", justifyContent: "space-around", alignItems: "flex-start", gap: 4, marginTop: 4, marginBottom: 6 }}>
           <Fighter isYou={true} name={youName} emoji={youEmoji} strikes={myH} other={opH} verdict={isDone ? (res.w ? "won" : "lost") : null} />

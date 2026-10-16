@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { playWhoosh, playImpact, playBeep, playFight, playFightVoice, preloadFightVoice } from "../sounds";
 import { Sparks, vibrate, REDUCED_MOTION } from "./fx";
 import { Rider, Face } from "./Rider";
+import FinalReveal from "./FinalReveal";
 
 const { useState, useEffect, useRef } = React;
 
@@ -120,12 +121,15 @@ export default function MatchIntro(props) {
     later(startCount, 1500);
   }
   useEffect(function () {
-    if (!props.scout) startCinematic();
+    if (!props.scout) startShow();
     return clearAll;
   }, []);
 
+  /* A final gets its own build-up first (trophy, your road, the opponent revealed), then the usual VS and countdown */
+  function startShow() { clearAll(); if (props.isFinal && !props.resumeSet) setStage("final"); else startCinematic(); }
+
   /* Only the scouting report waits for the player */
-  function advance() { if (stage === "scout") startCinematic(); }
+  function advance() { if (stage === "scout") startShow(); }
 
   /* Parent bumps skipSignal on Space/Enter */
   var skipSeen = useRef(props.skipSignal);
@@ -164,18 +168,20 @@ export default function MatchIntro(props) {
               </div>
             )}
             <TaleOfTape scout={props.scout} you={props.you} foe={props.foe} />
-            <motion.button onClick={function (e) { e.stopPropagation(); startCinematic(); }} onPointerDown={function (e) { e.stopPropagation(); }}
+            <motion.button onClick={function (e) { e.stopPropagation(); startShow(); }} onPointerDown={function (e) { e.stopPropagation(); }}
               initial={{ y: 20, scale: 0.9 }} animate={{ y: 0, scale: 1 }} transition={{ delay: 0.15, type: "spring", stiffness: 380, damping: 18 }}
               style={{ flexShrink: 0, background: "linear-gradient(180deg,#f87171,#dc2626)", color: "#fff", border: "2px solid #450a0a", boxShadow: "0 5px 0 #450a0a", borderRadius: 14, padding: "13px 30px", fontWeight: 900, fontSize: 18, letterSpacing: 2, cursor: "pointer", fontFamily: "inherit", animation: REDUCED_MOTION ? "none" : "pulse 1.3s ease infinite 0.6s" }}>
-              ⚔️ TO THE LANES!
+              {props.isFinal ? "🏆 TO THE FINAL!" : "⚔️ TO THE LANES!"}
             </motion.button>
             <div style={{ fontSize: 11, color: "rgba(255,255,255,0.75)", fontWeight: 700, letterSpacing: 1.5, flexShrink: 0 }}>TAP THE BUTTON OR PRESS SPACE</div>
           </div>
         </div>
       )}
 
+      {stage === "final" && (<FinalReveal you={props.you} foe={props.foe} scout={props.scout} road={props.road} tierName={props.tierName} oppId={props.oppId} onDone={startCinematic} />)}
+
       {/* 2 · The cinematic, mounted fresh so every animation plays from the start */}
-      {stage !== "scout" && (
+      {stage !== "scout" && stage !== "final" && (
       <div style={{ position: "absolute", inset: 0, animation: REDUCED_MOTION ? "none" : "arenaShakeHard 0.45s ease 0.42s" }}>
         {/* Diagonal split halves */}
         <motion.div initial={{ x: "-100%" }} animate={{ x: 0 }} transition={{ type: "spring", stiffness: 200, damping: 26 }}

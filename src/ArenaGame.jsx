@@ -1086,7 +1086,7 @@ export default function Arena(props) {
 
         {pm && ts.alive && opp && (
           <div>
-            <PowerBar key={"t-"+ts.round} coach={tipOn("match")} scout={scoutT} onDone={onTR} oppSkill={opp.skill||50} diff={roundDiff(ts.tierIdx, ts.round)} tr={S.player.tr} otr={opp.tr||{}} playerName={S.pName} playerEmoji="⚔️" oppName={sh(opp.name)} oppEmoji={opp.emoji||"👤"} oppId={opp.id} oppRank={oppRank} fans={fansOf(S.player)} tierColor={tier.col} roundLabel={rNames[ts.round]}
+            <PowerBar key={"t-"+ts.round} tier={ts.tierIdx} road={ts.log.filter(function(m){ return m.won; }).map(function(m){ return { name: sh(m.opp), id: m.oppId, round: m.round }; })} coach={tipOn("match")} scout={scoutT} onDone={onTR} oppSkill={opp.skill||50} diff={roundDiff(ts.tierIdx, ts.round)} tr={S.player.tr} otr={opp.tr||{}} playerName={S.pName} playerEmoji="⚔️" oppName={sh(opp.name)} oppEmoji={opp.emoji||"👤"} oppId={opp.id} oppRank={oppRank} fans={fansOf(S.player)} tierColor={tier.col} roundLabel={rNames[ts.round]}
               tierName={tier.name} youSub={"World #"+pRank} foeSub={"World #"+oppRank+" · "+talentLabel(opp.skill)}
               isFinal={ts.round >= tier.rounds-1} nextLabel={ts.round < tier.rounds-1 ? rNames[ts.round+1] : null} eliminated={true}
               stakes={{ pts: tier.pts[ts.round], money: (tier.money||[])[ts.round]||0 }}
@@ -1133,7 +1133,7 @@ export default function Arena(props) {
           <MatchHeader tierName={"Season " + S.sNum + " Finals"} tierColor="#a855f7" roundLabel={fs.phase==="final"?"World Final":fs.phase==="semis"?"Semifinal":"Group Stage"}
             bestOf={FINALS_BO} rounds={["Group Stage","Semifinal","World Final"]} roundIdx={fs.phase==="final"?2:fs.phase==="semis"?1:0}
             onScout={function(){ setShowScout(true); }} onHelp={function(){ setHelp(true); }} />
-          <PowerBar key={"f-"+fs.phase+"-"+fopp.id} scout={scoutF} onDone={onFR} oppSkill={fopp.skill||60} diff={fs.phase==="final"?5:fs.phase==="semis"?4:3} tr={S.player.tr} otr={fopp.tr||{}} playerName={S.pName} playerEmoji="⚔️" oppName={sh(fopp.name)} oppEmoji={fopp.emoji||"👤"} oppId={fopp.id} oppRank={fRank} fans={fansOf(S.player)} tierColor={fs.phase==="final"?"#b45309":"#8b5cf6"} roundLabel={fs.phase==="final"?"World Final":fs.phase==="semis"?"Semifinal":"Group Stage"}
+          <PowerBar key={"f-"+fs.phase+"-"+fopp.id} tier={6} road={(fs.log||[]).filter(function(m){ return m.won; }).map(function(m){ return { name: sh(m.opp), round: m.phase === "groups" ? "Groups" : "Semifinal" }; })} scout={scoutF} onDone={onFR} oppSkill={fopp.skill||60} diff={fs.phase==="final"?5:fs.phase==="semis"?4:3} tr={S.player.tr} otr={fopp.tr||{}} playerName={S.pName} playerEmoji="⚔️" oppName={sh(fopp.name)} oppEmoji={fopp.emoji||"👤"} oppId={fopp.id} oppRank={fRank} fans={fansOf(S.player)} tierColor={fs.phase==="final"?"#b45309":"#8b5cf6"} roundLabel={fs.phase==="final"?"World Final":fs.phase==="semis"?"Semifinal":"Group Stage"}
           tierName={"Season "+S.sNum+" Finals"} youSub={"World #"+pRank} foeSub={talentLabel(fopp.skill)}
           isFinal={fs.phase==="final"} nextLabel={fs.phase==="semis"?"World Final":null} eliminated={fs.phase!=="groups"}
           bestOf={FINALS_BO} initialProgress={fs.match}
