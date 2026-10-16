@@ -28,10 +28,10 @@ export default function HelpScreen(props) {
               <span style={{ color: "#b45309", fontWeight: 700 }}>GOLD ZONE</span>
             </div>
             {[
-              { zone: "🎯 Gold zone (center)", score: "88 — 100", col: "#22c55e", desc: "Perfect timing!" },
-              { zone: "Near miss (just outside)", score: "65 — 77", col: "#eab308", desc: "Decent, can still win" },
-              { zone: "Medium miss", score: "55 — 67", col: "#f59e0b", desc: "Risky against good NPCs" },
-              { zone: "Far miss", score: "25 — 50", col: "#ef4444", desc: "Almost certainly loses" }
+              { zone: "🎯 Centre line", score: "100", col: "#16a34a", desc: "Perfect!" },
+              { zone: "Gold zone, towards its edge", score: "99 — 85", col: "#22c55e", desc: "The closer, the more" },
+              { zone: "Just outside the gold", score: "70", col: "#eab308", desc: "A sharp drop" },
+              { zone: "Further out", score: "70 → floor", col: "#ef4444", desc: "Falls as you stray" }
             ].map(function(r, i) {
               return (
                 <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "3px 0", borderBottom: i < 3 ? "1px solid #f8fafc" : "none" }}>
@@ -43,6 +43,9 @@ export default function HelpScreen(props) {
             })}
           </div>
           <div style={{ fontSize: 14, color: "#475569", lineHeight: 1.5 }}>
+            <b style={{color:"#0f172a"}}>Your opponent strikes on the same bar</b>, scored the same way — her red ▲ shows where she landed. The more talented she is, the closer to the centre she tends to hit; Aim adds points on top of your score, Stubbornness raises your lowest possible score.
+          </div>
+          <div style={{ fontSize: 14, color: "#475569", lineHeight: 1.5, marginTop: 6 }}>
             Matches are played in <b style={{color:"#0f172a"}}>sets</b>. Each set is <b style={{color:"#0f172a"}}>3 strikes</b> — the <b style={{color:"#22c55e"}}>higher average takes the set</b>, so one bad strike can still be rescued.
           </div>
           <div style={{ fontSize: 14, color: "#475569", lineHeight: 1.5, marginTop: 6 }}>

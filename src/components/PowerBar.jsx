@@ -20,7 +20,7 @@ function orbColor(v) { return v >= 85 ? "#22c55e" : v >= 70 ? "#eab308" : v >= 5
 /* Lighter variants for text on the dark reveal overlay */
 function orbColorOnDark(v) { return v >= 85 ? "#4ade80" : v >= 70 ? "#facc15" : v >= 55 ? "#fb923c" : "#f87171"; }
 var INK_GOLD = "#92400e", INK_RED = "#b91c1c";
-function strikeLabel(v) { return v >= 85 ? "PERFECT!" : v >= 75 ? "GREAT" : v >= 60 ? "GOOD" : "MISS"; }
+function strikeLabel(v) { return v >= 96 ? "PERFECT!" : v >= 85 ? "GOLD!" : v >= 66 ? "CLOSE" : "MISS"; }
 function avg(a) { var s = 0; for (var i = 0; i < a.length; i++) s += a[i]; return a.length ? s / a.length : 0; }
 function countWon(sets) { var n = 0; for (var i = 0; i < sets.length; i++) if (sets[i].won) n++; return n; }
 
@@ -200,6 +200,15 @@ export default function PowerBar(props) {
   var youPal = PLAYER_PALETTE;
   var foePal = paletteFor(props.oppId, props.oppRank);
 
+  /* Scoring, the same for both riders: where the lance lands on the bar decides the score.
+     Inside the gold zone: 100 on the centre line, sliding to 85 at the zone's edge.
+     Just outside it drops sharply to 70, and keeps falling the further out you are, down to the floor. */
+  function strikeScore(d, half, floor) {
+    var s = d <= half ? 100 - 15 * (d / half) : Math.max(floor, 70 - (d - half) * 2.2);
+    return s + (Math.random() * 2 - 1);
+  }
+  function gauss() { var u = 0, v = 0; while (!u) u = Math.random(); while (!v) v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+
   /* Cursor is driven straight on the DOM node so the arena doesn't re-render 60×/s.
      Speed is normalised to 60fps units so 120Hz screens don't get a faster bar. */
   useEffect(function () {
@@ -225,12 +234,15 @@ export default function PowerBar(props) {
     if (raf.current) cancelAnimationFrame(raf.current);
     var pos = posRef.current;
     var d = Math.abs(pos - ctr), inZ = d <= sw / 2;
-    var sc = Math.min(100, (inZ ? 85 + Math.random() * 12 : Math.max(minSc, 60 - d * 1.2 + Math.random() * 10)) + fb);
-    /* Her training already works against you through the stat gaps above (bar speed, gold zone, aim, floor).
-       It used to be added to her score a second time as well, so training evenly with the field made you weaker. */
-    var effSkill = props.oppSkill||50;
-    var oBase = Math.min(95, 55 + effSkill * 0.4);
-    var osc = Math.min(99, oBase + (Math.random() * 14 - 5));
+    var sc = Math.max(0, Math.min(100, strikeScore(d, sw / 2, minSc) + fb));
+    /* Her strike lands on the same bar. Talent sets how tightly she groups around the centre; the round's speed
+       (and how far into the match it is) spreads her out just as it does you. Her training already works against
+       you through the stat gaps above, so her own zone and floor are the plain ones for this round. */
+    var oSw = Math.max(3, 13 - props.diff * 1.5);
+    var oSpd = 2.4 + props.diff * 0.4 + sets.length * 0.18 + myH.length * 0.3;
+    var oSigma = Math.max(1.5, 9.5 - (props.oppSkill || 50) * 0.075) * oSpd / 2.4;
+    var oPos = Math.max(0, Math.min(100, ctr + gauss() * oSigma));
+    var osc = Math.max(0, Math.min(100, strikeScore(Math.abs(oPos - ctr), oSw / 2, 15)));
     var youWon = sc >= osc;
     var id = Date.now() + Math.random();
     var nm = myH.concat([sc]), no = opH.concat([osc]);
@@ -256,7 +268,7 @@ export default function PowerBar(props) {
     function joustPhase(phase) { setJoust(function (j) { return j && j.id === id ? Object.assign({}, j, { phase: phase }) : j; }); }
 
     setPh("hitstop");
-    setMarks(marks.concat([{ pos: pos, sc: sc }]));
+    setMarks(marks.concat([{ pos: pos, sc: sc, opos: oPos }]));
     setReveal({ id: id, you: Math.round(sc), opp: Math.round(osc), youWon: youWon, label: strikeLabel(sc), set: setNum, strike: nm.length, stamped: false });
     setJoust({ id: id, phase: "charge", youWon: joustWon, big: big, word: word });
     playStrike(sc);
@@ -483,7 +495,11 @@ export default function PowerBar(props) {
           {/* Where this set's strikes landed — timing feedback */}
           {marks.map(function (m, i) {
             var isLast = i === marks.length - 1;
-            return (<div key={i} style={{ position: "absolute", top: 6, bottom: 6, width: 4, left: "calc(" + m.pos + "% - 2px)", background: orbColor(m.sc), borderRadius: 2, opacity: isLast ? 0.95 : 0.5, border: "1px solid rgba(255,255,255,0.7)" }} />);
+            /* Yours: a full-height tick in your score's colour. Hers: a red notch along the bottom edge */
+            return (<React.Fragment key={i}>
+              <div style={{ position: "absolute", top: 6, bottom: 6, width: 4, left: "calc(" + m.pos + "% - 2px)", background: orbColor(m.sc), borderRadius: 2, opacity: isLast ? 0.95 : 0.5, border: "1px solid rgba(255,255,255,0.7)" }} />
+              {m.opos != null && (<div title="Her strike" style={{ position: "absolute", bottom: 1, width: 0, height: 0, left: "calc(" + m.opos + "% - 5px)", borderLeft: "5px solid transparent", borderRight: "5px solid transparent", borderBottom: "9px solid #ef4444", opacity: isLast ? 1 : 0.45, filter: "drop-shadow(0 0 2px rgba(0,0,0,0.6))" }} />)}
+            </React.Fragment>);
           })}
           {ph === "hitstop" && lastMark && !REDUCED_MOTION && (
             <div key={"burst-" + marks.length} aria-hidden style={{ position: "absolute", top: "50%", left: lastMark.pos + "%", width: 44, height: 44, marginLeft: -22, marginTop: -22, borderRadius: "50%", background: "radial-gradient(circle," + orbColor(lastMark.sc) + ",transparent 70%)", animation: "flashBoom 0.45s ease-out forwards", pointerEvents: "none" }} />
