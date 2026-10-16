@@ -81,6 +81,21 @@ function noise(opts) {
   } catch (e) {}
 }
 
+/* The announcer's shout on FIGHT! — a recorded clip, loaded ahead of time so it lands exactly on the title */
+var FIGHT_VOICE = "/sfx/fight.mp3";
+var fightVoice = null;
+export function preloadFightVoice() {
+  if (fightVoice || typeof Audio === "undefined") return;
+  fightVoice = new Audio(FIGHT_VOICE); fightVoice.preload = "auto"; fightVoice.volume = 1;
+  try { fightVoice.load(); } catch (e) {}
+}
+export function playFightVoice() {
+  if (muted) return;
+  preloadFightVoice();
+  if (!fightVoice) return;
+  try { fightVoice.currentTime = 0; var p = fightVoice.play(); if (p && p.catch) p.catch(function () {}); } catch (e) {}
+}
+
 export function playWhoosh() {
   noise({ filter: "bandpass", freq: 300, freqEnd: 3200, duration: 0.4, volume: 0.22, q: 0.8, attack: 0.15 });
 }

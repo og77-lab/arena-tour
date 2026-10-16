@@ -4,7 +4,7 @@
 import * as React from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { playWhoosh, playImpact, playBeep, playFight } from "../sounds";
+import { playWhoosh, playImpact, playBeep, playFight, playFightVoice, preloadFightVoice } from "../sounds";
 import { Sparks, vibrate, REDUCED_MOTION } from "./fx";
 import { Rider, Face } from "./Rider";
 
@@ -92,6 +92,8 @@ function TaleOfTape(props) {
 
 export default function MatchIntro(props) {
   var _stage = useState(props.scout ? "scout" : "slam"), stage = _stage[0], setStage = _stage[1];
+  /* Warm up the announcer clip while the scouting report is on screen */
+  useEffect(function () { preloadFightVoice(); }, []);
   var _n = useState(3), n = _n[0], setN = _n[1];
   var timers = useRef([]);
   var doneRef = useRef(props.onDone);
@@ -105,7 +107,7 @@ export default function MatchIntro(props) {
     setStage("count"); setN(3); playBeep();
     later(function () { setN(2); playBeep(); }, 520);
     later(function () { setN(1); playBeep(); }, 1040);
-    later(function () { setN(0); playFight(); vibrate([30, 40, 60]); }, 1560);
+    later(function () { setN(0); playFight(); playFightVoice(); vibrate([30, 40, 60]); }, 1560);
     later(function () { setStage("out"); }, 2080);
     later(function () { doneRef.current(); }, 2330);
   }
@@ -113,7 +115,7 @@ export default function MatchIntro(props) {
   /* The cinematic: riders charge in, the VS slams, and the countdown follows straight on — nothing to tap, nothing in the way */
   function startCinematic() {
     clearAll();
-    setStage("slam"); playWhoosh();
+    setStage("slam"); playWhoosh(); preloadFightVoice();
     later(function () { playImpact(true); vibrate(35); }, 420);
     later(startCount, 1500);
   }
