@@ -32,7 +32,11 @@ export function performanceDelta(log, title, isGS, fans) {
 
 /* ── What fans buy you ── */
 export function sponsorTP(f) { return Math.floor(f / 10); }
-export function hasTierWildcard(f) { return f >= 70; }
-export function hasSlamWildcard(f) { return f >= 80; }
+/* Wildcards are earned on the ranking first: only a rider just outside the cut (within 15% of it) can be let in,
+   and only if the crowd is loudly behind her. cut = the worst rank that gets in on merit */
+export var TIER_WILD_FANS = 70, SLAM_WILD_FANS = 80, SLAM_CUT = 64;
+export function wildcardReach(cut) { return Math.round(cut * 1.15); }
+export function hasTierWildcard(f, rank, cut) { return f >= TIER_WILD_FANS && rank > cut && rank <= wildcardReach(cut); }
+export function hasSlamWildcard(f, rank) { return f >= SLAM_WILD_FANS && rank > SLAM_CUT && rank <= wildcardReach(SLAM_CUT); }
 /* Extra gold-zone width on a deciding strike */
 export function crowdRoar(f) { return f >= 85 ? 2 : f >= 60 ? 1 : 0; }

@@ -273,11 +273,11 @@ export default function PowerBar(props) {
     /* How the score was built, shown under it: where it landed + Extra Points + gear − tiredness */
     var aimShown = Math.round(fb), gearShown = Math.round(gearPts), tiredShown = Math.round(tiredPts), capped = base + fb + gearPts + tiredPts > 100;
     var why = { kind: inZ ? "Gold" : base <= minSc + 1.01 ? "Floor" : "Outside", aim: aimShown, gear: gearShown, tired: tiredShown, capped: capped, base: capped ? Math.round(base) : Math.round(sc) - aimShown - gearShown - tiredShown };
-    /* Her strike lands on the same bar. Talent sets how tightly she groups around the centre; the round's speed
-       (and how far into the match it is) spreads her out just as it does you. Her training already works against
-       you through the stat gaps above, so her own zone and floor are the plain ones for this round. */
-    var oSw = softZone(13 - props.diff * 1.5 + COND.zone + OFT.zone + OKIT.zone) + CROWD.her * (onTheLine ? 2 : 1);
-    var oSpd = ((2.4 + props.diff * 0.4) * COND.speed * OKIT.speed + (sets.length * 0.18 + myH.length * 0.3) * COND.accel * OFT.accel * OKIT.accel) * OFT.speed;
+    /* Her strike lands on the same bar. Talent sets how tightly she groups around the centre, so the riders you meet
+       deep in a big tournament are the steadiest. The round's faster bar is your challenge, not a handicap for her:
+       she only feels a little of the match speeding up (an odd slip late on), plus the lanes, her gear and her tiredness. */
+    var oSw = softZone(13 - (props.tier || 0) * 0.4 + COND.zone + OFT.zone + OKIT.zone) + CROWD.her * (onTheLine ? 2 : 1);
+    var oSpd = (2.4 * COND.speed * OKIT.speed + (sets.length * 0.18 + myH.length * 0.3) * 0.35 * COND.accel * OFT.accel * OKIT.accel) * OFT.speed;
     var oSigma = Math.max(1.5, 9.5 - (props.oppSkill || 50) * 0.075) * oSpd / 2.4;
     var oPos = Math.max(0, Math.min(100, ctr + gauss() * oSigma));
     var oD = Math.abs(oPos - ctr), oIn = oD <= oSw / 2, osc = Math.round(Math.max(0, Math.min(100, strikeScore(oD, oSw / 2, 15 + OKIT.floor) + (oIn ? 0 : OFT.miss) + OKIT.aim + (oIn ? OKIT.gold : OKIT.miss))));

@@ -109,7 +109,7 @@ export default function HelpScreen(props) {
           <div style={{ fontSize: 14, color: "#475569", lineHeight: 1.5 }}>
             Fans (0–100) love wins — especially clean sweeps, comebacks, upsets and titles — and slowly forget you if you go quiet. After every tournament the press asks you a question: <b style={{color:"#0f172a"}}>how the crowd takes your answer depends on who's asking and how your week went</b>, so read the room. Big promises get checked the following week.
           </div>
-          <div style={{ fontSize: 13, color: "#475569", marginTop: 4, lineHeight: 1.5 }}>Fans pay off: sponsors add training points every week, 70+ earns a wildcard into the tier above, 80+ a Grand Slam wildcard, and with the match on the line a loud crowd widens your gold zone.</div>
+          <div style={{ fontSize: 13, color: "#475569", marginTop: 4, lineHeight: 1.5 }}>Fans pay off: sponsors add training points every week, 70+ fans can earn a wildcard into the tier above if your rank is just outside its cut (80+ for a Slam, ranked 65–74), and with the match on the line a loud crowd widens your gold zone.</div>
         </div>
 
         <div>

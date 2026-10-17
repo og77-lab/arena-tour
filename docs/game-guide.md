@@ -29,7 +29,7 @@ A season is **20 events** in four blocks. Each block is four weekly tournaments 
 
 **Ranking points and defending.** Your world rank is your *season points*. Points carry over into the next season, but the points you won at a given week last season **drop off** when that week comes round again. You "defend" them: win more than last time and you climb, less and you slip. The Season tab shows what you're defending, in red.
 
-**Grand Slams.** Only the **top 64** may enter, or anyone with **80+ fans** (a fan wildcard). If you can't enter, you sit the week out. Slams have 64 riders, best of 5 sets, and enormous points.
+**Grand Slams.** Only the **top 64** may enter. A rider ranked 65–74 with **80+ fans** gets a fan wildcard. If you can't enter, you sit the week out. Slams have 64 riders, best of 5 sets, and enormous points.
 
 **Season Finals.** The top 16 after event 20 are split into four houses of four (🔥 Phoenix, 🌊 Kraken, 🐉 Wyvern, ⚡ Chimera). Everyone plays everyone in her house (3 points a win); the four house winners meet in the semifinals and then the World Final. Every Finals match is best of 5, and every one tires you (and her). If you don't qualify, the Finals are played without you and a world champion is crowned all the same.
 
@@ -68,7 +68,7 @@ Each week several tournaments run at once in every tier, and all 1,000 riders pl
 Grand Slam weeks have a single named Slam (The Coop Open, The Swamp Slam, Wimbledon-on-Wold, The Gale Cup), each with its own lanes.
 
 **Getting into a higher tier early**
-- **Fan wildcard:** with 70+ fans the tier above your normal range opens for free.
+- **Fan wildcard:** if you're ranked just outside the tier above (within 15% of its cut) and have 70+ fans, it opens for free.
 - **Paid entry:** at the bottom of the tournament list you can buy your way into the tier above for this week only (it uses this week's investment).
 
 During a tournament the header shows the tier, the round, best-of and the bracket path. **Scout** opens the opponent's full report; 🌐 opens the bracket.
@@ -246,7 +246,7 @@ Your **fans** (❤️, 0–100, starting at 20) are how much the crowd loves you
 
 **Why fans matter**
 - **Sponsors:** one training point every week for each 10 fans.
-- **Wildcards:** 70+ opens the tier above your rank; 80+ gets you into the Grand Slams.
+- **Wildcards (only if you are nearly in):** 70+ fans and a rank within 15% of the tier above's cut (Tour 500: 201–230, Masters: 101–115); for a Slam, 80+ fans and rank 65–74.
 - **The stands:** the crowd backs whichever rider it loves more — a slightly wider gold zone for the favourite (up to +1.5% of the bar), doubled on match-point strikes. Your rivals have crowds too; the tale of the tape shows both (📣 The stands).
 
 **What moves them**

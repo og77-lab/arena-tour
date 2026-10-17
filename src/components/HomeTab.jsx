@@ -53,7 +53,7 @@ export default function HomeTab(props) {
   var def = ev && S.player.def ? (S.player.def[S.calIdx] || 0) : 0;
   var isGS = ev && ev.type === "gs";
   var fans = S.player.fans != null ? S.player.fans : 20;
-  var gsWild = isGS && pRank > 64 && fans >= 80;
+  var gsWild = isGS && pRank > 64 && pRank <= 74 && fans >= 80;
   var gsOk = isGS && (pRank <= 64 || gsWild);
   var heroColor = seasonDone ? "#a855f7" : isGS ? C.gold : "#0ea5e9";
 

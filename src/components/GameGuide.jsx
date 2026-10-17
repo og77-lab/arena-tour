@@ -8,6 +8,7 @@ import { C, FONT, display, label, card } from "../ui/theme";
 import { Rider, PLAYER_PALETTE, paletteFor } from "./Rider";
 import { effectsOf, EffectList, Legend, statEffect } from "./Effect";
 import { CompareLanes } from "./Lanes";
+import FanRules from "./FanRules";
 import { CONDITIONS, FIELDS } from "../engine/events";
 import { GEAR } from "../engine/gear";
 import { fatigueFx } from "../engine/fitness";
@@ -124,7 +125,7 @@ function body(id) {
       <H>Ranking points and defending</H>
       <P>Your world rank is your <B>season points</B>. Points carry over into the next season, but the points you won at a given week last season <B>drop off</B> when that week comes round again. You "defend" them: win more than last time and you climb, less and you slip. The Season tab shows what you're defending, in red.</P>
       <H>Grand Slams</H>
-      <P>Only the <B>top 64</B> may enter a Slam, or anyone with <B>80+ fans</B> (a fan wildcard). If you can't enter, you sit the week out. Slams are 64 riders, best of 5 sets, and worth enormous points.</P>
+      <P>Only the <B>top 64</B> may enter a Slam. A rider ranked 65–74 with <B>80+ fans</B> gets a fan wildcard. If you can't enter, you sit the week out. Slams are 64 riders, best of 5 sets, and worth enormous points.</P>
       <H>Season Finals</H>
       <P>The top 16 after event 20 are split into four houses of four (🔥 Phoenix, 🌊 Kraken, 🐉 Wyvern, ⚡ Chimera). Everyone plays everyone in her house (3 points a win); the four house winners meet in the semifinals and then the World Final. Every Finals match is best of 5, and every one tires you (and her). If you don't qualify, the Finals are played without you and a world champion is crowned all the same.</P>
     </>);
@@ -153,7 +154,7 @@ function body(id) {
       <P>Grand Slam weeks have a single named Slam (The Coop Open, The Swamp Slam, Wimbledon-on-Wold, The Gale Cup), each with its own lanes.</P>
       <H>Getting into a higher tier early</H>
       <List items={[
-        <span key="a"><B>Fan wildcard:</B> with 70+ fans the tier above your normal range opens for free.</span>,
+        <span key="a"><B>Fan wildcard:</B> if you're ranked just outside the tier above (within 15% of its cut) and have 70+ fans, it opens for free.</span>,
         <span key="b"><B>Paid entry:</B> at the bottom of the tournament list you can buy your way into the tier above for this week only (it uses this week's investment).</span>
       ]} />
       <P>During a tournament, the header shows the tier, the round, best-of and the bracket path. <B>Scout</B> opens the opponent's full report; 🌐 opens the bracket.</P>
@@ -280,21 +281,7 @@ function body(id) {
 
     case "fans": return (<>
       <P>Your <B>fans</B> (❤️, 0–100, starting at 20) are how much the crowd loves you.</P>
-      <H>What moves them</H>
-      <List items={[
-        <span key="a"><B>Riding:</B> each win +1, a comeback (after losing the first set) +2, a real upset (beating someone ranked well above you) +2, each loss −1. At most +6 a week from riding, plus a title bonus (+4, +10 for a Slam). The closer you are to 100, the harder each point comes.</span>,
-        <span key="b"><B>Interviews:</B> after every tournament the press asks a question (see below).</span>,
-        <span key="c"><B>Promises:</B> a bold answer is a promise for the next tournament — reach the semifinals or better and it's +6; fall short and it's −5.</span>,
-        <span key="d"><B>Revenge:</B> beating your rival +3.</span>,
-        <span key="e"><B>Drift:</B> each week fans drift a little towards a baseline set by your fame — 30 for most, up to 60 in the top 10 — raised by your Knitter followers (1K +3, 10K +6, 100K +9).</span>
-      ]} />
-      <H>What they buy you</H>
-      <Table head={["Fans", "Perk"]} rows={[
-        ["Any", "Sponsor TP every week (one per 10 fans)"],
-        ["70+", "Wildcard into the tier above"],
-        ["80+", "Wildcard into the Grand Slams"],
-        ["More than her", "The stands back you: up to +1.5% gold zone, doubled on match-point strikes (and the same for her if the crowd loves her more)"]
-      ]} />
+      <FanRules />
       <H>🧶 Knitter</H>
       <P>The granny social network (posts are <i>knits</i>). Everyone has followers; yours grow with wins, titles, liked interviews and viral moments, faster the more famous you are. They lift the level your fans settle at, and the paper prints the week's best knits.</P>
       <H>The press conference</H>

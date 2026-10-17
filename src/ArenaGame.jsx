@@ -304,7 +304,7 @@ export default function Arena(props) {
     var ev = S.cal[S.calIdx];
     if (!ev) return;
     if (ev.type === "gs") {
-      if (pRankOf(S) <= 64 || hasSlamWildcard(fansOf(S.player))) {
+      if (pRankOf(S) <= 64 || hasSlamWildcard(fansOf(S.player), pRankOf(S))) {
         setPrep({ tier: 5, ev: weekEvents(S).filter(function(x){ return x.tier === 5; })[0] || null });
       } else {
         var cal = S.cal.slice();
@@ -339,9 +339,9 @@ export default function Arena(props) {
       else if (rank > 100) avail.push(3);
       else avail.push(4);
     }
-    /* Crowd favourites get a wildcard into the tier above */
+    /* A crowd favourite just outside the cut of the tier above gets a wildcard into it */
     var top = Math.max.apply(null, avail);
-    if (hasTierWildcard(fansOf(S.player)) && top < 4) avail.push(top + 1);
+    if (top < 4 && hasTierWildcard(fansOf(S.player), rank, TIERS[top + 1].rankRange[1])) avail.push(top + 1);
     if (earnedOnly) return avail;
     /* …or a paid entry bought with this week's investment */
     var paid = paidEntryTier(S);
@@ -349,8 +349,8 @@ export default function Arena(props) {
     return avail;
   }
   function wildcardTier(S) {
-    if (!hasTierWildcard(fansOf(S.player))) return -1;
-    var a = availableTiers(S, true); return a[a.length - 1];
+    var a = availableTiers(S, true), t = a[a.length - 1], r = pRankOf(S);
+    return t > 0 && r > TIERS[t].rankRange[1] ? t : -1;
   }
 
   /* ─── Bracket logic ─── */
@@ -1047,7 +1047,7 @@ export default function Arena(props) {
           {hubTab === "season" && (
             <div>
               <SeasonTab S={S} pRank={pRank} curEvent={curEvent} seasonDone={seasonDone} avail={seasonDone ? [] : availableTiers(S)} wildcard={wildcardTier(S)}
-                gsOk={pRank <= 64 || hasSlamWildcard(fansOf(S.player))} onPlay={playCurrent} onFinals={startFinals} onNextSeason={openGala} />
+                gsOk={pRank <= 64 || hasSlamWildcard(fansOf(S.player), pRank)} onPlay={playCurrent} onFinals={startFinals} onNextSeason={openGala} />
               <div style={Object.assign(label(C.textSoft), {margin:"14px 2px 6px"})}>Career results</div>
               <div style={card({padding:6})}>
                 {(S.tHist||[]).length===0?(<div style={{color:C.textMuted,fontSize:13,padding:6}}>No events yet.</div>):

@@ -4,6 +4,8 @@ import { fitOf, fatigueFx, fitColor, fitWord, recoveryOf, injuryText, INJURY_LIN
 import { effectsOf, EffectList } from "./Effect";
 import { C, FONT, label, card } from "../ui/theme";
 import { fanChain } from "../engine/social";
+import { useState } from "react";
+import FanRules from "./FanRules";
 
 function Meter(props) {
   var v = props.v, col = fitColor(v);
@@ -62,14 +64,13 @@ export function FanChain(props) {
       <div style={row}><span>🧶</span><span><b>{k(c.fol)} followers</b> → your fans drift back toward <b>{c.settle}</b> each week{c.lift ? (<span> ({c.base} for your rank <b style={{ color: C.greenInk }}>+{c.lift}</b> from followers)</span>) : (<span> (followers add +0 until 1K)</span>)}</span></div>
       <div style={row}>{arrow}<span><b>❤️ {c.fans} fans</b> → <b style={{ color: C.greenInk }}>+{c.tp} training pts</b> a week from sponsors</span></div>
       <div style={row}>{arrow}<span>In the stands vs a typical rival (❤️ {c.typLove}): {e > 0.05 ? (<b style={{ color: C.greenInk }}>your gold zone +{e.toFixed(1)}%</b>) : e < -0.05 ? (<b style={{ color: C.redInk }}>her gold zone +{(-e).toFixed(1)}%</b>) : (<b>even</b>)}{Math.abs(e) > 0.05 ? ", doubled on match point" : ""}</span></div>
-      <div style={row}>{arrow}<span>❤️ 70 opens the tier above · ❤️ 80 opens the Slams</span></div>
     </div>
   );
 }
 
 export function FansCard(props) {
   var p = props.player, fans = p.fans != null ? p.fans : 20, w = p.fansWeek, fol = p.followers != null ? p.followers : 120;
-  var d = w ? fans - w.before : 0;
+  var d = w ? fans - w.before : 0, rs = useState(false), open = rs[0];
   function k(n) { return n >= 1e6 ? (n / 1e6).toFixed(1) + "M" : n >= 1e4 ? Math.round(n / 1000) + "K" : n >= 1000 ? (n / 1000).toFixed(1) + "K" : String(n); }
   return (
     <div style={card({ padding: "10px 12px", fontFamily: FONT })}>
@@ -85,6 +86,8 @@ export function FansCard(props) {
         {w.parts.map(function (x, i) { return (<span key={i}>{i ? " · " : ""}{x[0]} <b style={{ color: x[1] > 0 ? C.greenInk : C.redInk }}>{x[1] > 0 ? "+" : ""}{x[1]}</b></span>); })}
       </div>)}
       <FanChain c={fanChain(p, props.rank)} k={k} />
+      <button onClick={function () { rs[1](!open); }} style={{ marginTop: 6, width: "100%", padding: "6px 8px", borderRadius: 8, border: "1.5px solid #fecdd3", background: open ? "#fff1f2" : "#fff", color: "#be123c", fontWeight: 900, fontSize: 12, fontFamily: FONT, cursor: "pointer" }}>📜 {open ? "Hide the fan rules" : "All the fan rules"}</button>
+      {open && (<div style={{ marginTop: 6 }}><FanRules /></div>)}
     </div>
   );
 }
