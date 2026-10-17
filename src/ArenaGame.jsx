@@ -8,7 +8,7 @@ import { W, CSS, EMO, TIERS, RN5, RN6, HN, HC, HI, TOTAL_EVENTS, FINALS_BO, STAT
 import { sh, bs, nW, pRankOf, getRanked, getARanked, trainCost, weeklyTP } from "./models/formulas";
 import { sSet, sGet, stamp, pickNewest, queueCloudSave, cancelCloudSave } from "./engine/persistence";
 import { pack, unpack } from "./engine/codec";
-import { followersOf, followersGain, followersLift, crowdLove, weekKnits, fmtFollowers } from "./engine/social";
+import { followersOf, followersGain, followersLift, crowdLove, weekKnits, fmtFollowers, fanChain } from "./engine/social";
 import { mkSeason } from "./engine/seasonManager";
 import PowerBar from "./components/PowerBar";
 import Profile from "./components/Profile";
@@ -717,6 +717,7 @@ export default function Arena(props) {
             if (k.who.handle) o2.handle = k.who.handle; if (k.photo) o2.photo = k.photo; if (k.reply) o2.reply = k.reply;
             return o2;
           });
+        var ch = fanChain(newP, curRank); issue.fanChain = { fol: ch.fol, lift: ch.lift, settle: ch.settle, fans: ch.fans, tp: ch.tp, edge: Math.round(ch.edge * 10) / 10 };
       } catch (e) { console.error("knits", e); }
       /* The feud column: your rival's week, and what happened if you met */
       var feudWho = rv.rival || rivalNow;

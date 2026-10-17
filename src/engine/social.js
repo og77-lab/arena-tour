@@ -53,10 +53,34 @@ export function handle(name) { var first = (name || "Granny").split(" ")[0].repl
    the paper never changes once printed, and the slots use different salts so pools are walked independently. */
 function mix(a, b) { var x = Math.imul((a >>> 0) ^ 0x9e3779b9, 2654435761) + Math.imul(b | 0, 40503); x ^= x >>> 15; x = Math.imul(x, 2246822519); x ^= x >>> 13; return x >>> 0; }
 function from(arr, seed) { return arr && arr.length ? arr[(seed >>> 0) % arr.length] : ""; }
-function dress(text, seed, vars) {
-  var t = fill(text, vars);
-  if (seed % 3 === 0) t += " " + from(HASHTAGS, seed >>> 4);
-  return t;
+/* Hashtags that fit the post: one for what kind of post it is, one made from the week's names, sometimes a classic */
+var TAGS = {
+  win: ["#Champion", "#TrophyGranny", "#GoldStandard", "#TeaAndTrophies", "#MantelpieceFull", "#UnbeatableNan", "#WattleOfVictory", "#BiscuitsOnMe"],
+  deep: ["#StillGotIt", "#NearlyThere", "#KneesHolding", "#OneMoreCharge", "#DeepRun", "#NotBadForEighty"],
+  loss: ["#NextWeek", "#BlameTheRooster", "#SunInMyEyes", "#ItWasRigged", "#CustardCreamCure", "#ChinUpCardiganOn", "#WeGoAgain"],
+  rest: ["#RestWeek", "#SlippersOn", "#FeetUp", "#RecoveryMode", "#BathAndBiscuits", "#DoNotDisturb"],
+  injury: ["#WalkingWounded", "#ColdCompress", "#HipHipHooray", "#PhysioIsMyBestFriend", "#BruisedNotBeaten", "#IceIceGranny"],
+  tired: ["#RunningOnTea", "#KnackeredNan", "#NapTime", "#EyesOpenBarely", "#OneMoreCuppa"],
+  rivalDig: ["#NoNamesNoPackDrill", "#ShadeAtTheFete", "#BlessHerHeart", "#SeeYouOnTheLanes", "#WatchThisSpace"],
+  champion: ["#Champion", "#BackToBack", "#QueenOfTheLanes", "#TrophyCabinet", "#StillUndefeated"],
+  random: ["#GrannyLife", "#JustSaying", "#VillageNews", "#BingoNight", "#KnitOrDie", "#TeaTime"],
+  rooster: ["#RoosterLife", "#FeatherGoals", "#CombOfTheDay", "#CornAppreciation", "#HeKnowsHesHandsome", "#WattleWednesday"],
+  selfie: ["#Selfie", "#NoFilterJustPowder", "#GoldenHour", "#FaceOfAChampion", "#SaySeed", "#ThatsMyGoodSide"]
+};
+function camel(s) { return String(s || "").replace(/[^A-Za-z0-9 ]/g, "").split(" ").filter(Boolean).map(function (w) { return w.charAt(0).toUpperCase() + w.slice(1); }).join(""); }
+function nameTag(cat, vars, seed) {
+  var t = camel(vars.tier), r = camel(vars.rooster), y = camel((vars.you || "").split(" ")[0]);
+  var opts = cat === "win" || cat === "champion" ? [t && "#" + t + "Champion", t && "#" + t] : cat === "loss" ? [t && "#" + t + "Survivor"] :
+    cat === "rooster" ? [r && "#" + r + "IsAVibe", r && "#Team" + r] : cat === "rivalDig" ? [y && "#" + y + "Watch"] : cat === "selfie" ? [r && "#MeAnd" + r] : [t && "#" + t];
+  opts = opts.filter(Boolean); return opts.length ? opts[seed % opts.length] : "";
+}
+function dress(text, seed, vars, cat) {
+  var t = fill(text, vars), tags = [];
+  if (seed % 4 !== 3) tags.push(from(TAGS[cat] || TAGS.random, seed >>> 5));
+  if ((seed >>> 3) % 2 === 0) { var nt = nameTag(cat, vars, seed >>> 7); if (nt) tags.push(nt); }
+  if ((seed >>> 9) % 5 === 0) tags.push(from(HASHTAGS, seed >>> 11));
+  tags = tags.filter(function (x, i) { return x && tags.indexOf(x) === i && t.indexOf(x) < 0; });
+  return tags.length ? t + " " + tags.join(" ") : t;
 }
 function photo(seed, cat, vars) {
   /* selfie posts always have one; others about half the time */
@@ -71,7 +95,7 @@ export function weekKnits(o) {
     var vars = Object.assign({}, V, { place: place });
     var ph = photo(sd, cat, vars);
     if (ph && cat !== "selfie") vars.place = ph.place;
-    var k = { who: who, text: dress(from(pool, sd), sd, vars), likes: Math.max(2, Math.round((who.followers || 100) * likesShare * (0.6 + (sd % 50) / 50))), photo: ph };
+    var k = { who: who, text: dress(from(pool, sd), sd, vars, cat), likes: Math.max(2, Math.round((who.followers || 100) * likesShare * (0.6 + (sd % 50) / 50))), photo: ph };
     if ((sd >>> 11) % 3 === 0 && replyFrom) k.reply = { name: replyFrom, text: from(REPLIES, sd >>> 13) };
     out.push(k);
   }
@@ -85,4 +109,11 @@ export function weekKnits(o) {
   var fan = from(KNITS.fanAccounts, mix(base, 5));
   if (fan) out.push({ who: { name: fan.name, handle: fan.handle, fan: true, followers: 800 + (mix(base, 6) % 9000) }, text: fill(fan.text, V), likes: 20 + (mix(base, 7) % 600), photo: null });
   return out;
+}
+
+/* The whole chain in numbers, for Home and the paper: followers → the level fans settle at → fans → what fans do */
+export function fanChain(player, rank) {
+  var r = Math.max(1, rank || 1000), fol = followersOf(Object.assign({}, player, { isP: true })), lift = followersLift(fol), base = fanBaseline(r), fans = fansOf(player);
+  var typFol = (200 + 420000 / Math.pow(r, 1.12)) * 1.1, typLove = Math.max(5, Math.min(95, base + followersLift(typFol)));
+  return { fol: fol, lift: lift, base: base, settle: base + lift, fans: fans, tp: Math.floor(fans / 10), typLove: typLove, edge: crowdEdge(fans, typLove).d };
 }

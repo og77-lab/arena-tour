@@ -115,7 +115,7 @@ export default function HomeTab(props) {
       </motion.div>
 
       <FitnessCard player={S.player} roosterName={S.player.roosterName} onTrain={props.onTrain} />
-      <FansCard player={S.player} />
+      <FansCard player={S.player} rank={props.pRank} />
 
       {/* Training nudge when points are waiting */}
       {(tr.tp || 0) >= 15 && (

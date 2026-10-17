@@ -4,6 +4,7 @@
 
 import { Rider } from "./Rider";
 import { FONT } from "../ui/theme";
+import { SceneArt } from "./SelfieScenes";
 
 /* Places: a backdrop and a few things that belong there. keys are matched against the post's place text */
 export var SCENES = [
@@ -40,12 +41,13 @@ export default function Selfie(props) {
   var r = rnd(props.seed || 1), sc = sceneFor(props.text, r), h = props.h || 132;
   var who = props.who || ["granny", "both", "rooster", "both", "granny"][Math.floor(r() * 5)];
   var hold = HOLD[Math.floor(r() * HOLD.length)], sticker = STICKERS[Math.floor(r() * STICKERS.length)], filter = FILTERS[Math.floor(r() * FILTERS.length)];
-  var tilt = (r() * 8 - 4).toFixed(1), flip = r() < 0.5, d1 = sc.deco[Math.floor(r() * sc.deco.length)], d2 = sc.deco[Math.floor(r() * sc.deco.length)];
+  var tilt = (r() * 8 - 4).toFixed(1), flip = r() < 0.5, d1 = r(), d2 = r();
   return (
-    <div aria-hidden style={{ position: "relative", height: h, borderRadius: 10, overflow: "hidden", border: "2px solid #3f2a1d", background: sc.bg, filter: filter, transform: "rotate(" + tilt * 0.25 + "deg)", fontFamily: FONT }}>
-      <div style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: h * 0.22, background: sc.floor, opacity: 0.85 }} />
-      <span style={{ position: "absolute", left: "6%", top: "10%", fontSize: h * 0.2 }}>{d1}</span>
-      <span style={{ position: "absolute", right: "8%", top: "14%", fontSize: h * 0.17 }}>{d2}</span>
+    <div aria-hidden style={{ position: "relative", height: h, borderRadius: 10, overflow: "hidden", border: "2px solid #3f2a1d", background: "#e5e7eb", boxShadow: "0 2px 0 rgba(63,42,29,0.25)", filter: filter, transform: "rotate(" + tilt * 0.25 + "deg)", fontFamily: FONT }}>
+      <SceneArt k={sc.key} />
+      {/* phone-camera depth: the background a touch soft, a warm light from one side */}
+      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(" + (flip ? 250 : 110) + "deg, rgba(255,240,200,0.35), rgba(255,255,255,0) 55%)" }} />
+      <div style={{ position: "absolute", left: "15%", right: "15%", bottom: h * 0.02, height: h * 0.1, borderRadius: "50%", background: "radial-gradient(rgba(0,0,0,0.28), rgba(0,0,0,0) 70%)" }} />
       {/* who's in shot */}
       {who === "granny" && (<div data-who="granny" style={{ position: "absolute", left: "48%", top: -h * 0.24, marginLeft: -((flip ? 84 : 56) / 140) * h * 2.1 }}><Rider palette={props.palette} width={h * 2.1} pose={r() < 0.5 ? "cheer" : "idle"} flip={flip} lance={props.kit && props.kit.lance} /></div>)}
       {who === "both" && (<div data-who="both" style={{ position: "absolute", left: flip ? "36%" : "18%", bottom: h * 0.02 }}><Rider palette={props.palette} width={h * 1.05} pose={r() < 0.5 ? "cheer" : "idle"} flip={flip} lance={props.kit && props.kit.lance} saddle={props.kit && props.kit.saddle} /></div>)}
@@ -53,6 +55,9 @@ export default function Selfie(props) {
       {/* in hand, a sticker, the phone */}
       <span style={{ position: "absolute", left: flip ? "28%" : "62%", bottom: h * 0.2, fontSize: h * 0.2, transform: "rotate(" + tilt + "deg)" }}>{hold}</span>
       <span style={{ position: "absolute", right: 6, bottom: 6, fontSize: h * 0.18, filter: "drop-shadow(0 1px 0 rgba(0,0,0,0.3))" }}>{sticker}</span>
+      {/* lens vignette, then the selfie frame */}
+      <div style={{ position: "absolute", inset: 0, boxShadow: "inset 0 0 " + h * 0.22 + "px rgba(40,20,0,0.35)", pointerEvents: "none" }} />
+      <span style={{ position: "absolute", left: 20, top: 6, fontSize: 9, fontWeight: 800, color: "#fff", background: "rgba(30,20,10,0.55)", borderRadius: 8, padding: props.text ? "1px 6px" : 0, letterSpacing: 0.3 }}>{props.text && props.text.length < 34 ? "📍 " + props.text : ""}</span>
       {/* selfie frame: corners and a timestamp */}
       {["0 0", "100% 0", "0 100%", "100% 100%"].map(function (p, i) { return (<span key={i} style={{ position: "absolute", left: i % 2 ? "auto" : 5, right: i % 2 ? 5 : "auto", top: i < 2 ? 5 : "auto", bottom: i >= 2 ? 5 : "auto", width: 12, height: 12, borderTop: i < 2 ? "2px solid rgba(255,255,255,0.8)" : "none", borderBottom: i >= 2 ? "2px solid rgba(255,255,255,0.8)" : "none", borderLeft: i % 2 ? "none" : "2px solid rgba(255,255,255,0.8)", borderRight: i % 2 ? "2px solid rgba(255,255,255,0.8)" : "none" }} />); })}
     </div>

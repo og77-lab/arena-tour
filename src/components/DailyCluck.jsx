@@ -464,6 +464,7 @@ export function CluckPaper(props) {
                 </div>
               );
             })}
+            {is.fanChain && (<Body><span style={{ display: "inline-block", marginTop: 6, fontSize: 13 }}><b>What it means for you:</b> {fmtK(is.fanChain.fol)} followers{is.fanChain.lift ? " lift your fans' resting level by +" + is.fanChain.lift + " (to " + is.fanChain.settle + ")" : " — not enough yet to lift your fans (that starts at 1K)"}. With ❤️ {is.fanChain.fans} fans the sponsors pay <b>+{is.fanChain.tp} training pts</b> a week{is.fanChain.edge > 0 ? ", and the stands give you a +" + is.fanChain.edge + "% wider gold zone against a typical rival" : is.fanChain.edge < 0 ? ", but a typical rival has the louder stands (+" + (-is.fanChain.edge) + "% gold zone for her)" : ""}.</span></Body>)}
           </section>
         )}
 
