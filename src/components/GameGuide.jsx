@@ -195,9 +195,9 @@ function body(id) {
         ["Further out", "Falls about 2 points for every % of the bar, down to your floor"]
       ]} />
       <List items={[
-        <span key="a"><B>Aim</B> adds points on top of every strike — 1.5 per level you're ahead of her (or takes them away if she has more Aim). That's why you can see, say, 83: a gold-edge 85 minus a little Aim, or a just-outside 70 plus a lot of Aim.</span>,
-        <span key="b"><B>Stubbornness</B> sets your floor — the lowest a strike can score (15 at even levels).</span>,
-        <span key="gr"><B>Gear</B> adds or takes points (on gold hits, on misses, or every strike), and <B>tiredness</B> takes points off your misses — the line under your score shows both: <i>In the gold 92 + 2 Aim + 3 Gear − 0 Tired</i>.</span>,
+        <span key="a"><B>Extra Points</B> adds points on top of every strike — 1.5 per level you're ahead of her (or takes them away if she has more Extra Points). That's why you can see, say, 83: a gold-edge 85 minus a little Extra Points, or a just-outside 70 plus a lot of Extra Points.</span>,
+        <span key="b"><B>Softer Misses</B> sets your floor — the lowest a strike can score (15 at even levels).</span>,
+        <span key="gr"><B>Gear</B> adds or takes points (on gold hits, on misses, or every strike), and <B>tiredness</B> takes points off your misses — the line under your score shows both: <i>In the gold 92 + 2 Extra Points + 3 Gear − 0 Tired</i>.</span>,
         <span key="c">There's almost no luck: ±1 point. The same strike always scores about the same.</span>,
         <span key="d">Labels: <B>PERFECT!</B> 96+, <B>GOLD!</B> inside the zone, <B>CLOSE</B> just outside, <B>MISS</B> beyond.</span>
       ]} />
@@ -214,7 +214,7 @@ function body(id) {
         ["2 · The round", "Each tier starts a step harder, and each round within a tournament adds a little more. This narrows the gold zone and speeds the bar for both of you, whatever your stats."],
         ["3 · Her talent", "How accurate she is. It doesn't touch your bar — it decides how high her scores tend to be."]
       ]} />
-      <P>An example — the width of your gold zone with Steady Stride:</P>
+      <P>An example — the width of your gold zone with Bigger Gold:</P>
       <Table head={["Situation", "Gold zone"]} rows={[
         ["Futures round 1, even levels", "13% of the bar"],
         ["Same, you 5 levels ahead", "19%"],
@@ -225,8 +225,8 @@ function body(id) {
     </>);
 
     case "training": return (<>
-      <P>Six stats, each from level 0 to 20: three for the granny, two for the rooster, and Bounce-back for recovery. For the first five <B>only the gap to your opponent counts</B> — if you both have 5 Aim, it cancels out.</P>
-      <ChipRows rows={[["r", "⚡ Reflexes"], ["f", "🎯 Aim"], ["g", "🛡️ Stubbornness"], ["s", "🫀 Stamina"], ["p", "🐾 Steady Stride"], ["b", "🔋 Bounce-back"]].map(function (x) { return { k: x[0], name: x[1], sub: x[0] === "b" ? "counts on its own" : "each level ahead", list: statEffect(x[0]) }; })} />
+      <P>Six stats, each from level 0 to 20: three for the granny, two for the rooster, and Bounce-back for recovery. For the first five <B>only the gap to your opponent counts</B> — if you both have 5 Extra Points, it cancels out.</P>
+      <ChipRows rows={[["r", "⚡ Slower Bar"], ["f", "🎯 Extra Points"], ["g", "🛡️ Softer Misses"], ["s", "🫀 Less Speed-up"], ["p", "🐾 Bigger Gold"], ["b", "🔋 Bounce-back"]].map(function (x) { return { k: x[0], name: x[1], sub: x[0] === "b" ? "counts on its own" : "each level ahead", list: statEffect(x[0]) }; })} />
       <H>Training points (TP)</H>
       <P>Everyone on tour — you and every rival — earns TP by the same rule every week: <B>8 for turning up, plus a third of the ranking points you won</B>. A deep run buys you a few levels on the riders who went out early; the edge fades once you move up to a tier where everyone is winning that much. You also get <B>sponsor TP</B> from your fans (one per 10 fans).</P>
       <P>Each level costs more than the last: 15 TP for level 1, 30 for level 2, 45 for level 3… and from level 9 the price climbs faster still.</P>
@@ -260,7 +260,7 @@ function body(id) {
         <span key="d"><B>Fitness only comes back between tournaments:</B> 40% of whatever is missing comes back after every tournament, plus 0.7% per level of 🔋 <B>Bounce-back</B>. A **rest week** brings back 80% of what's missing (and double the Bounce-back): tap **😴 Rest this week** at the bottom of the tournament list, or skip a Grand Slam you can't enter. You score no points that week and last season's points for it drop off. Only part comes back, so tiredness builds up for anyone who keeps going deep.</span>,
         <span key="e"><B>🔋 Bounce-back</B> is the sixth stat (0–20). Unlike the others it counts on its own, not against your opponent.</span>,
         <span key="f"><B>Physio staff</B> (Train tab, as the week's one investment): 👩‍⚕️ Nurse Nellie +35% granny, 🩺 Dr. Featherby the rooster chiropractor +35% rooster, 🛁 a spa weekend at Bingo-on-Sea +20% both — straight away.</span>,
-        <span key="i"><B>Injuries:</B> ride on under 35% and every match risks one (up to 25% a match at 0). An injury knocks 2–3 levels off one or two stats for 2–3 tournaments: 🦵 pulled hamstring (Reflexes), 💪 jouster's elbow (Aim), 🪑 creaky back (Stubbornness), 🐾 sprained claw (Steady Stride), 🪽 pulled wing (Stamina), 🦴 bruised wishbone (both rooster stats). Physio on that side shortens it by a tournament.</span>,
+        <span key="i"><B>Injuries:</B> ride on under 35% and every match risks one (up to 25% a match at 0). An injury knocks 2–3 levels off one or two stats for 2–3 tournaments: 🦵 pulled hamstring (Slower Bar), 💪 jouster's elbow (Extra Points), 🪑 creaky back (Softer Misses), 🐾 sprained claw (Bigger Gold), 🪽 pulled wing (Less Speed-up), 🦴 bruised wishbone (both rooster stats). Physio on that side shortens it by a tournament.</span>,
         <span key="sf">The Season Finals tire you too.</span>,
         <span key="g">Every rider on tour plays by the same fitness rules.</span>
       ]} />
@@ -273,7 +273,7 @@ function body(id) {
         ["📣 Private session", "+10 TP (Train tab)", "20% of a champion's prize at your top open tier — about $900 at Futures, $90K at Masters"],
         ["🎟️ Paid entry", "The tier above your range, this week only (tournament list)", "35% of that tier's champion's prize — about $5.7K for Challenger"],
         ["🩺 Physio", "Fitness back now, injuries heal a tournament sooner (Train tab)", "12–18% of a champion's prize"],
-        ["🧬 Pedigree certificate", "Raises the cap on Stamina and Steady Stride: 20 → 22 → 24 → 26", "$250K, $1M, $3M"]
+        ["🧬 Pedigree certificate", "Raises the cap on Less Speed-up and Bigger Gold: 20 → 22 → 24 → 26", "$250K, $1M, $3M"]
       ]} />
       <P>The world leaderboard counts everything you've ever earned, so spending never costs you places there.</P>
     </>);
@@ -353,8 +353,8 @@ function body(id) {
     case "tips": return (<>
       <List items={[
         "Aim for the white line, not just the gold. 100 against 86 is the difference between winning and losing a set.",
-        "If you keep overshooting, train Reflexes. If you land just next to the gold, train Steady Stride. If your misses are wild, Stubbornness.",
-        "Long best-of-5 matches get faster as they go: Stamina keeps them under control.",
+        "If you keep overshooting, train Slower Bar. If you land just next to the gold, train Bigger Gold. If your misses are wild, Softer Misses.",
+        "Long best-of-5 matches get faster as they go: Less Speed-up keeps them under control.",
         "Watch the 'Vs rivals' line — falling behind the riders near you is felt immediately.",
         "A title is worth far more training than a quarterfinal. Stay in a tier you can win before you jump up.",
         "Save the paid entry and wildcards for weeks you feel sharp.",

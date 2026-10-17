@@ -61,7 +61,7 @@ function TaleOfTape(props) {
         </motion.div>
       )}
       {sc.cond && (<div style={{ margin: "0 0 6px", padding: "4px 6px", borderRadius: 10, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)" }}>
-        <LaneRow cond={sc.cond} w={36} h={28} dark={true} compact={true} label="Today's lanes:" gaps={sc.gaps || null} />
+        <LaneRow cond={sc.cond} w={36} h={28} dark={true} compact={true} label="Today:" verdict={sc.laneV || null} />
       </div>)}
       <div style={{ textAlign: "center", fontSize: 10, fontWeight: 900, letterSpacing: 3, color: "#fde68a" }}>TALE OF THE TAPE</div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", alignItems: "center", gap: 8, margin: "6px 0 4px" }}>

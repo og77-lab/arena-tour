@@ -15,7 +15,7 @@ import { C, FONT } from "../ui/theme";
 import { REDUCED_MOTION } from "./fx";
 
 var STAT_ICON = { r: "⚡", p: "🐾", f: "🎯", s: "🫀", g: "🛡️", b: "🔋", all: "📊" };
-var STAT_NAME = { r: "Reflexes", p: "Steady Stride", f: "Aim", s: "Stamina", g: "Stubbornness", b: "Bounce-back" };
+var STAT_NAME = { r: "Slower Bar", p: "Bigger Gold", f: "Extra Points", s: "Less Speed-up", g: "Softer Misses", b: "Bounce-back" };
 /* Every stat is one element of the match — shown together so nobody has to remember which is which */
 export var STAT_ELEMENT = { r: { k: "speed", v: 0.85, what: "bar speed" }, p: { k: "zone", v: 2, what: "gold zone" }, f: { k: "aim", v: 2, what: "every strike" }, g: { k: "miss", v: 2, what: "misses" }, s: { k: "accel", v: 0.7, what: "speed-up" }, b: { k: "fit", v: 1, what: "recovery" } };
 export function statLabel(s) { var el = STAT_ELEMENT[s]; return STAT_NAME[s] + (el ? " (" + el.what + ")" : ""); }
@@ -118,13 +118,10 @@ export function EffectList(props) {
 
 /* What each element means on the lanes — the reference card, opened from "What do these mean?" */
 var LEGEND = [
-  { e: { k: "zone", v: 2, good: true, text: "Gold zone" }, what: "The yellow strip. Stop the marker inside it for 85–100 points." },
-  { e: { k: "speed", v: 1.3, good: false, text: "Bar speed" }, what: "How fast the marker sweeps when a set starts. Faster is harder to stop in the gold." },
-  { e: { k: "accel", v: 1.4, good: false, text: "Speed-up" }, what: "How much faster it gets after every strike in a set." },
-  { e: { k: "gold", v: 3, good: true, text: "On gold hits" }, what: "Points added only when you land in the gold." },
-  { e: { k: "miss", v: 3, good: true, text: "On misses" }, what: "Points added only when you land outside the gold (70 and below)." },
-  { e: { k: "aim", v: 2, good: true, text: "Every strike" }, what: "Points added to every strike, hit or miss." },
-  { e: { k: "stat", s: "r", v: 2, good: true, text: "Reflexes ×2 · you lead by 2 → bar 9% slower for you" }, what: "The lanes make that stat's gap count double (or half on the village green). The chip shows what that does to YOUR bar against this field: green helps you, red hurts." }
+  { e: { k: "zone", v: 2, good: true, text: "Gold zone" }, what: "The yellow strip. Stop the marker inside it for 85–100 points. Bigger is easier." },
+  { e: { k: "speed", v: 1.3, good: false, text: "Bar speed" }, what: "How fast the marker moves (it also speeds up after every strike). Slower is easier." },
+  { e: { k: "aim", v: 2, good: true, text: "Points" }, what: "Bonus points on your strikes. Points per strike adds everything up into one number." },
+  { e: { k: "pts", v: 1, good: true, text: "✓ GOOD FOR YOU" }, what: "The lanes and the entrants suit your stats: you'll score more than them, strike for strike. HARD FOR YOU is the opposite; EVEN is in between." }
 ];
 export function Legend() {
   return (

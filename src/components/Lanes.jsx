@@ -32,21 +32,24 @@ export function laneChips(c, gaps) { var d = CONDITIONS[c] || CONDITIONS.classic
 
 /* One lane on one row: tile, name, chips */
 export function LaneRow(props) {
-  var d = CONDITIONS[props.cond] || CONDITIONS.classic;
+  var d = CONDITIONS[props.cond] || CONDITIONS.classic, dark = props.dark;
+  if (props.compact) return (
+    <div style={{ display: "flex", alignItems: "center", gap: 8, fontFamily: FONT }}>
+      <LaneTile cond={props.cond} w={props.w || 36} h={props.h || 28} />
+      <span style={{ flex: 1, minWidth: 0, fontSize: 12.5, fontWeight: 900, color: dark ? "#fde68a" : C.text }}>{props.label ? props.label + " " : ""}{d.short}</span>
+      {props.verdict && (<Verdict v={props.verdict} />)}
+    </div>
+  );
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 8, fontFamily: FONT }}>
       <LaneTile cond={props.cond} w={props.w || 50} h={props.h || 36} />
-      {props.compact ? (
-        <div style={{ flex: 1, minWidth: 0, display: "flex", flexWrap: "wrap", alignItems: "center", gap: 4 }}>
-          <span style={{ fontSize: 12, fontWeight: 900, color: props.dark ? "#fde68a" : C.text, marginRight: 2 }}>{props.label && props.label.indexOf(d.name) === 0 ? props.label : (props.label ? props.label + " " : "") + d.name}</span>
-          <EffectList list={laneChips(props.cond, props.gaps)} empty="nothing changes" />
-        </div>
-      ) : (
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 13, fontWeight: 900, color: props.dark ? "#fff" : C.text }}>{d.name}</div>
-        {props.about && d.about && (<div style={{ fontSize: 11.5, color: props.dark ? "rgba(255,255,255,0.8)" : C.textSoft, lineHeight: 1.35, marginTop: 1 }}>{d.about}</div>)}
-        <div style={{ marginTop: 3 }}><EffectList list={laneChips(props.cond, props.gaps)} empty="Nothing changes — pure timing" /></div>
-      </div>)}
+        <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+          <span style={{ fontSize: 13, fontWeight: 900, color: dark ? "#fff" : C.text }}>{d.name}</span>
+          {props.verdict && (<Verdict v={props.verdict} />)}
+        </div>
+        <div style={{ fontSize: 11.5, color: dark ? "rgba(255,255,255,0.8)" : C.textSoft, lineHeight: 1.35, marginTop: 1 }}>{d.about}</div>
+      </div>
     </div>
   );
 }
@@ -54,9 +57,17 @@ export function LaneRow(props) {
 /* All five side by side, for comparing before you pick */
 export function CompareLanes(props) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 7, padding: "8px 10px", background: "#fff", border: "1.5px solid " + C.line, borderRadius: 12, marginBottom: 8 }}>
-      <div style={{ fontSize: 11.5, fontWeight: 800, color: C.textSoft }}>The lanes change the bar for <b>both</b> riders and make one stat count more. {props.gaps ? "Green and red are worked out from your stats against the riders near your rank." : "Which suits you depends on your stats and your kit."}</div>
-      {Object.keys(CONDITIONS).map(function (k) { return (<LaneRow key={k} cond={k} gaps={props.gaps} about={true} />); })}
+    <div style={{ display: "flex", flexDirection: "column", gap: 8, padding: "8px 10px", background: "#fff", border: "1.5px solid " + C.line, borderRadius: 12, marginBottom: 8 }}>
+      <div style={{ fontSize: 11.5, fontWeight: 800, color: C.textSoft }}>The lanes change the match for <b>both</b> riders. The tag says how they suit you, from your stats against riders at your level.</div>
+      {Object.keys(CONDITIONS).map(function (k) { return (<LaneRow key={k} cond={k} verdict={props.verdictOf ? props.verdictOf(k) : null} />); })}
     </div>
   );
+}
+
+/* The one thing a player needs: does this suit me? Words, not icons. */
+export function Verdict(props) {
+  var k = props.v && props.v.key;
+  if (!k) return null;
+  var st = k === "good" ? { bg: "#16a34a", fg: "#fff", t: "✓ GOOD FOR YOU" } : k === "hard" ? { bg: "#dc2626", fg: "#fff", t: "✗ HARD FOR YOU" } : { bg: "#e7e5e4", fg: "#44403c", t: "EVEN" };
+  return (<span style={{ display: "inline-block", fontSize: 10.5, fontWeight: 900, letterSpacing: 0.8, color: st.fg, background: st.bg, borderRadius: 10, padding: "3px 8px", whiteSpace: "nowrap", fontFamily: FONT }}>{st.t}</span>);
 }

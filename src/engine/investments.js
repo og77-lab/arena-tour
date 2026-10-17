@@ -6,7 +6,7 @@ import { TIERS } from "../models/constants";
 
 export var COACH_TP = 10;
 export var BASE_CAP = 20;
-/* Rooster pedigree: each certificate lifts the cap on the rooster's stats (Stamina, Steady Stride) */
+/* Rooster pedigree: each certificate lifts the cap on the rooster's stats (Less Speed-up, Bigger Gold) */
 export var PEDIGREE = [{ cap: 22, price: 250000 }, { cap: 24, price: 1000000 }, { cap: 26, price: 3000000 }];
 var ROOSTER_STATS = { s: true, p: true };
 

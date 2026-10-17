@@ -81,7 +81,7 @@ export function effTr(p) {
   var tr = Object.assign({}, (p && p.tr) || {}); ((p && p.inj) || []).forEach(function (x) { var d = INJ_BY_ID[x.id]; if (!d) return; Object.keys(d.mods).forEach(function (k) { tr[k] = Math.max(0, (tr[k] || 0) + d.mods[k]); }); });
   return tr;
 }
-export function injuryText(x) { var d = INJ_BY_ID[x.id]; if (!d) return ""; var names = { r: "Reflexes", f: "Aim", g: "Stubbornness", p: "Steady Stride", s: "Stamina" }; return d.icon + " " + d.name + ": " + Object.keys(d.mods).map(function (k) { return names[k] + " " + d.mods[k]; }).join(", ") + " · " + x.left + " tournament" + (x.left > 1 ? "s" : "") + " left"; }
+export function injuryText(x) { var d = INJ_BY_ID[x.id]; if (!d) return ""; var names = { r: "Slower Bar", f: "Extra Points", g: "Softer Misses", p: "Bigger Gold", s: "Less Speed-up" }; return d.icon + " " + d.name + ": " + Object.keys(d.mods).map(function (k) { return names[k] + " " + d.mods[k]; }).join(", ") + " · " + x.left + " tournament" + (x.left > 1 ? "s" : "") + " left"; }
 
 /* How tired riders play. Fresh = no effect; at 0 fitness: zone −4%, misses −10, bar starts 18% faster, speeds up 60% more.
    Felt mostly late in a tournament (a final is ridden at ~60%); best-of-5 weeks carry some tiredness into the next */

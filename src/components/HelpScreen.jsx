@@ -43,7 +43,7 @@ export default function HelpScreen(props) {
             })}
           </div>
           <div style={{ fontSize: 14, color: "#475569", lineHeight: 1.5 }}>
-            <b style={{color:"#0f172a"}}>Your opponent strikes on the same bar</b>, scored the same way — her red ▲ shows where she landed. The more talented she is, the closer to the centre she tends to hit; Aim adds points on top of your score, Stubbornness raises your lowest possible score.
+            <b style={{color:"#0f172a"}}>Your opponent strikes on the same bar</b>, scored the same way — her red ▲ shows where she landed. The more talented she is, the closer to the centre she tends to hit; Extra Points adds points on top of your score, Softer Misses raises your lowest possible score.
           </div>
           <div style={{ fontSize: 14, color: "#475569", lineHeight: 1.5, marginTop: 6 }}>
             Matches are played in <b style={{color:"#0f172a"}}>sets</b>. Each set is <b style={{color:"#0f172a"}}>3 strikes</b> — the <b style={{color:"#22c55e"}}>higher average takes the set</b>, so one bad strike can still be rescued.

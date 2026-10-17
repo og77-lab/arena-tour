@@ -7,7 +7,7 @@
      zone  — gold zone width, in % of the bar (+ is wider)
      speed — bar speed multiplier at the start of each set (below 1 is slower)
      accel — how much the bar speeds up after every strike, as a multiplier (below 1 is gentler)
-     floor — points added to the worst a miss can score (Stubbornness floor)
+     floor — points added to the worst a miss can score (Softer Misses floor)
      aim   — points added to every strike
      gold  — points added only to strikes that land in the gold
      miss  — points added only to strikes that land outside the gold */

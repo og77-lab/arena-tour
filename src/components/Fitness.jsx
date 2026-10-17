@@ -30,10 +30,10 @@ export function FitnessCard(props) {
       </div>
       {p.fitEnd && (<div style={{ fontSize: 11.5, fontWeight: 800, color: C.textSoft, marginBottom: 5 }}>Last tournament you finished at <span style={{ color: fitColor(p.fitEnd.g) }}>👵{p.fitEnd.g}%</span> <span style={{ color: fitColor(p.fitEnd.r) }}>🐓{p.fitEnd.r}%</span> — recovered since.</div>)}
       <Meter icon="👵" label="Granny" v={f.g} />
-      {gChips.length > 0 && (<div style={{ margin: "3px 0 5px" }}><EffectList list={gChips} /></div>)}
+
       <Meter icon="🐓" label="Rooster" v={f.r} />
-      {rChips.length > 0 && (<div style={{ margin: "3px 0 2px" }}><EffectList list={rChips} /></div>)}
-      {!gChips.length && !rChips.length && (<div style={{ fontSize: 12, color: C.greenInk, fontWeight: 800, marginTop: 4 }}>Both fresh — tiredness changes nothing yet.</div>)}
+      {(f.g < 100 || f.r < 100) && (<div style={{ fontSize: 12.5, fontWeight: 900, color: C.redInk, marginTop: 6 }}>Tiredness right now: gold zone −{Math.abs(x.zone).toFixed(1)}%, bar {Math.round((x.speed - 1) * 100 + (x.accel - 1) * 30)}% faster, misses −{Math.round(Math.abs(x.miss))}</div>)}
+      {f.g >= 100 && f.r >= 100 && (<div style={{ fontSize: 12, color: C.greenInk, fontWeight: 800, marginTop: 4 }}>Both fresh — tiredness changes nothing yet.</div>)}
       {(p.inj || []).map(function (x) { return (<div key={x.id} style={{ fontSize: 12, fontWeight: 900, color: C.redInk, background: "#fef2f2", border: "1.5px solid #fecaca", borderRadius: 8, padding: "4px 8px", marginTop: 5 }}>🩹 {injuryText(x)}</div>); })}
       {Math.min(f.g, f.r) < INJURY_LINE && (<div style={{ fontSize: 12, fontWeight: 900, color: C.redInk, marginTop: 5 }}>⚠️ Under {INJURY_LINE}%: every match now risks an injury. Book the physio or skip a Slam to rest.</div>)}
       <div style={{ fontSize: 11, color: C.textMuted, marginTop: 5, lineHeight: 1.35 }}>Every match tires you and only part of it comes back after a tournament, so tiredness builds up. 🔋 Bounce-back and the physio (Train tab) win it back.</div>

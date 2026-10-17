@@ -8,6 +8,7 @@ import { W, CSS, EMO, TIERS, RN5, RN6, HN, HC, HI, TOTAL_EVENTS, FINALS_BO, STAT
 import { sh, bs, nW, pRankOf, getRanked, getARanked, trainCost, weeklyTP } from "./models/formulas";
 import { sSet, sGet, stamp, pickNewest, queueCloudSave, cancelCloudSave } from "./engine/persistence";
 import { pack, unpack } from "./engine/codec";
+import { verdict as laneVerdictOf } from "./engine/profile";
 import { mkSeason } from "./engine/seasonManager";
 import PowerBar from "./components/PowerBar";
 import Profile from "./components/Profile";
@@ -890,9 +891,9 @@ export default function Arena(props) {
         {hubTip && (<CoachCard key={hubTip} id={hubTip} vars={{ name: S.pName, rival: S.player.rival ? S.player.rival.name : null }} onDone={function(all){ markTip(hubTip, all); }} />)}
         {picking && !seasonDone && (<TierSheet available={avTiers} wildcard={wildcardTier(S)} rank={pRank} paid={paidEntryTier(S)}
           entry={(function(){ var top = Math.max.apply(null, availableTiers(S, true)), ti = top + 1; if (ti > 4 || paidEntryTier(S) >= 0) return null; var fee = entryFee(ti); return { tier: ti, fee: fee, used: !!weekInvestment(S), can: !weekInvestment(S) && (S.player.money || 0) >= fee, cash: S.player.money || 0 }; })()}
-          onBuyEntry={buyEntry} onRest={restWeek} rest={(function(){ var f = fitOf(S.player), b = (S.player.tr || {}).b || 0; return { g: Math.round(recoveryOf(b, true, f.g)), r: Math.round(recoveryOf(b, true, f.r)), ng: Math.round(recoveryOf(b, false, f.g)), nr: Math.round(recoveryOf(b, false, f.r)), fit: f, def: (S.player.def && S.player.def[S.calIdx]) || 0 }; })()} onClose={function(){setPicking(false)}} events={weekEvents(S)} gapsOf={function(ev){ return eventGaps(S, ev); }} nearGaps={(function(){ var o = {}, me = effTr(S.player); GAP_KEYS.forEach(function(k){ o[k] = (me[k] || 0) - (rivalTr[k] || 0); }); return o; })()} onPickEvent={function(ev){ setPicking(false); setPrep({ tier: ev.tier, ev: ev }); }}
+          onBuyEntry={buyEntry} onRest={restWeek} rest={(function(){ var f = fitOf(S.player), b = (S.player.tr || {}).b || 0; return { g: Math.round(recoveryOf(b, true, f.g)), r: Math.round(recoveryOf(b, true, f.r)), ng: Math.round(recoveryOf(b, false, f.g)), nr: Math.round(recoveryOf(b, false, f.r)), fit: f, def: (S.player.def && S.player.def[S.calIdx]) || 0 }; })()} onClose={function(){setPicking(false)}} events={weekEvents(S)} verdictOf={function(ev){ return laneVerdictOf({ cond: ev.cond, tier: ev.tier, gaps: eventGaps(S, ev), kit: null }); }} laneVerdict={function(c){ var o = {}, me = effTr(S.player); GAP_KEYS.forEach(function(k){ o[k] = (me[k] || 0) - (rivalTr[k] || 0); }); return laneVerdictOf({ cond: c, tier: Math.max.apply(null, availableTiers(S, true)), gaps: o, kit: null }); }} nearGaps={(function(){ var o = {}, me = effTr(S.player); GAP_KEYS.forEach(function(k){ o[k] = (me[k] || 0) - (rivalTr[k] || 0); }); return o; })()} onPickEvent={function(ev){ setPicking(false); setPrep({ tier: ev.tier, ev: ev }); }}
           onPick={function(ti){ setPicking(false); setPrep({ tier: ti, ev: null }); }} />)}
-        {prep && (<PrepScreen S={S} ev={prep.ev} tier={prep.tier} gaps={prep.ev ? eventGaps(S, prep.ev) : null} topTier={Math.max.apply(null, availableTiers(S))} onCancel={function(){ var t = prep.tier; setPrep(null); if (t < 5) setPicking(true); }} onConfirm={confirmPrep} />)}
+        {prep && (<PrepScreen S={S} ev={prep.ev} tier={prep.tier} gaps={prep.ev ? eventGaps(S, prep.ev) : null} verdict={prep.ev ? laneVerdictOf({ cond: prep.ev.cond, tier: prep.tier, gaps: eventGaps(S, prep.ev), kit: null }) : null} topTier={Math.max.apply(null, availableTiers(S))} onCancel={function(){ var t = prep.tier; setPrep(null); if (t < 5) setPicking(true); }} onConfirm={confirmPrep} />)}
         {gala && (<SeasonGala S={S} champ={gala.champ} runnerUp={gala.runnerUp} champRank={gala.champRank} awards={gala.awards} you={gala.you} hall={gala.hall} goal={gala.goal} onDone={finishGala} />)}
         {achQ.length > 0 && (<AchToast queue={achQ} onShown={function(){ setAchQ(function(q){ return q.slice(1); }); }} onOpen={function(){ setAchQ([]); setShowAch(true); }} />)}
         {showAch && (<AchievementsSheet S={S} onClose={function(){ setShowAch(false); }} />)}
@@ -958,7 +959,7 @@ export default function Arena(props) {
                     </div>
                     {row("📣", "Private session with Coach Hettie", "+" + COACH_TP + " training points. Priced to the prizes at your level.", cp, bookCoach, "+" + COACH_TP + " TP", "coach")}
                     {STAFF.map(function(st){ var f = fitOf(S.player); return row(st.icon, st.name, st.sub + " " + (st.g ? "👵 +" + st.g + "% " : "") + (st.r ? "🐓 +" + st.r + "%" : "") + " fitness now (you're at 👵" + f.g + " 🐓" + f.r + ").", staffPrice(st), function(){ bookStaff(st.id); }, "Book", st.id); })}
-                    {ped && row("🧬", "Rooster pedigree certificate", "Lifts Stamina and Steady Stride's cap to level " + ped.cap + ". Everything you've trained stays.", ped.price, buyPedigree, "Lv " + ped.cap, "ped")}
+                    {ped && row("🧬", "Rooster pedigree certificate", "Lifts Less Speed-up and Bigger Gold's cap to level " + ped.cap + ". Everything you've trained stays.", ped.price, buyPedigree, "Lv " + ped.cap, "ped")}
                   </div>
                 );
               })()}
@@ -1211,7 +1212,7 @@ export default function Arena(props) {
     var opp = pm ? (pm.a.isP ? pm.b : pm.a) : null;
     var oppRank = 0; if (opp) { for (var oi = 0; oi < ranked.length; oi++) if (ranked[oi].id===opp.id){oppRank=oi+1;break;} }
     var matchDiff = roundDiff(ts.tierIdx, ts.round);
-    var scoutT = opp ? Object.assign(buildScout(S, Object.assign({}, opp, { _fit: afterMatches(fitOf(opp), ts.round, tier.bo), _kit: kitOfNpc(S, opp, ts.cond, ts.tierIdx, rankMap(S)[opp.id]) }), oppRank, matchDiff), { cond: ts.cond || "classic", gaps: gapsVs(S, [opp]) }) : null;
+    var scoutT = opp ? Object.assign(buildScout(S, Object.assign({}, opp, { _fit: afterMatches(fitOf(opp), ts.round, tier.bo), _kit: kitOfNpc(S, opp, ts.cond, ts.tierIdx, rankMap(S)[opp.id]) }), oppRank, matchDiff), { cond: ts.cond || "classic", gaps: gapsVs(S, [opp]), laneV: laneVerdictOf({ cond: ts.cond || "classic", tier: ts.tierIdx, gaps: gapsVs(S, [opp]), kit: null }) }) : null;
     return (
       <motion.div key="tourney" {...screenAnim} style={Object.assign({}, W, { background: C.page })}>
         <style dangerouslySetInnerHTML={{__html:CSS}} />
