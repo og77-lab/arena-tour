@@ -32,8 +32,8 @@ export function FitnessCard(props) {
       <Meter icon="👵" label="Granny" v={f.g} />
 
       <Meter icon="🐓" label="Rooster" v={f.r} />
-      {(f.g < 100 || f.r < 100) && (<div style={{ fontSize: 12.5, fontWeight: 900, color: C.redInk, marginTop: 6 }}>Tiredness right now: gold zone −{Math.abs(x.zone).toFixed(1)}%, bar {Math.round((x.speed - 1) * 100 + (x.accel - 1) * 30)}% faster, misses −{Math.round(Math.abs(x.miss))}</div>)}
-      {f.g >= 100 && f.r >= 100 && (<div style={{ fontSize: 12, color: C.greenInk, fontWeight: 800, marginTop: 4 }}>Both fresh — tiredness changes nothing yet.</div>)}
+      {Math.min(f.g, f.r) < 95 && (<div style={{ fontSize: 12.5, fontWeight: 900, color: C.redInk, marginTop: 6 }}>Tiredness right now: gold zone −{Math.abs(x.zone).toFixed(1)}%, bar {Math.round((x.speed - 1) * 100 + (x.accel - 1) * 30)}% faster, misses −{Math.round(Math.abs(x.miss))}</div>)}
+      {Math.min(f.g, f.r) >= 95 && (<div style={{ fontSize: 12, color: C.greenInk, fontWeight: 800, marginTop: 4 }}>Both fresh — tiredness changes nothing yet.</div>)}
       {(p.inj || []).map(function (x) { return (<div key={x.id} style={{ fontSize: 12, fontWeight: 900, color: C.redInk, background: "#fef2f2", border: "1.5px solid #fecaca", borderRadius: 8, padding: "4px 8px", marginTop: 5 }}>🩹 {injuryText(x)}</div>); })}
       {Math.min(f.g, f.r) < INJURY_LINE && (<div style={{ fontSize: 12, fontWeight: 900, color: C.redInk, marginTop: 5 }}>⚠️ Under {INJURY_LINE}%: every match now risks an injury. Book the physio or skip a Slam to rest.</div>)}
       <div style={{ fontSize: 11, color: C.textMuted, marginTop: 5, lineHeight: 1.35 }}>Every match tires you and only part of it comes back after a tournament, so tiredness builds up. 🔋 Bounce-back and the physio (Train tab) win it back.</div>
@@ -48,5 +48,28 @@ export function FitnessMini(props) {
     <span style={{ fontWeight: 900, whiteSpace: "nowrap" }}>
       <span style={{ color: fitColor(f.g) }}>👵{f.g}</span> <span style={{ color: fitColor(f.r) }}>🐓{f.r}</span>
     </span>
+  );
+}
+
+/* Home card: your fans (and why they moved this week), your Knitter following, and what fans are for */
+export function FansCard(props) {
+  var p = props.player, fans = p.fans != null ? p.fans : 20, w = p.fansWeek, fol = p.followers != null ? p.followers : 120;
+  var d = w ? fans - w.before : 0;
+  function k(n) { return n >= 1e6 ? (n / 1e6).toFixed(1) + "M" : n >= 1e4 ? Math.round(n / 1000) + "K" : n >= 1000 ? (n / 1000).toFixed(1) + "K" : String(n); }
+  return (
+    <div style={card({ padding: "10px 12px", fontFamily: FONT })}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+        <span style={label("#be123c")}>Fans & Knitter</span>
+        <span style={{ fontSize: 11, fontWeight: 800, color: C.textSoft }}>🧶 {k(fol)} followers{w && w.fol ? (<b style={{ color: C.greenInk }}> +{k(w.fol)}</b>) : null}</span>
+      </div>
+      <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginTop: 4 }}>
+        <span style={{ fontSize: 22, fontWeight: 900, color: "#be123c" }}>❤️ {fans}</span>
+        {w && (<span style={{ fontSize: 14, fontWeight: 900, color: d > 0 ? C.greenInk : d < 0 ? C.redInk : C.textMuted }}>{d > 0 ? "▲ +" + d : d < 0 ? "▼ " + d : "±0"} this week</span>)}
+      </div>
+      {w && w.parts && w.parts.length > 0 && (<div style={{ fontSize: 12, fontWeight: 800, color: C.textSoft, marginTop: 2 }}>
+        {w.parts.map(function (x, i) { return (<span key={i}>{i ? " · " : ""}{x[0]} <b style={{ color: x[1] > 0 ? C.greenInk : C.redInk }}>{x[1] > 0 ? "+" : ""}{x[1]}</b></span>); })}
+      </div>)}
+      <div style={{ fontSize: 11.5, color: C.textMuted, marginTop: 5, lineHeight: 1.4 }}>Fans pay sponsor training points (1 per 10 fans), open the tier above at 70 and the Slams at 80, and the crowd backs the rider it loves more — a wider gold zone for her. More Knitter followers raise the level your fans settle at.</div>
+    </div>
   );
 }

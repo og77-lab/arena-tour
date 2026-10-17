@@ -8,6 +8,7 @@ import { W, CSS, EMO, TIERS, RN5, RN6, HN, HC, HI, TOTAL_EVENTS, FINALS_BO, STAT
 import { sh, bs, nW, pRankOf, getRanked, getARanked, trainCost, weeklyTP } from "./models/formulas";
 import { sSet, sGet, stamp, pickNewest, queueCloudSave, cancelCloudSave } from "./engine/persistence";
 import { pack, unpack } from "./engine/codec";
+import { followersOf, followersGain, followersLift, crowdLove, weekKnits, fmtFollowers } from "./engine/social";
 import { mkSeason } from "./engine/seasonManager";
 import PowerBar from "./components/PowerBar";
 import Profile from "./components/Profile";
@@ -90,7 +91,8 @@ function roundDiff(tierIdx, round) { return [0, 1, 2, 3, 4, 3][tierIdx] + round 
 /* Tale of the tape: both riders' fitness right now (hers after the rounds she has ridden this week) */
 function fitRows(S, o) {
   var me = fitOf(S.player), her = o._fit || fitOf(o);
-  return [{ icon: "👵", label: "Granny fitness", what: "Tired grannies get a narrower gold zone and weaker misses", who: "fitness", you: me.g, foe: her.g },
+  return [{ icon: "❤️", label: "Crowd love", what: "The stands back the rider they love more: a slightly wider gold zone for her", who: "crowd", you: fansOf(S.player), foe: o._love != null ? o._love : 0 },
+    { icon: "👵", label: "Granny fitness", what: "Tired grannies get a narrower gold zone and weaker misses", who: "fitness", you: me.g, foe: her.g },
     { icon: "🐓", label: "Rooster fitness", what: "Tired roosters make the bar run faster", who: "fitness", you: me.r, foe: her.r }];
 }
 
@@ -233,12 +235,14 @@ export default function Arena(props) {
   function onInterviewAnswer(answer, outcome) {
     var iv = interview; if (!iv || !S) return;
     var p = S.player, f = clampFans(fansOf(p) + outcome.delta);
+    var fw = Object.assign({}, p.fansWeek || { before: fansOf(p), parts: [], fol: 0 }), extraFol = Math.max(0, outcome.delta) * 25 + (outcome.viral ? 400 : 0);
+    fw.parts = (fw.parts || []).concat(outcome.delta ? [["interview", outcome.delta]] : []); fw.after = f; fw.fol = (fw.fol || 0) + extraFol;
     var issue = Object.assign({}, iv.issue, {
       interview: { outlet: iv.iv.outlet, question: iv.iv.question, quote: answer.text, delta: outcome.delta, reaction: outcome.reaction, viral: outcome.viral, promise: answer.tone === "bold" },
       fans: Object.assign({}, iv.issue.fans, { after: f, interview: outcome.delta })
     });
     var news = (S.news || []).slice(); if (news[0] && news[0].at === iv.issue.at) news[0] = issue;
-    save(Object.assign({}, S, { news: news, player: Object.assign({}, p, { tips: Object.assign({}, p.tips || {}, { interview: true }), stats: outcome.viral ? Object.assign({}, p.stats || {}, { viral: ((p.stats || {}).viral || 0) + 1 }) : (p.stats || {}), fans: f, lastTones: [answer.tone].concat(p.lastTones || []).slice(0, 2), ivSeen: (iv.iv.used || []).concat(p.ivSeen || []).slice(0, 48), promise: answer.tone === "bold" ? { wk: iv.issue.wk } : null }) }));
+    save(Object.assign({}, S, { news: news, player: Object.assign({}, p, { tips: Object.assign({}, p.tips || {}, { interview: true }), stats: outcome.viral ? Object.assign({}, p.stats || {}, { viral: ((p.stats || {}).viral || 0) + 1 }) : (p.stats || {}), fans: f, fansWeek: fw, followers: followersOf(p) + extraFol, lastTones: [answer.tone].concat(p.lastTones || []).slice(0, 2), ivSeen: (iv.iv.used || []).concat(p.ivSeen || []).slice(0, 48), promise: answer.tone === "bold" ? { wk: iv.issue.wk } : null }) }));
     return issue;
   }
   var lastRankRef = useRef(null);
@@ -531,7 +535,9 @@ export default function Arena(props) {
     var revengeWins = rivalNow ? ts.log.filter(function(m){ return m.won && m.oppId === rivalNow.id; }).length : 0;
     var rivalLoss = rivalNow ? ts.log.some(function(m){ return !m.won && m.oppId === rivalNow.id; }) : false;
     if (revengeWins) { perf.d += 3; perf.notes = perf.notes.concat(["revenge on " + sh(rivalNow.name)]); }
-    var fansNow = clampFans(weeklyDrift(fansBefore, curRank) + perf.d + (prom ? prom.delta : 0));
+    var lift = followersLift(followersOf(S.player));
+    var driftTo = weeklyDrift(fansBefore, curRank, lift);
+    var fansNow = clampFans(driftTo + perf.d + (prom ? prom.delta : 0));
     var sponsor = sponsorTP(fansNow);
     /* Career counters for the achievements, then who your rival is after this week */
     var newStats = tallyTournament(S.player.stats, ts.log, { bo: tier.bo, tierIdx: ts.tierIdx, wonTitle: wonTitle, rivalId: rivalNow ? rivalNow.id : null, promiseKept: !!(prom && prom.kept) });
@@ -662,6 +668,10 @@ export default function Arena(props) {
       n.money = Math.max(0, Math.round(cash));
     });
     newP.fitEnd = fitOf(S.player); /* how tired you finished, shown on Home */
+    /* Knitter: this week's new followers, and the story of your fans (the interview adds its line later) */
+    var folBefore = followersOf(S.player), folGain = followersGain({ rank: curRank, fanDelta: fansNow - fansBefore, wins: ts.log.filter(function(m){ return m.won; }).length, title: !!wonTitle, slam: isGS });
+    newP.followers = Math.max(0, folBefore + folGain);
+    newP.fansWeek = { before: fansBefore, after: fansNow, parts: [["riding", perf.d], ["promise", prom ? prom.delta : 0], ["weekly drift", driftTo - fansBefore]].filter(function(x){ return x[1]; }), fol: folGain };
     var pInj = tickInjuries(S.player.inj); if (pInj.length) newP.inj = pInj; else delete newP.inj; delete newP.newInj;
     putFit(newP, recover(fitOf(S.player), (S.player.tr || {}).b, !!ts.rest));
     /* ── TRAINING: every rider earns and spends training points by the player's rules ── */
@@ -694,6 +704,18 @@ export default function Arena(props) {
     } catch (e) { console.error("News issue failed:", e); }
     if (issue) {
       issue.fans = { before: fansBefore, perf: perf.d, notes: perf.notes, promise: prom, sponsor: sponsor, after: fansNow };
+      try {
+        var rkA = rankMap(afterS), champP = champW && !champW.isP ? Object.assign({}, champW, { rank: rkA[champW.id] }) : null;
+        var rivP = (rv.rival || rivalNow) ? S.npcs.filter(function(n){ return n.id === (rv.rival || rivalNow).id; })[0] : null;
+        var randP = S.npcs[(S.calIdx * 37 + S.sNum * 11) % S.npcs.length];
+        var lastLoss = ts.log.filter(function(m){ return !m.won; })[0], bestWin = ts.log.filter(function(m){ return m.won; }).slice(-1)[0];
+        issue.knits = weekKnits({ seed: S.sNum * 1000 + S.calIdx * 17 + pp,
+          you: { name: S.pName, rest: !!ts.rest, title: !!wonTitle, wins: ts.log.filter(function(m){ return m.won; }).length, followers: newP.followers },
+          champ: champP, rival: rivP ? Object.assign({}, rivP, { rank: rkA[rivP.id] }) : null, random: randP ? Object.assign({}, randP, { rank: rkA[randP.id] }) : null,
+          vars: { tier: ts.eventName || tier.name, round: rNames[pRound], rooster: S.player.roosterName || "My rooster", foe: lastLoss ? sh(lastLoss.opp) : "the referee", beat: bestWin ? sh(bestWin.opp) : "a pigeon", you: sh(S.pName) } }).map(function(k){
+            return { name: k.who.name, isP: !!k.who.isP, id: k.who.id || 1, emoji: k.who.emoji || "", text: k.text, likes: k.likes, followers: k.who.isP ? newP.followers : followersOf(k.who, k.who.rank) };
+          });
+      } catch (e) { console.error("knits", e); }
       /* The feud column: your rival's week, and what happened if you met */
       var feudWho = rv.rival || rivalNow;
       if (feudWho) {
@@ -1211,7 +1233,7 @@ export default function Arena(props) {
     var opp = pm ? (pm.a.isP ? pm.b : pm.a) : null;
     var oppRank = 0; if (opp) { for (var oi = 0; oi < ranked.length; oi++) if (ranked[oi].id===opp.id){oppRank=oi+1;break;} }
     var matchDiff = roundDiff(ts.tierIdx, ts.round);
-    var scoutT = opp ? Object.assign(buildScout(S, Object.assign({}, opp, { _fit: afterMatches(fitOf(opp), ts.round, tier.bo), _kit: kitOfNpc(S, opp, ts.cond, ts.tierIdx, rankMap(S)[opp.id]) }), oppRank, matchDiff), { cond: ts.cond || "classic", gaps: gapsVs(S, [opp]) }) : null;
+    var scoutT = opp ? Object.assign(buildScout(S, Object.assign({}, opp, { _fit: afterMatches(fitOf(opp), ts.round, tier.bo), _kit: kitOfNpc(S, opp, ts.cond, ts.tierIdx, rankMap(S)[opp.id]), _love: crowdLove(opp, rankMap(S)[opp.id]) }), oppRank, matchDiff), { cond: ts.cond || "classic", gaps: gapsVs(S, [opp]) }) : null;
     return (
       <motion.div key="tourney" {...screenAnim} style={Object.assign({}, W, { background: C.page })}>
         <style dangerouslySetInnerHTML={{__html:CSS}} />
@@ -1229,7 +1251,7 @@ export default function Arena(props) {
 
         {pm && ts.alive && opp && (
           <div>
-            <PowerBar key={"t-"+ts.round} tier={ts.tierIdx} cond={ts.cond} gear={ts.gear || null} fit={fitOf(S.player)} oppFit={afterMatches(fitOf(opp), ts.round, tier.bo)} oppGear={kitOfNpc(S, opp, ts.cond, ts.tierIdx, rankMap(S)[opp.id])} eventName={ts.eventName} road={ts.log.filter(function(m){ return m.won; }).map(function(m){ return { name: sh(m.opp), id: m.oppId, round: m.round }; })} coach={tipOn("match")} scout={scoutT} onDone={onTR} oppSkill={opp.skill||50} diff={roundDiff(ts.tierIdx, ts.round)} tr={effTr(S.player)} otr={effTr(opp)} playerName={S.pName} playerEmoji="⚔️" oppName={sh(opp.name)} oppEmoji={opp.emoji||"👤"} oppId={opp.id} oppRank={oppRank} fans={fansOf(S.player)} tierColor={tier.col} roundLabel={rNames[ts.round]}
+            <PowerBar key={"t-"+ts.round} tier={ts.tierIdx} cond={ts.cond} gear={ts.gear || null} fit={fitOf(S.player)} oppFit={afterMatches(fitOf(opp), ts.round, tier.bo)} oppGear={kitOfNpc(S, opp, ts.cond, ts.tierIdx, rankMap(S)[opp.id])} eventName={ts.eventName} road={ts.log.filter(function(m){ return m.won; }).map(function(m){ return { name: sh(m.opp), id: m.oppId, round: m.round }; })} coach={tipOn("match")} scout={scoutT} onDone={onTR} oppSkill={opp.skill||50} diff={roundDiff(ts.tierIdx, ts.round)} tr={effTr(S.player)} otr={effTr(opp)} playerName={S.pName} playerEmoji="⚔️" oppName={sh(opp.name)} oppEmoji={opp.emoji||"👤"} oppId={opp.id} oppRank={oppRank} fans={fansOf(S.player)} oppFans={crowdLove(opp, oppRank)} tierColor={tier.col} roundLabel={rNames[ts.round]}
               tierName={ts.eventName || tier.name} youSub={"World #"+pRank} foeSub={"World #"+oppRank+" · "+talentLabel(opp.skill)}
               isFinal={ts.round >= tier.rounds-1} nextLabel={ts.round < tier.rounds-1 ? rNames[ts.round+1] : null} eliminated={true}
               stakes={{ pts: tier.pts[ts.round], money: (tier.money||[])[ts.round]||0 }}
@@ -1277,7 +1299,7 @@ export default function Arena(props) {
           <MatchHeader tierName={"Season " + S.sNum + " Finals"} tierColor="#a855f7" roundLabel={fs.phase==="final"?"World Final":fs.phase==="semis"?"Semifinal":"Group Stage"}
             bestOf={FINALS_BO} rounds={["Group Stage","Semifinal","World Final"]} roundIdx={fs.phase==="final"?2:fs.phase==="semis"?1:0}
             onScout={function(){ setShowScout(true); }} onHelp={function(){ setHelp(true); }} />
-          <PowerBar key={"f-"+fs.phase+"-"+fopp.id} tier={6} road={(fs.log||[]).filter(function(m){ return m.won; }).map(function(m){ return { name: sh(m.opp), round: m.phase === "groups" ? "Groups" : "Semifinal" }; })} scout={scoutF} onDone={onFR} oppSkill={fopp.skill||60} diff={fs.phase==="final"?5:fs.phase==="semis"?4:3} tr={effTr(S.player)} otr={effTr(fopp)} fit={fitOf(S.player)} oppFit={afterMatches(fitOf(fopp), finalsRidden(fs, fopp.id), FINALS_BO)} playerName={S.pName} playerEmoji="⚔️" oppName={sh(fopp.name)} oppEmoji={fopp.emoji||"👤"} oppId={fopp.id} oppRank={fRank} fans={fansOf(S.player)} tierColor={fs.phase==="final"?"#b45309":"#8b5cf6"} roundLabel={fs.phase==="final"?"World Final":fs.phase==="semis"?"Semifinal":"Group Stage"}
+          <PowerBar key={"f-"+fs.phase+"-"+fopp.id} tier={6} road={(fs.log||[]).filter(function(m){ return m.won; }).map(function(m){ return { name: sh(m.opp), round: m.phase === "groups" ? "Groups" : "Semifinal" }; })} scout={scoutF} onDone={onFR} oppSkill={fopp.skill||60} diff={fs.phase==="final"?5:fs.phase==="semis"?4:3} tr={effTr(S.player)} otr={effTr(fopp)} fit={fitOf(S.player)} oppFit={afterMatches(fitOf(fopp), finalsRidden(fs, fopp.id), FINALS_BO)} playerName={S.pName} playerEmoji="⚔️" oppName={sh(fopp.name)} oppEmoji={fopp.emoji||"👤"} oppId={fopp.id} oppRank={fRank} fans={fansOf(S.player)} oppFans={crowdLove(fopp, fRank)} tierColor={fs.phase==="final"?"#b45309":"#8b5cf6"} roundLabel={fs.phase==="final"?"World Final":fs.phase==="semis"?"Semifinal":"Group Stage"}
           tierName={"Season "+S.sNum+" Finals"} youSub={"World #"+pRank} foeSub={talentLabel(fopp.skill)}
           isFinal={fs.phase==="final"} nextLabel={fs.phase==="semis"?"World Final":null} eliminated={fs.phase!=="groups"}
           bestOf={FINALS_BO} initialProgress={fs.match}

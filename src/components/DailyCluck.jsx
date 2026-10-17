@@ -1,6 +1,7 @@
 /* ═══ DailyCluck ═══ The weekly cartoon newspaper: you, your tournament, riders at your level, the world's best */
 
 import * as React from "react";
+import { fmtFollowers as fmtK } from "../engine/social";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
 import { TIERS } from "../models/constants";
@@ -350,6 +351,25 @@ export function CluckPaper(props) {
             {pe.gym && (
               <Body><span style={{ display: "inline-block", marginTop: 6 }}><b>Gym gossip:</b> {pe.gym.p.emoji} {pe.gym.p.name} (#{pe.gym.rank}) {pk(["spent the week training", "was spotted lifting feed sacks at dawn", "has been sprinting her rooster up hills", "skipped bingo to practise"], v, 1)} — <b>+{pe.gym.lv} {pe.gym.lv === 1 ? "level" : "levels"}</b>. {pk(["The rivals aren't resting, dear.", "Best get to the gym yourself.", "Consider yourself warned.", "Something to think about over your cocoa."], v, 3)}</span></Body>
             )}
+          </section>
+        )}
+
+        {/* Knitter: what the grannies posted this week */}
+        {is.knits && is.knits.length > 0 && (
+          <section>
+            <Kicker col="#0e7490">🧶 On Knitter this week</Kicker>
+            {is.knits.map(function (k, i) {
+              return (
+                <div key={i} style={{ display: "flex", gap: 8, padding: "7px 8px", marginTop: 6, border: "1.5px solid " + RULE, background: "rgba(255,255,255,0.55)", borderRadius: 8 }}>
+                  <Face palette={k.isP ? PLAYER_PALETTE : paletteFor(k.id, 500)} size={30} />
+                  <div style={{ flex: 1, minWidth: 0, fontFamily: SERIF }}>
+                    <div style={{ fontSize: 12.5 }}><b>{k.emoji} {k.name}</b> <span style={{ color: "#78716c" }}>@{(k.name || "").split(" ")[0]}Jousts · {fmtK(k.followers)} followers</span></div>
+                    <div style={{ fontSize: 14, lineHeight: 1.35, marginTop: 2 }}>{k.text}</div>
+                    <div style={{ fontSize: 11.5, color: "#78716c", marginTop: 2 }}>❤️ {fmtK(k.likes)} · 🔁 {fmtK(Math.round(k.likes / 6))}</div>
+                  </div>
+                </div>
+              );
+            })}
           </section>
         )}
 

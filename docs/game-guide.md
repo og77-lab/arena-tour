@@ -240,28 +240,25 @@ Prize money buys **one investment per tournament week**. After you make one, the
 
 Lances and saddles from Mavis's shop are bought on the Get ready screen and don't use the weekly investment. The world leaderboard counts everything you've ever earned, so spending never costs you places there.
 
-## 13. Fans & the press
+## 13. Fans, Knitter & the press
 
-Your **fans** (❤️, 0–100, starting at 20) are how much the crowd loves you.
+Your **fans** (❤️, 0–100, starting at 20) are how much the crowd loves you. The **Fans & Knitter** card on Home shows your fans, how much they moved this week and why (*riding +6 · interview +3 · weekly drift −1*), and your Knitter followers.
+
+**Why fans matter**
+- **Sponsors:** one training point every week for each 10 fans.
+- **Wildcards:** 70+ opens the tier above your rank; 80+ gets you into the Grand Slams.
+- **The stands:** the crowd backs whichever rider it loves more — a slightly wider gold zone for the favourite (up to +1.5% of the bar), doubled on match-point strikes. Your rivals have crowds too; the tale of the tape shows both (📣 The stands).
 
 **What moves them**
-- **Riding:** each win +1, a comeback (after losing the first set) +2, a real upset (beating someone ranked well above you) +2, each loss −1. At most +6 a week from riding, plus a title bonus (+4, +10 for a Slam). The closer you are to 100, the harder each point comes.
-- **Interviews:** after every tournament the press asks a question.
-- **Promises:** a bold answer is a promise for the next tournament — reach the semifinals or better and it's +6; fall short and it's −5.
+- **Riding:** each win +1, a comeback +2, a real upset +2, each loss −1 (at most +6 a week), plus a title bonus (+4, +10 for a Slam). The closer you are to 100, the harder each point comes.
+- **Interviews:** see below.
+- **Promises:** a bold answer is a promise for the next tournament — reach the semifinals and it's +6; fall short and it's −5.
 - **Revenge:** beating your rival +3.
-- **Drift:** each week fans drift a little towards a baseline set by your fame — 30 for most, 40 in the top 200, 50 in the top 50, 60 in the top 10.
+- **Drift:** each week fans drift a little towards a baseline set by your fame (30 for most, up to 60 in the top 10) — **raised by your Knitter followers** (1K followers +3, 10K +6, 100K +9).
 
-**What they buy you**
+**🧶 Knitter** is the granny social network, where posts are called *knits*. Everyone on tour has followers. Yours grow with wins, titles (a Slam title brings thousands), well-liked interviews and viral moments, faster the more famous you are. The paper prints the week's best knits — yours, the champion's and your rival's.
 
-| Fans | Perk |
-|---|---|
-| Any | Sponsor TP every week (one per 10 fans) |
-| 60+ | Crowd roar: +1% gold zone on match-point strikes |
-| 70+ | Wildcard into the tier above |
-| 80+ | Wildcard into the Grand Slams |
-| 85+ | Crowd roar: +2% |
-
-**The press conference.** Pick one of three funny answers — cheeky digs at your rival, daft excuses, funny-but-sporting lines, or bold promises. Each outlet's audience has its own taste, nobody likes the same kind of joke twice in a row, and now and then an answer goes viral. There's no answer that always works.
+**The press conference.** Before you answer you see what this outlet's readers love and dislike, and every answer is labelled: 😏 cheeky dig, 🙈 daft excuse, 😇 good sport, 💪 bold promise. There's no dice: the result comes from the readers' taste, the moment (a humble winner, a gracious loser, a dig at your rival…) and whether you repeat last week's kind of answer. A well-liked answer can go viral and double. Afterwards the screen shows every point and why.
 
 ## 14. The Daily Cluck
 

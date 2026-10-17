@@ -10,7 +10,7 @@ import MatchOutro from "./MatchOutro";
 import SetBreak from "./SetBreak";
 import JoustStage from "./JoustStage";
 import { PLAYER_PALETTE, paletteFor, withKit } from "./Rider";
-import { crowdRoar } from "../engine/fans";
+import { crowdEdge } from "../engine/social";
 import { CoachBubble } from "./Coach";
 import FinalOutro from "./FinalOutro";
 import { conditionOf, softZone } from "../engine/events"
@@ -219,8 +219,10 @@ export default function PowerBar(props) {
   var deciding = setsWon === need - 1 && setsLost === need - 1;
   /* Crowd roar: on the last strike of a set with the match on the line, a fan favourite gets a wider gold zone */
   var onTheLine = cnt >= STRIKES_PER_SET - 1 && (setsWon === need - 1 || setsLost === need - 1);
-  var roar = onTheLine ? crowdRoar(props.fans || 0) : 0;
-  var sw = swBase + roar;
+  /* The stands back the rider they love more — a steady edge, doubled with the match on the line */
+  var CROWD = crowdEdge(props.fans || 0, props.oppFans != null ? props.oppFans : 0);
+  var roar = onTheLine ? CROWD.me : 0;
+  var sw = swBase + CROWD.me + roar;
 
   var youName = props.playerName || "YOU";
   var oppName = props.oppName || "OPPONENT";
@@ -274,7 +276,7 @@ export default function PowerBar(props) {
     /* Her strike lands on the same bar. Talent sets how tightly she groups around the centre; the round's speed
        (and how far into the match it is) spreads her out just as it does you. Her training already works against
        you through the stat gaps above, so her own zone and floor are the plain ones for this round. */
-    var oSw = softZone(13 - props.diff * 1.5 + COND.zone + OFT.zone + OKIT.zone);
+    var oSw = softZone(13 - props.diff * 1.5 + COND.zone + OFT.zone + OKIT.zone) + CROWD.her * (onTheLine ? 2 : 1);
     var oSpd = ((2.4 + props.diff * 0.4) * COND.speed * OKIT.speed + (sets.length * 0.18 + myH.length * 0.3) * COND.accel * OFT.accel * OKIT.accel) * OFT.speed;
     var oSigma = Math.max(1.5, 9.5 - (props.oppSkill || 50) * 0.075) * oSpd / 2.4;
     var oPos = Math.max(0, Math.min(100, ctr + gauss() * oSigma));
@@ -369,7 +371,7 @@ export default function PowerBar(props) {
   function finish() {
     if (!res || finished.current || Date.now() - doneAt.current < 1200) return;
     finished.current = true;
-    props.onDone(res.w, res.pa, res.oa, res.setsWon + "-" + res.setsLost, res.sets.map(function (s) { return s.won ? "W" : "L"; }).join(""), { gold: goldRef.current.total, flawless: goldRef.current.flawless, sets: res.sets.map(function (s) { return [Math.round(avg(s.my)), Math.round(avg(s.op))]; }) });
+    props.onDone(res.w, res.pa, res.oa, res.setsWon + "-" + res.setsLost, res.sets.map(function (s) { return s.won ? "W" : "L"; }).join(""), { gold: goldRef.current.total, flawless: goldRef.current.flawless, sets: res.sets.map(function (s) { return [s.my.reduce(function (a, b) { return a + b; }, 0), s.op.reduce(function (a, b) { return a + b; }, 0)]; }) });
   }
 
   /* Space / Enter drives every phase */

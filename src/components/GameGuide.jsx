@@ -286,18 +286,19 @@ function body(id) {
         <span key="b"><B>Interviews:</B> after every tournament the press asks a question (see below).</span>,
         <span key="c"><B>Promises:</B> a bold answer is a promise for the next tournament — reach the semifinals or better and it's +6; fall short and it's −5.</span>,
         <span key="d"><B>Revenge:</B> beating your rival +3.</span>,
-        <span key="e"><B>Drift:</B> each week fans drift a little towards a baseline set by your fame — 30 for most, 40 in the top 200, 50 in the top 50, 60 in the top 10.</span>
+        <span key="e"><B>Drift:</B> each week fans drift a little towards a baseline set by your fame — 30 for most, up to 60 in the top 10 — raised by your Knitter followers (1K +3, 10K +6, 100K +9).</span>
       ]} />
       <H>What they buy you</H>
       <Table head={["Fans", "Perk"]} rows={[
         ["Any", "Sponsor TP every week (one per 10 fans)"],
-        ["60+", "Crowd roar: +1% gold zone on match-point strikes"],
         ["70+", "Wildcard into the tier above"],
         ["80+", "Wildcard into the Grand Slams"],
-        ["85+", "Crowd roar: +2%"]
+        ["More than her", "The stands back you: up to +1.5% gold zone, doubled on match-point strikes (and the same for her if the crowd loves her more)"]
       ]} />
+      <H>🧶 Knitter</H>
+      <P>The granny social network (posts are <i>knits</i>). Everyone has followers; yours grow with wins, titles, liked interviews and viral moments, faster the more famous you are. They lift the level your fans settle at, and the paper prints the week's best knits.</P>
       <H>The press conference</H>
-      <P>Pick one of three funny answers — cheeky digs at your rival, daft excuses, funny-but-sporting lines, or bold promises. Each outlet's audience has its own taste, nobody likes the same kind of joke twice in a row, and now and then an answer goes viral. There's no answer that always works.</P>
+      <P>Before you answer you see what this outlet's readers love and dislike, and every answer is labelled: 😏 cheeky dig, 🙈 daft excuse, 😇 good sport, 💪 bold promise. No dice: the result comes from the readers' taste, the moment (a humble winner, a gracious loser, a dig at your rival) and whether you repeat last week's kind of answer. A well-liked answer can go viral and double. Afterwards you see every point and why.</P>
     </>);
 
     case "paper": return (<>

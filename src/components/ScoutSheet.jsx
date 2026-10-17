@@ -74,7 +74,7 @@ export default function ScoutSheet(props) {
             var head = i === 0 || sc.stats[i - 1].who !== s.who;
             return (
               <div key={s.label}>
-                {head && s.who && (<div style={{ fontSize: 12, fontWeight: 900, color: C.text, margin: i ? "8px 0 0" : "2px 0 0" }}>{s.who === "granny" ? "👵 Granny" : s.who === "fitness" ? "💪 Fitness today" : "🐓 Rooster"}</div>)}
+                {head && s.who && (<div style={{ fontSize: 12, fontWeight: 900, color: C.text, margin: i ? "8px 0 0" : "2px 0 0" }}>{s.who === "granny" ? "👵 Granny" : s.who === "fitness" ? "💪 Fitness today" : s.who === "crowd" ? "📣 The stands" : "🐓 Rooster"}</div>)}
                 <ScoutStatRow s={s} first={head} />
               </div>
             );

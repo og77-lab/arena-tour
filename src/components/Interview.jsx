@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
 import { FONT } from "../ui/theme";
 import { Face, PLAYER_PALETTE } from "./Rider";
-import { scoreAnswer } from "../engine/interview";
+import { scoreAnswer, TONE_LABEL } from "../engine/interview";
 import { REDUCED_MOTION } from "./fx";
 import { playClash, playDefeat } from "../sounds";
 
@@ -34,7 +34,7 @@ export default function Interview(props) {
 
   function choose(a) {
     if (pick) return;
-    var outcome = scoreAnswer(iv, a.tone, props.recentTones);
+    var outcome = scoreAnswer(iv, a.tone, props.recentTones, null, props.fans);
     var after = Math.max(0, Math.min(100, props.fans + outcome.delta));
     var issue = props.onAnswer(a, outcome);
     setPick(a); setRes({ outcome: outcome, issue: issue, after: after });
@@ -52,6 +52,15 @@ export default function Interview(props) {
             {iv.outlet.icon} {iv.outlet.name.toUpperCase()} · LIVE
           </span>
           <div style={{ fontSize: 11, fontWeight: 900, letterSpacing: 3, color: "#93c5fd", marginTop: 10 }}>POST-TOURNAMENT PRESS</div>
+          {iv.outlet.likes && (function () {
+            var ks = Object.keys(iv.outlet.likes).sort(function (a, b) { return iv.outlet.likes[b] - iv.outlet.likes[a]; });
+            var love = ks.filter(function (k) { return iv.outlet.likes[k] >= 2; }), hate = ks.filter(function (k) { return iv.outlet.likes[k] < 0; });
+            return (<div style={{ marginTop: 8, fontSize: 12.5, fontWeight: 800, color: "#e0e7ff", lineHeight: 1.5 }}>
+              Their readers love {love.map(function (k) { return TONE_LABEL[k].icon + " " + TONE_LABEL[k].plural; }).join(" and ") || "a bit of everything"}
+              {hate.length ? (<span style={{ color: "#fca5a5" }}> · dislike {hate.map(function (k) { return TONE_LABEL[k].icon + " " + TONE_LABEL[k].plural; }).join(" and ")}</span>) : null}
+              {(props.recentTones || []).length ? (<div style={{ color: "#93c5fd", fontWeight: 700 }}>Repeat the same kind of answer as last time and it counts less.</div>) : null}
+            </div>);
+          })()}
         </div>
         {coachOn && (
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 12, background: "rgba(255,255,255,0.1)", border: "1.5px solid #fde68a", borderRadius: 12, padding: "7px 10px", color: "#fff", fontSize: 13, fontWeight: 700, lineHeight: 1.4 }}>
@@ -81,6 +90,7 @@ export default function Interview(props) {
                 initial={{ x: 30, opacity: 0 }} animate={{ x: 0, opacity: dim ? 0.35 : 1 }} transition={{ delay: 0.15 + i * 0.08 }}
                 style={{ textAlign: "left", fontFamily: FONT, fontSize: 15, fontWeight: 700, lineHeight: 1.35, padding: "12px 14px", borderRadius: 14, cursor: pick ? "default" : "pointer",
                   background: chosen ? "#fde68a" : "rgba(255,255,255,0.1)", color: chosen ? "#1c1917" : "#fff", border: "2px solid " + (chosen ? "#3f2a1d" : "rgba(255,255,255,0.3)") }}>
+                <span style={{ display: "block", fontSize: 11, fontWeight: 900, letterSpacing: 0.5, marginBottom: 3, color: chosen ? "#57534e" : "#fde68a" }}>{(TONE_LABEL[a.tone] || {}).icon} {((TONE_LABEL[a.tone] || {}).name || "").toUpperCase()}</span>
                 “{a.text}”
               </motion.button>
             );
@@ -95,6 +105,9 @@ export default function Interview(props) {
               ❤️ {res.outcome.delta >= 0 ? "+" : "−"}{Math.abs(res.outcome.delta)}
             </div>
             <div style={{ fontSize: 14, fontWeight: 800, color: "#1c1917" }}>{res.outcome.reaction}</div>
+            <div style={{ fontSize: 12.5, color: "#44403c", marginTop: 6, textAlign: "left", lineHeight: 1.5 }}>
+              {(res.outcome.parts || []).map(function (x, i) { return (<div key={i}><b style={{ color: x.v > 0 ? "#15803d" : "#b91c1c" }}>{x.v > 0 ? "+" : "−"}{Math.abs(x.v)}</b> {x.why}</div>); })}
+            </div>
             <div style={{ fontSize: 12, fontWeight: 700, color: "#57534e", marginTop: 4 }}>Fans now <b style={{ color: "#1c1917" }}>{after}</b> / 100{pick && pick.tone === "bold" ? " · They'll remember that promise next week." : ""}</div>
             <button onClick={function () { props.onDone(res.issue); }}
               style={{ marginTop: 12, width: "100%", background: "#1c1917", color: "#f4ecd8", border: "none", borderRadius: 12, padding: "12px 16px", fontFamily: "Georgia, serif", fontWeight: 900, fontSize: 15, letterSpacing: 1, cursor: "pointer" }}>

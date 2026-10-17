@@ -27,6 +27,8 @@ export default function SetBreak(props) {
   var won = set.won;
   var need = props.need, w = props.setsWon, l = props.setsLost;
   var myAvg = avg(set.my), opAvg = avg(set.op), margin = myAvg - opAvg;
+  /* Sets are decided on total points (a tie goes to tie-break strikes), so that is what we show */
+  var mySum = set.my.reduce(function (a, b) { return a + b; }, 0), opSum = set.op.reduce(function (a, b) { return a + b; }, 0), by = Math.abs(mySum - opSum);
   var perfects = set.my.filter(function (s) { return s >= 85; }).length;
   var best = Math.round(Math.max.apply(null, set.my));
   var _ready = useState(false), ready = _ready[0], setReady = _ready[1];
@@ -74,11 +76,11 @@ export default function SetBreak(props) {
         </motion.div>
 
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.35 }} style={{ marginTop: 14, fontSize: 26, fontWeight: 900, color: "#fff" }}>
-          <span style={{ color: "#fde68a" }}><CountUp to={Math.round(myAvg)} duration={500} delay={350} /></span>
+          <span style={{ color: "#fde68a" }}><CountUp to={mySum} duration={500} delay={350} /></span>
           <span style={{ opacity: 0.4, margin: "0 10px", fontSize: 18 }}>–</span>
-          <span style={{ color: "#fca5a5" }}><CountUp to={Math.round(opAvg)} duration={500} delay={350} /></span>
+          <span style={{ color: "#fca5a5" }}><CountUp to={opSum} duration={500} delay={350} /></span>
         </motion.div>
-        <div style={{ fontSize: 10, color: "rgba(255,255,255,0.8)", fontWeight: 700, letterSpacing: 2 }}>SET AVERAGE</div>
+        <div style={{ fontSize: 10, color: "rgba(255,255,255,0.8)", fontWeight: 700, letterSpacing: 2 }}>SET TOTAL · {won ? "WON" : "LOST"} BY {by} POINT{by === 1 ? "" : "S"}{set.my.length > 3 ? " (AFTER TIE-BREAK)" : ""}</div>
         <div style={{ fontSize: 12, color: "rgba(255,255,255,0.75)", marginTop: 6 }}>
           {perfects > 0 ? perfects + " perfect " + (perfects === 1 ? "strike" : "strikes") + " · " : ""}Best strike {best}
         </div>

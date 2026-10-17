@@ -1,7 +1,8 @@
-/* ═══ Engine / Interview ═══ Post-tournament press. Every answer is a joke, but each carries a hidden tone:
+/* ═══ Engine / Interview ═══ Post-tournament press. Every answer is a joke, and each carries a tone (shown on it):
    sass (a cheeky dig at a rival), excuse (a daft excuse — or a daft secret when you won), sporting (funny but gracious)
    and bold (a funny promise, checked against the next tournament). How the crowd takes it depends on who's asking
-   this week (each outlet's audience has hidden tastes), the context, repetition, and a little luck.
+   this week (each outlet's readers have tastes, shown before you answer), the context and repetition — no dice.
+   Now and then a well-liked answer goes viral and the crowd's love doubles.
    Lines the player has already seen are skipped until the pool runs dry, so the press never sounds like a loop. */
 
 var OUTLETS = [
@@ -185,7 +186,7 @@ export function makeInterview(ctx, vars, rnd, seen) {
   var tones = shuffle(TONES, rnd).slice(0, 3);
   var lines = tones.map(function (t) { return { tone: t, line: fresh(ANSWERS[t][group], vars, seen, rnd) }; });
   return {
-    ctx: ctx, group: group, outlet: { name: outlet.name, icon: outlet.icon },
+    ctx: ctx, group: group, outlet: { name: outlet.name, icon: outlet.icon, likes: outlet.likes },
     question: fill(q, vars),
     used: [q].concat(lines.map(function (l) { return l.line; })),
     answers: lines.map(function (l) { return { tone: l.tone, text: fill(l.line, vars) }; })
@@ -197,24 +198,38 @@ var GOOD = ["The crowd loved it.", "Fans are chanting your name.", "That clip is
 var BAD = ["That one fell flat.", "Critics call it a bit much.", "The stands went quiet.", "Even your rooster looked embarrassed.",
   "Somebody coughed. Loudly.", "The bingo hall is not amused.", "A pensioner in row two tutted audibly.", "Tumbleweed. And a single cluck."];
 
-/* Returns { delta, viral, reaction } — revealed only after the player has chosen */
-export function scoreAnswer(iv, tone, recentTones, rnd) {
+/* What each tone is, for the labels on the answers and the readers' tastes */
+export var TONE_LABEL = {
+  sass: { icon: "😏", name: "Cheeky dig", plural: "cheeky digs" },
+  excuse: { icon: "🙈", name: "Daft excuse", plural: "daft excuses" },
+  sporting: { icon: "😇", name: "Good sport", plural: "good sports" },
+  bold: { icon: "💪", name: "Bold promise", plural: "bold promises" }
+};
+
+/* Returns { delta, viral, parts, reaction } — parts explain every point */
+export function scoreAnswer(iv, tone, recentTones, rnd, fans) {
   rnd = rnd || Math.random;
   var o = OUTLETS.filter(function (x) { return x.name === iv.outlet.name; })[0] || OUTLETS[0];
-  var d = o.likes[tone] || 0;
-  if (tone === "bold" && iv.group === "low") d -= 2;
-  if (tone === "sass" && iv.group === "high") d -= 1;
-  if (tone === "sass" && iv.ctx === "rival") d += 2;
-  if (tone === "sporting" && iv.group === "low") d += 1;
-  if (tone === "excuse" && iv.ctx === "early") d += 1;
-  if (tone === "excuse" && iv.ctx === "final") d -= 1;
+  var parts = [], L = TONE_LABEL[tone] || { name: tone };
+  function add(v, why) { if (v) parts.push({ v: v, why: why }); }
+  add(o.likes[tone] || 0, iv.outlet.name + " readers " + ((o.likes[tone] || 0) > 0 ? "like" : "don't like") + " " + L.plural);
+  if (tone === "bold" && iv.group === "low") add(-2, "big talk after a loss");
+  if (tone === "sass" && iv.group === "high") add(-1, "a winner who gloats");
+  if (tone === "sass" && iv.ctx === "rival") add(2, "a dig at your rival");
+  if (tone === "sporting" && iv.group === "low") add(1, "gracious in defeat");
+  if (tone === "sporting" && iv.group === "high") add(1, "a humble winner");
+  if (tone === "excuse" && iv.ctx === "early") add(1, "everyone loves a daft excuse after an early exit");
+  if (tone === "excuse" && iv.ctx === "final") add(-1, "excuses after a final");
   var rep = (recentTones || []).filter(function (t) { return t === tone; }).length;
-  d -= rep * 2;
-  d += Math.round(rnd() * 4 - 2);
-  var viral = rnd() < 0.08;
-  if (viral) d = Math.round(d * 2.5) || (rnd() < 0.5 ? 6 : -6);
+  add(-rep * 2, "same kind of answer as last time");
+  var d = parts.reduce(function (a, x) { return a + x.v; }, 0);
+  /* a liked answer can go viral: it doubles (never the other way) */
+  var viral = d > 0 && rnd() < 0.12;
+  if (viral) { parts.push({ v: d, why: "it went viral!" }); d *= 2; }
+  /* the closer to 100, the harder each fan comes (same rule as on the lanes) */
+  if (d > 0 && fans != null) { var k = Math.max(0.3, Math.min(1, (100 - fans) / 80)), d2 = Math.max(1, Math.round(d * k)); if (d2 < d) { parts.push({ v: d2 - d, why: "your fans are already near the top" }); d = d2; } }
   var pool = d >= 0 ? GOOD : BAD;
-  return { delta: d, viral: viral, reaction: (viral ? "It went viral! " : "") + pool[Math.floor(rnd() * pool.length)] };
+  return { delta: d, viral: viral, parts: parts, reaction: pool[Math.floor(rnd() * pool.length)] };
 }
 
 /* A bold answer is a promise for the next tournament: kept = semifinal or better */

@@ -8,7 +8,7 @@ export function clampFans(f) { return Math.max(0, Math.min(100, Math.round(f)));
 /* Fans slowly drift back toward a baseline each week (10% of the way). Fame sets the baseline:
    the world's best always have a following, an unknown granny starts from a handful of loyal neighbours */
 export function fanBaseline(rank) { return !rank ? 30 : rank <= 10 ? 60 : rank <= 50 ? 50 : rank <= 200 ? 40 : 30; }
-export function weeklyDrift(f, rank) { return f + Math.round((fanBaseline(rank) - f) * 0.1); }
+export function weeklyDrift(f, rank, lift) { return f + Math.round((fanBaseline(rank) + (lift || 0) - f) * 0.1); }
 
 /* How the week's riding moved the crowd. log = this tournament's matches (see onTR), fans = support before the week.
    Wins, comebacks and real upsets (beating someone ranked well above you, not just anyone when you're near the bottom)
