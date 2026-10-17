@@ -30,10 +30,10 @@ export function pRankOf(S) {
 }
 
 /* NPC vs NPC bracket resolution — skill + training with a random roll */
-import { fatiguePenalty } from "../engine/fitness";
+import { fatiguePenalty, effTr } from "../engine/fitness";
 
 export function nW(a, b, bonus) {
-  var ta = a.tr || {}, tb = b.tr || {};
+  var ta = a.inj ? effTr(a) : (a.tr || {}), tb = b.inj ? effTr(b) : (b.tr || {});
   var bA = ((ta.r||0)+(ta.p||0)+(ta.f||0)+(ta.s||0)+(ta.g||0)) * 0.9;
   var bB = ((tb.r||0)+(tb.p||0)+(tb.f||0)+(tb.s||0)+(tb.g||0)) * 0.9;
   var sA = Math.min(95, 55 + ((a.skill||50)+bA) * 0.4);

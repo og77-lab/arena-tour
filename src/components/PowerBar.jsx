@@ -9,7 +9,7 @@ import MatchIntro from "./MatchIntro";
 import MatchOutro from "./MatchOutro";
 import SetBreak from "./SetBreak";
 import JoustStage from "./JoustStage";
-import { PLAYER_PALETTE, paletteFor } from "./Rider";
+import { PLAYER_PALETTE, paletteFor, withKit } from "./Rider";
 import { crowdRoar } from "../engine/fans";
 import { CoachBubble } from "./Coach";
 import FinalOutro from "./FinalOutro";
@@ -227,8 +227,9 @@ export default function PowerBar(props) {
   var youEmoji = props.playerEmoji || "⚔️";
   var oppEmoji = props.oppEmoji || "👤";
   var tierColor = props.tierColor || "#f59e0b";
-  var youPal = PLAYER_PALETTE;
-  var foePal = paletteFor(props.oppId, props.oppRank);
+  /* Both riders carry this week's kit into every scene: the walk-out, the lanes, the podium */
+  var youPal = withKit(PLAYER_PALETTE, props.gear);
+  var foePal = withKit(paletteFor(props.oppId, props.oppRank), props.oppGear);
 
   /* Scoring, the same for both riders: where the lance lands on the bar decides the score.
      Inside the gold zone: 100 on the centre line, sliding to 85 at the zone's edge.

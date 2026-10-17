@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import { TIERS } from "../models/constants";
 import { sh } from "../models/formulas";
 import { quote } from "../models/persona";
-import { Face, Rider, PLAYER_PALETTE, paletteFor } from "./Rider";
+import { Face, Rider, PLAYER_PALETTE as BASE_PAL, paletteFor, withKit } from "./Rider";
 import { REDUCED_MOTION } from "./fx";
 import { playPaperFold } from "../sounds";
 
@@ -105,19 +105,19 @@ function WorldLead(props) {
       deck: pk(["The old queen has been sent to the back of the bus.", "The golden crown changes heads for the first time in weeks.", "Somewhere, a former world number one is sulking into her scones."], v, 2),
       body: nm(L.p) + " tops the world rankings this week. " + pk(["The view from the top is lovely, she says, if a bit draughty.", "She celebrated with a second biscuit. Living dangerously.", "Rivals have already started training twice as hard."], v, 1) };
   } else if (L.type === "upsetTitle") {
-    var U = L.upset, T = TIERS[L.tier].name;
+    var U = L.upset, T = U.event || TIERS[L.tier].name;
     s = { kick: pk([T + " shock", "Cinderella story", "Nobody saw it coming"], v, 0), p: U.winner, pose: "cheer",
       h: pk(["NOBODY SAW " + up(sh(U.winner.name)) + " COMING", up(sh(U.winner.name)) + " STUNS " + up(T), "CINDERELLA ON A ROOSTER", "FROM NOWHERE TO " + up(T) + " CHAMPION"], v, 1),
-      deck: "World #" + U.wRank + " " + sh(U.winner.name) + " won a " + T + " title as an outsider. Top seed " + nm(U.fav) + " (#" + U.favRank + ") was left eating dust.",
+      deck: "World #" + U.wRank + " " + sh(U.winner.name) + " won " + (U.event ? "the " + U.event : "a " + T + " title") + " as an outsider. Top seed " + nm(U.fav) + " (#" + U.favRank + ") was left eating dust.",
       body: pk(["Bookmakers are reportedly lying down in a dark room.", "Her rooster was 200-to-1. He'd like that noted.", "\"I just closed my eyes and pointed the lance,\" she told reporters."], v, 2) };
   } else if (L.type === "shock") {
-    var K = L.shock, TT = TIERS[K.tier].name;
+    var K = L.shock, TT = K.event || TIERS[K.tier].name;
     s = { kick: pk(["Upset of the week", "Giant-killing!", "Shock result"], v, 0), p: K.w, pose: "cheer", fallen: K.l,
       h: pk([up(sh(K.w.name)) + " TOPPLES " + up(sh(K.l.name)) + "!", "DAVID AND GOLIATH, ON ROOSTERBACK", up(sh(K.l.name)) + " DUMPED BY WORLD #" + K.wRank, "THE UPSET THAT SHOOK THE HENHOUSE"], v, 1),
-      deck: "In the " + K.round + " of a " + TT + ", world #" + K.wRank + " " + sh(K.w.name) + " knocked out #" + K.lRank + " " + sh(K.l.name) + ".",
+      deck: "In the " + K.round + " of " + (K.event ? "the " + K.event : "a " + TT) + ", world #" + K.wRank + " " + sh(K.w.name) + " knocked out #" + K.lRank + " " + sh(K.l.name) + ".",
       body: pk(["Several spectators had to be revived with smelling salts and a custard cream.", sh(K.l.name) + " has asked for the lance to be inspected.", "The losing rooster is said to be \"absolutely mortified\"."], v, 3) };
   } else {
-    var TB = TIERS[L.tier].name;
+    var TB = (L.winner && L.winner.event) || TIERS[L.tier].name;
     s = { kick: TB, p: L.winner, pose: "cheer",
       h: pk([up(sh(L.winner.name)) + " CONQUERS THE " + up(TB), up(TB) + " GOLD FOR " + up(sh(L.winner.name)), up(sh(L.winner.name)) + " IS THE WEEK'S BIG WINNER"], v, 1),
       deck: "The week's most prestigious title went to " + nm(L.winner) + (L.winner.rank ? " (world #" + L.winner.rank + ")" : "") + (L.count > 1 ? ", best of " + L.count + " events at this level." : "."),
@@ -194,6 +194,7 @@ function Creases(props) {
 /* The paper itself — also shown inline in the News tab (inline: no spin, no close button) */
 export function CluckPaper(props) {
   var is = props.issue, y = is.special ? null : is.you, w = is.world, pe = is.peers || {}, ev = is.myEvent || {};
+  var PLAYER_PALETTE = withKit(BASE_PAL, y && y.kit);
   var v = is.v != null ? is.v : Math.floor((is.at || 0) / 1000) % 997;
   var lead = y ? leadStory(y, v) : null;
   var youLead = !is.lead || is.lead.type === "you";
@@ -371,7 +372,7 @@ export function CluckPaper(props) {
             })}
           </div>
           {w.bigEvent && w.bigEvent.winner && String(w.bigEvent.winner.id) !== String(ledWith) && (
-            <Body><span style={{ display: "inline-block", marginTop: 8 }}><b>{TIERS[w.bigEvent.tier].name}:</b> {w.bigEvent.winner.emoji} {sh(w.bigEvent.winner.name)}{w.bigEvent.rank ? " (#" + w.bigEvent.rank + ")" : ""} took the week's biggest title{w.bigEvent.count > 1 ? " among " + w.bigEvent.count + " events" : ""}.</span></Body>
+            <Body><span style={{ display: "inline-block", marginTop: 8 }}><b>{w.bigEvent.winner.event || TIERS[w.bigEvent.tier].name}:</b> {w.bigEvent.winner.emoji} {sh(w.bigEvent.winner.name)}{w.bigEvent.rank ? " (#" + w.bigEvent.rank + ")" : ""} took the week's biggest title{w.bigEvent.count > 1 ? " among " + w.bigEvent.count + " events" : ""}.</span></Body>
           )}
         </section>
 

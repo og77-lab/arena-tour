@@ -1,7 +1,7 @@
 /* ═══ Profile ═══ Player/NPC profile modal: stats, talent bar, training, h2h, career timeline */
 
 import { TIERS, RN5, RN6, STATS } from "../models/constants";
-import { Rider, PLAYER_PALETTE, paletteFor } from "./Rider";
+import { Rider, PLAYER_PALETTE, paletteFor, withKit } from "./Rider";
 import { roosterName, trait, quote, standing } from "../models/persona";
 import { useState } from "react";
 
@@ -24,7 +24,7 @@ export default function Profile(props) {
           <button onClick={onClose} aria-label="Close" style={{ position: "absolute", top: 8, right: 8, background: "rgba(255,255,255,0.8)", border: "1.5px solid #3f2a1d", color: "#3f2a1d", width: 30, height: 30, borderRadius: 15, fontSize: 15, fontWeight: 900, cursor: "pointer", lineHeight: "26px", padding: 0 }}>✕</button>
           <div style={{ display: "flex", justifyContent: "center" }}>
             <div style={{ filter: "drop-shadow(0 6px 8px rgba(63,42,29,0.25))" }}>
-              <Rider palette={p.isP ? PLAYER_PALETTE : paletteFor(p.id, rank)} width={190} pose={rank === 1 ? "cheer" : "idle"} flip={!p.isP} />
+              <Rider palette={p.isP ? withKit(PLAYER_PALETTE, p.kit) : paletteFor(p.id, rank)} width={190} pose={rank === 1 ? "cheer" : "idle"} flip={!p.isP} />
             </div>
           </div>
           <div style={{ textAlign: "center", marginTop: 4 }}>

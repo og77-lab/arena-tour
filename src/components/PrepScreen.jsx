@@ -6,6 +6,7 @@ import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
 import { GEAR, BY_ID, BASIC, itemFx, kitFx, priceOf, usesLeft, COND_LABEL } from "../engine/gear";
 import { effectsOf, EffectList, Legend } from "./Effect";
+import { LaneRow } from "./Lanes";
 import { conditionOf, FIELDS } from "../engine/events";
 import { TIERS } from "../models/constants";
 import { C, FONT, display, label, card, button, money } from "../ui/theme";
@@ -68,7 +69,7 @@ export default function PrepScreen(props) {
           <span style={{ flex: 1 }} />
           <button onClick={function () { setLegend(!legend); }} style={{ fontFamily: FONT, fontSize: 12, fontWeight: 900, color: C.goldInk, background: "none", border: "none", cursor: "pointer", padding: 0, whiteSpace: "nowrap" }}>ⓘ {legend ? "Hide" : "What these mean"}</button>
         </div>
-        {cd && (<div style={{ marginTop: 5 }}><EffectList list={effectsOf({ zone: cd.zone, speed: cd.speed, accel: cd.accel, w: cd.w })} empty="☀️ Classic lanes — nothing changes" /></div>)}
+        {cd && (<div style={{ marginTop: 6 }}><LaneRow cond={ev.cond} w={44} h={32} /></div>)}
         <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
           {[["locker", "🎒 Your locker"], ["shop", "🛒 Mavis's shop"]].map(function (t) {
             var on = tab === t[0];

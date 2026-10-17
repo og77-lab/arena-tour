@@ -1,6 +1,6 @@
 /* ═══ Fitness ═══ The two meters (granny, rooster), big on Home and small everywhere else */
 
-import { fitOf, fatigueFx, fitColor, fitWord, recoveryOf } from "../engine/fitness";
+import { fitOf, fatigueFx, fitColor, fitWord, recoveryOf, injuryText, INJURY_LINE } from "../engine/fitness";
 import { effectsOf, EffectList } from "./Effect";
 import { C, FONT, label, card } from "../ui/theme";
 
@@ -26,14 +26,17 @@ export function FitnessCard(props) {
     <div onClick={props.onTrain} style={card({ padding: "10px 12px", cursor: props.onTrain ? "pointer" : "default", fontFamily: FONT })}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 6 }}>
         <span style={label(C.goldInk)}>Fitness</span>
-        <span style={{ fontSize: 11, fontWeight: 800, color: C.textSoft }}>🔋 +{Math.round(recoveryOf(b, false))}% back after each tournament</span>
+        <span style={{ fontSize: 11, fontWeight: 800, color: C.textSoft }}>Next recovery 👵+{Math.round(recoveryOf(b, false, f.g))} 🐓+{Math.round(recoveryOf(b, false, f.r))}</span>
       </div>
+      {p.fitEnd && (<div style={{ fontSize: 11.5, fontWeight: 800, color: C.textSoft, marginBottom: 5 }}>Last tournament you finished at <span style={{ color: fitColor(p.fitEnd.g) }}>👵{p.fitEnd.g}%</span> <span style={{ color: fitColor(p.fitEnd.r) }}>🐓{p.fitEnd.r}%</span> — recovered since.</div>)}
       <Meter icon="👵" label="Granny" v={f.g} />
       {gChips.length > 0 && (<div style={{ margin: "3px 0 5px" }}><EffectList list={gChips} /></div>)}
       <Meter icon="🐓" label="Rooster" v={f.r} />
       {rChips.length > 0 && (<div style={{ margin: "3px 0 2px" }}><EffectList list={rChips} /></div>)}
       {!gChips.length && !rChips.length && (<div style={{ fontSize: 12, color: C.greenInk, fontWeight: 800, marginTop: 4 }}>Both fresh — tiredness changes nothing yet.</div>)}
-      <div style={{ fontSize: 11, color: C.textMuted, marginTop: 5, lineHeight: 1.35 }}>Every match tires you; fitness only comes back between tournaments. Physio in the Train tab.</div>
+      {(p.inj || []).map(function (x) { return (<div key={x.id} style={{ fontSize: 12, fontWeight: 900, color: C.redInk, background: "#fef2f2", border: "1.5px solid #fecaca", borderRadius: 8, padding: "4px 8px", marginTop: 5 }}>🩹 {injuryText(x)}</div>); })}
+      {Math.min(f.g, f.r) < INJURY_LINE && (<div style={{ fontSize: 12, fontWeight: 900, color: C.redInk, marginTop: 5 }}>⚠️ Under {INJURY_LINE}%: every match now risks an injury. Book the physio or skip a Slam to rest.</div>)}
+      <div style={{ fontSize: 11, color: C.textMuted, marginTop: 5, lineHeight: 1.35 }}>Every match tires you and only part of it comes back after a tournament, so tiredness builds up. 🔋 Bounce-back and the physio (Train tab) win it back.</div>
     </div>
   );
 }

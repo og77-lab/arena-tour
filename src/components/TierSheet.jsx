@@ -7,6 +7,7 @@ import { CONDITIONS, FIELDS } from "../engine/events";
 import { TIERS } from "../models/constants";
 import { C, FONT, display, label, card, money } from "../ui/theme";
 import { effectsOf, EffectList, Legend } from "./Effect";
+import { LaneTile, CompareLanes } from "./Lanes";
 
 export default function TierSheet(props) {
   var avail = props.available || [];
@@ -14,6 +15,7 @@ export default function TierSheet(props) {
   var events = props.events || [];
   var [open, setOpen] = useState(props.paid >= 0 ? props.paid : best);
   var [legend, setLegend] = useState(false);
+  var [lanes, setLanes] = useState(false);
   function evOf(ti) { return events.filter(function (x) { return x.tier === ti; }); }
   return createPortal(
     <div onClick={props.onClose} style={{ position: "fixed", inset: 0, zIndex: 900, background: "rgba(28,25,23,0.55)", display: "flex", alignItems: "flex-end", justifyContent: "center", fontFamily: FONT }}>
@@ -27,8 +29,12 @@ export default function TierSheet(props) {
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, margin: "2px 0 10px" }}>
           <span style={{ fontSize: 13, color: C.textSoft }}>You're <b style={{ color: C.goldInk }}>#{props.rank}</b>. Tiers open as you climb.</span>
-          <button onClick={function () { setLegend(!legend); }} style={{ fontFamily: FONT, fontSize: 12, fontWeight: 900, color: C.goldInk, background: "none", border: "none", cursor: "pointer", padding: 2, whiteSpace: "nowrap" }}>ⓘ {legend ? "Hide" : "What these mean"}</button>
         </div>
+        <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
+          <button onClick={function () { setLanes(!lanes); setLegend(false); }} style={{ flex: 1, fontFamily: FONT, fontSize: 12, fontWeight: 900, color: lanes ? "#fff" : C.ink, background: lanes ? C.night : C.card, border: "2px solid " + (lanes ? C.nightDeep : C.lineStrong), borderRadius: 10, padding: "6px 4px", cursor: "pointer" }}>🗺 Compare the 5 lanes</button>
+          <button onClick={function () { setLegend(!legend); setLanes(false); }} style={{ flex: 1, fontFamily: FONT, fontSize: 12, fontWeight: 900, color: legend ? "#fff" : C.ink, background: legend ? C.night : C.card, border: "2px solid " + (legend ? C.nightDeep : C.lineStrong), borderRadius: 10, padding: "6px 4px", cursor: "pointer" }}>ⓘ What the chips mean</button>
+        </div>
+        {lanes && (<CompareLanes />)}
         {legend && (<Legend />)}
 
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -104,7 +110,7 @@ function EventCard(props) {
   return (
     <button onClick={props.onPick} style={Object.assign(card({ padding: "8px 10px", borderColor: props.col, boxShadow: "0 2px 0 " + props.col }), { width: "100%", textAlign: "left", cursor: "pointer", fontFamily: FONT, background: C.card, display: "block" })}>
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-        <span aria-hidden style={{ fontSize: 26, flexShrink: 0 }}>{cd.icon}</span>
+        <LaneTile cond={ev.cond} w={50} h={38} />
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: 14, fontWeight: 900, color: C.text, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{ev.name}</div>
           <div style={{ fontSize: 11.5, fontWeight: 800, color: C.textSoft }}>{cd.name} · <span style={{ color: C.goldInk }}>{"★".repeat(fd.stars)}<span style={{ opacity: 0.22 }}>{"★".repeat(3 - fd.stars)}</span></span> {fd.label}</div>

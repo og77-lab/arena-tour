@@ -6,6 +6,27 @@ import * as React from "react";
 import { createPortal } from "react-dom";
 import { C, FONT, display, label, card } from "../ui/theme";
 import { Rider, PLAYER_PALETTE, paletteFor } from "./Rider";
+import { effectsOf, EffectList, Legend, statEffect } from "./Effect";
+import { CompareLanes } from "./Lanes";
+import { CONDITIONS, FIELDS } from "../engine/events";
+import { GEAR } from "../engine/gear";
+import { fatigueFx } from "../engine/fitness";
+
+/* One row per thing: icon + name on the left, its effect chips on the right */
+function ChipRows(props) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 6, margin: "6px 0 10px" }}>
+      {props.rows.map(function (r) {
+        return (
+          <div key={r.k} style={{ display: "grid", gridTemplateColumns: "112px 1fr", gap: 8, alignItems: "center", padding: "6px 8px", background: "#fff", border: "1.5px solid " + C.line, borderRadius: 10 }}>
+            <span style={{ fontSize: 12.5, fontWeight: 900, color: C.text, lineHeight: 1.2 }}>{r.name}{r.sub && (<span style={{ display: "block", fontSize: 10.5, fontWeight: 800, color: C.textMuted }}>{r.sub}</span>)}</span>
+            <EffectList list={r.list} empty={r.empty || "No change"} />
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 const { useRef } = React;
 
@@ -90,7 +111,7 @@ function body(id) {
       <P>Six tabs live in the bar at the bottom of the screen:</P>
       <Table head={["Tab", "What's there"]} rows={[
         ["🏠 Home", "Your granny card (tap it for your profile), the next event and its button, your rival, achievements, the latest newspaper and your ranking chart."],
-        ["🏋️ Train", "Spend training points on five stats, this week's investment (private coach, pedigree), and how you compare with the riders near your rank. A red badge shows how many stats you can afford."],
+        ["🏋️ Train", "Spend training points on six stats, this week's investment (private coach, physio, pedigree), and how you compare with the riders near your rank. A red badge shows how many stats you can afford."],
         ["📅 Season", "The season road map: progress through the four blocks, what's up next, what you're chasing (Grand Slam entry, the Finals), and every week's result."],
         ["📰 News", "The Daily Cluck — a fresh issue after every tournament, plus the archive. A ! badge means an unread issue."],
         ["🏆 Ranks", "The world rankings, opening on your own row. Toggle 'Around me' or 'Top 50', and tap any granny for her profile."],
@@ -123,10 +144,12 @@ function body(id) {
       <P>Each week several tournaments run at once in every tier, and all 1,000 riders play one of them. Tap a tier to see its events. Each card shows:</P>
       <List items={[
         <span key="n"><B>Name and lanes</B> — the conditions change the match for both riders:</span>,
-        <span key="c">☀️ <B>Classic</B>: no tricks. 🌧️ <B>Muddy lanes</B>: bar 10% faster for both, Reflexes gaps count double. 🌬️ <B>Windy coast</B>: gold zone 2% narrower for both, Precision gaps count double, +10% prize money. 🔥 <B>Heatwave</B>: the bar speeds up 40% more each strike, Stamina gaps count double. 🌼 <B>Village green</B>: gold zone 1.5% wider, every stat gap counts half (an underdog's day out), −10% points and money.</span>,
+                <span key="ln"><B>The lanes</B> change the match for both riders:</span>,
         <span key="e"><B>Entrants (★)</B> — who signed up. ★★★ tough entrants: mostly the tier's top-ranked riders, +10% points. ★★ mixed. ★ weaker entrants: mostly lower-ranked riders, −10% points.</span>,
         <span key="s"><B>Top seeds</B> — the two best-ranked riders in the draw, and what the champion takes home.</span>
       ]} />
+      <CompareLanes />
+      <ChipRows rows={Object.keys(FIELDS).map(function (k) { var f = FIELDS[k]; return { k: k, name: "★".repeat(f.stars) + " " + f.label, list: effectsOf({ pts: f.pts }), empty: "Normal points" }; })} />
       <P>Grand Slam weeks have a single named Slam (The Coop Open, The Swamp Slam, Wimbledon-on-Wold, The Gale Cup), each with its own lanes.</P>
       <H>Getting into a higher tier early</H>
       <List items={[
@@ -137,6 +160,9 @@ function body(id) {
     </>);
 
     case "match": return (<>
+      <H>The match elements</H>
+      <P>Everything in the game that changes a match — lanes, gear, tiredness, training — changes one of these. The same little chips are used everywhere.</P>
+      <Legend />
       <H>1 · The scouting report</H>
       <P>Before every match a "tale of the tape" compares you side by side: world rank, season points, her talent, every stat (green where you're stronger, red where she is), the difficulty, your head-to-head and her rooster. A red banner marks your arch-rival. Take your time, then tap <B>To the lanes!</B></P>
       <H>2 · The opening</H>
@@ -198,14 +224,8 @@ function body(id) {
     </>);
 
     case "training": return (<>
-      <P>Five stats, three for the granny and two for the rooster, each from level 0 to 20. <B>Only the gap to your opponent counts</B> — if you both have 5 Aim, it cancels out.</P>
-      <Table head={["Stat", "What it does", "Each level ahead"]} rows={[
-        ["⚡ Reflexes", "The marker sweeps slower", "Bar about 3–4% slower"],
-        ["🎯 Aim", "Extra points on every strike", "+1.5 points per strike"],
-        ["🛡️ Stubbornness", "Your bad strikes aren't as bad", "Floor +1.5 points"],
-        ["🫀 Stamina", "The bar speeds up less as the match goes on", "About 5% less speed-up"],
-        ["🐾 Steady Stride", "A wider gold zone", "+1.2% of the bar"]
-      ]} />
+      <P>Six stats, each from level 0 to 20: three for the granny, two for the rooster, and Bounce-back for recovery. For the first five <B>only the gap to your opponent counts</B> — if you both have 5 Aim, it cancels out.</P>
+      <ChipRows rows={[["r", "⚡ Reflexes"], ["f", "🎯 Aim"], ["g", "🛡️ Stubbornness"], ["s", "🫀 Stamina"], ["p", "🐾 Steady Stride"], ["b", "🔋 Bounce-back"]].map(function (x) { return { k: x[0], name: x[1], sub: x[0] === "b" ? "counts on its own" : "each level ahead", list: statEffect(x[0]) }; })} />
       <H>Training points (TP)</H>
       <P>Everyone on tour — you and every rival — earns TP by the same rule every week: <B>8 for turning up, plus a third of the ranking points you won</B>. A deep run buys you a few levels on the riders who went out early; the edge fades once you move up to a tier where everyone is winning that much. You also get <B>sponsor TP</B> from your fans (one per 10 fans).</P>
       <P>Each level costs more than the last: 15 TP for level 1, 30 for level 2, 45 for level 3… and from level 9 the price climbs faster still.</P>
@@ -227,20 +247,23 @@ function body(id) {
         <span key="r"><B>Rivals shop too</B>, with prize money they actually won: each picks the kit she thinks suits the lanes (the tour's best judge it well, lower ranks guess), keeps a reserve, and books physio when worn out. Her kit shows in the tale of the tape.</span>,
         <span key="e">Every item helps one thing and hurts another, and the lanes shift the balance. Precise riders tend to love the needle; riders who miss a lot get more from the baguette.</span>
       ]} />
-      <Table head={["Item", "Effect", "Lasts", "Lanes change it"]} rows={[["🧶 Knitting-Needle Lance","Gold zone 0.6% narrower, +3 points on gold hits","3","Wind: Gold zone 1% narrower · Heat: +4 points on gold hits"],["🥖 Day-Old Baguette","+3 points on misses, −2 points on gold hits","1","Mud: +1 points on misses · Heat: +4 points on misses"],["🪵 Grandpa's Oak Lance","Bar starts 9% faster, +2 points every strike","5","Wind: Gold zone 0.3% wider · Heat: Speeds up 12% more each strike"],["🎋 Featherlight Bamboo","Gold zone 1.2% wider, −2 points every strike","3","Wind: Gold zone 0.4% wider · Mud: Gold zone 1.4% wider"],["🏁 Racing Saddle","Bar starts 4% slower, Speeds up 20% more each strike","3","Mud: Bar starts 1% slower · Heat: Speeds up 35% more each strike · Green: Bar starts 3% slower"],["🪑 Rocking-Chair Saddle","Bar starts 3% faster, Speeds up 22% less each strike","5","Heat: Bar starts 5% faster · Mud: Speeds up 12% less each strike"],["🧽 Memory-Foam Cushion","Gold zone 0.5% wider, Bar starts 3% faster","2","Mud: Gold zone 0.1% wider · Green: Gold zone 0.7% wider"],["🛼 Roller-Skate Saddle","Gold zone 0.6% narrower, Bar starts 6% slower","1","Mud: Bar starts 1% slower · Wind: Gold zone 0.9% narrower"]]} />
+      <ChipRows rows={GEAR.filter(function (g) { return !g.basic; }).map(function (g) { return { k: g.id, name: g.icon + " " + g.name, sub: "Lasts " + g.uses + " · differs in " + Object.keys(g.cond || {}).map(function (c) { return (CONDITIONS[c] || {}).icon; }).join(" "), list: effectsOf(g.fx) }; })} />
     </>);
 
     case "fitness": return (<>
       <P>You have <B>two fitness meters</B>, 0–100%: 👵 the granny's and 🐓 the rooster's. They're on Home, in the Get ready screen, in the match header and in the tale of the tape (hers too).</P>
       <List items={[
-        <span key="a"><B>Every match tires both of you:</B> −5% granny and −6% rooster (best of 5: −7.5% and −9%). A deep run leaves you tired in the later rounds — and so is the rider who got there with you.</span>,
-        <span key="b"><B>A tired granny:</B> the gold zone gets narrower (up to −2.5% at 0) and misses score less (up to −6). The strike breakdown shows it as <B>Tired</B>.</span>,
-        <span key="c"><B>A tired rooster:</B> the bar starts faster (up to +10%) and speeds up more after every strike (up to +35%).</span>,
-        <span key="d"><B>Fitness only comes back between tournaments:</B> +25% after every tournament, plus 1.25% per level of 🔋 <B>Bounce-back</B>. A week off (a Grand Slam you don't play) recovers double.</span>,
+        <span key="a"><B>Every match tires both of you:</B> −9% granny and −11% rooster (best of 5: −13.5% and −16.5%). A deep run leaves you tired in the later rounds — and so is the rider who got there with you.</span>,
+        <span key="b"><B>A tired granny:</B> the gold zone gets narrower (up to −4% at 0) and misses score less (up to −10). The strike breakdown shows it as <B>Tired</B>.</span>,
+        <span key="c"><B>A tired rooster:</B> the bar starts faster (up to +18%) and speeds up more after every strike (up to +60%).</span>,
+        <span key="d"><B>Fitness only comes back between tournaments:</B> 14% + 30% of whatever is missing after every tournament, plus 1.25% per level of 🔋 <B>Bounce-back</B>. A week off (a Grand Slam you don't play) recovers double. Only part comes back, so tiredness builds up for anyone who keeps going deep.</span>,
         <span key="e"><B>🔋 Bounce-back</B> is the sixth stat (0–20). Unlike the others it counts on its own, not against your opponent.</span>,
         <span key="f"><B>Physio staff</B> (Train tab, as the week's one investment): 👩‍⚕️ Nurse Nellie +35% granny, 🩺 Dr. Featherby the rooster chiropractor +35% rooster, 🛁 a spa weekend at Bingo-on-Sea +20% both — straight away.</span>,
+        <span key="i"><B>Injuries:</B> ride on under 35% and every match risks one (up to 25% a match at 0). An injury knocks 2–3 levels off one or two stats for 2–3 tournaments: 🦵 pulled hamstring (Reflexes), 💪 jouster's elbow (Aim), 🪑 creaky back (Stubbornness), 🐾 sprained claw (Steady Stride), 🪽 pulled wing (Stamina), 🦴 bruised wishbone (both rooster stats). Physio on that side shortens it by a tournament.</span>,
+        <span key="sf">The Season Finals tire you too.</span>,
         <span key="g">Every rider on tour plays by the same fitness rules.</span>
       ]} />
+      <ChipRows rows={[80, 60, 40].map(function (v) { var x = fatigueFx({ g: v, r: v }); return { k: v, name: "At " + v + "% fitness", sub: v === 60 ? "≈ a final" : null, list: effectsOf({ zone: Math.round(x.zone * 10) / 10, miss: Math.round(x.miss), speed: Math.round(x.speed * 100) / 100, accel: Math.round(x.accel * 100) / 100 }) }; })} />
     </>);
 
     case "money": return (<>

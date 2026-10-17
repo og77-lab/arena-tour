@@ -260,6 +260,8 @@ function Skate(props) {
 /* pose: idle | charge | deflect | knocked | fallen | cheer */
 export function Rider(props) {
   var p = props.palette || PLAYER_PALETTE, ch = p.chicken, L = p.look || PLAYER_PALETTE.look;
+  /* Kit can come in as props or ride along on the palette (so every scene that draws her shows the same gear) */
+  var lance = props.lance || (p.kit && p.kit.lance), saddle = props.saddle || (p.kit && p.kit.saddle);
   var neck = ch.neck || ch.body;
   var pose = props.pose || "idle";
   var run = props.running && !REDUCED_MOTION;
@@ -278,8 +280,8 @@ export function Rider(props) {
           <ellipse cx="27" cy="76" rx="10" ry="4.5" fill={ch.tail} transform="rotate(18 27 76)" />
         </g>
         <g fill="none" stroke="#ea580c" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
-          <g style={Object.assign(svgT("68px 88px"), { animation: legB })}><path d="M68 88 L68 104 M63 107 L68 104 L73 107 M68 104 L69 108" />{props.saddle === "skates" && (<Skate x={68} />)}</g>
-          <g style={Object.assign(svgT("56px 88px"), { animation: legA })}><path d="M56 88 L56 104 M51 107 L56 104 L61 107 M56 104 L57 108" />{props.saddle === "skates" && (<Skate x={56} />)}</g>
+          <g style={Object.assign(svgT("68px 88px"), { animation: legB })}><path d="M68 88 L68 104 M63 107 L68 104 L73 107 M68 104 L69 108" />{saddle === "skates" && (<Skate x={68} />)}</g>
+          <g style={Object.assign(svgT("56px 88px"), { animation: legA })}><path d="M56 88 L56 104 M51 107 L56 104 L61 107 M56 104 L57 108" />{saddle === "skates" && (<Skate x={56} />)}</g>
         </g>
         <g stroke={INK} strokeWidth="2" strokeLinejoin="round">
           <ellipse cx="87" cy="60" rx="10" ry="15" fill={neck} transform="rotate(22 87 60)" />
@@ -299,7 +301,7 @@ export function Rider(props) {
           <path d="M50 79 Q53 73 51 68 M57 80 Q61 74 59 68 M64 78 Q67 73 66 69" fill="none" stroke={INK} strokeWidth="1.3" strokeLinecap="round" opacity="0.55" />
         </g>
 
-        {props.saddle && (<Saddle id={props.saddle} />)}
+        {saddle && (<Saddle id={saddle} />)}
 
         {/* ── Granny ── */}
         <g style={Object.assign(svgT("56px 64px", GRANNY_POSE[pose], pose === "fallen" ? "transform 0.55s cubic-bezier(.5,-0.3,.6,1)" : "transform 0.22s cubic-bezier(.3,1.6,.5,1)"), { display: props.noRider ? "none" : undefined })}>
@@ -333,7 +335,7 @@ export function Rider(props) {
 
           {/* Lance with a boxing-glove tip */}
           <g style={svgT("68px 56px", "rotate(" + (LANCE_ANGLE[pose] != null ? LANCE_ANGLE[pose] : -24) + "deg)", pose === "charge" ? "transform 0.18s ease-in" : "transform 0.3s cubic-bezier(.3,1.5,.5,1)")}>
-            <LanceShaft id={props.lance} knit={L.knit} plume={p.plume} />
+            <LanceShaft id={lance} knit={L.knit} plume={p.plume} />
             <rect x="117" y="46" width="5" height="8" rx="1.5" fill="#fff" stroke={INK} strokeWidth="1.6" />
             <ellipse cx="127" cy="50" rx="7" ry="6" fill="#dc2626" stroke={INK} strokeWidth="1.8" />
             <ellipse cx="124" cy="44.6" rx="2.8" ry="2.1" fill="#dc2626" stroke={INK} strokeWidth="1.5" />
@@ -348,6 +350,9 @@ export function Rider(props) {
     </svg>
   );
 }
+
+/* The same palette carrying a kit (lance + saddle ids) */
+export function withKit(pal, kit) { return kit ? Object.assign({}, pal, { kit: { lance: kit.lance || "broom", saddle: kit.saddle || "teacosy" } }) : pal; }
 
 /* Round head-and-shoulders crop of a rider, for lists and news photos */
 export function Face(props) {

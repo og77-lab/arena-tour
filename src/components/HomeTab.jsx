@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { TIERS, TOTAL_EVENTS } from "../models/constants";
 import { sh } from "../models/formulas";
 import { C, FONT, display, label, card, button, pill, money } from "../ui/theme";
-import { Rider, Face, PLAYER_PALETTE, paletteFor } from "./Rider";
+import { Rider, Face, PLAYER_PALETTE, paletteFor, withKit } from "./Rider";
 import RankSparkline from "./RankSparkline";
 import { FitnessCard } from "./Fitness";
 
@@ -78,7 +78,7 @@ export default function HomeTab(props) {
       {/* Player card */}
       <button onClick={props.onOpenProfile} style={Object.assign(card({ padding: "10px 12px" }), { display: "flex", alignItems: "center", gap: 10, cursor: "pointer", textAlign: "left", width: "100%", fontFamily: FONT })}>
         <div style={{ flexShrink: 0, width: 86, height: 70, borderRadius: 12, background: "linear-gradient(180deg,#fef3c7,#fde68a)", border: "1.5px solid " + C.line, display: "flex", alignItems: "flex-end", justifyContent: "center", overflow: "hidden" }}>
-          <Rider palette={PLAYER_PALETTE} width={84} pose="idle" />
+          <Rider palette={withKit(PLAYER_PALETTE, S.player.kit)} width={84} pose="idle" />
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 6 }}>

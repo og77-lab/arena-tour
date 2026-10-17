@@ -17,7 +17,7 @@ Every one of the 999 other grannies is a full rider too: she plays her own tourn
 | Tab | What's there |
 |---|---|
 | 🏠 **Home** | Your granny card (tap it for your profile), the next event and its button, your rival, achievements, the latest newspaper and your ranking chart. |
-| 🏋️ **Train** | Spend training points on five stats, this week's investment (private coach, pedigree), and how you compare with the riders near your rank. A red badge shows how many stats you can afford. |
+| 🏋️ **Train** | Spend training points on six stats, this week's investment (private coach, physio, pedigree), and how you compare with the riders near your rank. A red badge shows how many stats you can afford. |
 | 📅 **Season** | The season road map: progress through the four blocks, what's up next, what you're chasing (Grand Slam entry, the Finals), and every week's result. |
 | 📰 **News** | The Daily Cluck — a fresh issue after every tournament, plus the archive. A **!** badge means an unread issue. |
 | 🏆 **Ranks** | The world rankings, opening on your own row. Toggle *Around me* / *Top 50*, and tap any granny for her profile. |
@@ -179,12 +179,14 @@ After you pick a tournament you land on **Get ready**. Choose a lance and a sadd
 
 You have **two fitness meters**, 0–100%: 👵 the granny's and 🐓 the rooster's. They're on Home, in the Get ready screen, in the match header and in the tale of the tape (hers too).
 
-- **Every match tires both of you:** −5% granny and −6% rooster (best of 5: −7.5% and −9%). A deep run leaves you tired in the later rounds — and so is the rider who got there with you.
-- **A tired granny:** the gold zone gets narrower (up to −2.5% at 0) and misses score less (up to −6). The strike breakdown shows it as **Tired**.
-- **A tired rooster:** the bar starts faster (up to +10%) and speeds up more after every strike (up to +35%).
-- **Fitness only comes back between tournaments:** +25% after every tournament, plus 1.25% per level of 🔋 **Bounce-back**. A week off (a Grand Slam you don't play) recovers double.
+- **Every match tires both of you:** −9% granny and −11% rooster (best of 5: −13.5% and −16.5%). A deep run leaves you tired in the later rounds — and so is the rider who got there with you.
+- **A tired granny:** the gold zone gets narrower (up to −4% at 0) and misses score less (up to −10). The strike breakdown shows it as **Tired**.
+- **A tired rooster:** the bar starts faster (up to +18%) and speeds up more after every strike (up to +60%).
+- **Fitness only comes back between tournaments:** 14% + 30% of whatever is missing after every tournament, plus 1.25% per level of 🔋 **Bounce-back**. A week off (a Grand Slam you don't play) recovers double. Only part comes back, so tiredness builds up for anyone who keeps going deep.
 - **🔋 Bounce-back** is the sixth stat (0–20). Unlike the others it counts on its own, not against your opponent.
 - **Physio staff** (Train tab, as the week's one investment): 👩‍⚕️ Nurse Nellie +35% granny, 🩺 Dr. Featherby the rooster chiropractor +35% rooster, 🛁 a spa weekend at Bingo-on-Sea +20% both — straight away.
+- **Injuries:** ride on under 35% and every match risks one (up to 25% a match at 0). An injury knocks 2–3 levels off one or two stats for 2–3 tournaments: 🦵 pulled hamstring (Reflexes), 💪 jouster's elbow (Aim), 🪑 creaky back (Stubbornness), 🐾 sprained claw (Steady Stride), 🪽 pulled wing (Stamina), 🦴 bruised wishbone (both rooster stats). Physio on that side shortens it by a tournament.
+- The Season Finals tire you too.
 - Every rider on tour plays by the same fitness rules.
 
 ## 11. Prize money
