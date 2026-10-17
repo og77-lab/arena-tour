@@ -170,7 +170,7 @@ function body(id) {
       <H>3 · Sets and strikes</H>
       <List items={[
         <span key="1">A match is played in <B>sets</B>; each set is <B>3 strikes</B>.</span>,
-        <span key="2">Each strike, you and she both score. The set goes to whoever has the <B>higher average</B> of the three — one bad strike can be rescued.</span>,
+        <span key="2">Each strike, you and she both score. The set goes to whoever has the <B>higher average</B> of the three, rounded as the screen shows it — one bad strike can be rescued. <B>Level averages (say 83–83) go to tie-break strikes</B> until one rider is ahead.</span>,
         <span key="3">Win the majority of sets: best of 3 (first to 2) up to Tour 500, best of 5 (first to 3) at Masters, Slams and the Finals. A deciding set only happens if it's needed.</span>
       ]} />
       <H>4 · Striking</H>

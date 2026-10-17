@@ -4,6 +4,7 @@
    more — a small, steady edge (a slightly wider gold zone) for the crowd favourite, doubled on match-point strikes. */
 
 import { fanBaseline, fansOf } from "./fans";
+import { KNITS, REPLIES, HASHTAGS, PLACES } from "./knitPool";
 
 export var NETWORK = { name: "Knitter", icon: "🧶", post: "knit" };
 export var START_FOLLOWERS = 120;
@@ -44,58 +45,44 @@ export function crowdEdge(myLove, herLove) {
 }
 
 /* ── Knits for the paper ── */
-var MINE_WIN = [
-  "Trophy's on the mantelpiece next to the biscuit tin. Both are mine. #Champion #{tier}",
-  "Told the girls at bingo I'd win {tier}. Now they owe me a custard cream each. 🏆",
-  "{rooster} would like everyone to know he did most of the work. He did not. 🐓",
-  "Won {tier}! Going to have a little lie down now. A long one. 😴"
-];
-var MINE_DEEP = [
-  "{round} at {tier}! My knees have filed a formal complaint. #StillGotIt",
-  "Not the trophy this week but {rooster} got a lovely compliment on his comb. 💅",
-  "Beat {beat} today. Sent her a sympathy scone. 🧁"
-];
-var MINE_LOSS = [
-  "Lost to {foe} at {tier}. In my defence, the sun was in my eyes. Indoors. 🙄",
-  "{rooster} and I are taking a moment. And a biscuit. And another moment. #NextWeek",
-  "Out early at {tier}. Used the spare time to reorganise my button tin. Productive week really.",
-  "{foe} won fair and square. I'm still writing her a strongly worded letter. ✉️"
-];
-var MINE_REST = [
-  "Week off. Feet up, slippers on, rooster in the bath. Do NOT call. 🛁",
-  "Physio says rest. So I am resting. Aggressively. 😤🧶",
-  "Skipping this week to knit {rooster} a little cardigan. Priorities. 🐓🧥"
-];
-var CHAMP = [
-  "{tier} CHAMPION! Dedicating this to my late husband's moustache. 🥇",
-  "Who's got two thumbs and a {tier} trophy? This granny. 👍👍",
-  "Big thank you to my rooster, my physio, and whoever left the gate open at the bakery. 🏆"
-];
-var RIVAL = [
-  "Funny how some grannies only win when I'm not in the draw. No names. 👀 #{you}",
-  "Spotted {you} at the garden centre. Buying a new lance? Won't help, dear. 🌷",
-  "My rooster asked who {you} is. I said 'nobody important, darling'. 🐓"
-];
-var RANDOM = [
-  "Rooster refused to joust today because a pigeon looked at him funny. Professional athlete, apparently.",
-  "New knitting pattern: a tea-cosy saddle with go-faster stripes. DM for details. 🧶",
-  "Physio says I need to rest. Physio clearly hasn't met me. 💪",
-  "Mud lanes again next week. My good cardigan is NOT coming. 🌧️",
-  "Reminder: the lance goes at the OTHER granny. Asking for a friend. 🤦",
-  "Hot take: the village green is just a big lawn with ambition. 🌼",
-  "Got an autograph request today! It was a parking ticket, but still."
-];
-function pick(arr, seed) { return arr[seed % arr.length]; }
 function fill(t, v) { return t.replace(/\{(\w+)\}/g, function (m, k) { return v[k] != null ? v[k] : m; }); }
 export function handle(name) { var first = (name || "Granny").split(" ")[0].replace(/[^A-Za-z]/g, ""); return "@" + first + "Jousts"; }
 
-/* Three knits for the week: yours, the week's big champion's, and your rival's (or someone random) */
+/* The week's knits, from the big pool (engine/knitPool): yours (by how your week went), the champion's, your rival's,
+   a random rider's, and one from the fan accounts. Many come with a selfie; some get a reply. Seeded by the week so
+   the paper never changes once printed, and the slots use different salts so pools are walked independently. */
+function mix(a, b) { var x = Math.imul((a >>> 0) ^ 0x9e3779b9, 2654435761) + Math.imul(b | 0, 40503); x ^= x >>> 15; x = Math.imul(x, 2246822519); x ^= x >>> 13; return x >>> 0; }
+function from(arr, seed) { return arr && arr.length ? arr[(seed >>> 0) % arr.length] : ""; }
+function dress(text, seed, vars) {
+  var t = fill(text, vars);
+  if (seed % 3 === 0) t += " " + from(HASHTAGS, seed >>> 4);
+  return t;
+}
+function photo(seed, cat, vars) {
+  /* selfie posts always have one; others about half the time */
+  if (cat !== "selfie" && (seed >>> 7) % 2) return null;
+  var place = from(PLACES, seed >>> 9);
+  return { seed: seed, place: place, who: cat === "rooster" ? "rooster" : null };
+}
 export function weekKnits(o) {
-  var seed = (o.seed || 1) >>> 0, out = [];
-  var mine = o.you.rest ? MINE_REST : o.you.title ? MINE_WIN : o.you.wins >= 2 ? MINE_DEEP : MINE_LOSS;
-  out.push({ who: { name: o.you.name, isP: true }, text: fill(pick(mine, seed), o.vars), likes: Math.max(3, Math.round(o.you.followers * (0.04 + (seed % 7) / 100))) });
-  if (o.champ && !o.champ.isP) out.push({ who: o.champ, text: fill(pick(CHAMP, seed >> 3), o.vars), likes: Math.round(followersOf(o.champ, o.champ.rank) * 0.08) });
-  if (o.rival) out.push({ who: o.rival, text: fill(pick(RIVAL, seed >> 5), o.vars), likes: Math.round(followersOf(o.rival, o.rival.rank) * 0.06) });
-  else if (o.random) out.push({ who: o.random, text: pick(RANDOM, seed >> 7), likes: Math.round(followersOf(o.random, o.random.rank) * 0.05) });
+  var base = (o.seed || 1) >>> 0, out = [], V = Object.assign({}, o.vars || {});
+  function post(who, cat, salt, likesShare, replyFrom) {
+    var sd = mix(base, salt), pool = KNITS[cat] || KNITS.random, place = from(PLACES, sd >>> 9);
+    var vars = Object.assign({}, V, { place: place });
+    var ph = photo(sd, cat, vars);
+    if (ph && cat !== "selfie") vars.place = ph.place;
+    var k = { who: who, text: dress(from(pool, sd), sd, vars), likes: Math.max(2, Math.round((who.followers || 100) * likesShare * (0.6 + (sd % 50) / 50))), photo: ph };
+    if ((sd >>> 11) % 3 === 0 && replyFrom) k.reply = { name: replyFrom, text: from(REPLIES, sd >>> 13) };
+    out.push(k);
+  }
+  var y = o.you;
+  var myCat = y.rest ? "rest" : y.injured ? "injury" : y.title ? "win" : y.tired ? "tired" : y.wins >= 2 ? "deep" : "loss";
+  if (base % 4 === 1 && !y.title && !y.rest) myCat = "selfie";
+  post({ name: y.name, isP: true, followers: y.followers }, myCat, 1, 0.05, o.rival ? o.rival.name : null);
+  if (o.champ && !o.champ.isP) post(Object.assign({}, o.champ, { followers: followersOf(o.champ, o.champ.rank) }), "champion", 2, 0.08, y.name);
+  if (o.rival) post(Object.assign({}, o.rival, { followers: followersOf(o.rival, o.rival.rank) }), mix(base, 3) % 3 === 0 ? "selfie" : "rivalDig", 3, 0.06, y.name);
+  if (o.random) post(Object.assign({}, o.random, { followers: followersOf(o.random, o.random.rank) }), ["random", "rooster", "selfie"][mix(base, 4) % 3], 4, 0.05, null);
+  var fan = from(KNITS.fanAccounts, mix(base, 5));
+  if (fan) out.push({ who: { name: fan.name, handle: fan.handle, fan: true, followers: 800 + (mix(base, 6) % 9000) }, text: fill(fan.text, V), likes: 20 + (mix(base, 7) % 600), photo: null });
   return out;
 }

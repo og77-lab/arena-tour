@@ -1,6 +1,7 @@
 /* ═══ DailyCluck ═══ The weekly cartoon newspaper: you, your tournament, riders at your level, the world's best */
 
 import * as React from "react";
+import Selfie from "./Selfie";
 import { fmtFollowers as fmtK } from "../engine/social";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
@@ -68,25 +69,55 @@ function leadStory(y, v) {
   var T = up(y.tierName), N = up(y.name), t = y.tierName, n = y.name, R = up(y.reached), W = y.wins;
   var wins = W + (W === 1 ? " win" : " wins");
   if (y.champion) return { pose: "cheer",
-    h: pk([N + " CONQUERS " + T + "!", "ALL HAIL QUEEN " + N, N + " TAKES " + T + " BY THE WATTLES", "TROPHY! " + N + " RULES " + T, "GRANNY GOLD: " + N + " SWEEPS " + T, "FEATHERS FLY AS " + N + " WINS " + T, "UNSTOPPABLE! " + N + " LIFTS " + T + " CUP"], v, 0),
-    deck: pk(["Won all " + W + " matches. Roosters across the county weep.", W + " matches, " + W + " wins, not a single dropped stitch.", "The tea urn ran dry from all the celebrating.", "Rivals were spotted sobbing into their cardigans.", "Bookmakers are refunding bets out of sheer embarrassment.", "Her rooster has demanded a pay rise."], v, 3),
-    say: pk(["Never bet against a granny with a boxing glove.", "I'd like to thank my hip surgeon.", "Somebody fetch me a cushion and a bigger shelf.", "Told you. I told ALL of you."], v, 1) };
+    h: pk([N + " CONQUERS " + T + "!", "ALL HAIL QUEEN " + N, N + " TAKES " + T + " BY THE WATTLES", "TROPHY! " + N + " RULES " + T, "GRANNY GOLD: " + N + " SWEEPS " + T, "FEATHERS FLY AS " + N + " WINS " + T, "UNSTOPPABLE! " + N + " LIFTS " + T + " CUP",
+      N + " IS QUEEN OF " + T, "CROWN AND CUSTARD: " + N + " WINS " + T, N + " KNITS UP THE " + T + " TITLE", "BINGO! " + N + " SCOOPS " + T,
+      "THE " + T + " CUP GOES HOME WITH " + N, N + " HAS " + T + " IN THE BAG (THE BIG HANDBAG)", "PERFECT WEEK FOR " + N + " AT " + T, "CHAMPION " + N + "! PUT THE KETTLE ON"], v, 0),
+    deck: pk(["Won all " + W + " matches. Roosters across the county weep.", W + " matches, " + W + " wins, not a single dropped stitch.", "The tea urn ran dry from all the celebrating.", "Rivals were spotted sobbing into their cardigans.", "Bookmakers are refunding bets out of sheer embarrassment.", "Her rooster has demanded a pay rise.",
+      "Not one loss in " + W + " matches. Not one hair out of place.", "The church bells rang. Nobody is quite sure who asked them to.", "Her grandchildren have finally admitted she's cool.",
+      "The trophy now sits next to the good china, which is saying something.", "The garden centre has named a begonia after her.", "Her rooster strutted the whole way home and refused to stop."], v, 3),
+    say: pk(["Never bet against a granny with a boxing glove.", "I'd like to thank my hip surgeon.", "Somebody fetch me a cushion and a bigger shelf.", "Told you. I told ALL of you.",
+      "Pass the biscuits. The chocolate ones. I've earned them.", "Not bad for a woman who needs two goes to get out of a deckchair.", "My knees creaked, but they never quit.", "I'm off for a sherry and a very long sit-down.",
+      "Put it in the parish newsletter. Front page.", "The secret? A good breakfast and a grudge.", "I'd like to dedicate this to everyone at Thursday bingo.", "My rooster did the hard bit. I just held on and shouted."], v, 1) };
   if (y.reached === "Final") return { pose: "knocked",
-    h: pk(["HEARTBREAK IN THE " + T + " FINAL", "SO NEAR! " + N + " PIPPED AT " + T, "SILVER LINING FOR " + N, N + " FALLS AT THE FINAL FENCE", "ONE CHARGE TOO FAR FOR " + N, "RUNNER-UP " + N + " VOWS REVENGE"], v, 0),
-    deck: pk([n + " falls one charge short of the trophy.", "The final was lost; the dignity, mostly, survived.", "Silver medal, gold-medal sulk.", n + " was last seen glaring at the trophy from a distance.", "A tissue-heavy evening in the " + t + " stands."], v, 2),
-    say: pk(["Silver suits me. Gold would've suited me better.", "Second place is just first loser. Lovely ribbon, though.", "I'll be back. With sharper elbows."], v, 1) };
+    h: pk(["HEARTBREAK IN THE " + T + " FINAL", "SO NEAR! " + N + " PIPPED AT " + T, "SILVER LINING FOR " + N, N + " FALLS AT THE FINAL FENCE", "ONE CHARGE TOO FAR FOR " + N, "RUNNER-UP " + N + " VOWS REVENGE",
+      "SO CLOSE, " + N + ", SO CLOSE", N + " LEFT HOLDING THE RUNNER-UP RIBBON", "FINAL FLOP FOR " + N + " AT " + T, "NEARLY QUEEN: " + N + " BOWS OUT IN " + T + " FINAL",
+      "TEARS IN THE TEA AS " + N + " LOSES " + T + " FINAL", N + " SETTLES FOR SECOND AT " + T, "THE CUP SLIPS AWAY FROM " + N, "ALMOST! " + N + " FALLS AT THE LAST", N + " DENIED " + T + " GLORY"], v, 0),
+    deck: pk([n + " falls one charge short of the trophy.", "The final was lost; the dignity, mostly, survived.", "Silver medal, gold-medal sulk.", n + " was last seen glaring at the trophy from a distance.", "A tissue-heavy evening in the " + t + " stands.",
+      "So close she could see her reflection in the trophy.", n + " has asked for a recount. Of the jousting.", "The silver plate will look lovely on the mantelpiece, she insists.", "Her rooster blames the wind. There was no wind.",
+      "The " + t + " crowd gave her a standing ovation, then a sit-down one.", "Second best in the whole draw. She is not pleased about the second bit.", "The vicar offered words of comfort. She declined them."], v, 2),
+    say: pk(["Silver suits me. Gold would've suited me better.", "Second place is just first loser. Lovely ribbon, though.", "I'll be back. With sharper elbows.",
+      "I'm not crying. It's hay fever.", "Lovely day out. Shame about the last ten minutes.", "Next time I'm bringing my lucky cardigan.", "She got lucky. I'll tell her that to her face.",
+      "I've had worse weeks. My hip replacement, for one.", "Runner-up sounds very grand at the bridge club.", "My rooster wants a word with the referee.", "Silver goes with my hair, at least.", "Somebody owes me a trophy. I've written it on the calendar."], v, 1) };
   if (W === 0) return { pose: "fallen",
-    h: pk(["EARLY BATH FOR " + N, N + " HITS THE HAY", "SHORT AND NOT SWEET FOR " + N, "WHERE DID " + N + " GO?", "OOPS! " + N + " OUT IN A FLASH", "ROOSTER ROUT: " + N + " DUMPED EARLY"], v, 0),
-    deck: pk(["Out in the " + y.reached + " of " + t + ". The tea was still warm.", "Spectators barely had time to unwrap their sandwiches.", "Her rooster has been seen hiding behind the stables.", "Over before the brass band finished tuning up.", "Not so much a run as a brisk stroll to the exit."], v, 4),
-    say: pk(["My rooster had a cold. That's my story and I'm sticking to it.", "I was just checking the hay was soft. It is.", "Practice round. Everyone knows the real tournament is next week."], v, 2) };
+    h: pk(["EARLY BATH FOR " + N, N + " HITS THE HAY", "SHORT AND NOT SWEET FOR " + N, "WHERE DID " + N + " GO?", "OOPS! " + N + " OUT IN A FLASH", "ROOSTER ROUT: " + N + " DUMPED EARLY",
+      N + " BITES THE DUST", "FIRST ROUND FLUMP FOR " + N, N + " BACK HOME BEFORE ELEVENSES", "FEATHERS AND DIGNITY LOST: " + N + " OUT", "BRIEF VISIT FROM " + N + " AT " + T,
+      "NO JOY FOR " + N + " AT " + T, N + " TAKES A TUMBLE", "HAY THERE! " + N + " LANDS FIRST TIME OUT", "QUICK EXIT FOR " + N], v, 0),
+    deck: pk(["Out in the " + y.reached + " of " + t + ". The tea was still warm.", "Spectators barely had time to unwrap their sandwiches.", "Her rooster has been seen hiding behind the stables.", "Over before the brass band finished tuning up.", "Not so much a run as a brisk stroll to the exit.",
+      "Out in the " + y.reached + " and home in time for the afternoon film.", "The car park attendant saw more of her than the crowd did.", "Her flask of tea was still full when she left " + t + ".",
+      "She spent longer queuing for the loo than on the lanes.", "The programme seller hadn't even reached her row.", "A week best forgotten, and she's already trying.", "Her rooster has gone right off his corn."], v, 4),
+    say: pk(["My rooster had a cold. That's my story and I'm sticking to it.", "I was just checking the hay was soft. It is.", "Practice round. Everyone knows the real tournament is next week.",
+      "The ground came up very quickly. Rude of it.", "I wasn't ready. I was still looking for my glasses.", "At least I got a nice sit-down in the hay.", "Don't tell my grandchildren. They'll put it on the internet.",
+      "We'll call this one a warm-up, shall we?", "I've had more dignified tumbles at the church fete.", "Next week I'm wearing my lucky bloomers.", "Even the best of us have Mondays. Mine lasted all week.", "I let her win. Out of kindness. Don't print that."], v, 2) };
   if (y.reached === "Semifinals" || y.reached === "Quarterfinals") return { pose: "idle",
-    h: pk([N + " CHARGES INTO THE " + R, "GRANNY ON THE RISE: " + N + " IN " + T + " " + R, N + " MAKES THE " + T + " " + R, "WATCH OUT! " + N + " IS WARMING UP", "DEEP RUN FOR DETERMINED " + N, N + " RATTLES THE " + T + " DRAW"], v, 0),
-    deck: pk([wins + " at " + t + " before the run finally ended.", wins + " and a rooster who's starting to believe.", "The bigger names are checking over their shoulders.", "A run that had the bingo hall on its feet.", "Knitting circles across the land are buzzing."], v, 1),
-    say: pk(["Next week I'm bringing the good biscuits.", "We're only just getting started, dear.", "My rooster wants a bigger stable now. Typical."], v, 2) };
+    h: pk([N + " CHARGES INTO THE " + R, "GRANNY ON THE RISE: " + N + " IN " + T + " " + R, N + " MAKES THE " + T + " " + R, "WATCH OUT! " + N + " IS WARMING UP", "DEEP RUN FOR DETERMINED " + N, N + " RATTLES THE " + T + " DRAW",
+      N + " BARGES INTO THE " + R, "WHAT A RUN! " + N + " REACHES " + T + " " + R, N + " TURNS HEADS AT " + T, "KNITTING NEEDLES DOWN: " + N + " IS ON A ROLL", N + " ROLLS ON TO THE " + R,
+      "GRANNY POWER! " + N + " IN THE " + R, "THE " + T + " " + R + " WELCOMES " + N, N + " PUFFS INTO THE " + R, "SPIRITED " + N + " STIRS UP " + T], v, 0),
+    deck: pk([wins + " at " + t + " before the run finally ended.", wins + " and a rooster who's starting to believe.", "The bigger names are checking over their shoulders.", "A run that had the bingo hall on its feet.", "Knitting circles across the land are buzzing.",
+      wins + " and a fair few biscuits along the way.", "A run at " + t + " that'll be talked about at the bowls club for weeks.", "She went further than her bus pass, and that's saying something.",
+      wins + " at " + t + " and the grandchildren are suddenly ringing.", "The top seeds noticed. So did the tea lady.", "Not the trophy, but a good long look at it.", "Her rooster has started doing press-ups."], v, 1),
+    say: pk(["Next week I'm bringing the good biscuits.", "We're only just getting started, dear.", "My rooster wants a bigger stable now. Typical.",
+      "Give me another week and a strong cuppa.", "I can smell the trophy from here. It smells of polish.", "Not bad for someone who fell asleep in the car on the way.", "The knees are holding up. Just about.",
+      "Tell the top seeds I'm coming. Slowly, but I'm coming.", "I'll need a new hat for the next round.", "Lovely crowd. They cheered louder than at bingo.", "One more charge and I'd have had her.", "My grandson says I'm trending. I said lovely, dear."], v, 2) };
   return { pose: "idle",
-    h: pk([N + " REACHES THE " + R, "STEADY DOES IT FOR " + N, N + " CLIMBS TO THE " + R, "PROGRESS! " + N + " PUSHES ON AT " + T, "QUIET WEEK, LOUD GRANNY: " + N, N + " LIVES TO JOUST ANOTHER DAY"], v, 0),
-    deck: pk([wins + " at " + t + ". The lance is warming up.", wins + " and only one minor tantrum.", "Not the trophy, but the hat stayed on. Mostly.", "A respectable week, by anyone's standards. Except hers.", "Her rooster ate well, slept well and jousted reasonably."], v, 3),
-    say: pk(["Small steps, dear. Small, determined steps.", "Rome wasn't built in a day. Neither was my left knee.", "Next week, the big one. Or the medium one."], v, 1) };
+    h: pk([N + " REACHES THE " + R, "STEADY DOES IT FOR " + N, N + " CLIMBS TO THE " + R, "PROGRESS! " + N + " PUSHES ON AT " + T, "QUIET WEEK, LOUD GRANNY: " + N, N + " LIVES TO JOUST ANOTHER DAY",
+      N + " SOLDIERS ON AT " + T, "NOT BAD AT ALL, " + N, N + " KEEPS HER HAT ON", "A DECENT DAY'S WORK FOR " + N, N + " CREAKS INTO THE " + R,
+      "ONWARDS AND UPWARDS FOR " + N, "FAIR PLAY TO " + N + " AT " + T, N + " PLODS ON, PROUDLY", "SOLID STUFF FROM " + N + " IN THE " + R], v, 0),
+    deck: pk([wins + " at " + t + ". The lance is warming up.", wins + " and only one minor tantrum.", "Not the trophy, but the hat stayed on. Mostly.", "A respectable week, by anyone's standards. Except hers.", "Her rooster ate well, slept well and jousted reasonably.",
+      wins + " at " + t + " and a very nice packed lunch.", "Nothing to write home about. She wrote home anyway.", wins + " and a bit of a limp, but who's counting.",
+      "A tidy week that ended a round or two too early.", "She came, she jousted, she queued for a scone.", "The lance held, the knees held, the run didn't.", "Steady progress, like a good slow-cooked stew."], v, 3),
+    say: pk(["Small steps, dear. Small, determined steps.", "Rome wasn't built in a day. Neither was my left knee.", "Next week, the big one. Or the medium one.",
+      "Good enough for a Tuesday, dear.", "Slow and steady. Like my pension.", "I'm saving the best for later. Much later.", "Every match is a chance to wear my nice cardigan.",
+      "I'm not getting older, I'm getting craftier.", "Back to the gym. Well, back to the garden. Same thing.", "My rooster says well done. I think. He mostly clucks.", "Not quite, but closer than last week.", "Somebody put the kettle on. I've earned a cup."], v, 1) };
 }
 
 /* Front-page stories that aren't about you: Grand Slam champions, a new #1, Cinderella titles, giant-killings, big titles */
@@ -95,34 +126,69 @@ function WorldLead(props) {
   var nm = function (p) { return p.emoji + " " + sh(p.name); };
   if (L.type === "slam") {
     var N = up(sh(L.winner.name)), u = L.upset;
-    s = { kick: pk(["Grand Slam", "Slam special", "The big one"], v, 0), p: L.winner, crown: true, pose: "cheer",
-      h: pk([N + " WINS THE GRAND SLAM!", "SLAM QUEEN " + N, N + " CONQUERS THE GRAND SLAM", "GLORY! " + N + " TAKES THE SLAM", "THE SLAM BELONGS TO " + N], v, 1),
+    s = { kick: pk(["Grand Slam", "Slam special", "The big one", "Grand Slam glory", "Slam of the season", "Biggest week on tour", "The golden lance", "Grand Slam report", "Slam sensation", "Trophy of trophies", "Slam souvenir edition", "Slam day"], v, 0), p: L.winner, crown: true, pose: "cheer",
+      h: pk([N + " WINS THE GRAND SLAM!", "SLAM QUEEN " + N, N + " CONQUERS THE GRAND SLAM", "GLORY! " + N + " TAKES THE SLAM", "THE SLAM BELONGS TO " + N,
+        N + " IS THE GRAND SLAM CHAMPION", "GRAND SLAM, GRAND GRANNY: " + N, N + " GRABS THE GOLDEN LANCE", "ALL HAIL " + N + ", SLAM WINNER", "SLAM DUNKED! " + N + " WINS IT ALL",
+        N + " TAMES THE GRAND SLAM", "BUNTING OUT FOR SLAM CHAMP " + N, "THE GOLDEN LANCE GOES TO " + N, N + " SLAMS THE DOOR ON THE FIELD", "HISTORY! " + N + " WINS THE SLAM"], v, 1),
       deck: u && u.winner.id === L.winner.id ? "Ranked #" + u.wRank + ", she left top seed " + nm(u.fav) + " (#" + u.favRank + ") and sixty-two others in the dust."
-        : pk(["Sixty-four grannies saddled up. One rode home with the golden lance.", "Six rounds, six wins, one very smug rooster.", "The biggest prize on tour, and she barely spilt her tea."], v, 2),
-      body: nm(L.winner) + (L.winner.rank ? " (world #" + L.winner.rank + ")" : "") + " is the toast of the tour after the week's Grand Slam. " + pk(["Celebrations went on until well past nine o'clock.", "Her rooster has hired an agent.", "The knitting circle has already started on the commemorative scarf."], v, 3) };
+        : pk(["Sixty-four grannies saddled up. One rode home with the golden lance.", "Six rounds, six wins, one very smug rooster.", "The biggest prize on tour, and she barely spilt her tea.",
+          "Sixty-three opponents, sixty-three polite handshakes, one trophy.", "She rode in a contender and rode out a legend.", "Six matches, one cardigan, zero mercy.",
+          "The whole tour turned up. Only one granny went home smiling.", "The golden lance has never looked so pleased with itself.", "A week of thunderous charges and a fair few cream teas.",
+          "The biggest draw of the season, and she had it for breakfast.", "Roosters across the land bowed their combs.", "She'll be dining out on this until next season. Possibly forever."], v, 2),
+      body: nm(L.winner) + (L.winner.rank ? " (world #" + L.winner.rank + ")" : "") + " is the toast of the tour after the week's Grand Slam. " + pk(["Celebrations went on until well past nine o'clock.", "Her rooster has hired an agent.", "The knitting circle has already started on the commemorative scarf.",
+        "The village hall has booked a barn dance in her honour.", "Her grandchildren have been told they may now call her Your Majesty.", "She's already found the perfect spot on the mantelpiece.",
+        "The commemorative tea towels go on sale on Monday.", "Her rooster was presented with a medal and promptly ate the ribbon.", "The parish council has voted to rename the duck pond after her.",
+        "She celebrated with a Victoria sponge the size of a cartwheel.", "Fireworks were planned but postponed on account of the dog.", "She has asked for the trophy to be engraved in a nice curly font."], v, 3) };
   } else if (L.type === "no1") {
-    s = { kick: pk(["A new queen", "Changing of the guard", "World rankings"], v, 0), p: L.p, crown: true, pose: "cheer",
-      h: pk(["NEW WORLD NUMBER ONE: " + up(sh(L.p.name)), up(sh(L.p.name)) + " SEIZES THE CROWN", "LONG LIVE QUEEN " + up(sh(L.p.name)), "THE THRONE HAS A NEW BOTTOM"], v, 1),
-      deck: pk(["The old queen has been sent to the back of the bus.", "The golden crown changes heads for the first time in weeks.", "Somewhere, a former world number one is sulking into her scones."], v, 2),
-      body: nm(L.p) + " tops the world rankings this week. " + pk(["The view from the top is lovely, she says, if a bit draughty.", "She celebrated with a second biscuit. Living dangerously.", "Rivals have already started training twice as hard."], v, 1) };
+    s = { kick: pk(["A new queen", "Changing of the guard", "World rankings", "Top of the pecking order", "Crown watch", "Rankings shake-up", "The summit", "Number one news", "Head of the henhouse", "New at the top", "The golden crown", "Throne room"], v, 0), p: L.p, crown: true, pose: "cheer",
+      h: pk(["NEW WORLD NUMBER ONE: " + up(sh(L.p.name)), up(sh(L.p.name)) + " SEIZES THE CROWN", "LONG LIVE QUEEN " + up(sh(L.p.name)), "THE THRONE HAS A NEW BOTTOM",
+        up(sh(L.p.name)) + " IS THE NEW NUMBER ONE", "MAKE WAY FOR QUEEN " + up(sh(L.p.name)), up(sh(L.p.name)) + " CLIMBS TO THE SUMMIT", "TOP OF THE PECKING ORDER: " + up(sh(L.p.name)),
+        up(sh(L.p.name)) + " TAKES THE TOP SPOT", "THE WORLD BOWS TO " + up(sh(L.p.name)), "A NEW NAME ON THE THRONE", "CROWN ON, KETTLE ON: " + up(sh(L.p.name)) + " IS NO. 1",
+        up(sh(L.p.name)) + " RULES THE ROOST", "NUMBER ONE AT LAST FOR " + up(sh(L.p.name)), "HEAD OF THE HENHOUSE: " + up(sh(L.p.name))], v, 1),
+      deck: pk(["The old queen has been sent to the back of the bus.", "The golden crown changes heads for the first time in weeks.", "Somewhere, a former world number one is sulking into her scones.",
+        "The rankings were checked twice. It's true.", "The previous queen has been offered a nice cushion and a cup of tea.", "A new name sits at the very top of the ladder.",
+        "The crown has been resized, polished and passed along.", "Her rooster has started walking with a noticeable swagger.", "Months of early mornings have finally paid off.",
+        "The whole tour has a new target pinned to its noticeboard.", "The bunting has been rehung with a new name on it.", "Nobody stays on top forever, but she intends to try."], v, 2),
+      body: nm(L.p) + " tops the world rankings this week. " + pk(["The view from the top is lovely, she says, if a bit draughty.", "She celebrated with a second biscuit. Living dangerously.", "Rivals have already started training twice as hard.",
+        "She has promised to stay humble. Her new monogrammed slippers say otherwise.", "Her first royal decree: longer tea breaks.", "She had the crown fitted over her rain bonnet.",
+        "The neighbours have been informed. Several times.", "She says it's an honour, then asked whether it comes with a parking space.", "Her rooster now insists on being addressed as Sir.",
+        "She rang her sister at the seaside to gloat, politely.", "Her grandchildren have stuck the rankings on the fridge.", "She has vowed to defend the crown with lance, glove and knitting needle."], v, 1) };
   } else if (L.type === "upsetTitle") {
     var U = L.upset, T = U.event || TIERS[L.tier].name;
-    s = { kick: pk([T + " shock", "Cinderella story", "Nobody saw it coming"], v, 0), p: U.winner, pose: "cheer",
-      h: pk(["NOBODY SAW " + up(sh(U.winner.name)) + " COMING", up(sh(U.winner.name)) + " STUNS " + up(T), "CINDERELLA ON A ROOSTER", "FROM NOWHERE TO " + up(T) + " CHAMPION"], v, 1),
+    s = { kick: pk([T + " shock", "Cinderella story", "Nobody saw it coming", "Fairy-tale finish", "Outsider wins!", "Against all odds", "Shock champion", "Long shot lands", "Rank outsider", "Dark horse (well, rooster)", "Upset special", "Underdog's day"], v, 0), p: U.winner, pose: "cheer",
+      h: pk(["NOBODY SAW " + up(sh(U.winner.name)) + " COMING", up(sh(U.winner.name)) + " STUNS " + up(T), "CINDERELLA ON A ROOSTER", "FROM NOWHERE TO " + up(T) + " CHAMPION",
+        up(sh(U.winner.name)) + " WINS " + up(T) + " AGAINST ALL ODDS", "OUTSIDER " + up(sh(U.winner.name)) + " LIFTS THE CUP", "WHO? " + up(sh(U.winner.name)) + ", THAT'S WHO", "FAIRY TALE AT " + up(T),
+        "THE LONG SHOT THAT LANDED", up(sh(U.winner.name)) + " TURNS " + up(T) + " UPSIDE DOWN", "UNDERDOG'S DAY: " + up(sh(U.winner.name)) + " TRIUMPHS", "RANK OUTSIDER RULES " + up(T),
+        up(sh(U.winner.name)) + " CRASHES THE PARTY", "DARK ROOSTER " + up(sh(U.winner.name)) + " ROMPS HOME", "SEEDS SCATTERED AS " + up(sh(U.winner.name)) + " WINS"], v, 1),
       deck: "World #" + U.wRank + " " + sh(U.winner.name) + " won " + (U.event ? "the " + U.event : "a " + T + " title") + " as an outsider. Top seed " + nm(U.fav) + " (#" + U.favRank + ") was left eating dust.",
-      body: pk(["Bookmakers are reportedly lying down in a dark room.", "Her rooster was 200-to-1. He'd like that noted.", "\"I just closed my eyes and pointed the lance,\" she told reporters."], v, 2) };
+      body: pk(["Bookmakers are reportedly lying down in a dark room.", "Her rooster was 200-to-1. He'd like that noted.", "\"I just closed my eyes and pointed the lance,\" she told reporters.",
+        "The favourites have been seen consulting their tea leaves.", "Her own family didn't buy tickets. They have since apologised.", "She'd only entered for the free sandwiches.",
+        "The trophy engraver had to ask how to spell her name.", "Her rooster has been offered a modelling job with a feed catalogue.", "Seeding committees across the land are reviewing their sums.",
+        "She plans to spend the prize money on a new conservatory.", "Nobody had her in the office sweepstake. Nobody.", "She thanked her knitting group, her hairdresser and her rooster, in that order."], v, 2) };
   } else if (L.type === "shock") {
     var K = L.shock, TT = K.event || TIERS[K.tier].name;
-    s = { kick: pk(["Upset of the week", "Giant-killing!", "Shock result"], v, 0), p: K.w, pose: "cheer", fallen: K.l,
-      h: pk([up(sh(K.w.name)) + " TOPPLES " + up(sh(K.l.name)) + "!", "DAVID AND GOLIATH, ON ROOSTERBACK", up(sh(K.l.name)) + " DUMPED BY WORLD #" + K.wRank, "THE UPSET THAT SHOOK THE HENHOUSE"], v, 1),
+    s = { kick: pk(["Upset of the week", "Giant-killing!", "Shock result", "Stop the presses", "Upset alert", "Topsy-turvy", "Pecking order upended", "Big scalp", "Feathers ruffled", "Form book torn up", "Hay-maker!", "The unthinkable"], v, 0), p: K.w, pose: "cheer", fallen: K.l,
+      h: pk([up(sh(K.w.name)) + " TOPPLES " + up(sh(K.l.name)) + "!", "DAVID AND GOLIATH, ON ROOSTERBACK", up(sh(K.l.name)) + " DUMPED BY WORLD #" + K.wRank, "THE UPSET THAT SHOOK THE HENHOUSE",
+        up(sh(K.w.name)) + " FELLS THE MIGHTY " + up(sh(K.l.name)), "HAY DAY FOR " + up(sh(K.w.name)), up(sh(K.l.name)) + " SENT TO THE HAY BY AN OUTSIDER", "STUNNER! " + up(sh(K.w.name)) + " BEATS " + up(sh(K.l.name)),
+        "WORLD #" + K.wRank + " CAUSES A KERFUFFLE", up(sh(K.w.name)) + " BRINGS THE HOUSE DOWN", "BIG SCALP FOR " + up(sh(K.w.name)), "OH MY WATTLES! " + up(sh(K.l.name)) + " IS OUT",
+        up(sh(K.l.name)) + " LEFT RED-FACED", "THE FORM BOOK IS IN THE BIN", "GOLIATH GOES DOWN: " + up(sh(K.l.name)) + " BEATEN"], v, 1),
       deck: "In the " + K.round + " of " + (K.event ? "the " + K.event : "a " + TT) + ", world #" + K.wRank + " " + sh(K.w.name) + " knocked out #" + K.lRank + " " + sh(K.l.name) + ".",
-      body: pk(["Several spectators had to be revived with smelling salts and a custard cream.", sh(K.l.name) + " has asked for the lance to be inspected.", "The losing rooster is said to be \"absolutely mortified\"."], v, 3) };
+      body: pk(["Several spectators had to be revived with smelling salts and a custard cream.", sh(K.l.name) + " has asked for the lance to be inspected.", "The losing rooster is said to be \"absolutely mortified\".",
+        "The favourite's fan club has gone very quiet.", sh(K.l.name) + " left without signing a single autograph.", "Bingo was suspended so everyone could watch the replay.",
+        sh(K.l.name) + " claims her glove was on the wrong hand.", "The winner celebrated with a modest, if noisy, cup of tea.", "Even the umpire dropped her custard tart.",
+        "The tour's statisticians are said to need a lie-down.", sh(K.l.name) + "'s rooster has refused to come out of his hutch.", "Spectators are still arguing about it in the tea tent."], v, 3) };
   } else {
     var TB = (L.winner && L.winner.event) || TIERS[L.tier].name;
     s = { kick: TB, p: L.winner, pose: "cheer",
-      h: pk([up(sh(L.winner.name)) + " CONQUERS THE " + up(TB), up(TB) + " GOLD FOR " + up(sh(L.winner.name)), up(sh(L.winner.name)) + " IS THE WEEK'S BIG WINNER"], v, 1),
+      h: pk([up(sh(L.winner.name)) + " CONQUERS THE " + up(TB), up(TB) + " GOLD FOR " + up(sh(L.winner.name)), up(sh(L.winner.name)) + " IS THE WEEK'S BIG WINNER",
+        up(sh(L.winner.name)) + " TAKES THE " + up(TB) + " TITLE", "TRIUMPH FOR " + up(sh(L.winner.name)) + " AT " + up(TB), up(TB) + " BELONGS TO " + up(sh(L.winner.name)), up(sh(L.winner.name)) + " RIDES OFF WITH THE SPOILS",
+        "A BIG WEEK FOR " + up(sh(L.winner.name)), up(sh(L.winner.name)) + " ROARS TO " + up(TB) + " GLORY", "TOP OF THE WEEK: " + up(sh(L.winner.name)), "CUP AND SAUCER FOR " + up(sh(L.winner.name)),
+        up(sh(L.winner.name)) + " WINS THE WEEK'S BIGGEST PRIZE", "NO STOPPING " + up(sh(L.winner.name)) + " AT " + up(TB), up(TB) + " CROWN FOR " + up(sh(L.winner.name)), "A BIG SHINY CUP FOR " + up(sh(L.winner.name))], v, 1),
       deck: "The week's most prestigious title went to " + nm(L.winner) + (L.winner.rank ? " (world #" + L.winner.rank + ")" : "") + (L.count > 1 ? ", best of " + L.count + " events at this level." : "."),
-      body: pk(["She dedicated the win to her late husband's moustache.", "Her rooster celebrated by pecking a steward. Twice.", "\"Not bad for a Tuesday,\" she said, adjusting her shawl."], v, 2) };
+      body: pk(["She dedicated the win to her late husband's moustache.", "Her rooster celebrated by pecking a steward. Twice.", "\"Not bad for a Tuesday,\" she said, adjusting her shawl.",
+        "She celebrated with a large slice of lemon drizzle.", "Her rooster has been asked to stop crowing at the press.", "\"Is there a cash prize? Lovely,\" she said, reaching for her purse.",
+        "The trophy is going straight on top of the telly.", "She thanked her chiropodist in her victory speech.", "Her lucky brooch has been put away for safe keeping.",
+        "She has promised the grandchildren a trip to the garden centre.", "The tea tent stayed open late in her honour.", "She waved her walking stick at the crowd, who waved back."], v, 2) };
   }
   return (
     <section>
@@ -130,7 +196,7 @@ function WorldLead(props) {
       <Headline big>{s.h}</Headline>
       <div style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 14, color: SOFT, marginBottom: 8 }}>{s.deck}</div>
       <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
-        <Photo w={118} tilt={-2.5} caption={sh(s.p.name) + pk([" takes a bow", " on her lap of honour", " soaks it up"], v, 1)}>
+        <Photo w={118} tilt={-2.5} caption={sh(s.p.name) + pk([" takes a bow", " on her lap of honour", " soaks it up", " basks in the glory", " waves to the crowd", " poses for posterity", " with a rather smug rooster", ", all smiles", " before the tea party", " salutes the stands", " in her finest hour", ", still a bit breathless"], v, 1)}>
           <div style={{ marginBottom: -4 }}><Rider palette={paletteFor(s.p.id, L.type === "no1" ? 1 : L.type === "upsetTitle" ? L.upset.wRank : L.type === "shock" ? L.shock.wRank : s.p.rank)} width={112} pose={s.pose} crown={s.crown} /></div>
         </Photo>
         <div style={{ minWidth: 0 }}>
@@ -254,7 +320,7 @@ export function CluckPaper(props) {
 
         {/* You: the lead story, or your own column further down */}
         {y && (<section>
-          <Kicker>{!youLead ? pk(["Meanwhile, your week", "And how did our granny do?", "Your week on the tour", "Closer to home"], v, 2) : y.champion ? pk(["Extra! Extra!", "Stop the presses!", "Hold the front page!"], v, 0) : pk(["This week on the tour", "From the jousting lanes", "Our granny of the week", "Dispatches from the stables"], v, 0)}</Kicker>
+          <Kicker>{!youLead ? pk(["Meanwhile, your week", "And how did our granny do?", "Your week on the tour", "Closer to home", "Back at our stables", "Our own correspondent reports", "Your granny's diary", "On the home front", "Your tour this week", "News from your corner", "Our granny's progress", "Elsewhere on the lanes"], v, 2) : y.champion ? pk(["Extra! Extra!", "Stop the presses!", "Hold the front page!", "Special souvenir edition", "Ring the church bells!", "Cancel the bingo!", "Read all about it!", "Champion edition", "Put the bunting up!", "Late extra", "Breaking news from the stables", "Front-page splash"], v, 0) : pk(["This week on the tour", "From the jousting lanes", "Our granny of the week", "Dispatches from the stables", "Our woman on the lanes", "Saddle report", "Tour diary", "The weekly jousting round-up", "Notes from the tilt yard", "Hot off the henhouse press", "Ringside report", "This week's joust"], v, 0)}</Kicker>
           <Headline big={youLead}>{lead.h}</Headline>
           <div style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: youLead ? 14 : 13, color: SOFT, marginBottom: 8 }}>{lead.deck}</div>
           <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
@@ -297,11 +363,21 @@ export function CluckPaper(props) {
             <Kicker col="#1d4ed8">{ev.tierName}</Kicker>
             <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
               <div style={{ minWidth: 0, flex: 1 }}>
-                <Headline>{pk([sh(ev.champ.name) + " lifts the " + ev.tierName + " trophy", sh(ev.champ.name) + " is queen of " + ev.tierName, "Nobody could catch " + sh(ev.champ.name), sh(ev.champ.name) + " storms " + ev.tierName, "Hats off to " + sh(ev.champ.name), sh(ev.champ.name) + " bags the " + ev.tierName + " cup"], v, 2)}</Headline>
+                <Headline>{pk([sh(ev.champ.name) + " lifts the " + ev.tierName + " trophy", sh(ev.champ.name) + " is queen of " + ev.tierName, "Nobody could catch " + sh(ev.champ.name), sh(ev.champ.name) + " storms " + ev.tierName, "Hats off to " + sh(ev.champ.name), sh(ev.champ.name) + " bags the " + ev.tierName + " cup",
+                  sh(ev.champ.name) + " wins it all at " + ev.tierName, "Three cheers for " + sh(ev.champ.name), sh(ev.champ.name) + " rules the roost at " + ev.tierName, ev.tierName + " glory for " + sh(ev.champ.name),
+                  "No stopping " + sh(ev.champ.name) + " this week", sh(ev.champ.name) + " takes home the silverware", "The " + ev.tierName + " crown fits " + sh(ev.champ.name), sh(ev.champ.name) + " gallops to the title", "All bow to " + sh(ev.champ.name)], v, 2)}</Headline>
                 <Body>{pk(["The week's " + ev.tierName + " draw belonged to " + ev.champ.emoji + " " + sh(ev.champ.name) + ", who rode through the bracket untouched.",
                   ev.champ.emoji + " " + sh(ev.champ.name) + " left a trail of feathers and bruised egos all the way to the " + ev.tierName + " title.",
                   "Rivals tried everything — flattery, fruitcake, mild threats — but " + ev.champ.emoji + " " + sh(ev.champ.name) + " took the title regardless.",
-                  ev.champ.emoji + " " + sh(ev.champ.name) + "'s rooster did a lap of honour. Then another. Officials had to step in."], v, 1)}</Body>
+                  ev.champ.emoji + " " + sh(ev.champ.name) + "'s rooster did a lap of honour. Then another. Officials had to step in.",
+                  "Nobody laid a glove on " + ev.champ.emoji + " " + sh(ev.champ.name) + " all week at " + ev.tierName + ".",
+                  ev.champ.emoji + " " + sh(ev.champ.name) + " celebrated the " + ev.tierName + " title with a pot of tea and a smug little smile.",
+                  "The " + ev.tierName + " trophy is heading to " + ev.champ.emoji + " " + sh(ev.champ.name) + "'s mantelpiece, right next to the carriage clock.",
+                  ev.champ.emoji + " " + sh(ev.champ.name) + " charged, charged and charged again until there was nobody left to charge at.",
+                  "Opponents queued up to be knocked off by " + ev.champ.emoji + " " + sh(ev.champ.name) + ", and knocked off they were.",
+                  ev.champ.emoji + " " + sh(ev.champ.name) + " made the " + ev.tierName + " final look like a gentle stroll round the garden centre.",
+                  "Several knitting circles have already started on a scarf for " + ev.champ.emoji + " " + sh(ev.champ.name) + ".",
+                  ev.champ.emoji + " " + sh(ev.champ.name) + " thanked the crowd, the stewards and, rather pointedly, her rooster."], v, 1)}</Body>
                 <Bubble by={sh(ev.champ.name)}>{quote(ev.champ.id, v)}</Bubble>
               </div>
               <Photo w={86} tilt={2.5} caption="Champion's lap"><div style={{ marginBottom: -3 }}><Rider palette={paletteFor(ev.champ.id)} width={82} pose="cheer" flip={true} /></div></Photo>
@@ -313,10 +389,22 @@ export function CluckPaper(props) {
         {is.rival && (function () {
           var R = is.rival, n = sh(R.p.name), moved = R.from && R.to ? R.from - R.to : 0;
           var h = R.settled ? "Feud over! " + sh(R.settled.name) + " waves the white hanky"
-            : R.isNew ? pk(["A new rivalry is born: " + n, n + " has it in for " + (y ? y.name : "you"), "Pistols at dawn: meet " + n], v, 0)
-            : R.met === "won" ? pk(["Sweet revenge over " + n + "!", n + " gets her comeuppance", "Score settled with " + n + " — for now"], v, 1)
-            : R.met === "lost" ? pk([n + " strikes again", "The feud deepens: " + n + " wins round " + (R.h2h.w + R.h2h.l), n + " is insufferable this week"], v, 2)
-            : pk(["Meanwhile, " + n + " is watching", "What " + n + " did this week", "Keep your enemies closer: " + n], v, 3);
+            : R.isNew ? pk(["A new rivalry is born: " + n, n + " has it in for " + (y ? y.name : "you"), "Pistols at dawn: meet " + n,
+                "Someone new is glaring at you: " + n, n + " has your name on her list", "Watch your back: " + n + " is coming", "Handbags at dawn with " + n,
+                n + " wants a word with " + (y ? y.name : "you"), "Enter the nemesis: " + n, "A grudge is born, courtesy of " + n, n + " is sharpening her knitting needles", "Meet your new arch-enemy: " + n,
+                "Trouble brewing: " + n + " takes against " + (y ? y.name : "you"), n + " has taken a dislike", "Say hello to your new nemesis, " + n], v, 0)
+            : R.met === "won" ? pk(["Sweet revenge over " + n + "!", n + " gets her comeuppance", "Score settled with " + n + " — for now",
+                n + " sent packing!", "A win over " + n + " never tasted sweeter", "Take that, " + n + "!", n + " eats humble pie", "Victory over " + n + ", served with cream",
+                "Back in the hay, " + n, n + " is not happy this week", "Bragging rights over " + n, n + " left fuming in the car park",
+                n + " knocked off her perch", "Who's laughing now, " + n + "?", n + " goes home to sulk"], v, 1)
+            : R.met === "lost" ? pk([n + " strikes again", "The feud deepens: " + n + " wins round " + (R.h2h.w + R.h2h.l), n + " is insufferable this week",
+                n + " has the last laugh, again", "Curses! " + n + " wins again", n + " rubs it in", "Round " + (R.h2h.w + R.h2h.l) + " goes to " + n, n + " is gloating at bingo",
+                "Defeat at the hands of " + n, n + " won't stop going on about it", "The feud boils over: " + n + " wins", n + " sends a smug postcard",
+                "Not again! " + n + " triumphs", n + " is unbearable at the tea urn", "Another one for " + n + "'s scrapbook"], v, 2)
+            : pk(["Meanwhile, " + n + " is watching", "What " + n + " did this week", "Keep your enemies closer: " + n,
+                n + " is up to something", "An eye on " + n, "The latest on " + n, n + " is biding her time", "Spotted: " + n + " doing her stretches",
+                "Not a peep from " + n + ". Suspicious.", "Rival watch: " + n, n + " is plotting, quietly", "What's " + n + " knitting this week?",
+                "Curtains twitch as " + n + " passes", n + " has bought a new lance", "Eyes peeled for " + n], v, 3);
           return (
             <section>
               <Kicker col="#be123c">The feud</Kicker>
@@ -326,9 +414,11 @@ export function CluckPaper(props) {
                   <Body>{R.p.emoji} <b>{R.p.name}</b> {R.to ? "is world #" + R.to : ""}{moved > 0 ? ", up " + moved + " this week" : moved < 0 ? ", down " + (-moved) + " this week" : ""}. Head-to-head: <b>{R.h2h.w}–{R.h2h.l}</b>{R.h2h.w > R.h2h.l ? " to our granny." : R.h2h.w < R.h2h.l ? " to her." : ", dead level."}
                     {R.lv > 0 ? " She was spotted at the gym too: +" + R.lv + (R.lv === 1 ? " level." : " levels.") : ""}
                     {R.settled ? " Lead a rival by three and she stops bothering you — " + (R.isNew ? "but " + n + " has already stepped into the role." : "for now.") : ""}</Body>
-                  <Bubble by={n}>{pk(["I've been practising. Mostly glaring.", "Tell her I said hello. Rudely.", "I'll see her on the lanes, dear.", "She knows what she did."], v, R.h2h.l)}</Bubble>
+                  <Bubble by={n}>{pk(["I've been practising. Mostly glaring.", "Tell her I said hello. Rudely.", "I'll see her on the lanes, dear.", "She knows what she did.",
+                    "I've seen better jousting at the church fete.", "She can keep her trophies. I'll take her next.", "Tell her the knitting needles are out.", "I don't hold grudges. I knit them into scarves.",
+                    "Lovely woman. Terrible jouster.", "My rooster doesn't like her rooster. Neither do I.", "She'll get hers. Mark my words.", "I've circled the date on the parish calendar."], v, R.h2h.l)}</Bubble>
                 </div>
-                <Photo w={86} tilt={2.5} caption={pk(["Seen sharpening her lance", "Not amused", "Plotting"], v, 1)}><div style={{ marginBottom: -3 }}><Rider palette={paletteFor(R.p.id, R.to)} width={82} pose={R.met === "won" ? "knocked" : "idle"} flip={true} /></div></Photo>
+                <Photo w={86} tilt={2.5} caption={pk(["Seen sharpening her lance", "Not amused", "Plotting", "Muttering darkly", "Glaring at the camera", "Polishing her glove", "Arms very firmly folded", "Unimpressed, as usual", "Taking notes", "Lips pursed", "Biding her time", "Pretending not to care"], v, 1)}><div style={{ marginBottom: -3 }}><Rider palette={paletteFor(R.p.id, R.to)} width={82} pose={R.met === "won" ? "knocked" : "idle"} flip={true} /></div></Photo>
               </div>
             </section>
           );
@@ -338,8 +428,10 @@ export function CluckPaper(props) {
         {(pe.climber || pe.faller || pe.gym) && (
           <section>
             <Kicker col="#166534">Around your ranking</Kicker>
-            <Headline>{pk(["On the move near #" + (y ? y.rankAfter : ""), "Shake-up around #" + (y ? y.rankAfter : ""), "Your neighbours are restless", "Comings and goings in your corner", "Elbows out near #" + (y ? y.rankAfter : "")], v, 1)}</Headline>
-            {[pe.climber && { m: pe.climber, txt: pk(["rockets up the rankings", "is flying up the ladder", "climbs like a startled hen", "can't stop climbing"], v, 0) }, pe.faller && { m: pe.faller, txt: pk(["takes a tumble", "slides down the ladder", "has a week to forget", "is in free fall"], v, 2) }].filter(Boolean).map(function (r) {
+            <Headline>{pk(["On the move near #" + (y ? y.rankAfter : ""), "Shake-up around #" + (y ? y.rankAfter : ""), "Your neighbours are restless", "Comings and goings in your corner", "Elbows out near #" + (y ? y.rankAfter : ""),
+              "Busy week around #" + (y ? y.rankAfter : ""), "Who's who near #" + (y ? y.rankAfter : ""), "The neighbours are at it again", "Musical chairs near #" + (y ? y.rankAfter : ""), "Over the garden fence",
+              "Gossip from your end of the ladder", "Your corner of the rankings stirs", "Jostling near #" + (y ? y.rankAfter : ""), "Climbers and tumblers by #" + (y ? y.rankAfter : ""), "Twitching curtains in your neighbourhood"], v, 1)}</Headline>
+            {[pe.climber && { m: pe.climber, txt: pk(["rockets up the rankings", "is flying up the ladder", "climbs like a startled hen", "can't stop climbing", "shoots up like a runner bean", "has found a second wind", "is on the up and up", "scales the ladder two rungs at a time", "is the talk of the tea tent", "zooms skywards", "leaves the pack behind", "goes up in the world"], v, 0) }, pe.faller && { m: pe.faller, txt: pk(["takes a tumble", "slides down the ladder", "has a week to forget", "is in free fall", "drops like a dropped stitch", "slips a few rungs", "goes down with a bump", "loses her footing", "tumbles out of favour", "sinks like a soggy scone", "goes backwards in a hurry", "is heading the wrong way"], v, 2) }].filter(Boolean).map(function (r) {
               return (
                 <div key={r.m.p.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "5px 0", borderBottom: "1px dotted " + RULE }}>
                   <Face palette={paletteFor(r.m.p.id, r.m.to)} size={34} />
@@ -349,7 +441,7 @@ export function CluckPaper(props) {
               );
             })}
             {pe.gym && (
-              <Body><span style={{ display: "inline-block", marginTop: 6 }}><b>Gym gossip:</b> {pe.gym.p.emoji} {pe.gym.p.name} (#{pe.gym.rank}) {pk(["spent the week training", "was spotted lifting feed sacks at dawn", "has been sprinting her rooster up hills", "skipped bingo to practise"], v, 1)} — <b>+{pe.gym.lv} {pe.gym.lv === 1 ? "level" : "levels"}</b>. {pk(["The rivals aren't resting, dear.", "Best get to the gym yourself.", "Consider yourself warned.", "Something to think about over your cocoa."], v, 3)}</span></Body>
+              <Body><span style={{ display: "inline-block", marginTop: 6 }}><b>Gym gossip:</b> {pe.gym.p.emoji} {pe.gym.p.name} (#{pe.gym.rank}) {pk(["spent the week training", "was spotted lifting feed sacks at dawn", "has been sprinting her rooster up hills", "skipped bingo to practise", "did squats with a hay bale", "jogged three laps of the village green", "practised her lance work on the washing line", "has been doing yoga with her rooster", "swapped the biscuits for porridge", "trained by torchlight on the allotment", "hired a personal trainer from the bowls club", "did lunges all the way to the post office"], v, 1)} — <b>+{pe.gym.lv} {pe.gym.lv === 1 ? "level" : "levels"}</b>. {pk(["The rivals aren't resting, dear.", "Best get to the gym yourself.", "Consider yourself warned.", "Something to think about over your cocoa.", "Put that biscuit down.", "Your rooster's looking a bit soft, dear.", "Time to dust off the leg warmers.", "Don't say we didn't tell you.", "The gym's open till nine, you know.", "Just saying.", "Worth mulling over with a custard cream.", "Your knees won't train themselves."], v, 3)}</span></Body>
             )}
           </section>
         )}
@@ -361,11 +453,13 @@ export function CluckPaper(props) {
             {is.knits.map(function (k, i) {
               return (
                 <div key={i} style={{ display: "flex", gap: 8, padding: "7px 8px", marginTop: 6, border: "1.5px solid " + RULE, background: "rgba(255,255,255,0.55)", borderRadius: 8 }}>
-                  <Face palette={k.isP ? PLAYER_PALETTE : paletteFor(k.id, 500)} size={30} />
+                  {k.fan ? (<span aria-hidden style={{ width: 30, height: 30, borderRadius: "50%", background: "#e0f2fe", border: "1.5px solid " + INK, display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 16, flexShrink: 0 }}>📣</span>) : (<Face palette={k.isP ? PLAYER_PALETTE : paletteFor(k.id, k.rank || 500)} size={30} />)}
                   <div style={{ flex: 1, minWidth: 0, fontFamily: SERIF }}>
-                    <div style={{ fontSize: 12.5 }}><b>{k.emoji} {k.name}</b> <span style={{ color: "#78716c" }}>@{(k.name || "").split(" ")[0]}Jousts · {fmtK(k.followers)} followers</span></div>
+                    <div style={{ fontSize: 12.5 }}><b>{k.emoji} {k.name}</b> <span style={{ color: "#78716c" }}>{k.handle || "@" + (k.name || "").split(" ")[0] + "Jousts"} · {fmtK(k.followers)} followers</span></div>
                     <div style={{ fontSize: 14, lineHeight: 1.35, marginTop: 2 }}>{k.text}</div>
+                    {k.photo && (<div style={{ marginTop: 5 }}><Selfie seed={k.photo.seed} text={k.photo.place} who={k.photo.who || undefined} palette={k.isP ? PLAYER_PALETTE : paletteFor(k.id, k.rank || 500)} h={128} /></div>)}
                     <div style={{ fontSize: 11.5, color: "#78716c", marginTop: 2 }}>❤️ {fmtK(k.likes)} · 🔁 {fmtK(Math.round(k.likes / 6))}</div>
+                    {k.reply && (<div style={{ fontSize: 12.5, marginTop: 4, paddingLeft: 8, borderLeft: "2px solid " + RULE, color: "#44403c" }}><b>{k.reply.name}:</b> {k.reply.text}</div>)}
                   </div>
                 </div>
               );
@@ -377,8 +471,13 @@ export function CluckPaper(props) {
         <section>
           <Kicker col="#7c2d12">World tour</Kicker>
           <Headline>{w.newNo1
-            ? pk(["New world number one! " + sh(top1.p.name) + " seizes the crown", "Long live Queen " + sh(top1.p.name) + "!", "A new #1: " + sh(top1.p.name) + " takes the throne", "The crown changes heads: " + sh(top1.p.name)], v, 0)
-            : pk([sh(top1.p.name) + " still rules the tour", sh(top1.p.name) + " keeps the crown polished", "Nobody can shift " + sh(top1.p.name), sh(top1.p.name) + "'s throne: still warm, still hers", "Week after week, it's " + sh(top1.p.name), sh(top1.p.name) + " reigns on"], v, 4)}</Headline>
+            ? pk(["New world number one! " + sh(top1.p.name) + " seizes the crown", "Long live Queen " + sh(top1.p.name) + "!", "A new #1: " + sh(top1.p.name) + " takes the throne", "The crown changes heads: " + sh(top1.p.name),
+              "Make way for " + sh(top1.p.name) + ", the new #1", sh(top1.p.name) + " climbs to the very top", "Top of the tree: " + sh(top1.p.name), "The crown fits " + sh(top1.p.name),
+              sh(top1.p.name) + " is number one!", "All change at the top: " + sh(top1.p.name) + " reigns", "Bunting out for new #1 " + sh(top1.p.name), sh(top1.p.name) + " takes the top perch",
+              "Queen of the tour: " + sh(top1.p.name), "Fresh face at the summit: " + sh(top1.p.name), sh(top1.p.name) + " is the new head of the henhouse"], v, 0)
+            : pk([sh(top1.p.name) + " still rules the tour", sh(top1.p.name) + " keeps the crown polished", "Nobody can shift " + sh(top1.p.name), sh(top1.p.name) + "'s throne: still warm, still hers", "Week after week, it's " + sh(top1.p.name), sh(top1.p.name) + " reigns on",
+              sh(top1.p.name) + " stays top of the pecking order", "Still number one: " + sh(top1.p.name), sh(top1.p.name) + " won't budge", "Same old queen: " + sh(top1.p.name), sh(top1.p.name) + " hangs on to the crown",
+              "The summit still belongs to " + sh(top1.p.name), sh(top1.p.name) + " guards the throne", "No change at the top: " + sh(top1.p.name), sh(top1.p.name) + " still wears the golden helmet"], v, 4)}</Headline>
           <div style={{ border: "2px solid " + INK, background: "rgba(255,255,255,0.45)", marginTop: 4 }}>
             {w.top.map(function (t) {
               return (

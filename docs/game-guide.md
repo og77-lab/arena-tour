@@ -95,7 +95,7 @@ Everything that changes a match — lanes, gear, tiredness, training, injuries �
 
 **3 · Sets and strikes**
 - A match is played in **sets**; each set is **3 strikes**.
-- Each strike, you and she both score. The set goes to whoever has the **higher average** of the three — one bad strike can be rescued.
+- Each strike, you and she both score. The set goes to whoever has the **higher average** of the three, rounded as the screen shows it — one bad strike can be rescued. **Level averages (say 83–83) go to tie-break strikes** until one rider is ahead.
 - Win the majority of sets: best of 3 (first to 2) up to Tour 500, best of 5 (first to 3) at Masters, Slams and the Finals. A deciding set only happens if it's needed.
 
 **4 · Striking.** A blue marker sweeps back and forth across the bar. Tap the big round **STRIKE** button (or the arena, or press Space) when it's in the gold zone — as close to the white centre line as you can. The bar gets a little faster with every strike and every set.

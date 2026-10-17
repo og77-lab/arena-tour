@@ -710,10 +710,12 @@ export default function Arena(props) {
         var randP = S.npcs[(S.calIdx * 37 + S.sNum * 11) % S.npcs.length];
         var lastLoss = ts.log.filter(function(m){ return !m.won; })[0], bestWin = ts.log.filter(function(m){ return m.won; }).slice(-1)[0];
         issue.knits = weekKnits({ seed: S.sNum * 1000 + S.calIdx * 17 + pp,
-          you: { name: S.pName, rest: !!ts.rest, title: !!wonTitle, wins: ts.log.filter(function(m){ return m.won; }).length, followers: newP.followers },
+          you: { name: S.pName, rest: !!ts.rest, injured: !!(newP.inj && newP.inj.length), tired: Math.min(fitOf(S.player).g, fitOf(S.player).r) < 50, title: !!wonTitle, wins: ts.log.filter(function(m){ return m.won; }).length, followers: newP.followers },
           champ: champP, rival: rivP ? Object.assign({}, rivP, { rank: rkA[rivP.id] }) : null, random: randP ? Object.assign({}, randP, { rank: rkA[randP.id] }) : null,
           vars: { tier: ts.eventName || tier.name, round: rNames[pRound], rooster: S.player.roosterName || "My rooster", foe: lastLoss ? sh(lastLoss.opp) : "the referee", beat: bestWin ? sh(bestWin.opp) : "a pigeon", you: sh(S.pName) } }).map(function(k){
-            return { name: k.who.name, isP: !!k.who.isP, id: k.who.id || 1, emoji: k.who.emoji || "", text: k.text, likes: k.likes, followers: k.who.isP ? newP.followers : followersOf(k.who, k.who.rank) };
+            var o2 = { name: k.who.name, isP: !!k.who.isP, fan: !!k.who.fan, id: k.who.id || 1, rank: k.who.rank || 500, emoji: k.who.emoji || "", text: k.text, likes: k.likes, followers: k.who.fan ? k.who.followers : k.who.isP ? newP.followers : followersOf(k.who, k.who.rank) };
+            if (k.who.handle) o2.handle = k.who.handle; if (k.photo) o2.photo = k.photo; if (k.reply) o2.reply = k.reply;
+            return o2;
           });
       } catch (e) { console.error("knits", e); }
       /* The feud column: your rival's week, and what happened if you met */

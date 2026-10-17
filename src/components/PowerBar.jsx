@@ -78,11 +78,11 @@ function Fighter(props) {
 function Momentum(props) {
   var n = props.my.length;
   if (n === 0) return (<div style={{ height: 30 }} />);
-  var gap = 0; for (var i = 0; i < n; i++) gap += props.my[i] - props.op[i];
-  var a = gap / n;
+  var sm = 0, so = 0; for (var i = 0; i < n; i++) { sm += props.my[i]; so += props.op[i]; }
+  var a = Math.round(sm / n) - Math.round(so / n); /* the same rounded averages that decide the set */
   var frac = Math.min(1, Math.abs(a) / 20);
   var ahead = a >= 0;
-  var label = Math.abs(a) < 0.5 ? "SET: DEAD EVEN" : ahead ? "SET: YOU LEAD +" + Math.round(a) : "SET: TRAILING " + Math.round(a);
+  var label = a === 0 ? "SET: DEAD EVEN" : ahead ? "SET: YOU LEAD +" + Math.round(a) : "SET: TRAILING " + Math.round(a);
   return (
     <div style={{ maxWidth: 260, margin: "0 auto", height: 30 }}>
       <div style={{ position: "relative", height: 8, borderRadius: 4, background: "rgba(15,23,42,0.08)", overflow: "hidden" }}>
@@ -284,13 +284,15 @@ export default function PowerBar(props) {
     var youWon = sc > osc, tie = sc === osc;
     var id = Date.now() + Math.random();
     var nm = myH.concat([sc]), no = opH.concat([osc]);
+    /* A set is decided on the averages as the screen shows them (rounded): level averages — 83–83 — go to tie-break strikes */
     var sumMy = nm.reduce(function (a, b) { return a + b; }, 0), sumOp = no.reduce(function (a, b) { return a + b; }, 0);
-    var setDone = nm.length >= STRIKES_PER_SET && sumMy !== sumOp;
-    var goesToTieBreak = nm.length >= STRIKES_PER_SET && sumMy === sumOp;
+    var avMy = Math.round(sumMy / nm.length), avOp = Math.round(sumOp / no.length);
+    var setDone = nm.length >= STRIKES_PER_SET && avMy !== avOp;
+    var goesToTieBreak = nm.length >= STRIKES_PER_SET && avMy === avOp;
     var g = goldRef.current;
     if (inZ) { g.total++; g.set++; }
-    if (setDone) { if (g.set >= STRIKES_PER_SET && sumMy > sumOp) g.flawless++; g.set = 0; }
-    var newSets = setDone ? sets.concat([{ my: nm, op: no, won: sumMy > sumOp }]) : sets;
+    if (setDone) { if (g.set >= STRIKES_PER_SET && avMy > avOp) g.flawless++; g.set = 0; }
+    var newSets = setDone ? sets.concat([{ my: nm, op: no, won: avMy > avOp }]) : sets;
     var result = setDone ? matchResult(newSets, need) : null;
 
     /* Persist before any animation so a reload can't undo this strike */
@@ -371,7 +373,7 @@ export default function PowerBar(props) {
   function finish() {
     if (!res || finished.current || Date.now() - doneAt.current < 1200) return;
     finished.current = true;
-    props.onDone(res.w, res.pa, res.oa, res.setsWon + "-" + res.setsLost, res.sets.map(function (s) { return s.won ? "W" : "L"; }).join(""), { gold: goldRef.current.total, flawless: goldRef.current.flawless, sets: res.sets.map(function (s) { return [s.my.reduce(function (a, b) { return a + b; }, 0), s.op.reduce(function (a, b) { return a + b; }, 0)]; }) });
+    props.onDone(res.w, res.pa, res.oa, res.setsWon + "-" + res.setsLost, res.sets.map(function (s) { return s.won ? "W" : "L"; }).join(""), { gold: goldRef.current.total, flawless: goldRef.current.flawless, sets: res.sets.map(function (s) { return [Math.round(avg(s.my)), Math.round(avg(s.op))]; }) });
   }
 
   /* Space / Enter drives every phase */

@@ -24,7 +24,7 @@ function SetChips(props) {
   return (
     <div style={{ display: "flex", justifyContent: "center", gap: 6, flexWrap: "wrap", maxWidth: 340 }}>
       {props.sets.map(function (s, i) {
-        var my = s.my.reduce(function (a, b) { return a + b; }, 0), op = s.op.reduce(function (a, b) { return a + b; }, 0); /* set totals: that is what decides a set */
+        var my = Math.round(avg(s.my)), op = Math.round(avg(s.op)); /* rounded set averages: that is what decides a set */
         return (
           <motion.div key={i} initial={{ y: 14, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: props.delay + i * 0.08 }}
             style={{ padding: "4px 9px", borderRadius: 20, fontSize: 12, fontWeight: 800, background: s.won ? "rgba(34,197,94,0.18)" : "rgba(239,68,68,0.18)", border: "1px solid " + (s.won ? "rgba(74,222,128,0.6)" : "rgba(248,113,113,0.6)"), color: "#fff" }}>
