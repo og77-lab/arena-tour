@@ -65,7 +65,7 @@ function Channel(tracks, recentKey, gapMs) {
   return ch;
 }
 
-var menu = Channel(["/music/rooster.mp3", "/music/jousting.mp3", "/music/grandma.mp3", "/music/grandma-joust.mp3"], "arena-music-recent", GAP_MS);
+var menu = Channel(["/music/rooster.mp3", "/music/jousting.mp3", "/music/grandma.mp3", "/music/grandma-joust.mp3", "/music/roosters-and-sticks.mp3"], "arena-music-recent", GAP_MS);
 var battle = Channel(["/music/fight-1.mp3", "/music/fight-2.mp3", "/music/fight-3.mp3", "/music/fight-4.mp3"], "arena-battle-recent", 300);
 menu.want = true;
 
