@@ -4,6 +4,31 @@ import { TIERS, RN5, RN6, STATS } from "../models/constants";
 import { Rider, PLAYER_PALETTE, paletteFor, withKit } from "./Rider";
 import { roosterName, trait, quote, standing } from "../models/persona";
 import { useState } from "react";
+import { crowdLove, followersOf, crowdEdge, fmtFollowers, fanChain } from "../engine/social";
+import { fansOf } from "../engine/fans";
+import FanRules from "./FanRules";
+
+/* Fans and followers, and what they mean when you meet: the stands back whoever the crowd loves more */
+function FanBox(props) {
+  var p = props.p, me = props.me || {}, isMe = p.isP || p.id === 1;
+  var love = isMe ? fansOf(me) : crowdLove(p, props.rank), fol = isMe ? followersOf(Object.assign({}, me, { isP: true })) : followersOf(p, props.rank);
+  var line, rs = useState(false);
+  if (isMe) { var c = fanChain(me, props.myRank || props.rank); line = (<span>Sponsors pay you <b style={{ color: "#15803d" }}>+{c.tp} training pts</b> a week · your fans drift back toward <b>{c.settle}</b></span>); }
+  else {
+    var mine = fansOf(me), e = crowdEdge(mine, love).d;
+    line = (<span>When you meet (you ❤️ {mine}): {e > 0.05 ? (<b style={{ color: "#15803d" }}>the stands back you, your gold zone +{e.toFixed(1)}%</b>) : e < -0.05 ? (<b style={{ color: "#b91c1c" }}>the stands back her, her gold zone +{(-e).toFixed(1)}%</b>) : (<b>the stands are split, no edge</b>)}{Math.abs(e) > 0.05 ? ", doubled on match point" : ""}</span>);
+  }
+  return (
+    <div style={{ background: "#fff1f2", border: "1.5px solid #fecdd3", borderRadius: 8, padding: "7px 9px", marginBottom: 10 }}>
+      <div style={{ display: "flex", gap: 14, alignItems: "baseline" }}>
+        <span style={{ fontSize: 17, fontWeight: 900, color: "#be123c" }}>❤️ {love} <span style={{ fontSize: 12, color: "#64748b" }}>fans</span></span>
+        <span style={{ fontSize: 15, fontWeight: 900, color: "#0e7490" }}>🧶 {fmtFollowers(fol)} <span style={{ fontSize: 12, color: "#64748b" }}>followers</span></span>
+      </div>
+      <div style={{ fontSize: 12.5, color: "#44403c", marginTop: 3, lineHeight: 1.35 }}>{line} <button onClick={function () { rs[1](!rs[0]); }} style={{ border: "none", background: "none", padding: 0, color: "#be123c", fontWeight: 900, fontSize: 12.5, cursor: "pointer", textDecoration: "underline" }}>{rs[0] ? "hide rules" : "📜 fan rules"}</button></div>
+      {rs[0] && (<div style={{ marginTop: 6, background: "#fff", borderRadius: 6, padding: "6px 8px" }}><FanRules /></div>)}
+    </div>
+  );
+}
 
 export default function Profile(props) {
   var _ed = useState(false), editing = _ed[0], setEditing = _ed[1];
@@ -63,6 +88,7 @@ export default function Profile(props) {
             </div>
           )}
         </div>
+        <FanBox p={p} rank={rank} me={props.me} myRank={props.myRank} />
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginBottom: 10 }}>
           {[{ l: "Current Rank", v: "#" + rank, c: rank <= 10 ? "#b45309" : rank <= 50 ? "#22c55e" : "#475569" },
             { l: "Peak Rank", v: "#" + Math.min(b.rank || 1001, rank), c: "#4f46e5" },
@@ -110,10 +136,10 @@ export default function Profile(props) {
             <span style={{ fontSize: 14, color: "#64748b", fontWeight: 700 }}>TRAINING LEVELS</span>
             <span style={{ fontSize: 13, color: "#7c3aed", fontWeight: 700 }}>{totalTr}/100</span>
           </div>
-          {STATS.map(function(st){ return { k: st.k, i: st.icon, l: st.label, c: st.col, who: st.who }; }).map(function(s, si, all){
+          {STATS.map(function(st){ return { k: st.k, i: st.icon, l: st.label, el: st.el, c: st.col, who: st.who }; }).map(function(s, si, all){
             var lv = t[s.k]||0;
             var head = si === 0 || all[si - 1].who !== s.who;
-            return (<div key={s.k}>{head && (<div style={{ fontSize: 11, fontWeight: 900, letterSpacing: 1.2, color: "#57534e", margin: si ? "6px 0 2px" : "0 0 2px" }}>{s.who === "granny" ? "👵 GRANNY" : "🐓 ROOSTER"}</div>)}<div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}><span style={{ color: "#1c1917", fontWeight: 700, fontSize: 13, width: 112, flexShrink: 0 }}>{s.i} {s.l}</span><div style={{ flex: 1, display: "flex", gap: 1 }}>{Array.from({length:20}).map(function(_,i){return (<div key={i} style={{flex:1,height:5,borderRadius:2,background:i<lv?s.c:"#f1f5f9"}}/>);})}</div><span style={{fontSize:14,color:"#475569",width:20,textAlign:"right"}}>{lv}</span></div></div>);
+            return (<div key={s.k}>{head && (<div style={{ fontSize: 11, fontWeight: 900, letterSpacing: 1.2, color: "#57534e", margin: si ? "6px 0 2px" : "0 0 2px" }}>{s.who === "granny" ? "👵 GRANNY" : s.who === "rooster" ? "🐓 ROOSTER" : "🔋 BOTH"}</div>)}<div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}><span style={{ color: "#1c1917", fontWeight: 700, fontSize: 13, width: 112, flexShrink: 0, lineHeight: 1.1 }}>{s.i} {s.l}{s.el && (<span style={{ display: "block", fontSize: 10.5, fontWeight: 600, color: "#78716c", paddingLeft: 18 }}>({s.el})</span>)}</span><div style={{ flex: 1, display: "flex", gap: 1 }}>{Array.from({length:20}).map(function(_,i){return (<div key={i} style={{flex:1,height:5,borderRadius:2,background:i<lv?s.c:"#f1f5f9"}}/>);})}</div><span style={{fontSize:14,color:"#475569",width:20,textAlign:"right"}}>{lv}</span></div></div>);
           })}
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 6 }}>

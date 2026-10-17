@@ -21,8 +21,8 @@ function Bunting(props) {
 
 function Stat(props) {
   return (
-    <div style={{ background: C.cardWarm, border: "1.5px solid " + C.line, borderRadius: 10, padding: "4px 8px", minWidth: 0 }}>
-      <div style={label()}>{props.k}</div>
+    <div onClick={props.onClick} style={{ background: C.cardWarm, border: "1.5px solid " + C.line, borderRadius: 10, padding: "4px 8px", minWidth: 0, cursor: props.onClick ? "pointer" : "default" }}>
+      <div style={label()}>{props.k}{props.onClick ? " ›" : ""}</div>
       <div style={{ fontSize: 15, fontWeight: 900, color: props.color || C.text, whiteSpace: "nowrap" }}>{props.v}</div>
     </div>
   );
@@ -89,7 +89,7 @@ export default function HomeTab(props) {
             <Stat k="Points" v={(S.player.sp || 0).toLocaleString()} />
             <Stat k="Prize" v={money(S.player.money)} color={C.greenInk} />
             <Stat k="Train" v={(tr.tp || 0) + " TP"} color={C.goldInk} />
-            <Stat k="Fans" v={"❤️ " + fans} color="#be123c" />
+            <Stat k="Fans" v={"❤️ " + fans} color="#be123c" onClick={function (e) { e.stopPropagation(); var el = document.getElementById("fans-card"); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); }} />
           </div>
         </div>
       </button>
@@ -115,7 +115,7 @@ export default function HomeTab(props) {
       </motion.div>
 
       <FitnessCard player={S.player} roosterName={S.player.roosterName} onTrain={props.onTrain} />
-      <FansCard player={S.player} rank={props.pRank} />
+      <div id="fans-card"><FansCard player={S.player} rank={props.pRank} /></div>
 
       {/* Training nudge when points are waiting */}
       {(tr.tp || 0) >= 15 && (

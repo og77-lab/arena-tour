@@ -35,17 +35,17 @@ export const TIERS = [
    what = what it does in the joust; per = the effect of one level ahead of your opponent (mirrors PowerBar's formulas);
    best = who should train it */
 export const STATS = [
-  { k: "r", icon: "⚡", label: "Slower Bar", el: "bar speed", who: "granny", col: "#0891b2", what: "The marker sweeps slower, so it's easier to stop it in the gold",
+  { k: "r", icon: "⚡", label: "Reflexes", el: "slower bar", who: "granny", col: "#0891b2", what: "The marker sweeps slower, so it's easier to stop it in the gold",
     per: "Bar about 3–4% slower", best: "You keep overshooting the gold zone" },
-  { k: "f", icon: "🎯", label: "Extra Points", el: "every strike", who: "granny", col: "#16a34a", what: "Extra points on every single strike — hit or miss",
+  { k: "f", icon: "🎯", label: "Aim", el: "extra points", who: "granny", col: "#16a34a", what: "Extra points on every single strike — hit or miss",
     per: "+1.5 points on every strike", best: "You want steady gains no matter how you tap" },
-  { k: "g", icon: "🛡️", label: "Softer Misses", el: "misses", who: "granny", col: "#7c3aed", what: "Your bad strikes aren't as bad: a higher minimum score when you miss",
+  { k: "g", icon: "🛡️", label: "Stubbornness", el: "softer misses", who: "granny", col: "#7c3aed", what: "Your bad strikes aren't as bad: a higher minimum score when you miss",
     per: "Worst possible strike +1.5 points", best: "Your misses are wild and cost you whole sets" },
-  { k: "s", icon: "🫀", label: "Less Speed-up", el: "speed-up", who: "rooster", col: "#ea580c", what: "The bar speeds up less as a match goes on — strike after strike, set after set",
+  { k: "s", icon: "🫀", label: "Stamina", el: "less speed-up", who: "rooster", col: "#ea580c", what: "The bar speeds up less as a match goes on — strike after strike, set after set",
     per: "About 5% less speed-up each strike", best: "Long best-of-5 matches get away from you late on" },
-  { k: "p", icon: "🐾", label: "Bigger Gold", el: "gold zone", who: "rooster", col: "#db2777", what: "A wider gold zone — a steady mount is easier to aim from",
+  { k: "p", icon: "🐾", label: "Steady Stride", el: "bigger gold", who: "rooster", col: "#db2777", what: "A wider gold zone — a steady mount is easier to aim from",
     per: "Gold zone +1.2% of the bar wider", best: "You often stop just next to the gold" },
-  { k: "b", icon: "🔋", label: "Bounce-back", who: "recovery", col: "#0d9488", what: "Granny and rooster win back more fitness between tournaments. It counts on its own, not against your opponent",
+  { k: "b", icon: "🔋", label: "Bounce-back", el: "recovery", who: "recovery", col: "#0d9488", what: "Granny and rooster win back more fitness between tournaments. It counts on its own, not against your opponent",
     per: "+0.7% fitness back after every tournament (double in a rest week)", best: "Deep runs leave you running on empty the week after" }
 ];
 export const STAT_GROUPS = [

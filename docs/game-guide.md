@@ -53,9 +53,9 @@ Each tournament is a knockout bracket (32 riders, 64 at a Slam). Every round you
 Each week several tournaments run at once in every tier, and all 1,000 riders play one of them. Tap a tier to see its events. Each card shows:
 - **A picture of the lanes** and the event's name. The lanes change the match for **both** riders, and each makes one stat count more:
   - ☀️ **Classic** — dry, packed earth on a fair day. Nothing changes: pure timing.
-  - 🌧️ **Muddy lanes** — rain-soaked dirt. The roosters slip, so the bar runs 10% faster for both riders, and the **Slower Bar (bar speed)** gap counts double.
-  - 🌬️ **Windy coast** — a seaside ground in the gusts. The gold zone is 2% narrower for both, the **Bigger Gold (gold zone)** gap counts double, and seaside sponsors pay +10% prize money.
-  - 🔥 **Heatwave** — baking sun. The bar speeds up 40% more after every strike, and the **Less Speed-up (speed-up)** gap counts double.
+  - 🌧️ **Muddy lanes** — rain-soaked dirt. The roosters slip, so the bar runs 10% faster for both riders, and the **Reflexes (slower bar)** gap counts double.
+  - 🌬️ **Windy coast** — a seaside ground in the gusts. The gold zone is 2% narrower for both, the **Steady Stride (bigger gold) (gold zone)** gap counts double, and seaside sponsors pay +10% prize money.
+  - 🔥 **Heatwave** — baking sun. The bar speeds up 40% more after every strike, and the **Stamina (less speed-up) (speed-up)** gap counts double.
   - 🌼 **Village green** — soft grass at a village fete. The gold zone is 1.5% wider and every stat gap counts half: the underdog's best chance (−10% points and money).
 - **Entrants (★).** Who signed up:
   - ★★★ tough entrants: mostly the tier's top-ranked riders, +10% points.
@@ -63,7 +63,7 @@ Each week several tournaments run at once in every tier, and all 1,000 riders pl
   - ★ weaker entrants: mostly lower-ranked riders, −10% points.
 - **Chips** for what the lanes and the entrants change (see *Reading the chips* below), the champion's points and prize, and the two top seeds.
 
-**🗺 Compare the 5 lanes** (top of the list) shows all five side by side, and before every match the tale of the tape opens with **Today's lanes** — the picture and the chips again. Which lanes suit you depends on your stats and your kit: strong Slower Bar love the mud, strong Bigger Gold loves the wind, strong Less Speed-up loves a heatwave, and the village green helps whoever is behind on stats. The game works it out for you: a weighted stat chip says what the weighting does to **your** bar against that event's entrants — *Bigger Gold ×2 · you lead by 1.5 → gold zone +1.8% for you* — green when it helps you, red when it hurts. In the tale of the tape it compares you with your actual opponent.
+**🗺 Compare the 5 lanes** (top of the list) shows all five side by side, and before every match the tale of the tape opens with **Today's lanes** — the picture and the chips again. Which lanes suit you depends on your stats and your kit: strong Reflexes (slower bar) love the mud, strong Steady Stride (bigger gold) loves the wind, strong Stamina (less speed-up) loves a heatwave, and the village green helps whoever is behind on stats. The game works it out for you: a weighted stat chip says what the weighting does to **your** bar against that event's entrants — *Steady Stride (bigger gold) ×2 · you lead by 1.5 → gold zone +1.8% for you* — green when it helps you, red when it hurts. In the tale of the tape it compares you with your actual opponent.
 
 Grand Slam weeks have a single named Slam (The Coop Open, The Swamp Slam, Wimbledon-on-Wold, The Gale Cup), each with its own lanes.
 
@@ -103,7 +103,7 @@ Everything that changes a match — lanes, gear, tiredness, training, injuries �
 **5 · Reading the screen**
 - The chip at the top shows the set and strike. On the last strike of a set it turns into *Set point*, *Match point*, *Save the match* or *All on the line*, with the score you need.
 - Coloured orbs under each name are that set's strikes; the bar below them is the set's running gap.
-- Your strike leaves a tick on the bar, hers a red ▲. Under your score a line shows where it came from: *In the gold 92 + 2 Extra Points + 3 Gear − 0 Tired = 97*. Between sets a break screen shows the set result.
+- Your strike leaves a tick on the bar, hers a red ▲. Under your score a line shows where it came from: *In the gold 92 + 2 Aim (extra points) + 3 Gear − 0 Tired = 97*. Between sets a break screen shows the set result.
 - The header shows your fitness (👵 / 🐓, with 🩹 if you're injured), your kit and the lanes. If you get injured during a tournament, a red **Ouch!** note appears between matches.
 - When the match is decided, the loser is unseated and the outro shows the score, points and prize.
 
@@ -121,8 +121,8 @@ Both of you are scored the same way: **where the lance lands on the bar.**
 | Further out | Falls about 2 points for every % of the bar, down to your floor |
 
 On top of the base score:
-- **Extra Points** adds points to every strike — 1.5 per level you're ahead of her (or takes them away if she has more Extra Points). This is why a strike can show, say, 83: a gold-edge 85 minus a little Extra Points, or a just-outside 70 plus a lot of Extra Points.
-- **Softer Misses** sets your floor — the lowest a strike can score (15 at even levels, ±1.5 per level of gap).
+- **Aim (extra points)** adds points to every strike — 1.5 per level you're ahead of her (or takes them away if she has more Aim (extra points)). This is why a strike can show, say, 83: a gold-edge 85 minus a little Aim (extra points), or a just-outside 70 plus a lot of Aim (extra points).
+- **Stubbornness (softer misses)** sets your floor — the lowest a strike can score (15 at even levels, ±1.5 per level of gap).
 - **Gear** adds or takes points (on gold hits, on misses, or on every strike) — shown as *Gear*.
 - **Tiredness** takes points off your misses (up to −10 when your granny is exhausted) — shown as *Tired*.
 - There's almost no luck: ±1 point. The same strike always scores about the same.
@@ -142,7 +142,7 @@ On top of the base score:
 | 4 · The lanes | Mud, wind, heat or green bend the bar for both of you and weight one stat. |
 | 5 · Kit and tiredness | Your lance, saddle and fitness bend your bar; hers bend hers. |
 
-Example — the width of your gold zone with Bigger Gold:
+Example — the width of your gold zone with Steady Stride (bigger gold):
 
 | Situation | Gold zone |
 |---|---|
@@ -155,15 +155,15 @@ The gold zone never shrinks to nothing: once it is under 8% of the bar, every fu
 
 ## 9. Stats & training
 
-Six stats, each from level 0 to 20 — each one moves one element of the match, and the game always names it with the stat: **Slower Bar · bar speed**, **Bigger Gold · gold zone**, **Extra Points · every strike**, **Softer Misses · misses**, **Less Speed-up · speed-up**, **Bounce-back · recovery**. three for the granny, two for the rooster, and 🔋 Bounce-back for recovery. For the first five **only the gap to your opponent counts**: if you both have 5 Extra Points, it cancels out. Bounce-back counts on its own. An injury knocks a few levels off a stat until it heals.
+Six stats, each from level 0 to 20 — each one moves one element of the match, and the game always names it with the stat: **Reflexes (slower bar) · bar speed**, **Steady Stride (bigger gold) · gold zone**, **Aim (extra points) · every strike**, **Stubbornness (softer misses) · misses**, **Stamina (less speed-up) · speed-up**, **Bounce-back · recovery**. three for the granny, two for the rooster, and 🔋 Bounce-back for recovery. For the first five **only the gap to your opponent counts**: if you both have 5 Aim (extra points), it cancels out. Bounce-back counts on its own. An injury knocks a few levels off a stat until it heals.
 
 | Stat | What it does | Each level ahead |
 |---|---|---|
-| ⚡ Slower Bar | The marker sweeps slower | Bar about 3–4% slower |
-| 🎯 Extra Points | Extra points on every strike | +1.5 points per strike |
-| 🛡️ Softer Misses | Your bad strikes aren't as bad | Floor +1.5 points |
-| 🫀 Less Speed-up | The bar speeds up less as the match goes on | About 5% less speed-up |
-| 🐾 Bigger Gold | A wider gold zone | +1.2% of the bar |
+| ⚡ Reflexes (slower bar) | The marker sweeps slower | Bar about 3–4% slower |
+| 🎯 Aim (extra points) | Extra points on every strike | +1.5 points per strike |
+| 🛡️ Stubbornness (softer misses) | Your bad strikes aren't as bad | Floor +1.5 points |
+| 🫀 Stamina (less speed-up) | The bar speeds up less as the match goes on | About 5% less speed-up |
+| 🐾 Steady Stride (bigger gold) | A wider gold zone | +1.2% of the bar |
 | 🔋 Bounce-back | Granny and rooster win back more fitness after every tournament | +0.7% fitness back (double in a rest week; not against her) |
 
 **Training points (TP).** Everyone on tour — you and every rival — earns TP by the same rule every week: **8 for turning up, plus a third of the ranking points you won.** A deep run buys you a few levels on the riders who went out early; the edge fades once you move up to a tier where everyone is winning that much. You also get **sponsor TP** from your fans (one per 10 fans).
@@ -216,12 +216,12 @@ You have **two fitness meters**, 0–100%: 👵 the granny's and 🐓 the rooste
 
 | Injury | Side | Effect | Lasts |
 |---|---|---|---|
-| 🦵 Pulled hamstring | Granny | Slower Bar −3 | 2 tournaments |
-| 💪 Jouster's elbow | Granny | Extra Points −3 | 3 |
-| 🪑 Creaky back | Granny | Softer Misses −3 | 2 |
-| 🐾 Sprained claw | Rooster | Bigger Gold −3 | 3 |
-| 🪽 Pulled wing | Rooster | Less Speed-up −3 | 2 |
-| 🦴 Bruised wishbone | Rooster | Bigger Gold −2, Less Speed-up −2 | 2 |
+| 🦵 Pulled hamstring | Granny | Reflexes (slower bar) −3 | 2 tournaments |
+| 💪 Jouster's elbow | Granny | Aim (extra points) −3 | 3 |
+| 🪑 Creaky back | Granny | Stubbornness (softer misses) −3 | 2 |
+| 🐾 Sprained claw | Rooster | Steady Stride (bigger gold) −3 | 3 |
+| 🪽 Pulled wing | Rooster | Stamina (less speed-up) −3 | 2 |
+| 🦴 Bruised wishbone | Rooster | Steady Stride (bigger gold) −2, Stamina (less speed-up) −2 | 2 |
 
 A week off counts down an injury too.
 - The Season Finals tire you too, and can injure you.
@@ -236,7 +236,7 @@ Prize money buys **one investment per tournament week**. After you make one, the
 | 📣 Private session | +10 TP (Train tab) | 20% of a champion's prize at your top open tier — about $900 at Futures, $90K at Masters |
 | 🎟️ Paid entry | The tier above your range, this week only (tournament list) | 35% of that tier's champion's prize — about $5.7K for Challenger |
 | 🩺 Physio | Nurse Nellie, Dr. Featherby or a spa weekend: fitness back now, injuries heal sooner (Train tab) | 12–18% of a champion's prize at your top open tier |
-| 🧬 Pedigree certificate | Raises the cap on Less Speed-up and Bigger Gold: 20 → 22 → 24 → 26 | $250K, $1M, $3M |
+| 🧬 Pedigree certificate | Raises the cap on Stamina (less speed-up) and Steady Stride (bigger gold): 20 → 22 → 24 → 26 | $250K, $1M, $3M |
 
 Lances and saddles from Mavis's shop are bought on the Get ready screen and don't use the weekly investment. The world leaderboard counts everything you've ever earned, so spending never costs you places there.
 
@@ -316,8 +316,8 @@ The game saves after every change — every strike, every level, every answer �
 ## 20. Coach's tips
 
 - Aim for the white line, not just the gold. 100 against 86 is the difference between winning and losing a set.
-- If you keep overshooting, train Slower Bar. If you land just next to the gold, train Bigger Gold. If your misses are wild, Softer Misses.
-- Long best-of-5 matches get faster as they go: Less Speed-up keeps them under control.
+- If you keep overshooting, train Reflexes (slower bar). If you land just next to the gold, train Steady Stride (bigger gold). If your misses are wild, Stubbornness (softer misses).
+- Long best-of-5 matches get faster as they go: Stamina (less speed-up) keeps them under control.
 - Watch the "Vs rivals" line — falling behind the riders near you is felt immediately.
 - A title is worth far more training than a quarterfinal. Stay in a tier you can win before you jump up.
 - Save the paid entry and wildcards for weeks you feel sharp.

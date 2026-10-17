@@ -127,12 +127,12 @@ function StrikeReveal(props) {
         style={{ fontSize: 30, fontWeight: 900, color: "#f87171", textShadow: "0 0 14px rgba(239,68,68,0.5)", width: 52, textAlign: "right", lineHeight: 1.1 }}>
         <CountUp to={r.opp} duration={360} />
       </motion.div>
-      {/* Where your score came from: the landing spot, then Extra Points on top */}
+      {/* Where your score came from: the landing spot, then Aim (extra points) on top */}
       {r.why && (
         <div style={{ position: "absolute", left: 0, right: 0, top: "100%", marginTop: 3, display: "flex", justifyContent: "center" }}>
           <span style={{ fontSize: 10.5, fontWeight: 800, color: "#e2e8f0", background: "rgba(15,23,42,0.88)", borderRadius: 8, padding: "2px 8px", whiteSpace: "nowrap" }}>
             <span style={{ color: r.why.kind === "Gold" ? "#facc15" : r.why.kind === "Floor" ? "#c4b5fd" : "#fb923c" }}>
-              {r.why.kind === "Gold" ? "In the gold" : r.why.kind === "Floor" ? "Floor (Softer Misses)" : "Outside the gold"} {r.why.base}
+              {r.why.kind === "Gold" ? "In the gold" : r.why.kind === "Floor" ? "Floor (Stubbornness)" : "Outside the gold"} {r.why.base}
             </span>
             {r.why.aim !== 0 && (<span style={{ color: r.why.aim > 0 ? "#4ade80" : "#f87171" }}> {r.why.aim > 0 ? "+" : "−"} {Math.abs(r.why.aim)} Extra</span>)}
             {r.why.tired ? (<span style={{ color: "#f87171" }}> − {Math.abs(r.why.tired)} Tired</span>) : null}
@@ -207,7 +207,7 @@ export default function PowerBar(props) {
   var OKIT = kitFx(props.oppGear, props.cond);
   var ctr = 72, swBase = softZone(13 - props.diff * 1.5 + nP * 1.2 + COND.zone + KIT.zone + FT.zone), fb = nF * 1.5;
   var accel = Math.max(0.03, 0.3 - nS * 0.015) * COND.accel * KIT.accel * FT.accel, minSc = Math.max(0, 15 + nG * 1.5 + KIT.floor);
-  /* Bar resets every set, but each new set starts a little faster (fatigue — Less Speed-up softens it) */
+  /* Bar resets every set, but each new set starts a little faster (fatigue — Stamina (less speed-up) softens it) */
   var baseSpd = Math.max(0.8, 2.4 + props.diff * 0.4 - nR * 0.12) * COND.speed * KIT.speed * FT.speed;
   function speedFor(setIdx, strikeIdx) { return baseSpd + setIdx * accel * 0.6 + strikeIdx * accel; }
   var spd = useRef(speedFor(init.sets.length, init.my.length));
@@ -270,7 +270,7 @@ export default function PowerBar(props) {
     var base = strikeScore(d, sw / 2, minSc);
     var gearPts = KIT.aim + (inZ ? KIT.gold : KIT.miss), tiredPts = inZ ? 0 : FT.miss;
     var sc = Math.round(Math.max(0, Math.min(100, base + fb + gearPts + tiredPts)));
-    /* How the score was built, shown under it: where it landed + Extra Points + gear − tiredness */
+    /* How the score was built, shown under it: where it landed + Aim (extra points) + gear − tiredness */
     var aimShown = Math.round(fb), gearShown = Math.round(gearPts), tiredShown = Math.round(tiredPts), capped = base + fb + gearPts + tiredPts > 100;
     var why = { kind: inZ ? "Gold" : base <= minSc + 1.01 ? "Floor" : "Outside", aim: aimShown, gear: gearShown, tired: tiredShown, capped: capped, base: capped ? Math.round(base) : Math.round(sc) - aimShown - gearShown - tiredShown };
     /* Her strike lands on the same bar. Talent sets how tightly she groups around the centre, so the riders you meet

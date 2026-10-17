@@ -2,6 +2,7 @@
 
 import { bs } from "../models/formulas";
 import { STATS } from "../models/constants";
+import FanRules from "./FanRules";
 
 export default function HelpScreen(props) {
   return (
@@ -43,7 +44,7 @@ export default function HelpScreen(props) {
             })}
           </div>
           <div style={{ fontSize: 14, color: "#475569", lineHeight: 1.5 }}>
-            <b style={{color:"#0f172a"}}>Your opponent strikes on the same bar</b>, scored the same way — her red ▲ shows where she landed. The more talented she is, the closer to the centre she tends to hit; Extra Points adds points on top of your score, Softer Misses raises your lowest possible score.
+            <b style={{color:"#0f172a"}}>Your opponent strikes on the same bar</b>, scored the same way — her red ▲ shows where she landed. The more talented she is, the closer to the centre she tends to hit; Aim (extra points) adds points on top of your score, Stubbornness (softer misses) raises your lowest possible score.
           </div>
           <div style={{ fontSize: 14, color: "#475569", lineHeight: 1.5, marginTop: 6 }}>
             Matches are played in <b style={{color:"#0f172a"}}>sets</b>. Each set is <b style={{color:"#0f172a"}}>3 strikes</b> — the <b style={{color:"#22c55e"}}>higher average takes the set</b>, so one bad strike can still be rescued.
@@ -98,7 +99,7 @@ export default function HelpScreen(props) {
           <div style={{ background: "#ffffff", borderRadius: 6, padding: 6, marginTop: 4 }}>
             {STATS.map(function(s, i, all) {
               var head = i === 0 || all[i - 1].who !== s.who;
-              return (<div key={s.k}>{head && (<div style={{ fontSize: 12, fontWeight: 900, letterSpacing: 1, color: "#57534e", margin: i ? "6px 0 2px" : "0 0 2px" }}>{s.who === "granny" ? "👵 GRANNY — rider skills" : "🐓 ROOSTER — mount conditioning"}</div>)}<div style={{ fontSize: 13, padding: "2px 0", color: "#475569" }}><b style={{color:"#0f172a"}}>{s.icon} {s.label}</b> — {s.what}. <i>Each level ahead: {s.per.charAt(0).toLowerCase() + s.per.slice(1)}.</i></div></div>);
+              return (<div key={s.k}>{head && (<div style={{ fontSize: 12, fontWeight: 900, letterSpacing: 1, color: "#57534e", margin: i ? "6px 0 2px" : "0 0 2px" }}>{s.who === "granny" ? "👵 GRANNY — rider skills" : s.who === "rooster" ? "🐓 ROOSTER — mount conditioning" : "🔋 BOTH — recovery"}</div>)}<div style={{ fontSize: 13, padding: "2px 0", color: "#475569" }}><b style={{color:"#0f172a"}}>{s.icon} {s.label}{s.el ? " (" + s.el + ")" : ""}</b> — {s.what}. <i>Each level ahead: {s.per.charAt(0).toLowerCase() + s.per.slice(1)}.</i></div></div>);
             })}
           </div>
           <div style={{ fontSize: 13, color: "#64748b", marginTop: 4 }}>Example: You have ⚡8, opponent has ⚡5 → net +3 → bar is noticeably slower for you. If both are ⚡8 → cancels out completely.</div>
@@ -106,10 +107,7 @@ export default function HelpScreen(props) {
 
         <div style={{ marginBottom: 14 }}>
           <div style={{ fontSize: 13, color: "#be123c", fontWeight: 700, marginBottom: 4 }}>❤️ THE CROWD</div>
-          <div style={{ fontSize: 14, color: "#475569", lineHeight: 1.5 }}>
-            Fans (0–100) love wins — especially clean sweeps, comebacks, upsets and titles — and slowly forget you if you go quiet. After every tournament the press asks you a question: <b style={{color:"#0f172a"}}>how the crowd takes your answer depends on who's asking and how your week went</b>, so read the room. Big promises get checked the following week.
-          </div>
-          <div style={{ fontSize: 13, color: "#475569", marginTop: 4, lineHeight: 1.5 }}>Fans pay off: sponsors add training points every week, 70+ fans can earn a wildcard into the tier above if your rank is just outside its cut (80+ for a Slam, ranked 65–74), and with the match on the line a loud crowd widens your gold zone.</div>
+          <FanRules />
         </div>
 
         <div>

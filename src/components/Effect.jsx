@@ -15,10 +15,11 @@ import { C, FONT } from "../ui/theme";
 import { REDUCED_MOTION } from "./fx";
 
 var STAT_ICON = { r: "⚡", p: "🐾", f: "🎯", s: "🫀", g: "🛡️", b: "🔋", all: "📊" };
-var STAT_NAME = { r: "Slower Bar", p: "Bigger Gold", f: "Extra Points", s: "Less Speed-up", g: "Softer Misses", b: "Bounce-back" };
+var STAT_NAME = { r: "Reflexes", p: "Steady Stride", f: "Aim", s: "Stamina", g: "Stubbornness", b: "Bounce-back" };
+var STAT_PLAIN = { r: "slower bar", p: "bigger gold", f: "extra points", s: "less speed-up", g: "softer misses", b: "recovery" };
 /* Every stat is one element of the match — shown together so nobody has to remember which is which */
 export var STAT_ELEMENT = { r: { k: "speed", v: 0.85, what: "bar speed" }, p: { k: "zone", v: 2, what: "gold zone" }, f: { k: "aim", v: 2, what: "every strike" }, g: { k: "miss", v: 2, what: "misses" }, s: { k: "accel", v: 0.7, what: "speed-up" }, b: { k: "fit", v: 1, what: "recovery" } };
-export function statLabel(s) { var el = STAT_ELEMENT[s]; return STAT_NAME[s] + (el ? " (" + el.what + ")" : ""); }
+export function statLabel(s) { return STAT_NAME[s] + (STAT_PLAIN[s] ? " (" + STAT_PLAIN[s] + ")" : ""); }
 function statShift(k, extra) {
   if (Math.abs(extra) < 0.05) return null;
   if (k === "r") { var sp = Math.round(Math.abs(extra) * 4.3); if (!sp) return null; return { k: "speed", v: extra > 0 ? 0.85 : 1.2, good: extra > 0, text: "bar " + sp + "% " + (extra > 0 ? "slower" : "faster") + " for you" }; }
