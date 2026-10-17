@@ -24,7 +24,7 @@ export default function MatchHeader(props) {
           </div>
           {((cd && cd.key !== "classic") || props.gear || props.fit) && (
             <div style={{ marginTop: 3, fontSize: 11.5, fontWeight: 900, display: "flex", gap: 8, alignItems: "center" }}>
-              {props.fit && (<span style={{ flexShrink: 0 }}><FitnessMini fit={props.fit} />{props.injured ? " 🩹" : ""}</span>)}
+              {props.fit && (<span style={{ flexShrink: 0 }}><FitnessMini fit={props.fit} />{props.fitStart && (props.fitStart.g > props.fit.g || props.fitStart.r > props.fit.r) ? (<span style={{ color: C.redInk, fontSize: 10.5, marginLeft: 3 }}>({props.fit.g - props.fitStart.g}/{props.fit.r - props.fitStart.r})</span>) : null}{props.injured ? " 🩹" : ""}</span>)}
               {props.gear && (<span style={{ color: C.textSoft, flexShrink: 0 }}>{(BY_ID[props.gear.lance] || {}).icon}{(BY_ID[props.gear.saddle] || {}).icon}</span>)}
               {cd && cd.key !== "classic" && (<span style={{ color: C.redInk, minWidth: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{cd.icon} {cd.effect}</span>)}
             </div>

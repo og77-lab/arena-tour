@@ -22,7 +22,7 @@ import TierSheet from "./components/TierSheet";
 import PrepScreen from "./components/PrepScreen";
 import { EffectList, statEffect } from "./components/Effect";
 import { BY_ID as GEAR_BY_ID } from "./engine/gear";
-import { fitOf, putFit, afterMatches, recover, STAFF, rollInjury, addInjury, tickInjuries, treatInjuries, effTr, injuryText } from "./engine/fitness";
+import { fitOf, putFit, afterMatches, afterSets, setsOf, recover, STAFF, rollInjury, addInjury, tickInjuries, treatInjuries, effTr, injuryText } from "./engine/fitness";
 import { npcKit, npcStaff, prizeFor, kitStrength } from "./engine/npcBrain";
 import { BY_ID as GEAR_ID } from "./engine/gear";
 import BottomNav, { NAV_HEIGHT } from "./components/BottomNav";
@@ -103,6 +103,15 @@ function kitBonus(S, cond, tier) {
 }
 function kitIcons(k) { return k && (k.lance !== "broom" || k.saddle !== "teacosy") ? (GEAR_ID[k.lance].icon + GEAR_ID[k.saddle].icon) : null; }
 
+/* Your stat gaps (as you ride today) against a set of riders: their average, or one opponent */
+var GAP_KEYS = ["r", "p", "f", "s", "g"];
+function gapsVs(S, others) {
+  var me = effTr(S.player), out = {}, list = (others || []).filter(Boolean);
+  GAP_KEYS.forEach(function (k) { var avg = list.length ? list.reduce(function (a, o) { return a + (effTr(o)[k] || 0); }, 0) / list.length : 0; out[k] = (me[k] || 0) - avg; });
+  return out;
+}
+function eventGaps(S, ev) { var byId = {}; S.npcs.forEach(function (n) { byId[n.id] = n; }); return gapsVs(S, (ev && ev.ids || []).map(function (id) { return byId[id]; })); }
+
 /* Finals matches a rider has already ridden (for her tiredness) */
 function finalsRidden(f, id) { var n = 0; (f.gm || []).concat(f.semis || []).forEach(function (m) { if (m && m.w && ((m.a && m.a.id === id) || (m.b && m.b.id === id))) n++; }); return n; }
 
@@ -117,7 +126,7 @@ function buildScout(S, o, oRank, d) {
     h2h: { w: w, l: meetings.length - w }, rival: !!(S.player.rival && S.player.rival.id === o.id),
     kit: o._kit ? kitIcons(o._kit) : null,
     injuries: ((S.player.inj || []).map(function (x) { return "You " + injuryText(x); })).concat((o.inj || []).map(function (x) { return "Her " + injuryText(x); })),
-    stats: STATS.filter(function (s) { return s.k !== "b"; }).map(function (s) { return { icon: s.icon, label: s.label, what: s.what, who: s.who, you: mine[s.k] || 0, foe: hers[s.k] || 0 }; })
+    stats: STATS.filter(function (s) { return s.k !== "b"; }).map(function (s) { return { icon: s.icon, label: s.label + (s.el ? " · " + s.el : ""), what: s.what, who: s.who, you: mine[s.k] || 0, foe: hers[s.k] || 0 }; })
       .concat(fitRows(S, o)),
     diff: diffInfo(d)
   };
@@ -401,6 +410,7 @@ export default function Arena(props) {
     var result = runBk(bk, 0, true, tier.rounds, kitBonus(S, ev ? ev.cond : "classic", tierIdx));
     var evInfo = ev ? { eventId: ev.id, eventName: ev.name, cond: ev.cond, field: ev.field, ptsMul: ev.ptsMul, moneyMul: ev.moneyMul } : {};
     if (kit) evInfo.gear = { lance: kit.lance, saddle: kit.saddle };
+    evInfo.fitStart = fitOf(S.player); /* to show what this tournament has cost so far */
     setTS(Object.assign({ bracket: result.bracket, round: result.round, pending: result.pending, done: result.done, alive: true, log: [], tierIdx: tierIdx }, evInfo));
     setTtab("match"); setScr("tourney");
   }
@@ -430,7 +440,7 @@ export default function Arena(props) {
       delete h2h[opp.id]; h2h[opp.id] = entries.slice(-10); /* keep last 10 per opponent; re-adding moves her to the most recent end */
       var h2hKeys = Object.keys(h2h); for (var hk = 0; hk < h2hKeys.length - 150; hk++) delete h2h[h2hKeys[hk]]; /* the 150 most recent opponents */
       var pAfter = Object.assign({}, S.player, { h2h: h2h, tips: Object.assign({}, S.player.tips || {}, { match: true }) });
-      var fNow = afterMatches(fitOf(S.player), 1, tier.bo);
+      var fNow = afterSets(fitOf(S.player), setsOf(setScore)); /* every set you rode tires you */
       putFit(pAfter, fNow);
       var hurt = rollInjury(fNow); if (hurt) { pAfter.inj = addInjury(S.player.inj, hurt); pAfter.newInj = hurt.id; }
       save(Object.assign({}, S, { player: pAfter }));
@@ -741,7 +751,7 @@ export default function Arena(props) {
     if (!fs) return;
     /* Finals matches count towards the career counters too (S1 carries them into the champion save below) */
     var S1 = S;
-    if (S && xtra) { var gst = Object.assign({}, S.player.stats || {}); gst.gold = (gst.gold || 0) + (xtra.gold || 0); gst.flawless = (gst.flawless || 0) + (xtra.flawless || 0); if (won) gst.wins = (gst.wins || 0) + 1; var fp = Object.assign({}, S.player, { stats: gst }); var ff = afterMatches(fitOf(S.player), 1, FINALS_BO); putFit(fp, ff); var fh = rollInjury(ff); if (fh) fp.inj = addInjury(S.player.inj, fh); S1 = Object.assign({}, S, { player: fp }); save(S1); }
+    if (S && xtra) { var gst = Object.assign({}, S.player.stats || {}); gst.gold = (gst.gold || 0) + (xtra.gold || 0); gst.flawless = (gst.flawless || 0) + (xtra.flawless || 0); if (won) gst.wins = (gst.wins || 0) + 1; var fp = Object.assign({}, S.player, { stats: gst }); var ff = afterSets(fitOf(S.player), setsOf(setScore)); putFit(fp, ff); var fh = rollInjury(ff); if (fh) fp.inj = addInjury(S.player.inj, fh); S1 = Object.assign({}, S, { player: fp }); save(S1); }
     var st = JSON.parse(JSON.stringify(fs)); var m, opp, winner, loser;
     delete st.match;
     if (st.phase==="groups") { m=st.gm[st.pending]; opp=m.a.isP?m.b:m.a; winner=won?(m.a.isP?m.a:m.b):(m.a.isP?m.b:m.a); loser=winner.id===m.a.id?m.b:m.a; m.w=winner; var h=st.houses[m.hi]; for(var x=0;x<h.length;x++){if(h[x].id===winner.id){h[x].gP+=3;h[x].gW++;}if(h[x].id===loser.id){h[x].gL++;}} st.gi++; }
@@ -861,9 +871,9 @@ export default function Arena(props) {
         {hubTip && (<CoachCard key={hubTip} id={hubTip} vars={{ name: S.pName, rival: S.player.rival ? S.player.rival.name : null }} onDone={function(all){ markTip(hubTip, all); }} />)}
         {picking && !seasonDone && (<TierSheet available={avTiers} wildcard={wildcardTier(S)} rank={pRank} paid={paidEntryTier(S)}
           entry={(function(){ var top = Math.max.apply(null, availableTiers(S, true)), ti = top + 1; if (ti > 4 || paidEntryTier(S) >= 0) return null; var fee = entryFee(ti); return { tier: ti, fee: fee, used: !!weekInvestment(S), can: !weekInvestment(S) && (S.player.money || 0) >= fee, cash: S.player.money || 0 }; })()}
-          onBuyEntry={buyEntry} onClose={function(){setPicking(false)}} events={weekEvents(S)} onPickEvent={function(ev){ setPicking(false); setPrep({ tier: ev.tier, ev: ev }); }}
+          onBuyEntry={buyEntry} onClose={function(){setPicking(false)}} events={weekEvents(S)} gapsOf={function(ev){ return eventGaps(S, ev); }} nearGaps={(function(){ var o = {}, me = effTr(S.player); GAP_KEYS.forEach(function(k){ o[k] = (me[k] || 0) - (rivalTr[k] || 0); }); return o; })()} onPickEvent={function(ev){ setPicking(false); setPrep({ tier: ev.tier, ev: ev }); }}
           onPick={function(ti){ setPicking(false); setPrep({ tier: ti, ev: null }); }} />)}
-        {prep && (<PrepScreen S={S} ev={prep.ev} tier={prep.tier} topTier={Math.max.apply(null, availableTiers(S))} onCancel={function(){ var t = prep.tier; setPrep(null); if (t < 5) setPicking(true); }} onConfirm={confirmPrep} />)}
+        {prep && (<PrepScreen S={S} ev={prep.ev} tier={prep.tier} gaps={prep.ev ? eventGaps(S, prep.ev) : null} topTier={Math.max.apply(null, availableTiers(S))} onCancel={function(){ var t = prep.tier; setPrep(null); if (t < 5) setPicking(true); }} onConfirm={confirmPrep} />)}
         {gala && (<SeasonGala S={S} champ={gala.champ} runnerUp={gala.runnerUp} champRank={gala.champRank} awards={gala.awards} you={gala.you} hall={gala.hall} goal={gala.goal} onDone={finishGala} />)}
         {achQ.length > 0 && (<AchToast queue={achQ} onShown={function(){ setAchQ(function(q){ return q.slice(1); }); }} onOpen={function(){ setAchQ([]); setShowAch(true); }} />)}
         {showAch && (<AchievementsSheet S={S} onClose={function(){ setShowAch(false); }} />)}
@@ -948,7 +958,7 @@ export default function Arena(props) {
                       return (
                         <div key={st.k} style={{padding:"9px 0",borderTop:"1px dashed "+C.line}}>
                           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6,gap:8}}>
-                            <div><span style={{color:C.text,fontWeight:900,fontSize:15}}>{st.icon} {st.label}</span><span style={{color:C.textSoft,fontSize:13,marginLeft:6,fontWeight:700}}>Lv {lv}/{cap}{cap > 20 ? " 🧬" : ""}</span></div>
+                            <div><span style={{color:C.text,fontWeight:900,fontSize:15}}>{st.icon} {st.label}</span>{st.el && (<span style={{color:C.goldInk,fontSize:12,fontWeight:900,marginLeft:5}}>· {st.el}</span>)}<span style={{color:C.textSoft,fontSize:13,marginLeft:6,fontWeight:700}}>Lv {lv}/{cap}{cap > 20 ? " 🧬" : ""}</span></div>
                             <button onClick={function(){doTrain(st.k)}} disabled={!can} style={button(can?"gold":"ghost",{padding:"6px 12px",fontSize:13,opacity:can?1:0.6,cursor:can?"pointer":"default"})}>{lv>=cap?"MAX":cost+" TP"}</button>
                           </div>
                           {(function(){
@@ -1182,7 +1192,7 @@ export default function Arena(props) {
     var opp = pm ? (pm.a.isP ? pm.b : pm.a) : null;
     var oppRank = 0; if (opp) { for (var oi = 0; oi < ranked.length; oi++) if (ranked[oi].id===opp.id){oppRank=oi+1;break;} }
     var matchDiff = roundDiff(ts.tierIdx, ts.round);
-    var scoutT = opp ? Object.assign(buildScout(S, Object.assign({}, opp, { _fit: afterMatches(fitOf(opp), ts.round, tier.bo), _kit: kitOfNpc(S, opp, ts.cond, ts.tierIdx, rankMap(S)[opp.id]) }), oppRank, matchDiff), { cond: ts.cond || "classic" }) : null;
+    var scoutT = opp ? Object.assign(buildScout(S, Object.assign({}, opp, { _fit: afterMatches(fitOf(opp), ts.round, tier.bo), _kit: kitOfNpc(S, opp, ts.cond, ts.tierIdx, rankMap(S)[opp.id]) }), oppRank, matchDiff), { cond: ts.cond || "classic", gaps: gapsVs(S, [opp]) }) : null;
     return (
       <motion.div key="tourney" {...screenAnim} style={Object.assign({}, W, { background: C.page })}>
         <style dangerouslySetInnerHTML={{__html:CSS}} />
@@ -1192,7 +1202,7 @@ export default function Arena(props) {
         {showBracket && (<BracketView ts={ts} playerName={S.pName} onClose={function(){setShowBracket(false)}} />)}
         {showScout && scoutT && pm && ts.alive && (<ScoutSheet scout={scoutT} onClose={function(){setShowScout(false)}} />)}
         <div style={{maxWidth:520,margin:"0 auto",textAlign:"left"}}>
-        <MatchHeader tierName={ts.eventName || tier.name} cond={ts.cond} gear={ts.gear || null} fit={fitOf(S.player)} injured={(S.player.inj || []).length > 0} tierColor={tier.col} roundLabel={ts.done ? (ts.alive ? "Champion" : "Tournament over") : rNames[Math.min(ts.round,tier.rounds-1)]}
+        <MatchHeader tierName={ts.eventName || tier.name} cond={ts.cond} gear={ts.gear || null} fit={fitOf(S.player)} fitStart={ts.fitStart || null} injured={(S.player.inj || []).length > 0} tierColor={tier.col} roundLabel={ts.done ? (ts.alive ? "Champion" : "Tournament over") : rNames[Math.min(ts.round,tier.rounds-1)]}
           bestOf={tier.bo || 3} rounds={rNames} roundIdx={ts.done ? (ts.alive ? tier.rounds : -1) : ts.round}
           onScout={pm && ts.alive && opp ? function(){ setShowScout(true); } : null}
           onBracket={function(){ setShowBracket(true); }} onHelp={function(){ setHelp(true); }} />

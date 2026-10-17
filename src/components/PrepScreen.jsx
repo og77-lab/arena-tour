@@ -7,6 +7,10 @@ import { motion } from "framer-motion";
 import { GEAR, BY_ID, BASIC, itemFx, kitFx, priceOf, usesLeft, COND_LABEL } from "../engine/gear";
 import { effectsOf, EffectList, Legend } from "./Effect";
 import { LaneRow } from "./Lanes";
+import { MiniBar } from "./Effect";
+import ItemArt from "./ItemArt";
+import { matchNumbers } from "../engine/profile";
+import { fitOf } from "../engine/fitness";
 import { conditionOf, FIELDS } from "../engine/events";
 import { TIERS } from "../models/constants";
 import { C, FONT, display, label, card, button, money } from "../ui/theme";
@@ -34,6 +38,10 @@ export default function PrepScreen(props) {
   var [slotTab, setSlotTab] = useState("lance");
   var [legend, setLegend] = useState(false);
   var condKey = ev ? ev.cond : "classic";
+  /* Tap an item in the shop to try it on: the numbers below show it before you buy */
+  var [preview, setPreview] = useState(null);
+  var [laneInfo, setLaneInfo] = useState(false);
+  var shown = preview ? Object.assign({}, kit, (function () { var o = {}; o[BY_ID[preview].slot] = preview; return o; })()) : kit;
   var [quote] = useState(function () { return MAVIS[Math.floor(Math.random() * MAVIS.length)]; });
   var cash = p.money || 0;
   var cost = Object.keys(cart).reduce(function (a, id) { return a + priceOf(id, props.topTier) * cart[id]; }, 0);
@@ -69,7 +77,8 @@ export default function PrepScreen(props) {
           <span style={{ flex: 1 }} />
           <button onClick={function () { setLegend(!legend); }} style={{ fontFamily: FONT, fontSize: 12, fontWeight: 900, color: C.goldInk, background: "none", border: "none", cursor: "pointer", padding: 0, whiteSpace: "nowrap" }}>ⓘ {legend ? "Hide" : "What these mean"}</button>
         </div>
-        {cd && (<div style={{ marginTop: 6 }}><LaneRow cond={ev.cond} w={44} h={32} /></div>)}
+        {cd && (<div onClick={function () { setLaneInfo(!laneInfo); }} style={{ marginTop: 6, cursor: "pointer" }}><LaneRow cond={ev.cond} w={36} h={28} gaps={props.gaps || null} compact={true} label={cd.name + ":"} />
+          <div style={{ fontSize: 11, color: C.textSoft, lineHeight: 1.35, marginTop: 3 }}>{laneInfo ? cd.about + " ▲" : "ⓘ What are " + cd.name.toLowerCase() + "? tap"}</div></div>)}
         <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
           {[["locker", "🎒 Your locker"], ["shop", "🛒 Mavis's shop"]].map(function (t) {
             var on = tab === t[0];
@@ -96,7 +105,7 @@ export default function PrepScreen(props) {
                           style={Object.assign(card({ padding: "8px 4px", borderColor: on ? C.gold : C.line, boxShadow: on ? "0 0 0 3px " + C.goldSoft + ", 0 3px 0 " + C.goldInk : "0 3px 0 " + C.shadow }),
                             { cursor: "pointer", fontFamily: FONT, background: on ? C.cardWarm : C.card, position: "relative", textAlign: "center" })}>
                           {on && (<span style={{ position: "absolute", top: 4, right: 6, fontSize: 14, fontWeight: 900, color: C.greenInk }}>✓</span>)}
-                          <div aria-hidden style={{ fontSize: 50, lineHeight: 1.1 }}>{g.icon}</div>
+                          <div aria-hidden style={{ display: "flex", justifyContent: "center", height: 60, alignItems: "center" }}><ItemArt id={g.id} size={g.slot === "lance" ? 66 : 58} /></div>
                           <div style={{ fontSize: 11.5, fontWeight: 900, color: C.text, lineHeight: 1.2, minHeight: 28 }}>{g.name}</div>
                           <div style={{ fontSize: 10.5, fontWeight: 800, color: g.basic ? C.textMuted : inCart ? "#7c3aed" : C.goldInk, marginTop: 2 }}>
                             {g.basic ? "Always yours" : inCart ? "In basket · " + left : left + " tournament" + (left === 1 ? "" : "s") + " left"}
@@ -133,9 +142,9 @@ export default function PrepScreen(props) {
             {GEAR.filter(function (g) { return !g.basic && g.slot === slotTab; }).sort(function (a, b) { return priceOf(a.id, props.topTier) / a.uses - priceOf(b.id, props.topTier) / b.uses; }).map(function (g, i) {
               var n = cart[g.id] || 0, price = priceOf(g.id, props.topTier), own = locker[g.id] || 0;
               return (
-                <div key={g.id} style={card({ display: "flex", gap: 10, padding: "10px 10px", marginBottom: 8 })}>
+                <div key={g.id} onClick={function () { setPreview(preview === g.id ? null : g.id); }} style={Object.assign(card({ display: "flex", gap: 10, padding: "10px 10px", marginBottom: 8, borderColor: preview === g.id ? "#38bdf8" : C.line, boxShadow: preview === g.id ? "0 0 0 3px #bae6fd, 0 3px 0 " + C.shadow : "0 3px 0 " + C.shadow }), { cursor: "pointer" })}>
                   <motion.div aria-hidden animate={REDUCED_MOTION ? {} : { rotate: [0, -7, 7, -3, 0], y: [0, -4, 0] }} transition={{ duration: 1.6, repeat: Infinity, repeatDelay: 2 + (i % 4) * 0.7, delay: i * 0.35 }}
-                    style={{ fontSize: 46, width: 58, textAlign: "center", flexShrink: 0, alignSelf: "flex-start" }}>{g.icon}</motion.div>
+                    style={{ width: 72, display: "flex", justifyContent: "center", flexShrink: 0, alignSelf: "flex-start" }}><ItemArt id={g.id} size={g.slot === "lance" ? 74 : 62} /></motion.div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: 14, fontWeight: 900, color: C.text }}>{g.name}</div>
                     <div style={{ fontSize: 11, fontStyle: "italic", color: C.textMuted, lineHeight: 1.3, marginTop: 1, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{g.pitch}</div>
@@ -143,9 +152,10 @@ export default function PrepScreen(props) {
                     <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 6 }}>
                       <span style={{ fontSize: 11, fontWeight: 900, color: C.goldInk, lineHeight: 1.25 }}>{g.uses} tournament{g.uses > 1 ? "s" : ""} · {money(Math.round(price / g.uses))} each{own ? <span style={{ display: "block", color: C.textMuted }}>you own {own}</span> : null}</span>
                       <span style={{ flex: 1 }} />
-                      {n > 0 && (<button onClick={function () { addCart(g.id, -1); }} aria-label={"Remove " + g.name} style={button("ghost", { padding: "5px 10px", fontSize: 14 })}>−</button>)}
+                      {preview !== g.id && n === 0 && (<span style={{ fontSize: 10.5, fontWeight: 900, color: "#0369a1" }}>tap to try</span>)}
+                      {n > 0 && (<button onClick={function (e) { e.stopPropagation(); addCart(g.id, -1); }} aria-label={"Remove " + g.name} style={button("ghost", { padding: "5px 10px", fontSize: 14 })}>−</button>)}
                       {n > 0 && (<span style={{ fontSize: 13, fontWeight: 900 }}>{n}</span>)}
-                      {(function () { var ok = cost + price <= cash; return (<button disabled={!ok} onClick={function () { if (ok) addCart(g.id, 1); }} style={button(ok ? "gold" : "ghost", { padding: "6px 10px", fontSize: 12.5, opacity: ok ? 1 : 0.55, cursor: ok ? "pointer" : "default" })}>{ok ? (n ? "+" : "Add") + " " + money(price) : money(price) + " · can't afford"}</button>); })()}
+                      {(function () { var ok = cost + price <= cash; return (<button disabled={!ok} onClick={function (e) { e.stopPropagation(); if (ok) { addCart(g.id, 1); setPreview(null); } }} style={button(ok ? "gold" : "ghost", { padding: "6px 10px", fontSize: 12.5, opacity: ok ? 1 : 0.55, cursor: ok ? "pointer" : "default" })}>{ok ? (n ? "+" : "Add") + " " + money(price) : money(price) + " · can't afford"}</button>); })()}
                     </div>
                   </div>
                 </div>
@@ -158,11 +168,11 @@ export default function PrepScreen(props) {
       {/* Your kit and the one button that pays and rides */}
       <div style={{ borderTop: "2px solid " + C.line, background: C.card, padding: "8px 12px calc(env(safe-area-inset-bottom) + 10px)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6, fontSize: 12, fontWeight: 800, color: C.textSoft }}>
-          <span aria-hidden style={{ fontSize: 22 }}>{BY_ID[kit.lance].icon}{BY_ID[kit.saddle].icon}</span>
-          <span style={{ flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{BY_ID[kit.lance].name} + {BY_ID[kit.saddle].name}</span>
+          <span aria-hidden style={{ display: "inline-flex", gap: 2 }}><ItemArt id={shown.lance} size={28} /><ItemArt id={shown.saddle} size={28} /></span>
+          <span style={{ flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: preview ? "#0369a1" : C.textSoft }}>{preview ? "Trying on " + BY_ID[preview].name : BY_ID[kit.lance].name + " + " + BY_ID[kit.saddle].name}</span>
           {cost > 0 && (<span style={{ color: canPay ? C.text : C.redInk, fontWeight: 900 }}>Basket {money(cost)}</span>)}
         </div>
-        <div style={{ marginBottom: 7 }}><EffectList list={effectsOf(kitFx(kit, condKey))} empty="Your kit: no changes — the plain broom and tea-cosy." /></div>
+        <Numbers S={S} ev={ev} tier={props.tier} gaps={props.gaps} kit={shown} preview={preview} />
         <button onClick={confirm} disabled={!canPay} style={button(canPay ? "gold" : "ghost", { width: "100%", padding: "12px 10px", fontSize: 16, opacity: canPay ? 1 : 0.6 })}>
           {canPay ? (cost > 0 ? "✅ Pay " + money(cost) + " & ride" : "✅ Confirm & ride") : "Not enough money — take something out"}
         </button>
@@ -181,6 +191,39 @@ function Effects(props) {
     <div style={{ marginTop: props.compact ? 5 : 8 }}>
       <EffectList list={effectsOf(itemFx(g.id, props.cond))} />
       {others && (<div style={{ fontSize: 10.5, fontWeight: 800, color: C.textMuted, marginTop: 3 }}>Works differently in {others}</div>)}
+    </div>
+  );
+}
+
+/* Your numbers in this tournament (round 1, these lanes, your stats against the entrants, your fitness): with the
+   plain broom and tea-cosy, and with the kit you've picked or are trying on — every change in green or red */
+function Numbers(props) {
+  var p = props.S.player, cond = props.ev ? props.ev.cond : "classic";
+  var o = { cond: cond, tier: props.tier, gaps: props.gaps || {}, fit: fitOf(p) };
+  var base = matchNumbers(Object.assign({ kit: BASIC }, o)), now = matchNumbers(Object.assign({ kit: props.kit }, o));
+  function f1(v) { return (Math.round(v * 10) / 10).toFixed(1); }
+  function sgn(v) { return (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v); }
+  var rows = [
+    { k: "zone", v: 2, label: "Gold zone", val: f1(now.zone) + "% of bar", d: Math.round((now.zone - base.zone) * 10) / 10, up: true, unit: "%" },
+    { k: "speed", v: 1.2, label: "Bar speed", val: Math.round(now.speed) + "%", d: Math.round(now.speed - base.speed), up: false, unit: "%" },
+    { k: "accel", v: 1.3, label: "Speed-up", val: Math.round(now.accel) + "%", d: Math.round(now.accel - base.accel), up: false, unit: "%" },
+    { k: "gold", v: 1, label: "Gold hits", val: sgn(Math.round(now.gold)) + " pts", d: Math.round(now.gold - base.gold), up: true, unit: "" },
+    { k: "miss", v: 1, label: "Misses", val: sgn(Math.round(now.miss)) + " pts", d: Math.round(now.miss - base.miss), up: true, unit: "" }
+  ];
+  return (
+    <div style={{ marginBottom: 7 }}>
+      <div style={{ fontSize: 10, fontWeight: 900, letterSpacing: 1.2, color: C.textMuted, textTransform: "uppercase", marginBottom: 3 }}>Your numbers here · change from the plain kit</div>
+      <div style={{ display: "grid", gridTemplateColumns: "auto 1fr auto auto", columnGap: 8, rowGap: 2, alignItems: "center", fontSize: 12 }}>
+        {rows.map(function (r) {
+          var good = r.d === 0 ? null : (r.d > 0) === r.up;
+          return [
+            <MiniBar key={r.k + "b"} k={r.k} v={r.v} />,
+            <span key={r.k + "l"} style={{ fontWeight: 800, color: C.text }}>{r.label}</span>,
+            <span key={r.k + "v"} style={{ fontWeight: 900, color: C.text, textAlign: "right" }}>{r.val}</span>,
+            <span key={r.k + "d"} style={{ fontWeight: 900, minWidth: 44, textAlign: "right", color: good === true ? C.greenInk : good === false ? C.redInk : C.textMuted }}>{r.d === 0 ? "—" : (r.d > 0 ? "▲ +" : "▼ −") + Math.abs(r.d) + r.unit}</span>
+          ];
+        })}
+      </div>
     </div>
   );
 }

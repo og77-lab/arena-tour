@@ -52,18 +52,18 @@ Each tournament is a knockout bracket (32 riders, 64 at a Slam). Every round you
 
 Each week several tournaments run at once in every tier, and all 1,000 riders play one of them. Tap a tier to see its events. Each card shows:
 - **A picture of the lanes** and the event's name. The lanes change the match for **both** riders, and each makes one stat count more:
-  - ☀️ **Classic:** no tricks.
-  - 🌧️ **Muddy lanes:** bar 10% faster for both riders, and Reflexes gaps count double.
-  - 🌬️ **Windy coast:** gold zone 2% narrower for both, Precision gaps count double, +10% prize money.
-  - 🔥 **Heatwave:** the bar speeds up 40% more each strike, Stamina gaps count double.
-  - 🌼 **Village green:** gold zone 1.5% wider, every stat gap counts half (an underdog's day out), −10% points and money.
+  - ☀️ **Classic** — dry, packed earth on a fair day. Nothing changes: pure timing.
+  - 🌧️ **Muddy lanes** — rain-soaked dirt. The roosters slip, so the bar runs 10% faster for both riders, and the **Reflexes (bar speed)** gap counts double.
+  - 🌬️ **Windy coast** — a seaside ground in the gusts. The gold zone is 2% narrower for both, the **Steady Stride (gold zone)** gap counts double, and seaside sponsors pay +10% prize money.
+  - 🔥 **Heatwave** — baking sun. The bar speeds up 40% more after every strike, and the **Stamina (speed-up)** gap counts double.
+  - 🌼 **Village green** — soft grass at a village fete. The gold zone is 1.5% wider and every stat gap counts half: the underdog's best chance (−10% points and money).
 - **Entrants (★).** Who signed up:
   - ★★★ tough entrants: mostly the tier's top-ranked riders, +10% points.
   - ★★ mixed entrants.
   - ★ weaker entrants: mostly lower-ranked riders, −10% points.
 - **Chips** for what the lanes and the entrants change (see *Reading the chips* below), the champion's points and prize, and the two top seeds.
 
-**🗺 Compare the 5 lanes** (top of the list) shows all five side by side, and before every match the tale of the tape opens with **Today's lanes** — the picture and the chips again. Which lanes suit you depends on your stats and your kit: strong Reflexes love the mud, strong Steady Stride loves the wind (Precision = Steady Stride), strong Stamina loves a heatwave, and the village green helps whoever is behind on stats.
+**🗺 Compare the 5 lanes** (top of the list) shows all five side by side, and before every match the tale of the tape opens with **Today's lanes** — the picture and the chips again. Which lanes suit you depends on your stats and your kit: strong Reflexes love the mud, strong Steady Stride loves the wind, strong Stamina loves a heatwave, and the village green helps whoever is behind on stats. The game works it out for you: a weighted stat chip is **green** when you're ahead of that event's entrants in it (it helps you), **red** when you're behind, and says by how much (*Reflexes (bar speed) ×2 · you +1.2*). In the tale of the tape it compares you with your actual opponent.
 
 Grand Slam weeks have a single named Slam (The Coop Open, The Swamp Slam, Wimbledon-on-Wold, The Gale Cup), each with its own lanes.
 
@@ -85,7 +85,7 @@ Everything that changes a match — lanes, gear, tiredness, training, injuries �
 | ± on gold hits | The marker stopped in the gold | Points added only when you land in the gold |
 | ± on misses | The marker stopped outside | Points added only when you land outside the gold |
 | ± every strike | Both | Points added to every strike, hit or miss |
-| Stat ×2 / ×0.5 | The stat's icon | That stat's gap to your opponent counts double (or half) |
+| Reflexes (bar speed) ×2 · you +1.2 | The bar element that stat moves, with the stat's icon | That stat's gap counts double (or ½). Green if you're ahead in it, red if behind |
 | 🏆 Points / 💰 Prize ±% | — | Ranking points or prize money for this event |
 
 ## 6. The match
@@ -156,7 +156,7 @@ The gold zone never shrinks below 3% of the bar, and the bar never gets impossib
 
 ## 9. Stats & training
 
-Six stats, each from level 0 to 20: three for the granny, two for the rooster, and 🔋 Bounce-back for recovery. For the first five **only the gap to your opponent counts**: if you both have 5 Aim, it cancels out. Bounce-back counts on its own. An injury knocks a few levels off a stat until it heals.
+Six stats, each from level 0 to 20 — each one moves one element of the match, and the game always names it with the stat: **Reflexes · bar speed**, **Steady Stride · gold zone**, **Aim · every strike**, **Stubbornness · misses**, **Stamina · speed-up**, **Bounce-back · recovery**. three for the granny, two for the rooster, and 🔋 Bounce-back for recovery. For the first five **only the gap to your opponent counts**: if you both have 5 Aim, it cancels out. Bounce-back counts on its own. An injury knocks a few levels off a stat until it heals.
 
 | Stat | What it does | Each level ahead |
 |---|---|---|
@@ -183,6 +183,7 @@ After you pick a tournament you land on **Get ready**. Choose a lance and a sadd
 - The **🧹 Trusty Broom-Handle** and the **🫖 Tea-Cosy Saddle** are free, neutral and always yours.
 - Everything else lasts a set number of tournaments (1, 2, 3 or 5). Each tournament you enter with it uses one, however many rounds you play.
 - Prices follow the best tier you can enter: one tournament's worth costs about 6% of that tier's champion prize.
+- **Your numbers here** (bottom of Get ready): your gold zone, bar speed, speed-up and the points on gold hits and misses for this tournament — in these lanes, against these entrants, as tired as you are — and how your kit changes each one (▲▼ in green or red). **Tap any item in the shop to try it on** before you buy.
 - **Mavis's shop** has a tab for lances and one for saddles, cheapest per tournament first. Each item shows its chips **for the lanes of the tournament you picked**, and which other lanes would change it. The bar at the bottom adds up what your whole kit does in these lanes.
 - Your lance and saddle are drawn on your rider — in the arena, the walk-out, the podium, the paper and your profile — and so is hers.
 - Gear changes **your** bar only, never your opponent's. After each strike the breakdown shows its points as **Gear**.
@@ -204,11 +205,11 @@ After you pick a tournament you land on **Get ready**. Choose a lance and a sadd
 
 You have **two fitness meters**, 0–100%: 👵 the granny's and 🐓 the rooster's. They're on Home, in the Get ready screen, in the match header and in the tale of the tape (hers too).
 
-- **Every match tires both of you:** −9% granny and −11% rooster (best of 5: −13.5% and −16.5%). A deep run leaves you tired in the later rounds — and so is the rider who got there with you.
+- **Every match tires both of you:** −2.8% granny and −3.4% rooster for every set you ride, so a three-set match tires you more than a two-set one, and a long tournament more than a short one. A deep run leaves you tired in the later rounds — and so is the rider who got there with you.
 - **A tired granny:** the gold zone gets narrower (up to −4% at 0) and misses score less (up to −10). The strike breakdown shows it as **Tired**.
 - **A tired rooster:** the bar starts faster (up to +18%) and speeds up more after every strike (up to +60%).
-- **How it adds up:** a rider who loses early is fresh again by next week. One who keeps reaching the final week after week slides lower and lower — unless she trains Bounce-back, books the physio or rests.
-- **Fitness only comes back between tournaments:** 14% + 30% of whatever is missing after every tournament, plus 1.25% per level of 🔋 **Bounce-back**. A week off (a Grand Slam you don't play) recovers double. Only part comes back, so tiredness builds up for anyone who keeps going deep.
+- **How it adds up:** even a first-round exit leaves a little tiredness for next week. A rider who loses early is nearly fresh again; One who keeps reaching the final week after week slides lower and lower — unless she trains Bounce-back, books the physio or rests.
+- **Fitness only comes back between tournaments:** 65% of whatever is missing comes back after every tournament, plus 1.25% per level of 🔋 **Bounce-back**. A week off (a Grand Slam you don't play) recovers double. Only part comes back, so tiredness builds up for anyone who keeps going deep.
 - **🔋 Bounce-back** is the sixth stat (0–20). Unlike the others it counts on its own, not against your opponent.
 - **Physio staff** (Train tab, as the week's one investment): 👩‍⚕️ Nurse Nellie +35% granny, 🩺 Dr. Featherby the rooster chiropractor +35% rooster, 🛁 a spa weekend at Bingo-on-Sea +20% both — straight away, and it heals injuries on that side a tournament sooner.
 - **On Home** the fitness card shows both meters, chips for what tiredness is doing right now, how tired you finished your last tournament, how much comes back next time, your injuries, and a warning under 35%.

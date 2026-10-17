@@ -28,7 +28,7 @@ export function LaneTile(props) {
   );
 }
 
-export function laneChips(c) { var d = CONDITIONS[c] || CONDITIONS.classic; return effectsOf({ zone: d.zone, speed: d.speed, accel: d.accel, w: d.w, money: d.money !== 1 ? d.money : 1, pts: d.pts !== 1 ? d.pts : 1 }); }
+export function laneChips(c, gaps) { var d = CONDITIONS[c] || CONDITIONS.classic; return effectsOf({ zone: d.zone, speed: d.speed, accel: d.accel, w: d.w, money: d.money !== 1 ? d.money : 1, pts: d.pts !== 1 ? d.pts : 1 }, gaps); }
 
 /* One lane on one row: tile, name, chips */
 export function LaneRow(props) {
@@ -38,24 +38,25 @@ export function LaneRow(props) {
       <LaneTile cond={props.cond} w={props.w || 50} h={props.h || 36} />
       {props.compact ? (
         <div style={{ flex: 1, minWidth: 0, display: "flex", flexWrap: "wrap", alignItems: "center", gap: 4 }}>
-          <span style={{ fontSize: 12, fontWeight: 900, color: props.dark ? "#fde68a" : C.text, marginRight: 2 }}>{props.label ? props.label + " " : ""}{d.name}</span>
-          <EffectList list={laneChips(props.cond)} empty="nothing changes" />
+          <span style={{ fontSize: 12, fontWeight: 900, color: props.dark ? "#fde68a" : C.text, marginRight: 2 }}>{props.label && props.label.indexOf(d.name) === 0 ? props.label : (props.label ? props.label + " " : "") + d.name}</span>
+          <EffectList list={laneChips(props.cond, props.gaps)} empty="nothing changes" />
         </div>
       ) : (
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontSize: 13, fontWeight: 900, color: props.dark ? "#fff" : C.text }}>{d.name}</div>
-        <div style={{ marginTop: 3 }}><EffectList list={laneChips(props.cond)} empty="Nothing changes — pure timing" /></div>
+        {props.about && d.about && (<div style={{ fontSize: 11.5, color: props.dark ? "rgba(255,255,255,0.8)" : C.textSoft, lineHeight: 1.35, marginTop: 1 }}>{d.about}</div>)}
+        <div style={{ marginTop: 3 }}><EffectList list={laneChips(props.cond, props.gaps)} empty="Nothing changes — pure timing" /></div>
       </div>)}
     </div>
   );
 }
 
 /* All five side by side, for comparing before you pick */
-export function CompareLanes() {
+export function CompareLanes(props) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 7, padding: "8px 10px", background: "#fff", border: "1.5px solid " + C.line, borderRadius: 12, marginBottom: 8 }}>
-      <div style={{ fontSize: 11.5, fontWeight: 800, color: C.textSoft }}>The lanes change the bar for <b>both</b> riders. Which suits you depends on your stats and your gear.</div>
-      {Object.keys(CONDITIONS).map(function (k) { return (<LaneRow key={k} cond={k} />); })}
+      <div style={{ fontSize: 11.5, fontWeight: 800, color: C.textSoft }}>The lanes change the bar for <b>both</b> riders and make one stat count more. {props.gaps ? "Green and red are worked out from your stats against the riders near your rank." : "Which suits you depends on your stats and your kit."}</div>
+      {Object.keys(CONDITIONS).map(function (k) { return (<LaneRow key={k} cond={k} gaps={props.gaps} about={true} />); })}
     </div>
   );
 }

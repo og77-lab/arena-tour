@@ -16,13 +16,18 @@ import { REDUCED_MOTION } from "./fx";
 
 var STAT_ICON = { r: "⚡", p: "🐾", f: "🎯", s: "🫀", g: "🛡️", b: "🔋", all: "📊" };
 var STAT_NAME = { r: "Reflexes", p: "Steady Stride", f: "Aim", s: "Stamina", g: "Stubbornness", b: "Bounce-back" };
+/* Every stat is one element of the match — shown together so nobody has to remember which is which */
+export var STAT_ELEMENT = { r: { k: "speed", v: 0.85, what: "bar speed" }, p: { k: "zone", v: 2, what: "gold zone" }, f: { k: "aim", v: 2, what: "every strike" }, g: { k: "miss", v: 2, what: "misses" }, s: { k: "accel", v: 0.7, what: "speed-up" }, b: { k: "fit", v: 1, what: "recovery" } };
+export function statLabel(s) { var el = STAT_ELEMENT[s]; return STAT_NAME[s] + (el ? " (" + el.what + ")" : ""); }
+function gapText(g) { var r = Math.round(g * 10) / 10; return r === 0 ? "you're level" : "you " + (r > 0 ? "+" : "−") + Math.abs(r); }
 
 function pct(m) { return Math.round(Math.abs(m - 1) * 100); }
 function sg(v) { return v > 0 ? "+" : "−"; }
 function n1(v) { var a = Math.abs(v); return a % 1 ? a.toFixed(1) : String(a); }
 
-/* Turn any effect object into chips. fx keys: zone, speed, accel, gold, miss, aim, floor, w {r,p,…}, pts, money */
-export function effectsOf(fx) {
+/* Turn any effect object into chips. fx keys: zone, speed, accel, gold, miss, aim, floor, w {r,p,…}, pts, money.
+   gaps (optional): your stat gaps to the field you'll face — then a weighted stat is green if it helps YOU, red if it hurts */
+export function effectsOf(fx, gaps) {
   var out = []; if (!fx) return out;
   if (fx.zone) out.push({ k: "zone", v: fx.zone, good: fx.zone > 0, text: "Gold zone " + sg(fx.zone) + n1(fx.zone) + "%" });
   if (fx.speed && fx.speed !== 1) out.push({ k: "speed", v: fx.speed, good: fx.speed < 1, text: "Bar " + pct(fx.speed) + "% " + (fx.speed < 1 ? "slower" : "faster") });
@@ -32,8 +37,13 @@ export function effectsOf(fx) {
   if (fx.floor) out.push({ k: "miss", v: fx.floor, good: fx.floor > 0, text: sg(fx.floor) + n1(fx.floor) + " worst miss" });
   if (fx.aim) out.push({ k: "aim", v: fx.aim, good: fx.aim > 0, text: sg(fx.aim) + n1(fx.aim) + " every strike" });
   if (fx.w) { var ks = Object.keys(fx.w);
-    if (ks.length >= 3 && ks.every(function (s) { return fx.w[s] === fx.w[ks[0]]; })) out.push({ k: "stat", s: "all", v: fx.w[ks[0]], good: null, text: "All stat gaps ×" + fx.w[ks[0]] });
-    else ks.forEach(function (s) { var m = fx.w[s]; if (m !== 1) out.push({ k: "stat", s: s, v: m, good: null, text: STAT_NAME[s] + " ×" + m }); }); }
+    if (ks.length >= 3 && ks.every(function (s) { return fx.w[s] === fx.w[ks[0]]; })) {
+      var m0 = fx.w[ks[0]], tot = gaps ? ks.reduce(function (a, s) { return a + (gaps[s] || 0); }, 0) : null;
+      out.push({ k: "stat", s: "all", v: m0, good: tot == null || Math.abs(tot) < 0.5 ? null : tot * (m0 - 1) > 0,
+        text: "All stat gaps ×" + (m0 === 0.5 ? "½" : m0) + (tot == null ? "" : " · " + gapText(tot) + " in total") });
+    } else ks.forEach(function (s) { var m = fx.w[s]; if (m === 1) return; var g = gaps ? gaps[s] || 0 : null;
+      out.push({ k: "stat", s: s, v: m, good: g == null || Math.abs(g) < 0.3 ? null : g * (m - 1) > 0,
+        text: STAT_NAME[s] + " (" + STAT_ELEMENT[s].what + ") ×" + (m === 0.5 ? "½" : m) + (g == null ? "" : " · " + gapText(g)) }); }); }
   if (fx.pts && fx.pts !== 1) out.push({ k: "pts", v: fx.pts, good: fx.pts > 1, text: "Points " + sg(fx.pts - 1) + pct(fx.pts) + "%" });
   if (fx.money && fx.money !== 1) out.push({ k: "money", v: fx.money, good: fx.money > 1, text: "Prize " + sg(fx.money - 1) + pct(fx.money) + "%" });
   if (fx.fit) out.push({ k: "fit", v: fx.fit, good: fx.fit > 0, text: sg(fx.fit) + n1(fx.fit) + "% fitness back" });
@@ -72,11 +82,12 @@ function Badge(props) {
 /* One chip: the miniature, then the change in plain numbers. good=true green, false red, null neutral */
 export function EffectChip(props) {
   var e = props.e, col = e.good === true ? C.greenInk : e.good === false ? C.redInk : C.text;
-  var vis = e.k === "stat" ? (<Badge>{STAT_ICON[e.s]}×{e.v}</Badge>) : e.k === "pts" ? (<Badge>🏆</Badge>) : e.k === "money" ? (<Badge>💰</Badge>) : e.k === "fit" ? (<Badge>🔋</Badge>) : (<MiniBar k={e.k} v={e.v} />);
+  var el = e.k === "stat" && STAT_ELEMENT[e.s];
+  var vis = e.k === "stat" ? (el && el.k !== "fit" ? (<span style={{ position: "relative", display: "inline-flex" }}><MiniBar k={el.k} v={el.v} /><span style={{ position: "absolute", left: -4, top: -6, fontSize: 10 }}>{STAT_ICON[e.s]}</span></span>) : (<Badge>{STAT_ICON[e.s]}×{e.v}</Badge>)) : e.k === "pts" ? (<Badge>🏆</Badge>) : e.k === "money" ? (<Badge>💰</Badge>) : e.k === "fit" ? (<Badge>🔋</Badge>) : (<MiniBar k={e.k} v={e.v} />);
   return (
-    <span style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "3px 7px 3px 4px", borderRadius: 9, background: e.good === true ? "#f0fdf4" : e.good === false ? "#fef2f2" : "#f8fafc", border: "1.5px solid " + (e.good === true ? "#bbf7d0" : e.good === false ? "#fecaca" : C.line), fontFamily: FONT }}>
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 5, maxWidth: "100%", boxSizing: "border-box", padding: "3px 7px 3px 4px", borderRadius: 9, background: e.good === true ? "#f0fdf4" : e.good === false ? "#fef2f2" : "#f8fafc", border: "1.5px solid " + (e.good === true ? "#bbf7d0" : e.good === false ? "#fecaca" : C.line), fontFamily: FONT }}>
       {vis}
-      <span style={{ fontSize: 11.5, fontWeight: 900, color: col, whiteSpace: "nowrap" }}>{e.text}</span>
+      <span style={{ fontSize: 11.5, fontWeight: 900, color: col, whiteSpace: e.text.length > 26 ? "normal" : "nowrap", lineHeight: 1.2 }}>{e.text}</span>
     </span>
   );
 }
@@ -95,7 +106,7 @@ var LEGEND = [
   { e: { k: "gold", v: 3, good: true, text: "On gold hits" }, what: "Points added only when you land in the gold." },
   { e: { k: "miss", v: 3, good: true, text: "On misses" }, what: "Points added only when you land outside the gold (70 and below)." },
   { e: { k: "aim", v: 2, good: true, text: "Every strike" }, what: "Points added to every strike, hit or miss." },
-  { e: { k: "stat", s: "r", v: 2, good: null, text: "Stat ×2" }, what: "That stat's gap to your opponent counts double (×0.5 = half)." }
+  { e: { k: "stat", s: "r", v: 2, good: true, text: "Reflexes (bar speed) counts double · you +2" }, what: "That stat's gap counts double (half on the village green). Green if you're ahead of the field in it — it helps you; red if you're behind." }
 ];
 export function Legend() {
   return (

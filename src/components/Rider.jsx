@@ -164,7 +164,7 @@ function Accessory(props) {
 }
 
 /* ── Kit: what the lance shaft and the saddle look like (no lance given = the classic striped lance) ── */
-function LanceShaft(props) {
+export function LanceShaft(props) {
   var id = props.id;
   var vamp = (<polygon points="70,50 78,55.5 71,62" fill="#e5e7eb" stroke={INK} strokeWidth="1.8" strokeLinejoin="round" />);
   var pennant = (<path d="M84 53.2 L99 49 L86 59 Z" fill={props.plume} stroke={INK} strokeWidth="1.5" strokeLinejoin="round" />);

@@ -34,7 +34,7 @@ export default function TierSheet(props) {
           <button onClick={function () { setLanes(!lanes); setLegend(false); }} style={{ flex: 1, fontFamily: FONT, fontSize: 12, fontWeight: 900, color: lanes ? "#fff" : C.ink, background: lanes ? C.night : C.card, border: "2px solid " + (lanes ? C.nightDeep : C.lineStrong), borderRadius: 10, padding: "6px 4px", cursor: "pointer" }}>🗺 Compare the 5 lanes</button>
           <button onClick={function () { setLegend(!legend); setLanes(false); }} style={{ flex: 1, fontFamily: FONT, fontSize: 12, fontWeight: 900, color: legend ? "#fff" : C.ink, background: legend ? C.night : C.card, border: "2px solid " + (legend ? C.nightDeep : C.lineStrong), borderRadius: 10, padding: "6px 4px", cursor: "pointer" }}>ⓘ What the chips mean</button>
         </div>
-        {lanes && (<CompareLanes />)}
+        {lanes && (<CompareLanes gaps={props.nearGaps || null} />)}
         {legend && (<Legend />)}
 
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -67,7 +67,7 @@ export default function TierSheet(props) {
               </button>
               {ok && open === ti && evOf(ti).length > 0 && (
                 <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} style={{ display: "flex", flexDirection: "column", gap: 6, margin: "6px 0 4px 14px", paddingLeft: 10, borderLeft: "3px solid " + t.col }}>
-                  {evOf(ti).map(function (ev) { return (<EventCard key={ev.id} ev={ev} col={t.col} bo={t.bo || 3} onPick={function () { props.onPickEvent(ev); }} />); })}
+                  {evOf(ti).map(function (ev) { return (<EventCard key={ev.id} ev={ev} col={t.col} bo={t.bo || 3} gaps={props.gapsOf ? props.gapsOf(ev) : null} onPick={function () { props.onPickEvent(ev); }} />); })}
                 </motion.div>
               )}
               </div>
@@ -106,7 +106,7 @@ export default function TierSheet(props) {
 /* One named event: the lanes and the entrants as chips, the payout as numbers, the top seeds on one line */
 function EventCard(props) {
   var ev = props.ev, cd = CONDITIONS[ev.cond] || CONDITIONS.classic, fd = FIELDS[ev.field] || FIELDS.mixed;
-  var chips = effectsOf({ zone: cd.zone, speed: cd.speed, accel: cd.accel, w: cd.w, pts: ev.ptsMul, money: ev.moneyMul });
+  var chips = effectsOf({ zone: cd.zone, speed: cd.speed, accel: cd.accel, w: cd.w, pts: ev.ptsMul, money: ev.moneyMul }, props.gaps);
   return (
     <button onClick={props.onPick} style={Object.assign(card({ padding: "8px 10px", borderColor: props.col, boxShadow: "0 2px 0 " + props.col }), { width: "100%", textAlign: "left", cursor: "pointer", fontFamily: FONT, background: C.card, display: "block" })}>
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>

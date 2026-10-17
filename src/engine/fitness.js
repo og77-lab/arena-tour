@@ -1,18 +1,20 @@
 /* ═══ Engine / Fitness ═══ Two meters, 0–100: the granny's and the rooster's. Every match costs some of both (a
    best-of-5 costs more), and they only come back between tournaments. The same rules apply to every rider on tour.
 
+   Every SET ridden costs some of both, so a three-set match tires more than a two-set one.
+
    A tired granny: a narrower gold zone, and her misses score less.
    A tired rooster: the bar starts faster and speeds up more after every strike.
 
-   Recovery after each tournament = 14 + 30% of what's missing + 1.25 × Bounce-back (the sixth stat, 0–20 — it counts
+   Recovery after each tournament = 65% of what's missing + 1.25 × Bounce-back (the sixth stat, 0–20 — it counts
    on its own, not against the opponent). So tiredness builds up for anyone who keeps going deep. A week off (a Grand
    Slam you don't play) recovers double. Ride on under 35% and every match risks an injury.
    The physio staff (one booking per week, as the weekly investment) adds more on top. */
 
 import { TIERS } from "../models/constants";
 
-export var COST = { g: 9, r: 11 };
-export var BASE_RECOVERY = 14, MISSING_SHARE = 0.3, PER_BOUNCE = 1.25;
+export var COST = { g: 2.8, r: 3.4 }; /* per set ridden */
+export var BASE_RECOVERY = 0, MISSING_SHARE = 0.65, PER_BOUNCE = 1.25;
 
 /* Physio staff: booked as this week's investment, effect is immediate */
 export var STAFF = [
@@ -34,7 +36,10 @@ export function putFit(p, f) {
 }
 
 /* What one match costs, by format */
-export function matchCost(bo) { var m = (bo || 3) >= 5 ? 1.5 : 1; return { g: COST.g * m, r: COST.r * m }; }
+/* A match of unknown length (the quick sim, a rival's past rounds): the average sets for its format */
+export function matchCost(bo) { var sets = (bo || 3) >= 5 ? 4 : 2.5; return { g: COST.g * sets, r: COST.r * sets }; }
+export function afterSets(f, sets) { return { g: clamp(f.g - COST.g * sets), r: clamp(f.r - COST.r * sets) }; }
+export function setsOf(score) { var m = String(score || "").match(/(d+)D+(d+)/); return m ? (+m[1]) + (+m[2]) : 2.5; }
 export function tierBo(ti) { return (TIERS[ti] && TIERS[ti].bo) || 3; }
 export function afterMatches(f, n, bo) { var c = matchCost(bo); return { g: clamp(f.g - c.g * n), r: clamp(f.r - c.r * n) }; }
 

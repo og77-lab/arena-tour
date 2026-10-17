@@ -55,6 +55,9 @@ export function pack(S) {
   if (!S || S.v === VERSION || !S.npcs) return S;
   var out = Object.assign({}, S, { v: VERSION, npcs: S.npcs.map(packNpc) });
   if (S.start) out.start = mapStart(S.start, packMap);
+  /* Only the latest week needs the other tournaments results (Home and the paper read it); older weeks keep a played marker */
+  if (S.cal) { var lastDone = -1; S.cal.forEach(function (e, i) { if (e && e.done) lastDone = i; });
+    out.cal = S.cal.map(function (e, i) { return i !== lastDone && e && e.result && e.result.parallel && e.result.parallel.length > 1 ? Object.assign({}, e, { result: Object.assign({}, e.result, { parallel: [1] }) }) : e; }); }
   if (S.activeT && S.activeT.bracket) out.activeT = Object.assign({}, S.activeT, { bracket: mapBracket(S.activeT.bracket, packRider) });
   return out;
 }
