@@ -7,7 +7,7 @@ import { CONDITIONS, FIELDS } from "../engine/events";
 import { TIERS } from "../models/constants";
 import { C, FONT, display, label, card, money, button } from "../ui/theme";
 import { effectsOf, EffectList, Legend } from "./Effect";
-import { LaneTile, CompareLanes, Verdict } from "./Lanes";
+import { LaneTile, CompareLanes } from "./Lanes";
 
 export default function TierSheet(props) {
   var avail = props.available || [];
@@ -34,7 +34,7 @@ export default function TierSheet(props) {
           <button onClick={function () { setLanes(!lanes); setLegend(false); }} style={{ flex: 1, fontFamily: FONT, fontSize: 12, fontWeight: 900, color: lanes ? "#fff" : C.ink, background: lanes ? C.night : C.card, border: "2px solid " + (lanes ? C.nightDeep : C.lineStrong), borderRadius: 10, padding: "6px 4px", cursor: "pointer" }}>🗺 Compare the 5 lanes</button>
           
         </div>
-        {lanes && (<CompareLanes verdictOf={props.laneVerdict || null} />)}
+        {lanes && (<CompareLanes />)}
 
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {[4, 3, 2, 1, 0].filter(function (ti) { return avail.indexOf(ti) >= 0; }).concat([4, 3, 2, 1, 0].filter(function (ti) { return avail.indexOf(ti) < 0; })).map(function (ti) {
@@ -50,7 +50,7 @@ export default function TierSheet(props) {
                     <span style={{ fontSize: 16, fontWeight: 900, color: C.text }}>{t.name}</span>
                     {ok && ti === props.paid && (<span style={{ fontSize: 9, fontWeight: 900, letterSpacing: 1, color: "#fff", background: "#7c3aed", padding: "2px 6px", borderRadius: 10 }}>🎟 PAID ENTRY</span>)}
                     {ok && ti === props.wildcard && ti !== props.paid && (<span style={{ fontSize: 9, fontWeight: 900, letterSpacing: 1, color: "#fff", background: "#be123c", padding: "2px 6px", borderRadius: 10 }}>🎟 FAN WILDCARD</span>)}
-                    {ok && ti === best && ti !== props.wildcard && ti !== props.paid && (<span style={{ fontSize: 9, fontWeight: 900, letterSpacing: 1, color: "#fff", background: C.greenInk, padding: "2px 6px", borderRadius: 10 }}>BEST FOR YOU</span>)}
+                    {ok && ti === best && ti !== props.wildcard && ti !== props.paid && (<span style={{ fontSize: 9, fontWeight: 900, letterSpacing: 1, color: "#fff", background: C.greenInk, padding: "2px 6px", borderRadius: 10 }}>TOP TIER OPEN</span>)}
                   </div>
                   <div style={{ fontSize: 12, color: C.textSoft, marginTop: 2 }}>
                     Best of {t.bo || 3} sets · {t.size} riders · ranks {t.rankRange[0]}–{t.rankRange[1] > 1000 ? "1000" : t.rankRange[1]}
@@ -66,7 +66,7 @@ export default function TierSheet(props) {
               </button>
               {ok && open === ti && evOf(ti).length > 0 && (
                 <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} style={{ display: "flex", flexDirection: "column", gap: 6, margin: "6px 0 4px 14px", paddingLeft: 10, borderLeft: "3px solid " + t.col }}>
-                  {evOf(ti).map(function (ev) { return (<EventCard key={ev.id} ev={ev} col={t.col} bo={t.bo || 3} verdict={props.verdictOf ? props.verdictOf(ev) : null} onPick={function () { props.onPickEvent(ev); }} />); })}
+                  {evOf(ti).map(function (ev) { return (<EventCard key={ev.id} ev={ev} col={t.col} bo={t.bo || 3} rank={props.rank} onPick={function () { props.onPickEvent(ev); }} />); })}
                 </motion.div>
               )}
               </div>
@@ -135,9 +135,9 @@ function EventCard(props) {
         </div>
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 6 }}>
-        <Verdict v={props.verdict} />
+        <span style={{ fontSize: 11.5, fontWeight: 900, color: C.text, whiteSpace: "nowrap" }}>Field avg #{ev.avgRank}<span style={{ color: C.textMuted, fontWeight: 800 }}> · you #{props.rank}</span></span>
         <span style={{ flex: 1, minWidth: 0, fontSize: 11.5, color: C.textSoft, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-          Top seeds: {(ev.seeds || []).map(function (sd) { return (sd.name || "").split(" ")[0] + " #" + sd.rank; }).join(", ")}
+          · Seeds: {(ev.seeds || []).map(function (sd) { return (sd.name || "").split(" ")[0] + " #" + sd.rank; }).join(", ")}
         </span>
       </div>
     </button>

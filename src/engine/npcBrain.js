@@ -7,7 +7,7 @@
    average timing, in those lanes. Worked out once, when the game loads, from the same scoring rules as the match. */
 
 import { GEAR, BY_ID, kitFx, priceOf } from "./gear";
-import { conditionOf } from "./events";
+import { conditionOf, softZone } from "./events";
 import { fitOf, STAFF } from "./fitness";
 import { TIERS } from "../models/constants";
 
@@ -28,7 +28,7 @@ function expScore(sd, h, fx) {
 }
 function kitScore(kit, cond) {
   var C = conditionOf(cond), K = kitFx(kit, cond), diff = 1.5, tot = 0;
-  var sw = Math.max(3, 13 - diff * 1.5 + C.zone + K.zone), acc = 0.3 * C.accel * K.accel, base = (2.4 + diff * 0.4) * C.speed * K.speed;
+  var sw = softZone(13 - diff * 1.5 + C.zone + K.zone), acc = 0.3 * C.accel * K.accel, base = (2.4 + diff * 0.4) * C.speed * K.speed;
   for (var set = 0; set < 3; set++) for (var k = 0; k < 3; k++) { var spd = base + set * acc * 0.6 + k * acc; tot += expScore(6 * spd / 2.4, sw / 2, K); }
   return tot / 9;
 }

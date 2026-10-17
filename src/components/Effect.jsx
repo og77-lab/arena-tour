@@ -120,8 +120,7 @@ export function EffectList(props) {
 var LEGEND = [
   { e: { k: "zone", v: 2, good: true, text: "Gold zone" }, what: "The yellow strip. Stop the marker inside it for 85–100 points. Bigger is easier." },
   { e: { k: "speed", v: 1.3, good: false, text: "Bar speed" }, what: "How fast the marker moves (it also speeds up after every strike). Slower is easier." },
-  { e: { k: "aim", v: 2, good: true, text: "Points" }, what: "Bonus points on your strikes. Points per strike adds everything up into one number." },
-  { e: { k: "pts", v: 1, good: true, text: "✓ GOOD FOR YOU" }, what: "The lanes and the entrants suit your stats: you'll score more than them, strike for strike. HARD FOR YOU is the opposite; EVEN is in between." }
+  { e: { k: "aim", v: 2, good: true, text: "Points" }, what: "Bonus points on your strikes. Points per strike adds everything up into one number." }
 ];
 export function Legend() {
   return (

@@ -83,7 +83,7 @@ Everything that changes a match — lanes, gear, tiredness, training, injuries �
 | **Bar speed** | How fast the marker moves (it also speeds up after every strike) | Slower |
 | **Points per strike** | What an average-timed rider would score with your numbers — everything added up | Higher |
 
-- **Tournament cards** show a picture of the lanes, one line (*Mud: faster bar*), and a tag: **✓ GOOD FOR YOU** (green), **✗ HARD FOR YOU** (red) or **EVEN** (grey). The tag compares your stats with that event's entrants, in those lanes.
+- **Tournament cards** show a picture of the lanes, one line (*Mud: faster bar*), the stars for how tough the entrants are, and the **field's average rank** next to yours — so you can judge whether to play safe or chase a tougher, better-paid event.
 - **Shop items** say in one line what they help (✓ green) and what they cost (✗ red), in the lanes you picked.
 - **Your numbers** at the bottom of Get ready: those three rows, for a **normal** match, **this event** (lanes, your stats against the entrants, your tiredness) and **with your kit**. Green ▲ is better for you, red ▼ worse.
 
@@ -149,9 +149,9 @@ Example — the width of your gold zone with Bigger Gold:
 | Futures round 1, even levels | 13% of the bar |
 | Same, you 5 levels ahead | 19% |
 | Same, she's 5 levels ahead | 7% |
-| Masters final, even levels | about 3% (the minimum) |
+| Masters final, even levels | about 5% |
 
-The gold zone never shrinks below 3% of the bar, and the bar never gets impossibly fast or slow.
+The gold zone never shrinks to nothing: once it is under 8% of the bar, every further squeeze (a late round, a stronger rider, wind, tiredness, gear) counts less and less, so it bottoms out around 4–5%. The bar never gets impossibly fast or slow either.
 
 ## 9. Stats & training
 

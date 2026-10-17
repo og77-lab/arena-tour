@@ -58,7 +58,7 @@ export function LaneRow(props) {
 export function CompareLanes(props) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 8, padding: "8px 10px", background: "#fff", border: "1.5px solid " + C.line, borderRadius: 12, marginBottom: 8 }}>
-      <div style={{ fontSize: 11.5, fontWeight: 800, color: C.textSoft }}>The lanes change the match for <b>both</b> riders. The tag says how they suit you, from your stats against riders at your level.</div>
+      <div style={{ fontSize: 11.5, fontWeight: 800, color: C.textSoft }}>The lanes change the match for <b>both</b> riders.</div>
       {Object.keys(CONDITIONS).map(function (k) { return (<LaneRow key={k} cond={k} verdict={props.verdictOf ? props.verdictOf(k) : null} />); })}
     </div>
   );

@@ -82,10 +82,16 @@ function mk(S, tier, idx, name, cond, fieldKey, field, rankOf, ranked) {
   return {
     id: S.sNum + "-" + S.calIdx + "-" + tier + "-" + idx, tier: tier, name: name, cond: cond, field: fieldKey, ids: field,
     ptsMul: Math.round(C.pts * F.pts * 100) / 100, moneyMul: C.money,
+    avgRank: Math.round(field.reduce(function (a, id) { return a + (rankOf[id] || 1000); }, 0) / Math.max(1, field.length)),
     champPts: Math.round(T.pts.reduce(function (a, b) { return a + b; }, 0) * C.pts * F.pts),
     champMoney: Math.round(T.money.reduce(function (a, b) { return a + b; }, 0) * C.money),
     seeds: byRank.slice(0, 2).map(function (id) { var p = npc[id] || {}; return { id: id, name: p.name, emoji: p.emoji || "", rank: rankOf[id] }; })
   };
 }
+
+/* The gold zone never shrinks to nothing: above 8% of the bar every effect counts in full; below that each further
+   squeeze counts less and less, so stacked penalties (a late round, a stronger rider, wind, tiredness, a needle)
+   bottom out around 4–5% instead of a hairline. Used for both riders. */
+export function softZone(raw) { return raw >= 8 ? raw : 4 + 4 * Math.exp((raw - 8) / 4); }
 
 export function conditionOf(key) { return CONDITIONS[key] || CONDITIONS.classic; }

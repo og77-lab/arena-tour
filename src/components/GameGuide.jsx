@@ -219,9 +219,9 @@ function body(id) {
         ["Futures round 1, even levels", "13% of the bar"],
         ["Same, you 5 levels ahead", "19%"],
         ["Same, she's 5 levels ahead", "7%"],
-        ["Masters final, even levels", "about 3% (the minimum)"]
+        ["Masters final, even levels", "about 5%"]
       ]} />
-      <P>The gold zone never shrinks below 3% of the bar, and the bar never gets impossibly fast or slow.</P>
+      <P>The gold zone never shrinks to nothing: once it is under 8% of the bar, every further squeeze (a late round, a stronger rider, wind, tiredness, gear) counts less and less, so it bottoms out around 4–5%. The bar never gets impossibly fast or slow either.</P>
     </>);
 
     case "training": return (<>
