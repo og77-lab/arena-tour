@@ -46,7 +46,7 @@ export const STATS = [
   { k: "p", icon: "🐾", label: "Steady Stride", el: "gold zone", who: "rooster", col: "#db2777", what: "A wider gold zone — a steady mount is easier to aim from",
     per: "Gold zone +1.2% of the bar wider", best: "You often stop just next to the gold" },
   { k: "b", icon: "🔋", label: "Bounce-back", who: "recovery", col: "#0d9488", what: "Granny and rooster win back more fitness between tournaments. It counts on its own, not against your opponent",
-    per: "+1.25% fitness back after every tournament", best: "Deep runs leave you running on empty the week after" }
+    per: "+0.7% fitness back after every tournament (double in a rest week)", best: "Deep runs leave you running on empty the week after" }
 ];
 export const STAT_GROUPS = [
   { who: "granny", icon: "👵", title: "Granny", sub: "Rider skills" },

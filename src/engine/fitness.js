@@ -6,15 +6,15 @@
    A tired granny: a narrower gold zone, and her misses score less.
    A tired rooster: the bar starts faster and speeds up more after every strike.
 
-   Recovery after each tournament = 65% of what's missing + 1.25 × Bounce-back (the sixth stat, 0–20 — it counts
-   on its own, not against the opponent). So tiredness builds up for anyone who keeps going deep. A week off (a Grand
-   Slam you don't play) recovers double. Ride on under 35% and every match risks an injury.
+   Recovery after each tournament = 40% of what's missing + 0.7 × Bounce-back (the sixth stat, 0–20 — it counts
+   on its own, not against the opponent). So tiredness builds up week after week unless you manage it. A week of rest
+   (skip a tournament, or a Grand Slam you don't play) brings back 80% of what's missing. Ride on under 35% and every match risks an injury.
    The physio staff (one booking per week, as the weekly investment) adds more on top. */
 
 import { TIERS } from "../models/constants";
 
 export var COST = { g: 2.8, r: 3.4 }; /* per set ridden */
-export var BASE_RECOVERY = 0, MISSING_SHARE = 0.65, PER_BOUNCE = 1.25;
+export var BASE_RECOVERY = 0, MISSING_SHARE = 0.4, REST_SHARE = 0.8, PER_BOUNCE = 0.7;
 
 /* Physio staff: booked as this week's investment, effect is immediate */
 export var STAFF = [
@@ -44,7 +44,9 @@ export function tierBo(ti) { return (TIERS[ti] && TIERS[ti].bo) || 3; }
 export function afterMatches(f, n, bo) { var c = matchCost(bo); return { g: clamp(f.g - c.g * n), r: clamp(f.r - c.r * n) }; }
 
 /* Between tournaments: partial recovery, double on a week off */
-export function recoveryOf(bounce, rested, v) { return (BASE_RECOVERY + MISSING_SHARE * (100 - (v == null ? 100 : v)) + PER_BOUNCE * (bounce || 0)) * (rested ? 2 : 1); }
+export function recoveryOf(bounce, rested, v) { return BASE_RECOVERY + (rested ? REST_SHARE : MISSING_SHARE) * (100 - (v == null ? 100 : v)) + PER_BOUNCE * (bounce || 0) * (rested ? 2 : 1); }
+/* A rival this worn out sits the week out to recover (same rule the player can choose) */
+export function resting(p) { var f = fitOf(p); return Math.min(f.g, f.r) < INJURY_LINE; }
 export function recover(f, bounce, rested) { return { g: clamp(f.g + recoveryOf(bounce, rested, f.g)), r: clamp(f.r + recoveryOf(bounce, rested, f.r)) }; }
 
 /* ── Injuries ── Under 35% a match can injure you: the lower the meter, the likelier (up to 25% a match at 0).

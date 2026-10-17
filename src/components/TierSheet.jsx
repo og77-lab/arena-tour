@@ -5,7 +5,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { CONDITIONS, FIELDS } from "../engine/events";
 import { TIERS } from "../models/constants";
-import { C, FONT, display, label, card, money } from "../ui/theme";
+import { C, FONT, display, label, card, money, button } from "../ui/theme";
 import { effectsOf, EffectList, Legend } from "./Effect";
 import { LaneTile, CompareLanes } from "./Lanes";
 
@@ -74,6 +74,22 @@ export default function TierSheet(props) {
             );
           })}
         </div>
+
+        {/* Rest this week instead of riding */}
+        {props.rest && props.onRest && (
+          <div style={card({ marginTop: 12, padding: "10px 12px", background: "#f0f9ff", borderColor: "#bae6fd" })}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <span aria-hidden style={{ fontSize: 28 }}>😴</span>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 14, fontWeight: 900, color: C.text }}>Rest this week</div>
+                <div style={{ fontSize: 12, color: C.textSoft, lineHeight: 1.4 }}>
+                  You're at 👵{props.rest.fit.g}% 🐓{props.rest.fit.r}%. Resting brings back <b style={{ color: C.greenInk }}>👵+{props.rest.g} 🐓+{props.rest.r}</b> (after a tournament: +{props.rest.ng} / +{props.rest.nr}). No points this week{props.rest.def ? ", and the " + props.rest.def + " points you won here last season drop off" : ""}.
+                </div>
+              </div>
+              <button onClick={props.onRest} style={button("ghost", { padding: "8px 12px", fontSize: 13, flexShrink: 0 })}>Rest</button>
+            </div>
+          </div>
+        )}
 
         {/* Buy your way into the tier above — this week's investment */}
         {props.entry && (function () {

@@ -105,7 +105,7 @@ export default function PrepScreen(props) {
                           style={Object.assign(card({ padding: "8px 4px", borderColor: on ? C.gold : C.line, boxShadow: on ? "0 0 0 3px " + C.goldSoft + ", 0 3px 0 " + C.goldInk : "0 3px 0 " + C.shadow }),
                             { cursor: "pointer", fontFamily: FONT, background: on ? C.cardWarm : C.card, position: "relative", textAlign: "center" })}>
                           {on && (<span style={{ position: "absolute", top: 4, right: 6, fontSize: 14, fontWeight: 900, color: C.greenInk }}>✓</span>)}
-                          <div aria-hidden style={{ display: "flex", justifyContent: "center", height: 60, alignItems: "center" }}><ItemArt id={g.id} size={g.slot === "lance" ? 66 : 58} /></div>
+                          <div aria-hidden style={{ display: "flex", justifyContent: "center", height: 64, alignItems: "center", overflow: "hidden" }}><ItemArt id={g.id} size={62} /></div>
                           <div style={{ fontSize: 11.5, fontWeight: 900, color: C.text, lineHeight: 1.2, minHeight: 28 }}>{g.name}</div>
                           <div style={{ fontSize: 10.5, fontWeight: 800, color: g.basic ? C.textMuted : inCart ? "#7c3aed" : C.goldInk, marginTop: 2 }}>
                             {g.basic ? "Always yours" : inCart ? "In basket · " + left : left + " tournament" + (left === 1 ? "" : "s") + " left"}
@@ -168,7 +168,7 @@ export default function PrepScreen(props) {
       {/* Your kit and the one button that pays and rides */}
       <div style={{ borderTop: "2px solid " + C.line, background: C.card, padding: "8px 12px calc(env(safe-area-inset-bottom) + 10px)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6, fontSize: 12, fontWeight: 800, color: C.textSoft }}>
-          <span aria-hidden style={{ display: "inline-flex", gap: 2 }}><ItemArt id={shown.lance} size={28} /><ItemArt id={shown.saddle} size={28} /></span>
+          <span aria-hidden style={{ display: "inline-flex", gap: 2 }}><ItemArt id={shown.lance} size={30} pad={false} /><ItemArt id={shown.saddle} size={30} pad={false} /></span>
           <span style={{ flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: preview ? "#0369a1" : C.textSoft }}>{preview ? "Trying on " + BY_ID[preview].name : BY_ID[kit.lance].name + " + " + BY_ID[kit.saddle].name}</span>
           {cost > 0 && (<span style={{ color: canPay ? C.text : C.redInk, fontWeight: 900 }}>Basket {money(cost)}</span>)}
         </div>
@@ -195,35 +195,44 @@ function Effects(props) {
   );
 }
 
-/* Your numbers in this tournament (round 1, these lanes, your stats against the entrants, your fitness): with the
-   plain broom and tea-cosy, and with the kit you've picked or are trying on — every change in green or red */
+/* Your numbers, step by step: a normal match (classic lanes, level stats, fresh, plain kit) → this tournament (its lanes,
+   your stats against its entrants, your tiredness) → this tournament with the kit you've picked or are trying on.
+   Each step is coloured against the one before it, so you can see what the lanes and you do, and what the kit adds. */
 function Numbers(props) {
   var p = props.S.player, cond = props.ev ? props.ev.cond : "classic";
-  var o = { cond: cond, tier: props.tier, gaps: props.gaps || {}, fit: fitOf(p) };
-  var base = matchNumbers(Object.assign({ kit: BASIC }, o)), now = matchNumbers(Object.assign({ kit: props.kit }, o));
-  function f1(v) { return (Math.round(v * 10) / 10).toFixed(1); }
-  function sgn(v) { return (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v); }
+  var normal = matchNumbers({ cond: "classic", tier: props.tier, gaps: {}, fit: { g: 100, r: 100 }, kit: BASIC });
+  var here = matchNumbers({ cond: cond, tier: props.tier, gaps: props.gaps || {}, fit: fitOf(p), kit: BASIC });
+  var kit = matchNumbers({ cond: cond, tier: props.tier, gaps: props.gaps || {}, fit: fitOf(p), kit: props.kit });
+  function sgn(v) { v = Math.round(v); return (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v); }
   var rows = [
-    { k: "zone", v: 2, label: "Gold zone", val: f1(now.zone) + "% of bar", d: Math.round((now.zone - base.zone) * 10) / 10, up: true, unit: "%" },
-    { k: "speed", v: 1.2, label: "Bar speed", val: Math.round(now.speed) + "%", d: Math.round(now.speed - base.speed), up: false, unit: "%" },
-    { k: "accel", v: 1.3, label: "Speed-up", val: Math.round(now.accel) + "%", d: Math.round(now.accel - base.accel), up: false, unit: "%" },
-    { k: "gold", v: 1, label: "Gold hits", val: sgn(Math.round(now.gold)) + " pts", d: Math.round(now.gold - base.gold), up: true, unit: "" },
-    { k: "miss", v: 1, label: "Misses", val: sgn(Math.round(now.miss)) + " pts", d: Math.round(now.miss - base.miss), up: true, unit: "" }
+    { k: "zone", v: 2, label: "Gold zone", f: function (n) { return (Math.round(n.zone * 10) / 10).toFixed(1) + "%"; }, n: function (n) { return n.zone; }, up: true },
+    { k: "speed", v: 1.2, label: "Bar speed", f: function (n) { return Math.round(n.speed) + "%"; }, n: function (n) { return n.speed; }, up: false },
+    { k: "accel", v: 1.3, label: "Speed-up", f: function (n) { return Math.round(n.accel) + "%"; }, n: function (n) { return n.accel; }, up: false },
+    { k: "gold", v: 1, label: "Gold hits", f: function (n) { return sgn(n.gold); }, n: function (n) { return n.gold; }, up: true },
+    { k: "miss", v: 1, label: "Misses", f: function (n) { return sgn(n.miss); }, n: function (n) { return n.miss; }, up: true }
   ];
+  function cell(r, cur, prev, key, strong) {
+    var d = r.n(cur) - r.n(prev), same = Math.abs(d) < (r.k === "zone" ? 0.05 : 0.5), good = same ? null : (d > 0) === r.up;
+    return (<span key={key} style={{ fontWeight: strong ? 900 : 800, textAlign: "right", whiteSpace: "nowrap", color: good === true ? C.greenInk : good === false ? C.redInk : C.text }}>{r.f(cur)}{same ? "" : good ? " ▲" : " ▼"}</span>);
+  }
   return (
     <div style={{ marginBottom: 7 }}>
-      <div style={{ fontSize: 10, fontWeight: 900, letterSpacing: 1.2, color: C.textMuted, textTransform: "uppercase", marginBottom: 3 }}>Your numbers here · change from the plain kit</div>
-      <div style={{ display: "grid", gridTemplateColumns: "auto 1fr auto auto", columnGap: 8, rowGap: 2, alignItems: "center", fontSize: 12 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "auto 1fr auto auto auto", columnGap: 8, rowGap: 2, alignItems: "center", fontSize: 12 }}>
+        <span /><span />
+        <span style={{ fontSize: 9.5, fontWeight: 900, color: C.textMuted, textAlign: "right", letterSpacing: 0.5 }}>NORMAL</span>
+        <span style={{ fontSize: 9.5, fontWeight: 900, color: C.textMuted, textAlign: "right", letterSpacing: 0.5 }}>HERE, YOU</span>
+        <span style={{ fontSize: 9.5, fontWeight: 900, color: props.preview ? "#0369a1" : C.textMuted, textAlign: "right", letterSpacing: 0.5 }}>{props.preview ? "TRYING ON" : "+ YOUR KIT"}</span>
         {rows.map(function (r) {
-          var good = r.d === 0 ? null : (r.d > 0) === r.up;
           return [
             <MiniBar key={r.k + "b"} k={r.k} v={r.v} />,
             <span key={r.k + "l"} style={{ fontWeight: 800, color: C.text }}>{r.label}</span>,
-            <span key={r.k + "v"} style={{ fontWeight: 900, color: C.text, textAlign: "right" }}>{r.val}</span>,
-            <span key={r.k + "d"} style={{ fontWeight: 900, minWidth: 44, textAlign: "right", color: good === true ? C.greenInk : good === false ? C.redInk : C.textMuted }}>{r.d === 0 ? "—" : (r.d > 0 ? "▲ +" : "▼ −") + Math.abs(r.d) + r.unit}</span>
+            <span key={r.k + "n"} style={{ fontWeight: 800, color: C.textSoft, textAlign: "right" }}>{r.f(normal)}</span>,
+            cell(r, here, normal, r.k + "h", false),
+            cell(r, kit, here, r.k + "k", true)
           ];
         })}
       </div>
+      <div style={{ fontSize: 10.5, color: C.textMuted, marginTop: 3, lineHeight: 1.3 }}>Round 1. "Here, you" = these lanes, your stats against these entrants, your fitness. Green ▲ helps you, red ▼ hurts. Tap an item to try it on.</div>
     </div>
   );
 }

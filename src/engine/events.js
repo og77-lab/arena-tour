@@ -5,6 +5,7 @@
 
 import { TIERS } from "../models/constants";
 import { getRanked } from "../models/formulas";
+import { resting } from "./fitness";
 
 /* Lane conditions: what they do to the match (for both riders), what they pay, and how the arena looks */
 export var CONDITIONS = {
@@ -46,13 +47,13 @@ export function weekEvents(S) {
   ranked.forEach(function (p, i) { if (!p.isP) rankOf[p.id] = i + 1; });
   if (ev.type === "gs") {
     var sl = SLAMS[((ev.gsNum || 1) - 1) % SLAMS.length], t5 = TIERS[5];
-    var field = ranked.filter(function (p) { return !p.isP; }).slice(0, t5.size).map(function (p) { return p.id; });
+    var field = ranked.filter(function (p) { return !p.isP && !resting(p); }).slice(0, t5.size).map(function (p) { return p.id; });
     return [mk(S, 5, 0, sl.name, sl.cond, "strong", field, rankOf, ranked)];
   }
   var out = [], used = {};
   for (var ti = 4; ti >= 0; ti--) { /* top tiers first, so riders who could play two tiers play the higher one */
     var T = TIERS[ti], n = PER_TIER[ti], r = rng(S.sNum * 100003 + S.calIdx * 1009 + ti * 97 + 7);
-    var elig = ranked.filter(function (p, i) { return !p.isP && !used[p.id] && i + 1 >= T.rankRange[0] && i + 1 <= T.rankRange[1]; });
+    var elig = ranked.filter(function (p, i) { return !p.isP && !used[p.id] && !resting(p) && i + 1 >= T.rankRange[0] && i + 1 <= T.rankRange[1]; });
     /* Each event centres on a slice of the tier's ranks: strong events on the top, soft ones lower down */
     var centres = []; for (var e = 0; e < n; e++) centres.push(n === 1 ? 0.2 : e / (n - 1));
     var pool = elig.slice();

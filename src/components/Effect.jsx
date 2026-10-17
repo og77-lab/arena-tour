@@ -19,7 +19,16 @@ var STAT_NAME = { r: "Reflexes", p: "Steady Stride", f: "Aim", s: "Stamina", g: 
 /* Every stat is one element of the match — shown together so nobody has to remember which is which */
 export var STAT_ELEMENT = { r: { k: "speed", v: 0.85, what: "bar speed" }, p: { k: "zone", v: 2, what: "gold zone" }, f: { k: "aim", v: 2, what: "every strike" }, g: { k: "miss", v: 2, what: "misses" }, s: { k: "accel", v: 0.7, what: "speed-up" }, b: { k: "fit", v: 1, what: "recovery" } };
 export function statLabel(s) { var el = STAT_ELEMENT[s]; return STAT_NAME[s] + (el ? " (" + el.what + ")" : ""); }
-function gapText(g) { var r = Math.round(g * 10) / 10; return r === 0 ? "you're level" : "you " + (r > 0 ? "+" : "−") + Math.abs(r); }
+function statShift(k, extra) {
+  if (Math.abs(extra) < 0.05) return null;
+  if (k === "r") { var sp = Math.round(Math.abs(extra) * 4.3); if (!sp) return null; return { k: "speed", v: extra > 0 ? 0.85 : 1.2, good: extra > 0, text: "bar " + sp + "% " + (extra > 0 ? "slower" : "faster") + " for you" }; }
+  if (k === "p") { var z = Math.round(extra * 1.2 * 10) / 10; return { k: "zone", v: z, good: z > 0, text: "gold zone " + (z > 0 ? "+" : "−") + Math.abs(z) + "% for you" }; }
+  if (k === "f") { var a = Math.round(extra * 1.5 * 10) / 10; return { k: "aim", v: a, good: a > 0, text: (a > 0 ? "+" : "−") + Math.abs(a) + " every strike for you" }; }
+  if (k === "g") { var f = Math.round(extra * 1.5 * 10) / 10; return { k: "miss", v: f, good: f > 0, text: "worst miss " + (f > 0 ? "+" : "−") + Math.abs(f) + " for you" }; }
+  if (k === "s") { var ac = Math.round(Math.abs(extra) * 5); if (!ac) return null; return { k: "accel", v: extra > 0 ? 0.7 : 1.3, good: extra > 0, text: "speed-up " + ac + "% " + (extra > 0 ? "less" : "more") + " for you" }; }
+  return null;
+}
+function gapText(g) { var r = Math.round(g * 10) / 10; return r === 0 ? "you're level" : r > 0 ? "you lead by " + r : "you trail by " + Math.abs(r); }
 
 function pct(m) { return Math.round(Math.abs(m - 1) * 100); }
 function sg(v) { return v > 0 ? "+" : "−"; }
@@ -36,14 +45,23 @@ export function effectsOf(fx, gaps) {
   if (fx.miss) out.push({ k: "miss", v: fx.miss, good: fx.miss > 0, text: sg(fx.miss) + n1(fx.miss) + " on misses" });
   if (fx.floor) out.push({ k: "miss", v: fx.floor, good: fx.floor > 0, text: sg(fx.floor) + n1(fx.floor) + " worst miss" });
   if (fx.aim) out.push({ k: "aim", v: fx.aim, good: fx.aim > 0, text: sg(fx.aim) + n1(fx.aim) + " every strike" });
-  if (fx.w) { var ks = Object.keys(fx.w);
-    if (ks.length >= 3 && ks.every(function (s) { return fx.w[s] === fx.w[ks[0]]; })) {
-      var m0 = fx.w[ks[0]], tot = gaps ? ks.reduce(function (a, s) { return a + (gaps[s] || 0); }, 0) : null;
-      out.push({ k: "stat", s: "all", v: m0, good: tot == null || Math.abs(tot) < 0.5 ? null : tot * (m0 - 1) > 0,
-        text: "All stat gaps ×" + (m0 === 0.5 ? "½" : m0) + (tot == null ? "" : " · " + gapText(tot) + " in total") });
-    } else ks.forEach(function (s) { var m = fx.w[s]; if (m === 1) return; var g = gaps ? gaps[s] || 0 : null;
-      out.push({ k: "stat", s: s, v: m, good: g == null || Math.abs(g) < 0.3 ? null : g * (m - 1) > 0,
-        text: STAT_NAME[s] + " (" + STAT_ELEMENT[s].what + ") ×" + (m === 0.5 ? "½" : m) + (g == null ? "" : " · " + gapText(g)) }); }); }
+  if (fx.w) { var ks = Object.keys(fx.w).filter(function (k) { return fx.w[k] !== 1; });
+    var allSame = ks.length >= 3 && ks.every(function (k) { return fx.w[k] === fx.w[ks[0]]; });
+    if (!gaps) {
+      /* No player to compare with (the guide): say it plainly */
+      if (allSame) out.push({ k: "stat", s: "all", v: fx.w[ks[0]], good: null, text: "Every stat gap counts " + (fx.w[ks[0]] === 0.5 ? "half" : "×" + fx.w[ks[0]]) });
+      else ks.forEach(function (k) { out.push({ k: "stat", s: k, v: fx.w[k], good: null, text: STAT_NAME[k] + " gap counts " + (fx.w[k] === 2 ? "double" : fx.w[k] === 0.5 ? "half" : "×" + fx.w[k]) + " (" + STAT_ELEMENT[k].what + ")" }); });
+    } else {
+      /* With your gaps: what the weighting adds to (or takes from) YOUR bar, in the bar's own terms */
+      ks.forEach(function (k) {
+        var g = gaps[k] || 0; if (allSame && Math.abs(g) < 0.3) return;
+        var extra = g * (fx.w[k] - 1), el = statShift(k, extra);
+        var head = STAT_NAME[k] + " " + (fx.w[k] === 0.5 ? "halved" : "×" + fx.w[k]) + " · " + gapText(g) + " → ";
+        if (!el) { out.push({ k: "stat", s: k, v: fx.w[k], good: null, text: head + "no change for you" }); return; }
+        out.push({ k: el.k, v: el.v, icon: STAT_ICON[k], good: el.good, text: head + el.text });
+      });
+    }
+  }
   if (fx.pts && fx.pts !== 1) out.push({ k: "pts", v: fx.pts, good: fx.pts > 1, text: "Points " + sg(fx.pts - 1) + pct(fx.pts) + "%" });
   if (fx.money && fx.money !== 1) out.push({ k: "money", v: fx.money, good: fx.money > 1, text: "Prize " + sg(fx.money - 1) + pct(fx.money) + "%" });
   if (fx.fit) out.push({ k: "fit", v: fx.fit, good: fx.fit > 0, text: sg(fx.fit) + n1(fx.fit) + "% fitness back" });
@@ -83,7 +101,7 @@ function Badge(props) {
 export function EffectChip(props) {
   var e = props.e, col = e.good === true ? C.greenInk : e.good === false ? C.redInk : C.text;
   var el = e.k === "stat" && STAT_ELEMENT[e.s];
-  var vis = e.k === "stat" ? (el && el.k !== "fit" ? (<span style={{ position: "relative", display: "inline-flex" }}><MiniBar k={el.k} v={el.v} /><span style={{ position: "absolute", left: -4, top: -6, fontSize: 10 }}>{STAT_ICON[e.s]}</span></span>) : (<Badge>{STAT_ICON[e.s]}×{e.v}</Badge>)) : e.k === "pts" ? (<Badge>🏆</Badge>) : e.k === "money" ? (<Badge>💰</Badge>) : e.k === "fit" ? (<Badge>🔋</Badge>) : (<MiniBar k={e.k} v={e.v} />);
+  var vis = e.icon ? (<span style={{ position: "relative", display: "inline-flex" }}><MiniBar k={e.k} v={e.v} /><span style={{ position: "absolute", left: -4, top: -6, fontSize: 10 }}>{e.icon}</span></span>) : e.k === "stat" ? (el && el.k !== "fit" ? (<span style={{ position: "relative", display: "inline-flex" }}><MiniBar k={el.k} v={el.v} /><span style={{ position: "absolute", left: -4, top: -6, fontSize: 10 }}>{STAT_ICON[e.s]}</span></span>) : (<Badge>{STAT_ICON[e.s]}×{e.v}</Badge>)) : e.k === "pts" ? (<Badge>🏆</Badge>) : e.k === "money" ? (<Badge>💰</Badge>) : e.k === "fit" ? (<Badge>🔋</Badge>) : (<MiniBar k={e.k} v={e.v} />);
   return (
     <span style={{ display: "inline-flex", alignItems: "center", gap: 5, maxWidth: "100%", boxSizing: "border-box", padding: "3px 7px 3px 4px", borderRadius: 9, background: e.good === true ? "#f0fdf4" : e.good === false ? "#fef2f2" : "#f8fafc", border: "1.5px solid " + (e.good === true ? "#bbf7d0" : e.good === false ? "#fecaca" : C.line), fontFamily: FONT }}>
       {vis}
@@ -106,7 +124,7 @@ var LEGEND = [
   { e: { k: "gold", v: 3, good: true, text: "On gold hits" }, what: "Points added only when you land in the gold." },
   { e: { k: "miss", v: 3, good: true, text: "On misses" }, what: "Points added only when you land outside the gold (70 and below)." },
   { e: { k: "aim", v: 2, good: true, text: "Every strike" }, what: "Points added to every strike, hit or miss." },
-  { e: { k: "stat", s: "r", v: 2, good: true, text: "Reflexes (bar speed) counts double · you +2" }, what: "That stat's gap counts double (half on the village green). Green if you're ahead of the field in it — it helps you; red if you're behind." }
+  { e: { k: "stat", s: "r", v: 2, good: true, text: "Reflexes ×2 · you lead by 2 → bar 9% slower for you" }, what: "The lanes make that stat's gap count double (or half on the village green). The chip shows what that does to YOUR bar against this field: green helps you, red hurts." }
 ];
 export function Legend() {
   return (
@@ -119,5 +137,5 @@ export function Legend() {
 }
 
 /* What one level of each stat does, as a chip (the gap to your opponent, except Bounce-back) */
-var STAT_FX = { r: { speed: 0.96 }, f: { aim: 1.5 }, g: { floor: 1.5 }, s: { accel: 0.95 }, p: { zone: 1.2 }, b: { fit: 1.25 } };
+var STAT_FX = { r: { speed: 0.96 }, f: { aim: 1.5 }, g: { floor: 1.5 }, s: { accel: 0.95 }, p: { zone: 1.2 }, b: { fit: 0.7 } };
 export function statEffect(k) { return effectsOf(STAT_FX[k] || {}); }

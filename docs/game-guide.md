@@ -63,7 +63,7 @@ Each week several tournaments run at once in every tier, and all 1,000 riders pl
   - ★ weaker entrants: mostly lower-ranked riders, −10% points.
 - **Chips** for what the lanes and the entrants change (see *Reading the chips* below), the champion's points and prize, and the two top seeds.
 
-**🗺 Compare the 5 lanes** (top of the list) shows all five side by side, and before every match the tale of the tape opens with **Today's lanes** — the picture and the chips again. Which lanes suit you depends on your stats and your kit: strong Reflexes love the mud, strong Steady Stride loves the wind, strong Stamina loves a heatwave, and the village green helps whoever is behind on stats. The game works it out for you: a weighted stat chip is **green** when you're ahead of that event's entrants in it (it helps you), **red** when you're behind, and says by how much (*Reflexes (bar speed) ×2 · you +1.2*). In the tale of the tape it compares you with your actual opponent.
+**🗺 Compare the 5 lanes** (top of the list) shows all five side by side, and before every match the tale of the tape opens with **Today's lanes** — the picture and the chips again. Which lanes suit you depends on your stats and your kit: strong Reflexes love the mud, strong Steady Stride loves the wind, strong Stamina loves a heatwave, and the village green helps whoever is behind on stats. The game works it out for you: a weighted stat chip says what the weighting does to **your** bar against that event's entrants — *Steady Stride ×2 · you lead by 1.5 → gold zone +1.8% for you* — green when it helps you, red when it hurts. In the tale of the tape it compares you with your actual opponent.
 
 Grand Slam weeks have a single named Slam (The Coop Open, The Swamp Slam, Wimbledon-on-Wold, The Gale Cup), each with its own lanes.
 
@@ -85,7 +85,7 @@ Everything that changes a match — lanes, gear, tiredness, training, injuries �
 | ± on gold hits | The marker stopped in the gold | Points added only when you land in the gold |
 | ± on misses | The marker stopped outside | Points added only when you land outside the gold |
 | ± every strike | Both | Points added to every strike, hit or miss |
-| Reflexes (bar speed) ×2 · you +1.2 | The bar element that stat moves, with the stat's icon | That stat's gap counts double (or ½). Green if you're ahead in it, red if behind |
+| Reflexes ×2 · you lead by 2 → bar 9% slower for you | The bar element that stat moves, with the stat's icon | What the lanes' weighting of that stat does to your bar here. Green helps you, red hurts |
 | 🏆 Points / 💰 Prize ±% | — | Ranking points or prize money for this event |
 
 ## 6. The match
@@ -165,7 +165,7 @@ Six stats, each from level 0 to 20 — each one moves one element of the match, 
 | 🛡️ Stubbornness | Your bad strikes aren't as bad | Floor +1.5 points |
 | 🫀 Stamina | The bar speeds up less as the match goes on | About 5% less speed-up |
 | 🐾 Steady Stride | A wider gold zone | +1.2% of the bar |
-| 🔋 Bounce-back | Granny and rooster win back more fitness after every tournament | +1.25% fitness back (not against her) |
+| 🔋 Bounce-back | Granny and rooster win back more fitness after every tournament | +0.7% fitness back (double in a rest week; not against her) |
 
 **Training points (TP).** Everyone on tour — you and every rival — earns TP by the same rule every week: **8 for turning up, plus a third of the ranking points you won.** A deep run buys you a few levels on the riders who went out early; the edge fades once you move up to a tier where everyone is winning that much. You also get **sponsor TP** from your fans (one per 10 fans).
 
@@ -183,7 +183,7 @@ After you pick a tournament you land on **Get ready**. Choose a lance and a sadd
 - The **🧹 Trusty Broom-Handle** and the **🫖 Tea-Cosy Saddle** are free, neutral and always yours.
 - Everything else lasts a set number of tournaments (1, 2, 3 or 5). Each tournament you enter with it uses one, however many rounds you play.
 - Prices follow the best tier you can enter: one tournament's worth costs about 6% of that tier's champion prize.
-- **Your numbers here** (bottom of Get ready): your gold zone, bar speed, speed-up and the points on gold hits and misses for this tournament — in these lanes, against these entrants, as tired as you are — and how your kit changes each one (▲▼ in green or red). **Tap any item in the shop to try it on** before you buy.
+- **Your numbers** (bottom of Get ready), in three steps: **Normal** (classic lanes, level stats, fresh, plain kit) → **Here, you** (this tournament's lanes, your stats against its entrants, your tiredness) → **+ your kit** (or the item you're trying on). Each step is green ▲ where it helps you and red ▼ where it hurts, so you see what the lanes and your form do, and what the kit adds. **Tap any item in the shop to try it on** before you buy; pick items in your locker to compare them with the plain broom and tea-cosy.
 - **Mavis's shop** has a tab for lances and one for saddles, cheapest per tournament first. Each item shows its chips **for the lanes of the tournament you picked**, and which other lanes would change it. The bar at the bottom adds up what your whole kit does in these lanes.
 - Your lance and saddle are drawn on your rider — in the arena, the walk-out, the podium, the paper and your profile — and so is hers.
 - Gear changes **your** bar only, never your opponent's. After each strike the breakdown shows its points as **Gear**.
@@ -208,8 +208,8 @@ You have **two fitness meters**, 0–100%: 👵 the granny's and 🐓 the rooste
 - **Every match tires both of you:** −2.8% granny and −3.4% rooster for every set you ride, so a three-set match tires you more than a two-set one, and a long tournament more than a short one. A deep run leaves you tired in the later rounds — and so is the rider who got there with you.
 - **A tired granny:** the gold zone gets narrower (up to −4% at 0) and misses score less (up to −10). The strike breakdown shows it as **Tired**.
 - **A tired rooster:** the bar starts faster (up to +18%) and speeds up more after every strike (up to +60%).
-- **How it adds up:** even a first-round exit leaves a little tiredness for next week. A rider who loses early is nearly fresh again; One who keeps reaching the final week after week slides lower and lower — unless she trains Bounce-back, books the physio or rests.
-- **Fitness only comes back between tournaments:** 65% of whatever is missing comes back after every tournament, plus 1.25% per level of 🔋 **Bounce-back**. A week off (a Grand Slam you don't play) recovers double. Only part comes back, so tiredness builds up for anyone who keeps going deep.
+- **How it adds up:** tiredness carries from week to week. A rider who loses early stays fairly fresh (a typical rival starts her week at about 80%); One who keeps reaching the final week after week slides lower and lower — unless she trains Bounce-back, books the physio or rests.
+- **Fitness only comes back between tournaments:** 40% of whatever is missing comes back after every tournament, plus 0.7% per level of 🔋 **Bounce-back**. A **rest week** brings back 80% of what's missing (and double the Bounce-back): tap **😴 Rest this week** at the bottom of the tournament list, or skip a Grand Slam you can't enter. You score no points that week and last season's points for it drop off. Only part comes back, so tiredness builds up for anyone who keeps going deep.
 - **🔋 Bounce-back** is the sixth stat (0–20). Unlike the others it counts on its own, not against your opponent.
 - **Physio staff** (Train tab, as the week's one investment): 👩‍⚕️ Nurse Nellie +35% granny, 🩺 Dr. Featherby the rooster chiropractor +35% rooster, 🛁 a spa weekend at Bingo-on-Sea +20% both — straight away, and it heals injuries on that side a tournament sooner.
 - **On Home** the fitness card shows both meters, chips for what tiredness is doing right now, how tired you finished your last tournament, how much comes back next time, your injuries, and a warning under 35%.

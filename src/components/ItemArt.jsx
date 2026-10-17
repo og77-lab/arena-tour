@@ -38,8 +38,10 @@ export default function ItemArt(props) {
   if (!g) return null;
   if (g.slot === "lance") {
     return (
-      <svg width={size} height={size} viewBox="0 0 100 100" aria-hidden style={{ display: "block", overflow: "visible", filter: "drop-shadow(0 1px 0 rgba(63,42,29,0.35))" }}>
-        <g transform="translate(-30 96) rotate(-40) scale(1.0)">
+      <svg width={size} height={size} viewBox="0 0 100 100" aria-hidden style={{ display: "block", overflow: "hidden", filter: "drop-shadow(0 1px 0 rgba(63,42,29,0.35))" }}>
+        {props.pad !== false && (<ellipse cx="50" cy="86" rx="34" ry="7" fill="rgba(63,42,29,0.12)" />)}
+        {/* the whole lance, centred and laid diagonally so it always fits its box */}
+        <g transform="translate(50 48) rotate(-35) scale(0.8) translate(-80 -55)">
           <LanceShaft id={id} plume="#f59e0b" />
           <Glove />
         </g>
@@ -60,8 +62,9 @@ export default function ItemArt(props) {
     under={<g><circle cx="27" cy="54" r="5" fill="#fde047" /><circle cx="55" cy="53" r="5" fill="#fde047" /><path d="M22 49 L60 48" stroke={INK} strokeWidth="2.4" /></g>}
     over={<path d="M36 36 L41 33 L39 40 L45 37" fill="none" stroke="#fde047" strokeWidth="2" />} />);
   return (
-    <svg width={size} height={size} viewBox="0 -4 84 84" aria-hidden style={{ display: "block", overflow: "visible" }}>
-      <g transform="translate(2 10)">{art}</g>
+    <svg width={size} height={size} viewBox="0 -4 84 84" aria-hidden style={{ display: "block", overflow: "hidden" }}>
+      {props.pad !== false && (<ellipse cx="42" cy="76" rx="30" ry="6" fill="rgba(63,42,29,0.12)" />)}
+      <g transform="translate(2 6)">{art}</g>
     </svg>
   );
 }
