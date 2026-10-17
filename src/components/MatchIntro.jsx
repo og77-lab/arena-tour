@@ -60,9 +60,8 @@ function TaleOfTape(props) {
           <div style={{ fontSize: 10.5, letterSpacing: 0.5, fontWeight: 800, opacity: 0.9 }}>{h.w > h.l ? "You lead the feud — keep the boot on her neck" : h.w < h.l ? "She's got your number. Time for revenge." : "All square. Somebody has to blink."}</div>
         </motion.div>
       )}
-      {sc.cond && (<div style={{ margin: "0 0 8px", padding: "6px 8px", borderRadius: 10, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)" }}>
-        <div style={{ fontSize: 9.5, fontWeight: 900, letterSpacing: 2, color: "#fde68a", marginBottom: 4 }}>TODAY'S LANES · FOR BOTH OF YOU</div>
-        <LaneRow cond={sc.cond} w={44} h={32} dark={true} />
+      {sc.cond && (<div style={{ margin: "0 0 6px", padding: "4px 6px", borderRadius: 10, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)" }}>
+        <LaneRow cond={sc.cond} w={36} h={28} dark={true} compact={true} label="Today's lanes:" />
       </div>)}
       <div style={{ textAlign: "center", fontSize: 10, fontWeight: 900, letterSpacing: 3, color: "#fde68a" }}>TALE OF THE TAPE</div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", alignItems: "center", gap: 8, margin: "6px 0 4px" }}>

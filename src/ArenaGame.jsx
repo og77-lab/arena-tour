@@ -7,6 +7,7 @@ import { isMusicOn, setMusicOn } from "./music";
 import { W, CSS, EMO, TIERS, RN5, RN6, HN, HC, HI, TOTAL_EVENTS, FINALS_BO, STATS, STAT_GROUPS, screenAnim } from "./models/constants";
 import { sh, bs, nW, pRankOf, getRanked, getARanked, trainCost, weeklyTP } from "./models/formulas";
 import { sSet, sGet, stamp, pickNewest, queueCloudSave, cancelCloudSave } from "./engine/persistence";
+import { pack, unpack } from "./engine/codec";
 import { mkSeason } from "./engine/seasonManager";
 import PowerBar from "./components/PowerBar";
 import Profile from "./components/Profile";
@@ -178,8 +179,8 @@ export default function Arena(props) {
     sSet(snap);
     queueCloudSave(userId, snap, saveGameToCloud);
   }, [ts, fs]);
-  function exportSave() { if (!S) return; var b = new Blob([JSON.stringify(S)],{type:"application/json"}); var u = URL.createObjectURL(b); var a = document.createElement("a"); a.href = u; a.download = "arena-"+S.pName+"-s"+S.sNum+".json"; a.click(); URL.revokeObjectURL(u); }
-  function importSave(e) { var f = e.target.files && e.target.files[0]; if (!f) return; var r = new FileReader(); r.onload = function(ev){ try { var d = JSON.parse(ev.target.result); if (d && d.player) { save(uniqueNames(d)); setScr("hub"); } } catch(err){} }; r.readAsText(f); }
+  function exportSave() { if (!S) return; var b = new Blob([JSON.stringify(pack(S))],{type:"application/json"}); var u = URL.createObjectURL(b); var a = document.createElement("a"); a.href = u; a.download = "arena-"+S.pName+"-s"+S.sNum+".json"; a.click(); URL.revokeObjectURL(u); }
+  function importSave(e) { var f = e.target.files && e.target.files[0]; if (!f) return; var r = new FileReader(); r.onload = function(ev){ try { var d = unpack(JSON.parse(ev.target.result)); if (d && d.player) { save(uniqueNames(d)); setScr("hub"); } } catch(err){} }; r.readAsText(f); }
   var _syncing = useState(false), syncing = _syncing[0], setSyncing = _syncing[1];
   var _syncMsg = useState(""), syncMsg = _syncMsg[0], setSyncMsg = _syncMsg[1];
   var _mutedState = useState(isMuted()), mutedState = _mutedState[0], setMutedState = _mutedState[1];
@@ -426,7 +427,8 @@ export default function Arena(props) {
         sc: setScore || null, sets: (xtra && xtra.sets) || null,
         name: opp.name, emoji: opp.emoji
       }]);
-      h2h[opp.id] = entries.slice(-10); /* keep last 10 per opponent */
+      delete h2h[opp.id]; h2h[opp.id] = entries.slice(-10); /* keep last 10 per opponent; re-adding moves her to the most recent end */
+      var h2hKeys = Object.keys(h2h); for (var hk = 0; hk < h2hKeys.length - 150; hk++) delete h2h[h2hKeys[hk]]; /* the 150 most recent opponents */
       var pAfter = Object.assign({}, S.player, { h2h: h2h, tips: Object.assign({}, S.player.tips || {}, { match: true }) });
       var fNow = afterMatches(fitOf(S.player), 1, tier.bo);
       putFit(pAfter, fNow);
@@ -646,7 +648,7 @@ export default function Arena(props) {
     var moneyEarned = 0;
     for (var mri = 0; mri <= pRound; mri++) { moneyEarned += (tier.money || [])[mri] || 0; }
     moneyEarned = Math.round(moneyEarned * evMoney);
-    var hist = (S.tHist||[]).concat([{ num: (S.tHist||[]).length + 1, season: S.sNum, tier: ts.tierIdx, tierName: tier.name, eventName: ts.eventName || null, cond: ts.cond || null, pPts: pp, defending: defending, netChange: netChange, pRound: pRound, roundName: rNames[pRound], money: moneyEarned, winner: champW ? { name: champW.isP ? S.pName : champW.name, emoji: champW.emoji||"👑", isP: champW.isP } : null }]);
+    var hist = (S.tHist||[]).slice(-119).concat([{ num: ((S.tHist||[]).length ? (S.tHist[S.tHist.length-1].num || S.tHist.length) : 0) + 1, season: S.sNum, tier: ts.tierIdx, tierName: tier.name, eventName: ts.eventName || null, cond: ts.cond || null, pPts: pp, defending: defending, netChange: netChange, pRound: pRound, roundName: rNames[pRound], money: moneyEarned, winner: champW ? { name: champW.isP ? S.pName : champW.name, emoji: champW.emoji||"👑", isP: champW.isP } : null }]);
     var cal = S.cal.slice(); cal[S.calIdx].done = true; cal[S.calIdx].tier = ts.tierIdx; cal[S.calIdx].result = { pPts: pp, defending: defending, net: netChange, pRound: pRound, won: !!wonTitle, parallel: parallelResults };
     if (ts.eventName) { cal[S.calIdx].result.eventName = ts.eventName; cal[S.calIdx].result.cond = ts.cond || "classic"; }
     newP.earned = (S.player.earned != null ? S.player.earned : (S.player.money || 0)) + moneyEarned;
@@ -672,7 +674,7 @@ export default function Arena(props) {
           h2h: { w: fw, l: fl.length - fw }, met: revengeWins ? "won" : rivalLoss ? "lost" : null, isNew: !!(rv.rival && (!rivalNow || rivalNow.id !== rv.rival.id)),
           settled: rv.settled ? { name: rv.settled.name, emoji: rv.settled.emoji || "" } : null };
       }
-      afterS.news = [issue].concat(S.news || []).slice(0, 12);
+      afterS.news = [issue].concat(S.news || []).slice(0, 8); /* the archive keeps the last 8 issues */
     }
     save(afterS);
     setScr("hub"); setTS(null);
@@ -842,8 +844,9 @@ export default function Arena(props) {
     var newsUnread = !!(S.news && S.news[0] && S.newsSeenAt !== S.news[0].at);
     var hubTip = null;
     if (!paper && !interview && !gala && !showAch && !prof && !showHelp) {
-      if (picking) hubTip = tipOn("tiers") ? "tiers" : null;
-      else if (hubTab === "home") hubTip = tipOn("welcome") ? "welcome" : S.player.rival && tipOn("rival") ? "rival" : null;
+      if (picking) hubTip = tipOn("tiers") ? "tiers" : tipOn("lanes") ? "lanes" : null;
+      else if (prep) hubTip = tipOn("prep") ? "prep" : null;
+      else if (hubTab === "home") hubTip = tipOn("welcome") ? "welcome" : (S.player.inj || []).length && tipOn("injury") ? "injury" : S.player.fitEnd && Math.min(S.player.fitEnd.g, S.player.fitEnd.r) < 80 && tipOn("fitness") ? "fitness" : S.player.rival && tipOn("rival") ? "rival" : null;
       else if (["train", "season", "rankings", "news"].indexOf(hubTab) >= 0 && tipOn(hubTab)) hubTip = hubTab;
     }
     function sectionTitle(txt, sub) {

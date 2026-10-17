@@ -1,18 +1,19 @@
 /* ═══ Engine / Persistence ═══ LocalStorage save (every change) + throttled cloud sync */
 
 import { SK } from "../models/constants";
+import { pack, unpack } from "./codec";
 
 export function sSet(v) {
   try {
     if (v === null) { localStorage.removeItem(SK); }
-    else { localStorage.setItem(SK, JSON.stringify(v)); }
+    else { localStorage.setItem(SK, JSON.stringify(pack(v))); } /* compact on disk */
   } catch (e) {}
 }
 
 export function sGet() {
   try {
     var r = localStorage.getItem(SK);
-    return r ? JSON.parse(r) : null;
+    return r ? unpack(JSON.parse(r)) : null;
   } catch (e) { return null; }
 }
 

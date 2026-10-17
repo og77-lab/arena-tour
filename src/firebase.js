@@ -1,4 +1,5 @@
 import { initializeApp } from "firebase/app";
+import { toCloud, fromCloud } from "./engine/codec";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
 import { getFirestore, doc, setDoc, getDoc, getDocs, collection, query, orderBy } from "firebase/firestore";
 
@@ -61,7 +62,7 @@ export async function saveGameToCloud(userId, gameState) {
     return;
   }
   await setDoc(doc(db, "saves", userId), {
-    gameState: JSON.stringify(gameState),
+    gameState: await toCloud(gameState), /* compact + gzip in the cloud */
     updatedAt: new Date()
   });
 }
@@ -72,7 +73,7 @@ export async function loadGameFromCloud(userId) {
   const snap = await getDoc(doc(db, "saves", userId));
   if (!snap.exists()) return null;
   const data = snap.data();
-  return data.gameState ? JSON.parse(data.gameState) : null;
+  return data.gameState ? await fromCloud(data.gameState) : null;
 }
 
 // Firestore: get global leaderboard

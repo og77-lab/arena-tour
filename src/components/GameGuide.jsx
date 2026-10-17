@@ -126,7 +126,7 @@ function body(id) {
       <H>Grand Slams</H>
       <P>Only the <B>top 64</B> may enter a Slam, or anyone with <B>80+ fans</B> (a fan wildcard). If you can't enter, you sit the week out. Slams are 64 riders, best of 5 sets, and worth enormous points.</P>
       <H>Season Finals</H>
-      <P>The top 16 after event 20 are split into four houses of four (🔥 Phoenix, 🌊 Kraken, 🐉 Wyvern, ⚡ Chimera). Everyone plays everyone in her house (3 points a win); the four house winners meet in the semifinals and then the World Final. Every Finals match is best of 5. If you don't qualify, the Finals are played without you and a world champion is crowned all the same.</P>
+      <P>The top 16 after event 20 are split into four houses of four (🔥 Phoenix, 🌊 Kraken, 🐉 Wyvern, ⚡ Chimera). Everyone plays everyone in her house (3 points a win); the four house winners meet in the semifinals and then the World Final. Every Finals match is best of 5, and every one tires you (and her). If you don't qualify, the Finals are played without you and a world champion is crowned all the same.</P>
     </>);
 
     case "tourney": return (<>
@@ -197,6 +197,7 @@ function body(id) {
       <List items={[
         <span key="a"><B>Aim</B> adds points on top of every strike — 1.5 per level you're ahead of her (or takes them away if she has more Aim). That's why you can see, say, 83: a gold-edge 85 minus a little Aim, or a just-outside 70 plus a lot of Aim.</span>,
         <span key="b"><B>Stubbornness</B> sets your floor — the lowest a strike can score (15 at even levels).</span>,
+        <span key="gr"><B>Gear</B> adds or takes points (on gold hits, on misses, or every strike), and <B>tiredness</B> takes points off your misses — the line under your score shows both: <i>In the gold 92 + 2 Aim + 3 Gear − 0 Tired</i>.</span>,
         <span key="c">There's almost no luck: ±1 point. The same strike always scores about the same.</span>,
         <span key="d">Labels: <B>PERFECT!</B> 96+, <B>GOLD!</B> inside the zone, <B>CLOSE</B> just outside, <B>MISS</B> beyond.</span>
       ]} />
@@ -271,6 +272,7 @@ function body(id) {
       <Table head={["Investment", "What you get", "Price"]} rows={[
         ["📣 Private session", "+10 TP (Train tab)", "20% of a champion's prize at your top open tier — about $900 at Futures, $90K at Masters"],
         ["🎟️ Paid entry", "The tier above your range, this week only (tournament list)", "35% of that tier's champion's prize — about $5.7K for Challenger"],
+        ["🩺 Physio", "Fitness back now, injuries heal a tournament sooner (Train tab)", "12–18% of a champion's prize"],
         ["🧬 Pedigree certificate", "Raises the cap on Stamina and Steady Stride: 20 → 22 → 24 → 26", "$250K, $1M, $3M"]
       ]} />
       <P>The world leaderboard counts everything you've ever earned, so spending never costs you places there.</P>

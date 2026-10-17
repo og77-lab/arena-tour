@@ -36,10 +36,16 @@ export function LaneRow(props) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 8, fontFamily: FONT }}>
       <LaneTile cond={props.cond} w={props.w || 50} h={props.h || 36} />
+      {props.compact ? (
+        <div style={{ flex: 1, minWidth: 0, display: "flex", flexWrap: "wrap", alignItems: "center", gap: 4 }}>
+          <span style={{ fontSize: 12, fontWeight: 900, color: props.dark ? "#fde68a" : C.text, marginRight: 2 }}>{props.label ? props.label + " " : ""}{d.name}</span>
+          <EffectList list={laneChips(props.cond)} empty="nothing changes" />
+        </div>
+      ) : (
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontSize: 13, fontWeight: 900, color: props.dark ? "#fff" : C.text }}>{d.name}</div>
         <div style={{ marginTop: 3 }}><EffectList list={laneChips(props.cond)} empty="Nothing changes — pure timing" /></div>
-      </div>
+      </div>)}
     </div>
   );
 }

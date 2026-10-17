@@ -19,7 +19,22 @@ export var TIPS = {
     { t: "How a season works", b: "A season is 20 weeks. Each week you ride in one tournament that fits your rank: win matches to earn ranking points and prize money. Every fifth week is a Grand Slam — top 64 only — and the top 16 at the end ride in the Season Finals." },
     { t: "Your first step", b: "Tap Choose tournament and pick one. I'll be right there for your first joust." }
   ],
-  tiers: [{ t: "Picking a tournament", b: "You can only enter tiers that suit your rank. Bigger tiers pay more points, but the grannies there are tougher. Everyone starts at the bottom, dear — pick the one on offer." }],
+  tiers: [
+    { t: "Picking a tournament", b: "You can only enter tiers that suit your rank. Bigger tiers pay more points, but the grannies there are tougher. Everyone starts at the bottom, dear — pick the one on offer." }
+  ],
+  lanes: [
+    { t: "Several tournaments a week", b: "Each tier runs a few named tournaments at once. Every card shows its lanes, who signed up (★★★ tough to ★ weaker) and what it pays. A tough field pays 10% more points; a weaker one is easier but pays 10% less." },
+    { t: "The lanes", b: "Mud, wind, heat or the village green change the bar for BOTH of you — and make one stat count double (village green halves every gap). Tap 'Compare the 5 lanes' to see them side by side, and pick lanes that suit your stats." }
+  ],
+  prep: [
+    { t: "Get ready", b: "Before you ride, pick a lance and a saddle. The broom and the tea-cosy are free and change nothing. Anything from Mavis's shop lasts a few tournaments — one used per tournament." },
+    { t: "Read the chips", b: "Every item shows exactly what it does in THESE lanes: green helps you, red hurts. Every item has both. Nothing is paid or used until you press Confirm & ride, so try things on." }
+  ],
+  fitness: [
+    { t: "You're tired, dear", b: "Every match tires your granny and your rooster, and only part of it comes back after a tournament. Keep going deep and it builds up: a narrower gold zone, a faster bar." },
+    { t: "Look after yourselves", b: "Bounce-back (in the gym) wins more back every week. Nurse Nellie and Dr. Featherby (this week's investment) patch you up straight away. Skipping a Slam you can't win is a week of rest. Under 35%, every match risks an injury." }
+  ],
+  injury: [{ t: "Injured!", b: "Ouch. An injury knocks a few levels off a stat for a few tournaments — you'll see it on Home and in the tale of the tape. The physio on that side heals it a tournament sooner. Rest up, and keep your fitness above 35%." }],
   train: [{ t: "The gym", b: "Every tournament earns you training points (TP), and the deeper you go the more you get — everyone on tour earns them by the same rule. Spend them here. A level only counts against your opponent's level in the same stat: if you both have 5 Aim, it cancels out. The dark tick on each bar is what the riders near you have." }],
   season: [{ t: "Your road map", b: "Every week of the season, the points you're defending from last season, and what you're chasing: a Grand Slam spot and the Finals. Tap this week's row to play." }],
   rankings: [{ t: "The rankings", b: "Your rank is your season points. Points you won at a week last season drop off when that week comes round again — so you have to keep winning just to stay put. Tap any granny for her profile." }],
