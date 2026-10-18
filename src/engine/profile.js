@@ -30,7 +30,7 @@ function expScore(sd, half, n) {
   for (var i = 0; i <= 48; i++) {
     var d = (i / 48) * 4 * sd, w = Math.exp(-0.5 * (d / sd) * (d / sd)) * (i === 0 ? 0.5 : 1), inZ = d <= half;
     var s = (inZ ? 100 - 15 * d / half : Math.max(n.floor, 70 - (d - half) * (n.slope || 2.2))) + (inZ ? n.gold : n.miss);
-    tot += w * Math.max(0, Math.min(100, s)); ws += w;
+    tot += w * Math.max(0, s); ws += w;
   }
   return tot / ws;
 }

@@ -26,7 +26,8 @@ function orbColor(v) { return v >= 85 ? "#22c55e" : v >= 70 ? "#eab308" : v >= 5
 /* Lighter variants for text on the dark reveal overlay */
 function orbColorOnDark(v) { return v >= 85 ? "#4ade80" : v >= 70 ? "#facc15" : v >= 55 ? "#fb923c" : "#f87171"; }
 var INK_GOLD = "#92400e", INK_RED = "#b91c1c";
-function strikeLabel(v) { return v >= 96 ? "PERFECT!" : v >= 85 ? "GOLD!" : v >= 66 ? "CLOSE" : "MISS"; }
+/* The label follows where the lance LANDED (0–100), not the bonuses: PERFECT is a true bullseye */
+function strikeLabel(v) { return v >= 99 ? "PERFECT!" : v >= 85 ? "GOLD!" : v >= 66 ? "CLOSE" : "MISS"; }
 function avg(a) { var s = 0; for (var i = 0; i < a.length; i++) s += a[i]; return a.length ? s / a.length : 0; }
 function countWon(sets) { var n = 0; for (var i = 0; i < sets.length; i++) if (sets[i].won) n++; return n; }
 
@@ -65,7 +66,7 @@ function Fighter(props) {
               boxShadow: won ? "0 0 8px " + c : "none",
               animation: filled ? "orbPop 0.5s ease" : "none",
               display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: 10, fontWeight: 900, color: filled ? "#0f172a" : "#cbd5e1"
+              fontSize: filled && v >= 100 ? 8.5 : 10, fontWeight: 900, letterSpacing: filled && v >= 100 ? -0.4 : 0, color: filled ? "#0f172a" : "#cbd5e1"
             }}>
               {filled ? Math.round(v) : ""}
             </div>
@@ -139,7 +140,6 @@ function StrikeReveal(props) {
             {r.why.aim !== 0 && (<span style={{ color: r.why.aim > 0 ? "#4ade80" : "#f87171" }}> {r.why.aim > 0 ? "+" : "−"} {Math.abs(r.why.aim)} Extra</span>)}
             {r.why.tired ? (<span style={{ color: "#f87171" }}> − {Math.abs(r.why.tired)} Tired</span>) : null}
             {r.why.gear ? (<span style={{ color: r.why.gear > 0 ? "#4ade80" : "#f87171" }}> {r.why.gear > 0 ? "+" : "−"} {Math.abs(r.why.gear)} Gear</span>) : null}
-            {r.why.capped && (<span style={{ color: "#94a3b8" }}> (max 100)</span>)}
             <span style={{ color: "#94a3b8" }}> = {r.you}</span>
           </span>
         </div>
@@ -276,10 +276,11 @@ export default function PowerBar(props) {
     var d = Math.abs(pos - ctr), inZ = d <= sw / 2;
     var base = strikeScore(d, sw / 2, minSc);
     var gearPts = KIT.aim + (inZ ? KIT.gold : KIT.miss), tiredPts = inZ ? 0 : FT.miss;
-    var sc = Math.round(Math.max(0, Math.min(100, base + fb + gearPts + tiredPts)));
+    base = Math.max(0, Math.min(100, base));                 /* the landing is 0–100; the bonuses go on top, no ceiling */
+    var sc = Math.round(Math.max(0, base + fb + gearPts + tiredPts));
     /* How the score was built, shown under it: where it landed + Aim (extra points) + gear − tiredness */
-    var aimShown = Math.round(fb), gearShown = Math.round(gearPts), tiredShown = Math.round(tiredPts), capped = base + fb + gearPts + tiredPts > 100;
-    var why = { kind: inZ ? "Gold" : base <= minSc + 1.01 ? "Floor" : "Outside", aim: aimShown, gear: gearShown, tired: tiredShown, capped: capped, base: capped ? Math.round(base) : Math.round(sc) - aimShown - gearShown - tiredShown };
+    var aimShown = Math.round(fb), gearShown = Math.round(gearPts), tiredShown = Math.round(tiredPts), capped = false;
+    var why = { kind: inZ ? "Gold" : base <= minSc + 1.01 ? "Floor" : "Outside", aim: aimShown, gear: gearShown, tired: tiredShown, capped: capped, base: false ? Math.round(base) : Math.round(sc) - aimShown - gearShown - tiredShown };
     /* Her strike: her own bar (her levels, kit, tiredness, nerves), the stands, and her hands — her talent's wobble
        at her bar's speed, with her form for the day. Same rules as yours, from her own abilities (engine/joust). */
     var oSw = OBAR.zone + CROWD.her * (onTheLine ? 2 : 1);
@@ -320,8 +321,8 @@ export default function PowerBar(props) {
 
     setPh("hitstop");
     setMarks(marks.concat([{ pos: pos, sc: sc, opos: oPos }]));
-    setReveal({ id: id, you: sc, opp: osc, youWon: youWon, tie: tie, label: strikeLabel(sc), set: setNum, strike: nm.length, stamped: false, why: why });
-    var perfect = !result && youWon && sc >= 96;
+    setReveal({ id: id, you: sc, opp: osc, youWon: youWon, tie: tie, label: strikeLabel(Math.round(base)), set: setNum, strike: nm.length, stamped: false, why: why });
+    var perfect = !result && youWon && base >= 99;
     if (perfect) word = "PERFECT!";
     setJoust({ id: id, phase: "charge", youWon: joustWon, big: big, word: word, perfect: perfect });
     playStrike(sc);

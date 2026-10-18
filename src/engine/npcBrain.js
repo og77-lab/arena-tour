@@ -22,7 +22,7 @@ function expScore(sd, h, fx) {
     var d = (i / 60) * 4 * sd, w = Math.exp(-0.5 * (d / sd) * (d / sd)) * (i === 0 ? 0.5 : 1);
     var inZ = d <= h, s = inZ ? 100 - 15 * d / h : Math.max(15 + fx.floor, 70 - (d - h) * 2.2);
     s += fx.aim + (inZ ? fx.gold : fx.miss);
-    tot += w * Math.max(0, Math.min(100, s)); wsum += w;
+    tot += w * Math.max(0, s); wsum += w;
   }
   return tot / wsum;
 }

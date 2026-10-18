@@ -122,13 +122,17 @@ Both of you are scored the same way: **where the lance lands on the bar.**
 | Just outside the gold | A sharp drop to 70 |
 | Further out | Falls about 2 points for every % of the bar, down to your floor |
 
+The base score is **0–100**, and **100 means dead on the line**. The bonuses go **on top, with no ceiling**: a near-perfect strike with good training can read 103, and the very best riders average a little over 100.
+
 On top of the base score:
-- **Aim (extra points)** adds points to every strike — 1.5 per level you're ahead of her (or takes them away if she has more Aim (extra points)). This is why a strike can show, say, 83: a gold-edge 85 minus a little Aim (extra points), or a just-outside 70 plus a lot of Aim (extra points).
-- **Stubbornness (softer misses)** sets your floor — the lowest a strike can score (15 at even levels, ±1.5 per level of gap).
+- **Aim (extra points)** adds about +0.5 a level to every strike (a little less at high levels; level 9 is about +3.4).
+- **Stubbornness (softer misses)**: misses lose fewer points, and the worst a strike can score (the floor, 15 untrained) is higher.
 - **Gear** adds or takes points (on gold hits, on misses, or on every strike) — shown as *Gear*.
 - **Tiredness** takes points off your misses (up to −10 when your granny is exhausted) — shown as *Tired*.
+- The line under the score adds it up, e.g. *In the gold 98 + 3 Extra + 2 Gear = 103*.
+- Labels follow the landing, not the bonuses: **PERFECT!** is a true bullseye (99+).
 - There's almost no luck: ±1 point. The same strike always scores about the same.
-- Labels: **PERFECT!** 96+, **GOLD!** inside the zone, **CLOSE** just outside, **MISS** beyond.
+- Labels: **PERFECT!** a true bullseye, **GOLD!** inside the zone, **CLOSE** just outside, **MISS** beyond.
 
 **How your opponent scores.** She strikes on **her own bar**, built exactly like yours but from **her** levels, her lanes, her kit, her tiredness and her crowd, and she's scored by the same rule. Where she stops is down to her **hands** — her talent: a gifted granny lands near the centre time after time, a developing one wobbles more, and everyone wobbles a little more as their bar runs faster. Each match she has a **form for the day** (about ±8%), and her bad strikes stay bad, not disasters: a set in the 20s or 30s only comes from real weakness or tiredness.
 

@@ -196,11 +196,12 @@ function body(id) {
         ["Further out", "Falls about 2 points for every % of the bar, down to your floor"]
       ]} />
       <List items={[
-        <span key="a"><B>Aim (extra points)</B> adds points on top of every strike — 1.5 per level you're ahead of her (or takes them away if she has more Aim). That's why you can see, say, 83: a gold-edge 85 minus a little Aim, or a just-outside 70 plus a lot of Aim (extra points).</span>,
-        <span key="b"><B>Stubbornness (softer misses)</B> sets your floor — the lowest a strike can score (15 at even levels).</span>,
-        <span key="gr"><B>Gear</B> adds or takes points (on gold hits, on misses, or every strike), and <B>tiredness</B> takes points off your misses — the line under your score shows both: <i>In the gold 92 + 2 Aim (extra points) + 3 Gear − 0 Tired</i>.</span>,
-        <span key="c">There's almost no luck: ±1 point. The same strike always scores about the same.</span>,
-        <span key="d">Labels: <B>PERFECT!</B> 96+, <B>GOLD!</B> inside the zone, <B>CLOSE</B> just outside, <B>MISS</B> beyond.</span>
+        <span key="a">The landing score above is <B>0–100</B>, and <B>100 means dead on the line</B>. Bonuses go <B>on top, with no ceiling</B> — so a near-perfect strike with good training can read 103, and the very best riders average a little over 100.</span>,
+        <span key="b"><B>Aim (extra points)</B>: about +0.5 a level on every strike (a little less at high levels; level 9 is about +3.4).</span>,
+        <span key="s"><B>Stubbornness (softer misses)</B>: misses lose fewer points and the worst strike (the floor, 15 untrained) is higher.</span>,
+        <span key="gr"><B>Gear</B> adds or takes points (on gold hits, on misses, or every strike), and <B>tiredness</B> takes points off your misses. The line under your score shows it all: <i>In the gold 98 + 3 Extra + 2 Gear = 103</i>.</span>,
+        <span key="c">There's almost no luck: ±1 point on the landing. The same strike always scores about the same.</span>,
+        <span key="d">Labels follow the landing, not the bonuses: <B>PERFECT!</B> a true bullseye (99+), <B>GOLD!</B> inside the zone, <B>CLOSE</B> just outside, <B>MISS</B> beyond.</span>
       ]} />
       <H>How your opponent scores</H>
       <P>She strikes on the same kind of bar and is scored by the same rule. Her <B>talent</B> decides how tightly she groups around the centre — a gifted granny lands near 100 time after time, a developing one sprays all over. The round's speed spreads her out just as it does you.</P>

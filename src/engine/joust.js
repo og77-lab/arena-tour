@@ -35,11 +35,15 @@ export function riderBar(o) {
 /* Bar speed for a strike: each strike of a set a little faster, each set starting a little faster */
 export function speedAt(bar, setIdx, strikeIdx) { return bar.speed + setIdx * bar.accel * 0.6 + strikeIdx * bar.accel; }
 
-/* Where it landed → points. Gold: 100 on the line down to 85 at the edge; outside: 70 falling to the floor */
+/* Where it landed → points, then the bonuses on top, with no ceiling.
+   The landing: 100 only dead on the line, 85 at the gold's edge, 70 just outside, falling to the floor.
+   The bonus (Aim, gear, tiredness) is added after, so a near-perfect strike with good training can read 103. */
 export function landScore(d, bar, jitter) {
   var half = bar.zone / 2, inZ = d <= half;
   var base = inZ ? 100 - 15 * (d / half) : Math.max(bar.floor, 70 - (d - half) * (bar.slope || 2.2));
-  return { inZ: inZ, base: base + (jitter || 0), total: Math.max(0, Math.min(100, base + (jitter || 0) + bar.aim + (inZ ? bar.gold : bar.miss))) };
+  base = Math.max(0, Math.min(100, base + (jitter || 0)));
+  var bonus = bar.aim + (inZ ? bar.gold : bar.miss);
+  return { inZ: inZ, base: base, bonus: bonus, total: Math.max(0, base + bonus) };
 }
 
 /* ── Hands ── a rider's wobble, in "% of a normal-speed bar" units (a normal bar crosses 144% a second, so 1 unit ≈ 7 ms).
