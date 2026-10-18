@@ -1,6 +1,7 @@
 /* ═══ ScoutSheet ═══ Everything about the opponent, in words — opened on demand, never in the way of the fight */
 
 import { createPortal } from "react-dom";
+import Icon, { StatIcon } from "./Icons";
 import { motion } from "framer-motion";
 import { C, FONT, display, label, card } from "../ui/theme";
 import { Rider } from "./Rider";
@@ -14,7 +15,7 @@ export function ScoutStatRow(props) {
   return (
     <div style={{ padding: "7px 0", borderTop: props.first ? "none" : "1px dashed " + C.line }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>
-        <span style={{ fontSize: 14, fontWeight: 900, color: C.text }}>{s.icon} {s.label}</span>
+        <span style={{ fontSize: 14, fontWeight: 900, color: C.text }}>{s.k ? (<StatIcon k={s.k} size={17} style={{ verticalAlign: "-3px", marginRight: 3 }} />) : s.icon + " "}{s.label}</span>
         <span style={{ fontSize: 13, fontWeight: 900, color: vcol, whiteSpace: "nowrap" }}>{verdict}</span>
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "34px 1fr 34px", alignItems: "center", gap: 6, marginTop: 4 }}>

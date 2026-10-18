@@ -1,4 +1,5 @@
 import * as React from "react";
+import Icon, { StatIcon } from "./components/Icons";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
 import { syncAchievements, saveGameToCloud, loadGameFromCloud } from "./firebase";
@@ -152,7 +153,7 @@ function buildScout(S, o, oRank, d, me) {
     h2h: { w: w, l: meetings.length - w }, rival: !!(S.player.rival && S.player.rival.id === o.id),
     kit: o._kit ? kitIcons(o._kit) : null,
     injuries: ((S.player.inj || []).map(function (x) { return "You " + injuryText(x); })).concat((o.inj || []).map(function (x) { return "Her " + injuryText(x); })),
-    stats: STATS.filter(function (s) { return s.k !== "b"; }).map(function (s) { return { icon: s.icon, label: s.label + (s.el ? " (" + s.el + ")" : ""), what: s.what, who: s.who, you: mine[s.k] || 0, foe: hers[s.k] || 0 }; })
+    stats: STATS.filter(function (s) { return s.k !== "b"; }).map(function (s) { return { k: s.k, icon: s.icon, label: s.label + (s.el ? " (" + s.el + ")" : ""), what: s.what, who: s.who, you: mine[s.k] || 0, foe: hers[s.k] || 0 }; })
       .concat(fitRows(S, o)),
     diff: diffInfo(d)
   };
@@ -1030,7 +1031,7 @@ export default function Arena(props) {
                       return (
                         <div key={st.k} style={{padding:"9px 0",borderTop:"1px dashed "+C.line}}>
                           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6,gap:8}}>
-                            <div><span style={{color:C.text,fontWeight:900,fontSize:15}}>{st.icon} {st.label}</span>{st.el && (<span style={{color:C.goldInk,fontSize:12,fontWeight:900,marginLeft:5}}>({st.el})</span>)}<span style={{color:C.textSoft,fontSize:13,marginLeft:6,fontWeight:700}}>Lv {lv}/{cap}{cap > 20 ? " 🧬" : ""}</span></div>
+                            <div><span style={{color:C.text,fontWeight:900,fontSize:15}}><StatIcon k={st.k} size={19} style={{ marginRight: 4, verticalAlign: "-4px" }} />{st.label}</span>{st.el && (<span style={{color:C.goldInk,fontSize:12,fontWeight:900,marginLeft:5}}>({st.el})</span>)}<span style={{color:C.textSoft,fontSize:13,marginLeft:6,fontWeight:700}}>Lv {lv}/{cap}{cap > 20 ? " 🧬" : ""}</span></div>
                             <button onClick={function(){doTrain(st.k)}} disabled={!can} style={button(can?"gold":"ghost",{padding:"6px 12px",fontSize:13,opacity:can?1:0.6,cursor:can?"pointer":"default"})}>{lv>=cap?"MAX":cost+" TP"}</button>
                           </div>
                           {(function(){
@@ -1154,7 +1155,7 @@ export default function Arena(props) {
                       {p.isP?S.pName+" ⭐":(p.emoji||"")+" "+sh(p.name)}{!p.isP && standing(i+1) ? " " + standing(i+1).icon : ""}
                     </div>
                     <div style={{fontSize:12,color:C.textMuted,marginTop:1,fontWeight:600}}>
-                      {p.isP?"":"Talent "}{p.isP?"":((p.skill||0)>80?"Elite":(p.skill||0)>60?"Strong":(p.skill||0)>40?"Average":"Developing")}{p.isP?"":" · "}{STATS.map(function(st){ return st.icon + (t[st.k]||0); }).join(" ")}
+                      {p.isP?"":"Talent "}{p.isP?"":((p.skill||0)>80?"Elite":(p.skill||0)>60?"Strong":(p.skill||0)>40?"Average":"Developing")}{p.isP?"":" · "}{STATS.map(function(st){ return (<span key={st.k} style={{ whiteSpace: "nowrap", marginRight: 5 }}><StatIcon k={st.k} size={12} style={{ verticalAlign: "-2px", marginRight: 1 }} />{t[st.k]||0}</span>); })}
                     </div>
                   </div>
                   <div style={{textAlign:"right"}}>

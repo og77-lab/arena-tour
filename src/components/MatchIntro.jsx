@@ -2,6 +2,7 @@
    VS splash and 3-2-1-FIGHT countdown in one uninterrupted run */
 
 import * as React from "react";
+import Icon, { StatIcon } from "./Icons";
 import { LaneRow } from "./Lanes";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -84,7 +85,7 @@ function TaleOfTape(props) {
         return (
           <div key={s.label}>
             {head && (<div style={{ textAlign: "center", fontSize: 10, fontWeight: 900, letterSpacing: 2, color: "#fde68a", marginTop: 6 }}>{s.who === "granny" ? "👵 GRANNY" : s.who === "fitness" ? "💪 FITNESS TODAY" : s.who === "crowd" ? "📣 THE STANDS" : "🐓 ROOSTER"}</div>)}
-            {row(s.icon + " " + s.label, s.you, s.foe, s.you - s.foe, s.label)}
+            {row(s.k ? (<span><StatIcon k={s.k} size={14} style={{ verticalAlign: "-2px", marginRight: 3 }} />{s.label}</span>) : s.icon + " " + s.label, s.you, s.foe, s.you - s.foe, s.label)}
           </div>
         );
       })}

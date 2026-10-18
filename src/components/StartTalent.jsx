@@ -2,6 +2,7 @@
    granny, and once for older saves). Any split is allowed — all in one stat is fine. Levels add to what you have. */
 
 import { useState } from "react";
+import Icon, { StatIcon } from "./Icons";
 import { createPortal } from "react-dom";
 import { STATS } from "../models/constants";
 import { C, FONT, display, label, card, button } from "../ui/theme";
@@ -29,7 +30,7 @@ export default function StartTalent(props) {
           return (
             <div key={s.k} style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 0", borderTop: "1px dashed " + C.line }}>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 14, fontWeight: 900 }}>{s.icon} {s.label} <span style={{ fontSize: 12, color: C.goldInk }}>({s.el})</span></div>
+                <div style={{ fontSize: 14, fontWeight: 900 }}><StatIcon k={s.k} size={18} style={{ verticalAlign: "-3px", marginRight: 4 }} />{s.label} <span style={{ fontSize: 12, color: C.goldInk }}>({s.el})</span></div>
                 <div style={{ fontSize: 11.5, color: C.textMuted }}>{s.who === "granny" ? "👵" : s.who === "rooster" ? "🐓" : "🔋"} Each level: {s.per}</div>
               </div>
               <button onClick={function () { bump(s.k, -1); }} disabled={!add[s.k]} style={button("ghost", { padding: "4px 10px", fontSize: 16, opacity: add[s.k] ? 1 : 0.4 })}>−</button>

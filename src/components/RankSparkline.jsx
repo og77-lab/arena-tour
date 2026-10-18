@@ -1,6 +1,7 @@
 /* ═══ RankSparkline ═══ Inline SVG trend chart of the player's rank over the last 20 events */
 
-import { C, label, card } from "../ui/theme";
+import { C, label, card, card2, title2, cap2, HEAD } from "../ui/theme";
+import Icon from "./Icons";
 
 export default function RankSparkline(props) {
   var hist = props.history || [];
@@ -27,10 +28,10 @@ export default function RankSparkline(props) {
   var first = pts[0], latest = pts[pts.length - 1];
   var delta = first - latest;
   return (
-    <div style={card({ padding: "8px 12px", display: "flex", alignItems: "center", gap: 10 })}>
+    <div style={card2({ padding: "11px 12px", display: "flex", alignItems: "center", gap: 12 })}>
       <div style={{ flexShrink: 0 }}>
-        <div style={label(C.textSoft)}>Rank trend</div>
-        <div style={{ fontSize: 16, color: ink, fontWeight: 900, marginTop: 1 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 5 }}><Icon name="chart" size={18} /><span style={title2(15)}>Rank trend</span></div>
+        <div style={{ fontFamily: HEAD, fontSize: 20, color: ink, fontWeight: 600, marginTop: 2 }}>
           {delta > 0 ? "▲ " + delta : delta < 0 ? "▼ " + Math.abs(delta) : "— 0"}
         </div>
         <div style={{ fontSize: 11, color: C.textMuted, fontWeight: 700 }}>last {pts.length} events</div>

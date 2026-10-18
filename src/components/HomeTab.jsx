@@ -3,7 +3,8 @@
 import { motion } from "framer-motion";
 import { TIERS, TOTAL_EVENTS } from "../models/constants";
 import { sh } from "../models/formulas";
-import { C, FONT, display, label, card, button, pill, money } from "../ui/theme";
+import { C, FONT, display, label, card, button, pill, money, BODY, HEAD, card2, title2, cap2, button2 } from "../ui/theme";
+import Icon, { IconTile } from "./Icons";
 import { Rider, Face, PLAYER_PALETTE, paletteFor, withKit } from "./Rider";
 import RankSparkline from "./RankSparkline";
 import { FitnessCard, FansCard } from "./Fitness";
@@ -21,10 +22,26 @@ function Bunting(props) {
 
 function Stat(props) {
   return (
-    <div onClick={props.onClick} style={{ background: C.cardWarm, border: "1.5px solid " + C.line, borderRadius: 10, padding: "4px 8px", minWidth: 0, cursor: props.onClick ? "pointer" : "default" }}>
-      <div style={label()}>{props.k}</div>
-      <div style={{ fontSize: 15, fontWeight: 900, color: props.color || C.text, whiteSpace: "nowrap" }}>{props.v}</div>
+    <div onClick={props.onClick} style={{ background: props.tint || "#fef3c7", borderRadius: 12, padding: "6px 4px 5px", minWidth: 0, textAlign: "center", cursor: props.onClick ? "pointer" : "default" }}>
+      <Icon name={props.icon} size={18} />
+      <div style={{ fontFamily: HEAD, fontWeight: 600, fontSize: 15, color: props.color || C.text, whiteSpace: "nowrap", lineHeight: 1.15, marginTop: 1 }}>{props.v}</div>
+      <div style={{ fontSize: 10, fontWeight: 800, color: C.textMuted }}>{props.k}</div>
     </div>
+  );
+}
+/* A tappable row: tinted icon tile, title, one short line, chevron */
+function Row(props) {
+  return (
+    <button onClick={props.onClick} style={Object.assign(card2({ padding: "11px 12px", background: props.bg || "#fff" }), { display: "flex", alignItems: "center", gap: 12, width: "100%", cursor: "pointer", textAlign: "left" })}>
+      {props.lead || (<IconTile name={props.icon} tint={props.tint} size={42} />)}
+      <span style={{ flex: 1, minWidth: 0 }}>
+        {props.kicker && (<span style={Object.assign(cap2(props.kickerCol), { display: "block", fontSize: 11 })}>{props.kicker}</span>)}
+        <span style={Object.assign(title2(16), { display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" })}>{props.title}</span>
+        {props.sub && (<span style={{ display: "block", fontSize: 12.5, color: C.textSoft, fontWeight: 700, marginTop: 1 }}>{props.sub}</span>)}
+        {props.extra}
+      </span>
+      <span style={{ color: props.chev || C.goldInk, display: "inline-flex" }}><Icon name="chevron" size={18} /></span>
+    </button>
   );
 }
 
@@ -38,8 +55,8 @@ function SeasonStrip(props) {
         var bg = ev.done ? (isGS ? C.gold : "#4ade80") : cur ? C.night : "#efe3c4";
         return (
           <div key={i} style={{ flex: 1, textAlign: "center" }}>
-            {isGS && (<div aria-hidden style={{ fontSize: 9, lineHeight: "10px" }}>👑</div>)}
-            <div style={{ height: cur ? 10 : 7, borderRadius: 3, background: bg, boxShadow: cur ? "0 0 0 2px " + C.goldSoft : "none", animation: cur ? "pulse 1.4s ease infinite" : "none" }} />
+            {isGS && (<div style={{ lineHeight: 0, marginBottom: 2 }}><Icon name="crown" size={11} /></div>)}
+            <div style={{ height: cur ? 10 : 7, borderRadius: 5, background: bg, boxShadow: cur ? "0 0 0 2.5px " + C.goldSoft : "none", animation: cur ? "pulse 1.4s ease infinite" : "none" }} />
           </div>
         );
       })}
@@ -74,41 +91,41 @@ export default function HomeTab(props) {
   var news = last && last.result && last.result.parallel ? last.result.parallel.filter(Boolean) : [];
 
   return (
-    <div style={{ fontFamily: FONT, display: "flex", flexDirection: "column", gap: 10 }}>
+    <div style={{ fontFamily: BODY, display: "flex", flexDirection: "column", gap: 12 }}>
       {/* Player card */}
-      <button onClick={props.onOpenProfile} style={Object.assign(card({ padding: "10px 12px" }), { display: "flex", alignItems: "center", gap: 10, cursor: "pointer", textAlign: "left", width: "100%", fontFamily: FONT })}>
-        <div style={{ flexShrink: 0, width: 86, height: 70, borderRadius: 12, background: "linear-gradient(180deg,#fef3c7,#fde68a)", border: "1.5px solid " + C.line, display: "flex", alignItems: "flex-end", justifyContent: "center", overflow: "hidden" }}>
+      <button onClick={props.onOpenProfile} style={Object.assign(card2({ padding: "12px" }), { display: "flex", alignItems: "center", gap: 12, cursor: "pointer", textAlign: "left", width: "100%" })}>
+        <div style={{ flexShrink: 0, width: 88, height: 84, borderRadius: 16, background: "radial-gradient(circle at 50% 30%, #e0f2fe 0%, #bae6fd 55%, #7dd3fc 100%)", display: "flex", alignItems: "flex-end", justifyContent: "center", overflow: "hidden" }}>
           <Rider palette={withKit(PLAYER_PALETTE, S.player.kit)} width={84} pose="idle" />
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 6 }}>
-            <span style={Object.assign(display(19), { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" })}>{S.pName}</span>
-            <span style={display(22, C.goldInk)}>#{pRank}</span>
+            <span style={Object.assign(title2(21), { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" })}>{S.pName}</span>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "linear-gradient(180deg,#fff7d6,#fde68a)", borderRadius: 999, padding: "2px 10px 2px 6px", boxShadow: "inset 0 -1px 0 rgba(146,64,14,0.15)" }}><Icon name="rank" size={16} /><span style={title2(18, C.goldInk)}>#{pRank}</span></span>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 4, marginTop: 6 }}>
-            <Stat k="Points" v={(S.player.sp || 0).toLocaleString()} />
-            <Stat k="Prize" v={money(S.player.money)} color={C.greenInk} />
-            <Stat k="Train" v={(tr.tp || 0) + " TP"} color={C.goldInk} />
-            <Stat k="Crowd" v={"❤️ " + fans} color="#be123c" onClick={function (e) { e.stopPropagation(); var el = document.getElementById("fans-card"); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); }} />
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 5, marginTop: 8 }}>
+            <Stat k="points" icon="trophy" tint="#fef3c7" v={(S.player.sp || 0).toLocaleString()} />
+            <Stat k="prize" icon="coin" tint="#dcfce7" v={money(S.player.money)} color={C.greenInk} />
+            <Stat k="to train" icon="dumbbell" tint="#e0e7ff" v={(tr.tp || 0) + " TP"} color="#3730a3" />
+            <Stat k="crowd" icon="heart" tint="#ffe4e6" v={fans} color="#be123c" onClick={function (e) { e.stopPropagation(); var el = document.getElementById("fans-card"); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); }} />
           </div>
         </div>
       </button>
 
       {/* Next event hero */}
       <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.25 }}
-        style={card({ position: "relative", overflow: "hidden", padding: "22px 14px 14px", background: "linear-gradient(180deg,#ffffff 0%,#fffbeb 100%)", borderColor: C.lineStrong })}>
+        style={card2({ position: "relative", overflow: "hidden", padding: "26px 16px 16px", background: "linear-gradient(180deg," + heroColor + "22 0%, #ffffff 46%)" })}>
         <Bunting color={heroColor} />
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
-          <span style={pill()}><span aria-hidden style={{ width: 7, height: 7, borderRadius: "50%", background: heroColor }} />{hero.kicker}</span>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(28,25,23,0.86)", color: "#fff", fontSize: 12, fontWeight: 800, padding: "4px 11px", borderRadius: 999 }}><span aria-hidden style={{ width: 8, height: 8, borderRadius: "50%", background: heroColor, boxShadow: "0 0 0 2px rgba(255,255,255,0.25)" }} />{hero.kicker}</span>
           {def > 0 && !seasonDone && (<span style={{ fontSize: 11, fontWeight: 800, color: C.redInk }} title="Points you earned at this event last season drop off after it">Defending {def} pts</span>)}
         </div>
-        <div style={Object.assign(display(30), { marginTop: 10 })}>{hero.title}</div>
-        <div style={{ fontSize: 13, color: C.textSoft, marginTop: 4, lineHeight: 1.4 }}>{hero.sub}</div>
-        <button onClick={hero.act} style={button(hero.kind, { width: "100%", marginTop: 12, fontSize: 16, padding: "14px 18px" })}>{hero.cta}</button>
+        <div style={Object.assign(title2(31), { marginTop: 12, fontWeight: 700 })}>{hero.title}</div>
+        <div style={{ fontSize: 13.5, color: C.textSoft, marginTop: 5, lineHeight: 1.4, fontWeight: 700 }}>{hero.sub}</div>
+        <button onClick={hero.act} style={button2(hero.kind === "gold" ? "gold" : "ghost", { width: "100%", marginTop: 14, fontSize: 18, padding: "15px 18px" })}>{hero.cta}</button>
         <div style={{ marginTop: 14 }}>
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
-            <span style={label(C.textSoft)}>Season {S.sNum}</span>
-            <span style={label(C.textSoft)}>Event {Math.min(S.calIdx + 1, TOTAL_EVENTS)} / {TOTAL_EVENTS}</span>
+            <span style={cap2(C.textSoft)}>Season {S.sNum}</span>
+            <span style={cap2(C.textSoft)}>Event {Math.min(S.calIdx + 1, TOTAL_EVENTS)} of {TOTAL_EVENTS}</span>
           </div>
           <SeasonStrip S={S} />
         </div>
@@ -118,62 +135,23 @@ export default function HomeTab(props) {
       <div id="fans-card"><FansCard player={S.player} rank={props.pRank} /></div>
 
       {/* Training nudge when points are waiting */}
-      {(tr.tp || 0) >= 15 && (
-        <button onClick={props.onTrain} style={Object.assign(card({ padding: "10px 12px" }), { display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer", width: "100%", fontFamily: FONT, textAlign: "left" })}>
-          <span>
-            <span style={{ fontSize: 14, fontWeight: 900, color: C.text }}>🏋️ {tr.tp} training points to spend</span>
-            <span style={{ display: "block", fontSize: 12, color: C.textSoft, marginTop: 2 }}>Every level makes your own bar easier.</span>
-          </span>
-          <span style={{ fontSize: 20, color: C.goldInk, fontWeight: 900 }}>›</span>
-        </button>
-      )}
+      {(tr.tp || 0) >= 15 && (<Row onClick={props.onTrain} icon="dumbbell" tint="#e0e7ff" title={tr.tp + " training points to spend"} sub="Every level makes your own bar easier" />)}
 
       {/* Your rival: the feud at a glance */}
-      {props.rival && (
-        <button onClick={props.onRival} style={Object.assign(card({ padding: "10px 12px", background: "linear-gradient(180deg,#fff,#fff1f2)", borderColor: "#fecdd3" }), { display: "flex", alignItems: "center", gap: 10, width: "100%", cursor: "pointer", textAlign: "left", fontFamily: FONT })}>
-          <div style={{ position: "relative", flexShrink: 0 }}>
-            <Face palette={paletteFor(props.rival.p.id, props.rival.rank)} size={46} />
-            <span aria-hidden style={{ position: "absolute", right: -4, bottom: -4, fontSize: 16 }}>😤</span>
-          </div>
-          <span style={{ flex: 1, minWidth: 0 }}>
-            <span style={label("#be123c")}>Your rival</span>
-            <span style={{ display: "block", fontSize: 16, fontWeight: 900, color: C.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{props.rival.p.emoji} {props.rival.p.name}</span>
-            <span style={{ display: "block", fontSize: 12, color: C.textSoft, fontWeight: 700 }}>
-              World #{props.rival.rank} · Head-to-head <b style={{ color: props.rival.rec && props.rival.rec.w >= props.rival.rec.l ? C.greenInk : C.redInk }}>{props.rival.rec ? props.rival.rec.w + "–" + props.rival.rec.l : "—"}</b> · lead by 3 to settle it
-            </span>
-          </span>
-          <span style={{ fontSize: 20, color: "#be123c", fontWeight: 900 }}>›</span>
-        </button>
-      )}
+      {props.rival && (<Row onClick={props.onRival} bg="linear-gradient(180deg,#fff 0%,#fff1f2 100%)" chev="#be123c" kicker="Your rival" kickerCol="#be123c"
+        lead={(<div style={{ position: "relative", flexShrink: 0 }}><Face palette={paletteFor(props.rival.p.id, props.rival.rank)} size={42} /><span style={{ position: "absolute", right: -6, bottom: -6 }}><Icon name="lances" size={20} /></span></div>)}
+        title={props.rival.p.emoji + " " + props.rival.p.name}
+        sub={(<span>World #{props.rival.rank} · head-to-head <b style={{ color: props.rival.rec && props.rival.rec.w >= props.rival.rec.l ? C.greenInk : C.redInk }}>{props.rival.rec ? props.rival.rec.w + "–" + props.rival.rec.l : "—"}</b></span>)} />)}
 
       {/* Badges */}
-      {props.ach && (
-        <button onClick={props.onAch} style={Object.assign(card({ padding: "10px 12px" }), { display: "flex", alignItems: "center", gap: 10, width: "100%", cursor: "pointer", textAlign: "left", fontFamily: FONT })}>
-          <span aria-hidden style={{ fontSize: 28 }}>🏅</span>
-          <span style={{ flex: 1, minWidth: 0 }}>
-            <span style={{ display: "block", fontSize: 15, fontWeight: 900, color: C.text }}>Achievements · {props.ach.n} / {props.ach.total}</span>
-            <span style={{ display: "block", height: 7, borderRadius: 4, background: "#efe3c4", marginTop: 5, overflow: "hidden" }}>
-              <span style={{ display: "block", width: (props.ach.n / props.ach.total * 100) + "%", height: "100%", background: "linear-gradient(90deg,#fde68a,#f59e0b)" }} />
-            </span>
-          </span>
-          <span style={{ fontSize: 20, color: C.goldInk, fontWeight: 900 }}>›</span>
-        </button>
-      )}
+      {props.ach && (<Row onClick={props.onAch} icon="medal" tint="#fef3c7" title={"Achievements · " + props.ach.n + " of " + props.ach.total}
+        extra={(<span style={{ display: "block", height: 7, borderRadius: 4, background: "#f3ead3", marginTop: 6, overflow: "hidden" }}><span style={{ display: "block", width: (props.ach.n / props.ach.total * 100) + "%", height: "100%", borderRadius: 4, background: "linear-gradient(90deg,#fde68a,#f59e0b)" }} /></span>)} />)}
 
       <RankSparkline history={S.player.rankHist || []} />
 
       {/* Latest issue of the paper */}
-      {(
-        <button onClick={function () { props.onReadPaper(); }}
-          style={Object.assign(card({ padding: "10px 12px", background: "#f4ecd8", borderColor: "#d6c7a1" }), { display: "flex", alignItems: "center", gap: 10, width: "100%", cursor: "pointer", textAlign: "left", fontFamily: FONT })}>
-          <span aria-hidden style={{ fontSize: 30, transform: "rotate(-8deg)" }}>📰</span>
-          <span style={{ flex: 1, minWidth: 0 }}>
-            <span style={{ display: "block", fontFamily: "Georgia, 'Times New Roman', serif", fontWeight: 900, fontSize: 17, color: "#1c1917" }}>The Daily Cluck</span>
-            <span style={{ display: "block", fontSize: 12, color: "#4a4038", fontWeight: 700 }}>{S.news && S.news[0] ? S.news[0].wk + " · your week, your rivals and the world's best" : "Special edition · the legends and the tour ahead"}</span>
-          </span>
-          <span style={{ fontSize: 13, fontWeight: 900, color: "#9a3412", whiteSpace: "nowrap" }}>Read ›</span>
-        </button>
-      )}
+      <Row onClick={function () { props.onReadPaper(); }} icon="paper" tint="#f4ecd8" bg="#fbf6ea" chev="#9a3412" title={(<span style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontWeight: 900 }}>The Daily Cluck</span>)}
+        sub={S.news && S.news[0] ? S.news[0].wk + " · your week, your rivals, the world's best" : "Special edition · the legends and the tour ahead"} />
 
       {/* Around the tour last week (shown until the first issue is printed) */}
       {!(S.news && S.news[0]) && news.length > 0 && (

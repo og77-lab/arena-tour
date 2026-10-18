@@ -8,6 +8,7 @@ import { crowdLove, followersOf, crowdEdge, fmtFollowers, fanChain } from "../en
 import { fansOf } from "../engine/fans";
 import FanRules from "./FanRules";
 import { handsTalent } from "../engine/joust";
+import Icon, { StatIcon } from "./Icons";
 
 /* Fans and followers, and what they mean when you meet: the stands back whoever the crowd loves more */
 function FanBox(props) {
@@ -148,7 +149,7 @@ export default function Profile(props) {
           {STATS.map(function(st){ return { k: st.k, i: st.icon, l: st.label, el: st.el, c: st.col, who: st.who }; }).map(function(s, si, all){
             var lv = t[s.k]||0;
             var head = si === 0 || all[si - 1].who !== s.who;
-            return (<div key={s.k}>{head && (<div style={{ fontSize: 11, fontWeight: 900, letterSpacing: 1.2, color: "#57534e", margin: si ? "6px 0 2px" : "0 0 2px" }}>{s.who === "granny" ? "👵 GRANNY" : s.who === "rooster" ? "🐓 ROOSTER" : "🔋 BOTH"}</div>)}<div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}><span style={{ color: "#1c1917", fontWeight: 700, fontSize: 13, width: 112, flexShrink: 0, lineHeight: 1.1 }}>{s.i} {s.l}{s.el && (<span style={{ display: "block", fontSize: 10.5, fontWeight: 600, color: "#78716c", paddingLeft: 18 }}>({s.el})</span>)}</span><div style={{ flex: 1, display: "flex", gap: 1 }}>{Array.from({length:20}).map(function(_,i){return (<div key={i} style={{flex:1,height:5,borderRadius:2,background:i<lv?s.c:"#f1f5f9"}}/>);})}</div><span style={{fontSize:14,color:"#475569",width:20,textAlign:"right"}}>{lv}</span></div></div>);
+            return (<div key={s.k}>{head && (<div style={{ fontSize: 11, fontWeight: 900, letterSpacing: 1.2, color: "#57534e", margin: si ? "6px 0 2px" : "0 0 2px" }}>{s.who === "granny" ? "👵 GRANNY" : s.who === "rooster" ? "🐓 ROOSTER" : "🔋 BOTH"}</div>)}<div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}><span style={{ color: "#1c1917", fontWeight: 700, fontSize: 13, width: 112, flexShrink: 0, lineHeight: 1.1 }}><StatIcon k={s.k} size={15} style={{ verticalAlign: "-3px", marginRight: 3 }} />{s.l}{s.el && (<span style={{ display: "block", fontSize: 10.5, fontWeight: 600, color: "#78716c", paddingLeft: 18 }}>({s.el})</span>)}</span><div style={{ flex: 1, display: "flex", gap: 1 }}>{Array.from({length:20}).map(function(_,i){return (<div key={i} style={{flex:1,height:5,borderRadius:2,background:i<lv?s.c:"#f1f5f9"}}/>);})}</div><span style={{fontSize:14,color:"#475569",width:20,textAlign:"right"}}>{lv}</span></div></div>);
           })}
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 6 }}>
