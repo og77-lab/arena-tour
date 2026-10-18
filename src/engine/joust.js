@@ -42,9 +42,11 @@ export function landScore(d, bar, jitter) {
   return { inZ: inZ, base: base + (jitter || 0), total: Math.max(0, Math.min(100, base + (jitter || 0) + bar.aim + (inZ ? bar.gold : bar.miss))) };
 }
 
-/* ── Hands ── a rider's wobble, in "bar at normal speed" units: talent 30 → 5.5, 60 → 4, 90 → 2.5 */
-export function handsOf(talent) { return Math.max(1, 7 - (talent || 50) * 0.05); }
-export function talentOfHands(h) { return Math.max(0, Math.min(100, (7 - h) / 0.05)); }
+/* ── Hands ── a rider's wobble, in "bar at normal speed" units: talent 30 → 6.7, 66 → 4.5, 90 → 3.1.
+   Set so a rival's hands are like a real player's at her rank (7 − 0.05×talent made them sharper than people) */
+export var HANDS = { a: 8.5, b: 0.06 };
+export function handsOf(talent) { return Math.max(1, HANDS.a - (talent || 50) * HANDS.b); }
+export function talentOfHands(h) { return Math.max(0, Math.min(100, (HANDS.a - h) / HANDS.b)); }
 function gauss(rnd) { var u = 0, v = 0; while (!u) u = rnd(); while (!v) v = rnd(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
 export function dayForm(rnd) { return Math.exp(gauss(rnd || Math.random) * 0.08); }
 /* A rival's strike: how far from the centre she stops, at this bar speed */

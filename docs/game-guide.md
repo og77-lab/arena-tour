@@ -249,7 +249,7 @@ Prize money buys **one investment per tournament week**. After you make one, the
 
 Lances and saddles from Mavis's shop are bought on the Get ready screen and don't use the weekly investment. The world leaderboard counts everything you've ever earned, so spending never costs you places there.
 
-## 13. Fans, Knitter & the press
+## 13. Crowd love, Knitter & the press
 
 Your **crowd love** (❤️, 0–100, starting at 20) is a score of how much the crowd loves you — not a head count; your Knitter **followers** are the people. The **Crowd love & Knitter** card on Home (tap ❤️ Crowd at the top to jump to it) shows your crowd love, how much they moved this week and why (*riding +6 · interview +3 · weekly drift −1*), and your Knitter followers.
 
