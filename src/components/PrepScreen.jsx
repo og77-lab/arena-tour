@@ -172,7 +172,7 @@ export default function PrepScreen(props) {
           <span style={{ flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: preview ? "#0369a1" : C.textSoft }}>{preview ? "Trying on " + BY_ID[preview].name : BY_ID[kit.lance].name + " + " + BY_ID[kit.saddle].name}</span>
           {cost > 0 && (<span style={{ color: canPay ? C.text : C.redInk, fontWeight: 900 }}>Basket {money(cost)}</span>)}
         </div>
-        <Numbers S={S} ev={ev} tier={props.tier} gaps={props.gaps} kit={shown} preview={preview} />
+        <Numbers S={S} ev={ev} tier={props.tier} tr={props.tr} kit={shown} preview={preview} />
         <button onClick={confirm} disabled={!canPay} style={button(canPay ? "gold" : "ghost", { width: "100%", padding: "12px 10px", fontSize: 16, opacity: canPay ? 1 : 0.6 })}>
           {canPay ? (cost > 0 ? "✅ Pay " + money(cost) + " & ride" : "✅ Confirm & ride") : "Not enough money — take something out"}
         </button>
@@ -211,8 +211,8 @@ function Effects(props) {
    Points per strike sums everything up: it's what an average-timed rider would score with those numbers. */
 function Numbers(props) {
   var p = props.S.player, cond = props.ev ? props.ev.cond : "classic";
-  var base = { tier: props.tier }, normal = Object.assign({ cond: "classic", gaps: {}, fit: { g: 100, r: 100 }, kit: BASIC }, base);
-  var here = Object.assign({ cond: cond, gaps: props.gaps || {}, fit: fitOf(p), kit: BASIC }, base), kit = Object.assign({}, here, { kit: props.kit });
+  var base = { tier: props.tier }, normal = Object.assign({ cond: "classic", tr: props.tr || {}, fit: { g: 100, r: 100 }, kit: BASIC }, base);
+  var here = Object.assign({ cond: cond, tr: props.tr || {}, fit: fitOf(p), kit: BASIC }, base), kit = Object.assign({}, here, { kit: props.kit });
   var rows = [
     { k: "zone", v: 2, label: "Gold zone", get: function (o) { return matchNumbers(o).zone; }, f: function (v) { return v.toFixed(1) + "%"; }, up: true, eps: 0.05 },
     { k: "speed", v: 1.2, label: "Bar speed", get: barSpeed, f: function (v) { return Math.round(v) + "%"; }, up: false, eps: 0.5 },

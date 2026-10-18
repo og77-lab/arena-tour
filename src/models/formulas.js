@@ -29,20 +29,19 @@ export function pRankOf(S) {
   return 1001;
 }
 
-/* NPC vs NPC bracket resolution — skill + training with a random roll */
-import { fatiguePenalty, effTr } from "../engine/fitness";
+/* Rival vs rival: the very match you play (engine/joust), strike by strike — each on her own bar from her own
+   abilities, her talent's hands, her kit for these lanes, her tiredness, the stands and nerves.
+   ctx: { tier, round, diff (else from tier + round), cond, bo, kit(n) → kit, rank(n) → rank } */
+import { effTr, fitOf } from "../engine/fitness";
+import { simMatch } from "../engine/joust";
+import { crowdEdge, crowdLove } from "../engine/social";
 
-export function nW(a, b, bonus) {
-  var ta = a.inj ? effTr(a) : (a.tr || {}), tb = b.inj ? effTr(b) : (b.tr || {});
-  var bA = ((ta.r||0)+(ta.p||0)+(ta.f||0)+(ta.s||0)+(ta.g||0)) * 0.9;
-  var bB = ((tb.r||0)+(tb.p||0)+(tb.f||0)+(tb.s||0)+(tb.g||0)) * 0.9;
-  var sA = Math.min(95, 55 + ((a.skill||50)+bA) * 0.4);
-  var sB = Math.min(95, 55 + ((b.skill||50)+bB) * 0.4);
-  /* Tired riders lose a little (same tiredness rules as the player's matches) */
-  sA -= fatiguePenalty(a); sB -= fatiguePenalty(b);
-  /* Her lance and saddle for these lanes, if she rented any */
-  if (bonus) { sA += bonus(a); sB += bonus(b); }
-  return (sA + Math.random() * 14 - 5) >= (sB + Math.random() * 14 - 5) ? a : b;
+var TIER_DIFF = [0, 1, 2, 3, 4, 3, 4];
+export function nW(a, b, ctx) {
+  ctx = ctx || {};
+  var tier = ctx.tier != null ? ctx.tier : 2, d = ctx.diff != null ? ctx.diff : (TIER_DIFF[tier] || 0) + (ctx.round || 0) * 0.6;
+  function who(n) { var r = ctx.rank ? ctx.rank(n) : 500; return { tr: effTr(n), talent: n.skill || 50, kit: ctx.kit ? ctx.kit(n) : null, fit: fitOf(n), rank: r, love: crowdLove(n, r) }; }
+  return simMatch(who(a), who(b), { diff: d, bo: ctx.bo || 3, cond: ctx.cond || "classic" }, crowdEdge).winner === "a" ? a : b;
 }
 
 /* Training points a rider earns in a week — the same rule for you and every rival: a small base for turning up,

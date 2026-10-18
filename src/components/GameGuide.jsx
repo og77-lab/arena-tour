@@ -211,22 +211,23 @@ function body(id) {
     case "difficulty": return (<>
       <P>How hard a strike is comes from three things:</P>
       <Table head={["What", "What it does"]} rows={[
-        ["1 · The stat gap", "Each stat is your level minus hers. Even levels cancel out. Ahead: a slower bar, a wider zone, extra points. Behind: the opposite."],
-        ["2 · The round", "Each tier starts a step harder, and each round within a tournament adds a little more. This narrows the gold zone and speeds the bar for both of you, whatever your stats."],
-        ["3 · Her talent", "How accurate she is. It doesn't touch your bar — it decides how high her scores tend to be."]
+        ["1 · Your levels", "Your own levels build your own bar: a slower bar, a wider gold zone, extra points, softer misses. Her levels build her bar, never yours."],
+        ["2 · The round", "Each tier starts a step harder, and each round within a tournament adds a little more. This narrows the gold zone and speeds the bar for both of you."],
+        ["3 · Hands", "Where you stop on your bar is your finger. Where she stops is her talent: how close to the centre she lands, a little worse when her bar runs faster, with a form for the day."],
+        ["4 · Nerves", "Facing a rider ranked many times higher (×30 or more) shrinks the underdog's gold zone by up to 1%, less with every set she wins. Close ranks: nothing."]
       ]} />
       <P>An example — the width of your gold zone with Steady Stride (bigger gold):</P>
       <Table head={["Situation", "Gold zone"]} rows={[
-        ["Futures round 1, even levels", "13% of the bar"],
-        ["Same, you 5 levels ahead", "19%"],
-        ["Same, she's 5 levels ahead", "7%"],
-        ["Masters final, even levels", "about 5%"]
+        ["Futures round 1, no training", "12% of the bar"],
+        ["Same, Steady Stride 5", "13.7%"],
+        ["Same, Steady Stride 10", "15%"],
+        ["Masters final, Steady Stride 15", "about 6.6%"]
       ]} />
-      <P>The gold zone never shrinks to nothing: once it is under 8% of the bar, every further squeeze (a late round, a stronger rider, wind, tiredness, gear) counts less and less, so it bottoms out around 4–5%. The bar never gets impossibly fast or slow either.</P>
+      <P>The gold zone never shrinks to nothing: once it is under 8% of the bar, every further squeeze (a late round, wind, tiredness, gear, nerves) counts less and less, so it bottoms out around 4–5%. The bar never gets impossibly fast or slow either.</P>
     </>);
 
     case "training": return (<>
-      <P>Six stats, each from level 0 to 20: three for the granny, two for the rooster, and Bounce-back for recovery. For the first five <B>only the gap to your opponent counts</B> — if you both have 5 Aim (extra points), it cancels out.</P>
+      <P>Six stats, each from level 0 to 20: three for the granny, two for the rooster, and Bounce-back for recovery. Every level builds <B>your own bar</B>; her levels build hers. Each level gives a little less than the one before (level 20 works like 11).</P>
       <ChipRows rows={[["r", "⚡ Reflexes (slower bar)"], ["f", "🎯 Aim (extra points)"], ["g", "🛡️ Stubbornness (softer misses)"], ["s", "🫀 Stamina (less speed-up)"], ["p", "🐾 Steady Stride (bigger gold)"], ["b", "🔋 Bounce-back"]].map(function (x) { return { k: x[0], name: x[1], sub: x[0] === "b" ? "counts on its own" : "each level ahead", list: statEffect(x[0]) }; })} />
       <H>Training points (TP)</H>
       <P>Everyone on tour — you and every rival — earns TP by the same rule every week: <B>8 for turning up, plus a third of the ranking points you won</B>. A deep run buys you a few levels on the riders who went out early; the edge fades once you move up to a tier where everyone is winning that much. You also get <B>sponsor TP</B> from your fans (one per 10 fans).</P>
@@ -280,7 +281,7 @@ function body(id) {
     </>);
 
     case "fans": return (<>
-      <P>Your <B>fans</B> (❤️, 0–100, starting at 20) are how much the crowd loves you.</P>
+      <P><B>Crowd love</B> (❤️, 0–100, starting at 20) is a score of how much the crowd loves you, not a head count. Your Knitter followers are the people.</P>
       <FanRules />
       <H>🧶 Knitter</H>
       <P>The granny social network (posts are <i>knits</i>). Everyone has followers; yours grow with wins, titles, liked interviews and viral moments, faster the more famous you are. They lift the level your fans settle at, and the paper prints the week's best knits.</P>

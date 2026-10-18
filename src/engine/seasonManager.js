@@ -52,10 +52,12 @@ export function mkSeason(name, num, prev) {
   };
   /* The crowd, the press, the paper, your badges, career counters and grudges all carry over between seasons (no undefined fields: the cloud save rejects them) */
   if (prev) {
-    ["fans", "ivSeen", "lastTones", "goal", "ach", "stats", "rival", "settledRivals", "tips", "tutorial", "earned", "pedigree", "locker", "kit", "gearSpent", "followers"].forEach(function (k) { if (prev.player[k] != null) S.player[k] = prev.player[k]; });
+    ["fans", "ivSeen", "lastTones", "goal", "ach", "stats", "rival", "settledRivals", "tips", "tutorial", "earned", "pedigree", "locker", "kit", "gearSpent", "followers", "hm", "startPts"].forEach(function (k) { if (prev.player[k] != null) S.player[k] = prev.player[k]; });
     if (prev.news) S.news = prev.news;
     if (prev.newsSeenAt != null) S.newsSeenAt = prev.newsSeenAt;
   }
+  S.eng = 2;                       /* the match engine version: each rider on her own bar (engine/joust) */
+  if (!prev) S.player.startPts = 10;  /* starting talent: 10 points to spread over the stats before the first event */
   S.start = seasonSnapshot(S);
   return S;
 }

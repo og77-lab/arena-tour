@@ -16,6 +16,7 @@ import FinalOutro from "./FinalOutro";
 import { conditionOf, softZone } from "../engine/events"
 import { kitFx } from "../engine/gear"
 import { fatigueFx } from "../engine/fitness";
+import { riderBar, speedAt, landScore, npcMiss, dayForm, nerves, handsSample, CTR } from "../engine/joust";
 import { enterMatch, leaveMatch, startBattle, stopBattle } from "../music";
 
 const { useState, useEffect, useRef } = React;
@@ -195,23 +196,28 @@ export default function PowerBar(props) {
   /* Menu music steps aside while a match is on screen */
   useEffect(function () { enterMatch(); return leaveMatch; }, []);
   var tr = props.tr || {}, otr = props.otr || {};
-  var nR=(tr.r||0)-(otr.r||0), nP=(tr.p||0)-(otr.p||0), nF=(tr.f||0)-(otr.f||0), nS=(tr.s||0)-(otr.s||0), nG=(tr.g||0)-(otr.g||0);
-  /* The lane conditions (mud, wind, heat, village green) bend the bar for both riders, and make one stat gap count more (or all of them less) */
+  /* The lane conditions (mud, wind, heat, village green) bend the bar for both riders, and make one stat count more (or all of them less) */
   var COND = conditionOf(props.cond), CW = COND.w || {};
-  nR *= CW.r || 1; nP *= CW.p || 1; nF *= CW.f || 1; nS *= CW.s || 1; nG *= CW.g || 1;
   /* Your lance and saddle bend your own bar only (never hers) */
   var KIT = kitFx(props.gear, props.cond);
   /* Tiredness (granny: zone and misses; rooster: bar speed), yours and hers */
   var FT = fatigueFx(props.fit || { g: 100, r: 100 }), OFT = fatigueFx(props.oppFit || { g: 100, r: 100 });
   /* Her kit bends her own strikes, exactly as yours bends yours */
   var OKIT = kitFx(props.oppGear, props.cond);
-  var ctr = 72, swBase = softZone(13 - props.diff * 1.5 + nP * 1.2 + COND.zone + KIT.zone + FT.zone), fb = nF * 1.5;
-  var accel = Math.max(0.03, 0.3 - nS * 0.015) * COND.accel * KIT.accel * FT.accel, minSc = Math.max(0, 15 + nG * 1.5 + KIT.floor);
+  /* Each rider's own bar, from her own abilities only (engine/joust): yours from your levels, hers from hers.
+     Nerves: the much lower-ranked rider's gold zone is a little smaller, fading with every set she wins. */
+  var myNerves = nerves(props.myRank, props.oppRank, countWon(sets)), herNerves = nerves(props.oppRank, props.myRank, sets.length - countWon(sets));
+  var MYBAR = riderBar({ tr: tr, diff: props.diff, cond: props.cond, kit: props.gear, fit: props.fit, nerves: myNerves });
+  var OBAR = riderBar({ tr: otr, diff: props.diff, cond: props.cond, kit: props.oppGear, fit: props.oppFit, nerves: herNerves });
+  var ctr = CTR, swBase = MYBAR.zone, fb = MYBAR.lvAim;
+  var accel = MYBAR.accel, minSc = MYBAR.floor;
   /* Bar resets every set, but each new set starts a little faster (fatigue — Stamina (less speed-up) softens it) */
-  var baseSpd = Math.max(0.8, 2.4 + props.diff * 0.4 - nR * 0.12) * COND.speed * KIT.speed * FT.speed;
-  function speedFor(setIdx, strikeIdx) { return baseSpd + setIdx * accel * 0.6 + strikeIdx * accel; }
+  function speedFor(setIdx, strikeIdx) { return speedAt(MYBAR, setIdx, strikeIdx); }
   var spd = useRef(speedFor(init.sets.length, init.my.length));
   var dir = useRef(1);
+  /* Her form for this match: a small, steady lift or dip (see her strike below) */
+  var oForm = useRef(null); if (oForm.current == null) oForm.current = dayForm();
+  var handsRef = useRef([]);
 
   var setsWon = countWon(sets), setsLost = sets.length - setsWon;
   var setNum = sets.length + 1;
@@ -237,7 +243,7 @@ export default function PowerBar(props) {
      Inside the gold zone: 100 on the centre line, sliding to 85 at the zone's edge.
      Just outside it drops sharply to 70, and keeps falling the further out you are, down to the floor. */
   function strikeScore(d, half, floor) {
-    var s = d <= half ? 100 - 15 * (d / half) : Math.max(floor, 70 - (d - half) * 2.2);
+    var s = d <= half ? 100 - 15 * (d / half) : Math.max(floor, 70 - (d - half) * MYBAR.slope);
     return s + (Math.random() * 2 - 1);
   }
   function gauss() { var u = 0, v = 0; while (!u) u = Math.random(); while (!v) v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
@@ -273,14 +279,15 @@ export default function PowerBar(props) {
     /* How the score was built, shown under it: where it landed + Aim (extra points) + gear − tiredness */
     var aimShown = Math.round(fb), gearShown = Math.round(gearPts), tiredShown = Math.round(tiredPts), capped = base + fb + gearPts + tiredPts > 100;
     var why = { kind: inZ ? "Gold" : base <= minSc + 1.01 ? "Floor" : "Outside", aim: aimShown, gear: gearShown, tired: tiredShown, capped: capped, base: capped ? Math.round(base) : Math.round(sc) - aimShown - gearShown - tiredShown };
-    /* Her strike lands on the same bar. Talent sets how tightly she groups around the centre, so the riders you meet
-       deep in a big tournament are the steadiest. The round's faster bar is your challenge, not a handicap for her:
-       she only feels a little of the match speeding up (an odd slip late on), plus the lanes, her gear and her tiredness. */
-    var oSw = softZone(13 - (props.tier || 0) * 0.4 + COND.zone + OFT.zone + OKIT.zone) + CROWD.her * (onTheLine ? 2 : 1);
-    var oSpd = (2.4 * COND.speed * OKIT.speed + (sets.length * 0.18 + myH.length * 0.3) * 0.35 * COND.accel * OFT.accel * OKIT.accel) * OFT.speed;
-    var oSigma = Math.max(1.5, 9.5 - (props.oppSkill || 50) * 0.075) * oSpd / 2.4;
-    var oPos = Math.max(0, Math.min(100, ctr + gauss() * oSigma));
-    var oD = Math.abs(oPos - ctr), oIn = oD <= oSw / 2, osc = Math.round(Math.max(0, Math.min(100, strikeScore(oD, oSw / 2, 15 + OKIT.floor) + (oIn ? 0 : OFT.miss) + OKIT.aim + (oIn ? OKIT.gold : OKIT.miss))));
+    /* Her strike: her own bar (her levels, kit, tiredness, nerves), the stands, and her hands — her talent's wobble
+       at her bar's speed, with her form for the day. Same rules as yours, from her own abilities (engine/joust). */
+    var oSw = OBAR.zone + CROWD.her * (onTheLine ? 2 : 1);
+    var oSpd = speedAt(OBAR, sets.length, myH.length);
+    var oPos = Math.max(0, Math.min(100, ctr + npcMiss(props.oppSkill || 50, oForm.current, oSpd)));
+    var oD = Math.abs(oPos - ctr), oIn = oD <= oSw / 2;
+    var osc = Math.round(landScore(oD, Object.assign({}, OBAR, { zone: oSw }), Math.random() * 2 - 1).total);
+    /* your hands, measured from this strike (shown in your profile) */
+    handsRef.current.push(Math.round(handsSample(d, spd.current) * 100) / 100);
     var youWon = sc > osc, tie = sc === osc;
     var id = Date.now() + Math.random();
     var nm = myH.concat([sc]), no = opH.concat([osc]);
@@ -373,7 +380,7 @@ export default function PowerBar(props) {
   function finish() {
     if (!res || finished.current || Date.now() - doneAt.current < 1200) return;
     finished.current = true;
-    props.onDone(res.w, res.pa, res.oa, res.setsWon + "-" + res.setsLost, res.sets.map(function (s) { return s.won ? "W" : "L"; }).join(""), { gold: goldRef.current.total, flawless: goldRef.current.flawless, sets: res.sets.map(function (s) { return [Math.round(avg(s.my)), Math.round(avg(s.op))]; }) });
+    props.onDone(res.w, res.pa, res.oa, res.setsWon + "-" + res.setsLost, res.sets.map(function (s) { return s.won ? "W" : "L"; }).join(""), { gold: goldRef.current.total, flawless: goldRef.current.flawless, hands: handsRef.current.slice(), sets: res.sets.map(function (s) { return [Math.round(avg(s.my)), Math.round(avg(s.op))]; }) });
   }
 
   /* Space / Enter drives every phase */
@@ -507,7 +514,7 @@ export default function PowerBar(props) {
         <div style={{ textAlign: "center" }}>
           <span style={{ display: "inline-flex", alignItems: "center", gap: 6, background: banner ? banner.col : "#1e293b", color: "#fff", fontSize: 10, fontWeight: 900, letterSpacing: 1.5, padding: "2px 10px", borderRadius: 20, textTransform: "uppercase", boxShadow: "0 2px 6px rgba(0,0,0,0.15)", animation: banner && !REDUCED_MOTION ? "pulse 1s ease infinite" : "none" }}>
             {!banner && (<span aria-hidden style={{ width: 7, height: 7, borderRadius: "50%", background: tierColor, boxShadow: "0 0 6px " + tierColor }} />)}
-            {banner ? banner.tag + (roar && ph === "go" ? " · 📣 Crowd roars" : "") : (deciding ? "Deciding set" : "Set " + setNum) + " · Strike " + Math.min(cnt + 1, STRIKES_PER_SET) + "/" + STRIKES_PER_SET}
+            {banner ? banner.tag + (roar && ph === "go" ? " · 📣 Crowd roars" : "") : (deciding ? "Deciding set" : "Set " + setNum) + " · Strike " + Math.min(cnt + 1, STRIKES_PER_SET) + "/" + STRIKES_PER_SET + (myNerves ? " · 😰 nerves −" + myNerves + "%" : herNerves ? " · 😰 her nerves −" + herNerves + "%" : "")}
           </span>
         </div>
 

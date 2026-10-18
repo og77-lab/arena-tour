@@ -22,7 +22,7 @@ function Bunting(props) {
 function Stat(props) {
   return (
     <div onClick={props.onClick} style={{ background: C.cardWarm, border: "1.5px solid " + C.line, borderRadius: 10, padding: "4px 8px", minWidth: 0, cursor: props.onClick ? "pointer" : "default" }}>
-      <div style={label()}>{props.k}{props.onClick ? " ›" : ""}</div>
+      <div style={label()}>{props.k}</div>
       <div style={{ fontSize: 15, fontWeight: 900, color: props.color || C.text, whiteSpace: "nowrap" }}>{props.v}</div>
     </div>
   );
@@ -89,7 +89,7 @@ export default function HomeTab(props) {
             <Stat k="Points" v={(S.player.sp || 0).toLocaleString()} />
             <Stat k="Prize" v={money(S.player.money)} color={C.greenInk} />
             <Stat k="Train" v={(tr.tp || 0) + " TP"} color={C.goldInk} />
-            <Stat k="Fans" v={"❤️ " + fans} color="#be123c" onClick={function (e) { e.stopPropagation(); var el = document.getElementById("fans-card"); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); }} />
+            <Stat k="Crowd" v={"❤️ " + fans} color="#be123c" onClick={function (e) { e.stopPropagation(); var el = document.getElementById("fans-card"); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); }} />
           </div>
         </div>
       </button>
@@ -122,7 +122,7 @@ export default function HomeTab(props) {
         <button onClick={props.onTrain} style={Object.assign(card({ padding: "10px 12px" }), { display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer", width: "100%", fontFamily: FONT, textAlign: "left" })}>
           <span>
             <span style={{ fontSize: 14, fontWeight: 900, color: C.text }}>🏋️ {tr.tp} training points to spend</span>
-            <span style={{ display: "block", fontSize: 12, color: C.textSoft, marginTop: 2 }}>Stats only count relative to your opponent — keep up!</span>
+            <span style={{ display: "block", fontSize: 12, color: C.textSoft, marginTop: 2 }}>Every level makes your own bar easier.</span>
           </span>
           <span style={{ fontSize: 20, color: C.goldInk, fontWeight: 900 }}>›</span>
         </button>

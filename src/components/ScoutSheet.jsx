@@ -69,7 +69,7 @@ export default function ScoutSheet(props) {
         </div>
 
         <div style={card({ padding: "6px 12px", marginTop: 10 })}>
-          <div style={Object.assign(label(C.textSoft), { margin: "4px 0 2px" })}>Training — only the gap counts</div>
+          <div style={Object.assign(label(C.textSoft), { margin: "4px 0 2px" })}>Training — each builds her own bar</div>
           {sc.stats.map(function (s, i) {
             var head = i === 0 || sc.stats[i - 1].who !== s.who;
             return (

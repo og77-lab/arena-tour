@@ -7,24 +7,25 @@ import { useState } from "react";
 import { crowdLove, followersOf, crowdEdge, fmtFollowers, fanChain } from "../engine/social";
 import { fansOf } from "../engine/fans";
 import FanRules from "./FanRules";
+import { handsTalent } from "../engine/joust";
 
 /* Fans and followers, and what they mean when you meet: the stands back whoever the crowd loves more */
 function FanBox(props) {
   var p = props.p, me = props.me || {}, isMe = p.isP || p.id === 1;
   var love = isMe ? fansOf(me) : crowdLove(p, props.rank), fol = isMe ? followersOf(Object.assign({}, me, { isP: true })) : followersOf(p, props.rank);
   var line, rs = useState(false);
-  if (isMe) { var c = fanChain(me, props.myRank || props.rank); line = (<span>Sponsors pay you <b style={{ color: "#15803d" }}>+{c.tp} training pts</b> a week · your fans drift back toward <b>{c.settle}</b></span>); }
+  if (isMe) { var c = fanChain(me, props.myRank || props.rank); line = (<span>Sponsors pay you <b style={{ color: "#15803d" }}>+{c.tp} training pts</b> a week · your ❤️ slides toward <b>{c.settle}</b></span>); }
   else {
     var mine = fansOf(me), e = crowdEdge(mine, love).d;
-    line = (<span>When you meet (you ❤️ {mine}): {e > 0.05 ? (<b style={{ color: "#15803d" }}>the stands back you, your gold zone +{e.toFixed(1)}%</b>) : e < -0.05 ? (<b style={{ color: "#b91c1c" }}>the stands back her, her gold zone +{(-e).toFixed(1)}%</b>) : (<b>the stands are split, no edge</b>)}{Math.abs(e) > 0.05 ? ", doubled on match point" : ""}</span>);
+    line = (<span>When you meet (yours ❤️ {mine}): {e > 0.05 ? (<b style={{ color: "#15803d" }}>the stands back you, your gold zone +{e.toFixed(1)}%</b>) : e < -0.05 ? (<b style={{ color: "#b91c1c" }}>the stands back her, her gold zone +{(-e).toFixed(1)}%</b>) : (<b>the stands are split, no edge</b>)}{Math.abs(e) > 0.05 ? ", doubled on match point" : ""}</span>);
   }
   return (
     <div style={{ background: "#fff1f2", border: "1.5px solid #fecdd3", borderRadius: 8, padding: "7px 9px", marginBottom: 10 }}>
       <div style={{ display: "flex", gap: 14, alignItems: "baseline" }}>
-        <span style={{ fontSize: 17, fontWeight: 900, color: "#be123c" }}>❤️ {love} <span style={{ fontSize: 12, color: "#64748b" }}>fans</span></span>
+        <span style={{ fontSize: 17, fontWeight: 900, color: "#be123c" }}>❤️ {love}<span style={{ fontSize: 12, color: "#64748b" }}>/100 crowd love</span></span>
         <span style={{ fontSize: 15, fontWeight: 900, color: "#0e7490" }}>🧶 {fmtFollowers(fol)} <span style={{ fontSize: 12, color: "#64748b" }}>followers</span></span>
       </div>
-      <div style={{ fontSize: 12.5, color: "#44403c", marginTop: 3, lineHeight: 1.35 }}>{line} <button onClick={function () { rs[1](!rs[0]); }} style={{ border: "none", background: "none", padding: 0, color: "#be123c", fontWeight: 900, fontSize: 12.5, cursor: "pointer", textDecoration: "underline" }}>{rs[0] ? "hide rules" : "📜 fan rules"}</button></div>
+      <div style={{ fontSize: 12.5, color: "#44403c", marginTop: 3, lineHeight: 1.35 }}>{line} <button onClick={function () { rs[1](!rs[0]); }} style={{ border: "none", background: "none", padding: 0, color: "#be123c", fontWeight: 900, fontSize: 12.5, cursor: "pointer", textDecoration: "underline" }}>{rs[0] ? "hide rules" : "📜 rules"}</button></div>
       {rs[0] && (<div style={{ marginTop: 6, background: "#fff", borderRadius: 6, padding: "6px 8px" }}><FanRules /></div>)}
     </div>
   );
@@ -101,10 +102,18 @@ export default function Profile(props) {
           })}
         </div>
         {/* Skill + Potential bar for NPCs */}
+        {p.isP && (function () { var me = props.me || p, ht = handsTalent(me.hm), n = (me.hm && me.hm.n) || 0; return (
+          <div style={{ marginBottom: 10, padding: 8, background: "#ffffff", borderRadius: 6 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14 }}>
+              <span style={{ color: "#475569", fontWeight: 700 }}>🖐 Your hands</span>
+              <span style={{ color: "#0f172a", fontWeight: 800 }}>{ht != null ? "≈ " + ht : "—"}</span>
+            </div>
+            <div style={{ fontSize: 12, color: "#64748b", marginTop: 2, lineHeight: 1.35 }}>{ht != null ? "Measured from your last " + n + " strikes, on the same scale as a rival's talent." : "Measured from your strikes — ready after 30 (" + n + " so far)."}</div>
+          </div>); })()}
         {!p.isP && (
           <div style={{ marginBottom: 10, padding: 8, background: "#ffffff", borderRadius: 6 }}>
             <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14, marginBottom: 4 }}>
-              <span style={{ color: "#475569", fontWeight: 700 }}>Natural Talent</span>
+              <span style={{ color: "#475569", fontWeight: 700 }}>🖐 Natural Talent <span style={{ fontWeight: 600, fontSize: 12 }}>(her hands)</span></span>
               <span style={{ fontSize: 14 }}>
                 <span style={{ color: "#0f172a", fontWeight: 800 }}>{Math.round(p.skill||0)}</span>
                 <span style={{ color: "#94a3b8" }}> / </span>

@@ -8,6 +8,9 @@ import { W, CSS, EMO, TIERS, RN5, RN6, HN, HC, HI, TOTAL_EVENTS, FINALS_BO, STAT
 import { sh, bs, nW, pRankOf, getRanked, getARanked, trainCost, weeklyTP } from "./models/formulas";
 import { sSet, sGet, stamp, pickNewest, queueCloudSave, cancelCloudSave } from "./engine/persistence";
 import { pack, unpack } from "./engine/codec";
+import { addHands, simMatch, handsTalent } from "./engine/joust";
+import { shapePotentials } from "./engine/npcGenerator";
+import StartTalent from "./components/StartTalent";
 import { followersOf, followersGain, followersLift, crowdLove, weekKnits, fmtFollowers, fanChain } from "./engine/social";
 import { mkSeason } from "./engine/seasonManager";
 import PowerBar from "./components/PowerBar";
@@ -99,13 +102,27 @@ function fitRows(S, o) {
 /* A rival's kit for this week's lanes (stable: the same answer wherever it's asked) */
 function weekKey(S) { return S.sNum * 100 + S.calIdx; }
 function kitOfNpc(S, n, cond, tier, rank) { return npcKit(n, cond || "classic", tier, rank, weekKey(S)); }
+/* What a rival-vs-rival match needs to know: the lanes, the tier, each rider's kit and rank (see nW) */
 function kitBonus(S, cond, tier) {
   var rm = rankMap(S), cache = {};
-  return function (p) { if (!p || p.isP) return 0; if (cache[p.id] == null) cache[p.id] = kitStrength(kitOfNpc(S, p, cond, tier, rm[p.id]).ev); return cache[p.id]; };
+  return { tier: tier, cond: cond || "classic", bo: (TIERS[tier] && TIERS[tier].bo) || 3,
+    rank: function (p) { return rm[p.id] || 1000; },
+    kit: function (p) { if (!p || p.isP) return null; if (!cache[p.id]) cache[p.id] = kitOfNpc(S, p, cond, tier, rm[p.id]); return cache[p.id]; } };
 }
 function kitIcons(k) { return k && (k.lance !== "broom" || k.saddle !== "teacosy") ? (GEAR_ID[k.lance].icon + GEAR_ID[k.saddle].icon) : null; }
 
-/* Your stat gaps (as you ride today) against a set of riders: their average, or one opponent */
+/* A save from before each-rider-on-her-own-bar: talent ceilings reshaped (only five can reach 90), and a one-time
+   gift of the 10 starting points every new granny gets */
+function toEngine2(d) {
+  var n = Object.assign({}, d, { npcs: shapePotentials(d.npcs.map(function (x) { return Object.assign({}, x); })), eng: 2 });
+  n.player = Object.assign({}, d.player, { startPts: (d.player.startPts || 0) + 10 });
+  return n;
+}
+
+/* Season finals between rivals: the finals' own round difficulty (groups 3, semis 4, final 5) */
+function finCtx(S, d) { var rm = rankMap(S); return { tier: 6, diff: d, bo: FINALS_BO, cond: "classic", rank: function (p) { return rm[p.id] || 1000; } }; }
+
+/* Your levels (as you ride today) minus a set of riders' average — shown as a fact on the training screen */
 var GAP_KEYS = ["r", "p", "f", "s", "g"];
 function gapsVs(S, others) {
   var me = effTr(S.player), out = {}, list = (others || []).filter(Boolean);
@@ -160,6 +177,7 @@ export default function Arena(props) {
       if (!d || !d.player) { setScr("title"); return; }
       /* Older tours reused first names: give every rider her own (once, then save) */
       if (needsUniqueNames(d)) { d = uniqueNames(d); try { sSet(d); } catch (e) {} }
+      if (!d.eng || d.eng < 2) { d = toEngine2(d); try { sSet(d); } catch (e) {} }
       setS(d);
       if (d.activeT) { setTS(d.activeT); setScr("tourney"); }
       else if (d.activeF) { setFS(d.activeF); setScr("finals"); }
@@ -191,7 +209,7 @@ export default function Arena(props) {
     queueCloudSave(userId, snap, saveGameToCloud);
   }, [ts, fs]);
   function exportSave() { if (!S) return; var b = new Blob([JSON.stringify(pack(S))],{type:"application/json"}); var u = URL.createObjectURL(b); var a = document.createElement("a"); a.href = u; a.download = "arena-"+S.pName+"-s"+S.sNum+".json"; a.click(); URL.revokeObjectURL(u); }
-  function importSave(e) { var f = e.target.files && e.target.files[0]; if (!f) return; var r = new FileReader(); r.onload = function(ev){ try { var d = unpack(JSON.parse(ev.target.result)); if (d && d.player) { save(uniqueNames(d)); setScr("hub"); } } catch(err){} }; r.readAsText(f); }
+  function importSave(e) { var f = e.target.files && e.target.files[0]; if (!f) return; var r = new FileReader(); r.onload = function(ev){ try { var d = unpack(JSON.parse(ev.target.result)); if (d && d.player) { if (!d.eng || d.eng < 2) d = toEngine2(d); save(uniqueNames(d)); setScr("hub"); } } catch(err){} }; r.readAsText(f); }
   var _syncing = useState(false), syncing = _syncing[0], setSyncing = _syncing[1];
   var _syncMsg = useState(""), syncMsg = _syncMsg[0], setSyncMsg = _syncMsg[1];
   var _mutedState = useState(isMuted()), mutedState = _mutedState[0], setMutedState = _mutedState[1];
@@ -356,7 +374,7 @@ export default function Arena(props) {
   /* ─── Bracket logic ─── */
   function runBk(bk, round, alive, maxRound, kb) {
     var rd = bk[round]; if (!rd) return { bracket: bk, round: round, pending: null, done: true };
-    for (var i = 0; i < rd.length; i++) { var m = rd[i]; if (m.w) continue; if ((m.a.isP || m.b.isP) && alive) return { bracket: bk, round: round, pending: i, done: false }; var w = nW(m.a, m.b, kb); w.tP = (w.tP||0) + (bk._pts ? bk._pts[round] : 0); m.w = w; }
+    for (var i = 0; i < rd.length; i++) { var m = rd[i]; if (m.w) continue; if ((m.a.isP || m.b.isP) && alive) return { bracket: bk, round: round, pending: i, done: false }; var w = nW(m.a, m.b, kb ? Object.assign({}, kb, { round: round }) : null); w.tP = (w.tP||0) + (bk._pts ? bk._pts[round] : 0); m.w = w; }
     if (round >= maxRound - 1) return { bracket: bk, round: round, pending: null, done: true };
     var nx = []; for (var j = 0; j < rd.length; j += 2) { if (j+1 < rd.length) nx.push({ a: rd[j].w, b: rd[j+1].w, w: null }); }
     bk[round + 1] = nx;
@@ -446,6 +464,7 @@ export default function Arena(props) {
       delete h2h[opp.id]; h2h[opp.id] = entries.slice(-10); /* keep last 10 per opponent; re-adding moves her to the most recent end */
       var h2hKeys = Object.keys(h2h); for (var hk = 0; hk < h2hKeys.length - 150; hk++) delete h2h[h2hKeys[hk]]; /* the 150 most recent opponents */
       var pAfter = Object.assign({}, S.player, { h2h: h2h, tips: Object.assign({}, S.player.tips || {}, { match: true }) });
+      if (xtra && xtra.hands && xtra.hands.length) pAfter.hm = xtra.hands.reduce(addHands, S.player.hm || null); /* your hands, measured */
       var fNow = afterSets(fitOf(S.player), setsOf(setScore)); /* every set you rode tires you */
       putFit(pAfter, fNow);
       var hurt = rollInjury(fNow); if (hurt) { pAfter.inj = addInjury(S.player.inj, hurt); pAfter.newInj = hurt.id; }
@@ -601,7 +620,7 @@ export default function Arena(props) {
           var cur = brackets[brackets.length-1]; var nxt = [];
           for (var mi2 = 0; mi2 < cur.length; mi2 += 2) {
             if (mi2+1 < cur.length) {
-              var w2 = nW(cur[mi2], cur[mi2+1], evKb);
+              var w2 = nW(cur[mi2], cur[mi2+1], Object.assign({}, evKb, { round: rd2 }));
               var l2 = w2.id === cur[mi2].id ? cur[mi2+1] : cur[mi2];
               deepRound[w2.id] = rd2 + 1;
               var gap = (rkOf[w2.id] || 0) - (rkOf[l2.id] || 0);
@@ -785,17 +804,17 @@ export default function Arena(props) {
   function advF(st) {
     if (st.champ) return;
     if (st.phase==="groups") {
-      while (st.gi < st.gm.length) { var m = st.gm[st.gi]; if (m.a.isP||m.b.isP){st.pending=st.gi;return;} var w=nW(m.a,m.b),l=w.id===m.a.id?m.b:m.a;m.w=w; var h=st.houses[m.hi]; for(var x=0;x<h.length;x++){if(h[x].id===w.id){h[x].gP+=3;h[x].gW++;}if(h[x].id===l.id){h[x].gL++;}} st.gi++; }
+      while (st.gi < st.gm.length) { var m = st.gm[st.gi]; if (m.a.isP||m.b.isP){st.pending=st.gi;return;} var w=nW(m.a,m.b,finCtx(S,3)),l=w.id===m.a.id?m.b:m.a;m.w=w; var h=st.houses[m.hi]; for(var x=0;x<h.length;x++){if(h[x].id===w.id){h[x].gP+=3;h[x].gW++;}if(h[x].id===l.id){h[x].gL++;}} st.gi++; }
       var hw=st.houses.map(function(h){return h.slice().sort(function(a,b){return(b.gP-a.gP)||(b.gW-a.gW);})[0];}); st.semis=[{a:hw[0],b:hw[2],w:null},{a:hw[1],b:hw[3],w:null}]; st.phase="semis"; st.pending=null; advF(st);
     } else if (st.phase==="semis") {
-      for(var i=0;i<st.semis.length;i++){var sm=st.semis[i];if(sm.w)continue;if(sm.a.isP||sm.b.isP){st.pending=i;return;}sm.w=nW(sm.a,sm.b);} if(st.semis[0].w&&st.semis[1].w){st.final={a:st.semis[0].w,b:st.semis[1].w,w:null};st.phase="final";st.pending=null;advF(st);}
-    } else if (st.phase==="final"&&st.final&&!st.final.w) { if(st.final.a.isP||st.final.b.isP){st.pending="final";return;} st.final.w=nW(st.final.a,st.final.b);st.champ=st.final.w; }
+      for(var i=0;i<st.semis.length;i++){var sm=st.semis[i];if(sm.w)continue;if(sm.a.isP||sm.b.isP){st.pending=i;return;}sm.w=nW(sm.a,sm.b,finCtx(S,4));} if(st.semis[0].w&&st.semis[1].w){st.final={a:st.semis[0].w,b:st.semis[1].w,w:null};st.phase="final";st.pending=null;advF(st);}
+    } else if (st.phase==="final"&&st.final&&!st.final.w) { if(st.final.a.isP||st.final.b.isP){st.pending="final";return;} st.final.w=nW(st.final.a,st.final.b,finCtx(S,5));st.champ=st.final.w; }
   }
   function onFR(won, myAvg, oppAvg, setScore, setSeq, xtra) {
     if (!fs) return;
     /* Finals matches count towards the career counters too (S1 carries them into the champion save below) */
     var S1 = S;
-    if (S && xtra) { var gst = Object.assign({}, S.player.stats || {}); gst.gold = (gst.gold || 0) + (xtra.gold || 0); gst.flawless = (gst.flawless || 0) + (xtra.flawless || 0); if (won) gst.wins = (gst.wins || 0) + 1; var fp = Object.assign({}, S.player, { stats: gst }); var ff = afterSets(fitOf(S.player), setsOf(setScore)); putFit(fp, ff); var fh = rollInjury(ff); if (fh) fp.inj = addInjury(S.player.inj, fh); S1 = Object.assign({}, S, { player: fp }); save(S1); }
+    if (S && xtra) { var gst = Object.assign({}, S.player.stats || {}); gst.gold = (gst.gold || 0) + (xtra.gold || 0); gst.flawless = (gst.flawless || 0) + (xtra.flawless || 0); if (won) gst.wins = (gst.wins || 0) + 1; var fp = Object.assign({}, S.player, { stats: gst }); if (xtra.hands && xtra.hands.length) fp.hm = xtra.hands.reduce(addHands, S.player.hm || null); var ff = afterSets(fitOf(S.player), setsOf(setScore)); putFit(fp, ff); var fh = rollInjury(ff); if (fh) fp.inj = addInjury(S.player.inj, fh); S1 = Object.assign({}, S, { player: fp }); save(S1); }
     var st = JSON.parse(JSON.stringify(fs)); var m, opp, winner, loser;
     delete st.match;
     if (st.phase==="groups") { m=st.gm[st.pending]; opp=m.a.isP?m.b:m.a; winner=won?(m.a.isP?m.a:m.b):(m.a.isP?m.b:m.a); loser=winner.id===m.a.id?m.b:m.a; m.w=winner; var h=st.houses[m.hi]; for(var x=0;x<h.length;x++){if(h[x].id===winner.id){h[x].gP+=3;h[x].gW++;}if(h[x].id===loser.id){h[x].gL++;}} st.gi++; }
@@ -911,13 +930,14 @@ export default function Arena(props) {
         <style dangerouslySetInnerHTML={{__html:CSS}} />
         {confetti && (<Confetti />)}
         {prof && (<Profile player={prof.p} rank={prof.rank} me={S.player} myRank={pRank} roosterName={S.player.roosterName} onRenameRooster={renameRooster} onRenamePlayer={renamePlayer} isRival={!!(S.player.rival && prof.p.id === S.player.rival.id)} playerName={S.pName} h2h={!prof.p.isP && S.player.h2h ? (S.player.h2h[prof.p.id] || []) : null} timeline={prof.p.isP ? (S.player.timeline || []) : null} onClose={function(){setProf(null)}} />)}
+        {S.player.startPts > 0 && (<StartTalent points={S.player.startPts} tr={S.player.tr} onDone={function(add){ var t = Object.assign({}, S.player.tr || {}); Object.keys(add).forEach(function(k){ t[k] = (t[k] || 0) + add[k]; }); var np = Object.assign({}, S.player, { tr: t }); delete np.startPts; save(Object.assign({}, S, { player: np })); }} />)}
         {showHelp && (<HelpScreen onClose={function(){setHelp(false)}} />)}
         {hubTip && (<CoachCard key={hubTip} id={hubTip} vars={{ name: S.pName, rival: S.player.rival ? S.player.rival.name : null }} onDone={function(all){ markTip(hubTip, all); }} />)}
         {picking && !seasonDone && (<TierSheet available={avTiers} wildcard={wildcardTier(S)} rank={pRank} paid={paidEntryTier(S)}
           entry={(function(){ var top = Math.max.apply(null, availableTiers(S, true)), ti = top + 1; if (ti > 4 || paidEntryTier(S) >= 0) return null; var fee = entryFee(ti); return { tier: ti, fee: fee, used: !!weekInvestment(S), can: !weekInvestment(S) && (S.player.money || 0) >= fee, cash: S.player.money || 0 }; })()}
           onBuyEntry={buyEntry} onRest={restWeek} rest={(function(){ var f = fitOf(S.player), b = (S.player.tr || {}).b || 0; return { g: Math.round(recoveryOf(b, true, f.g)), r: Math.round(recoveryOf(b, true, f.r)), ng: Math.round(recoveryOf(b, false, f.g)), nr: Math.round(recoveryOf(b, false, f.r)), fit: f, def: (S.player.def && S.player.def[S.calIdx]) || 0 }; })()} onClose={function(){setPicking(false)}} events={weekEvents(S)} nearGaps={(function(){ var o = {}, me = effTr(S.player); GAP_KEYS.forEach(function(k){ o[k] = (me[k] || 0) - (rivalTr[k] || 0); }); return o; })()} onPickEvent={function(ev){ setPicking(false); setPrep({ tier: ev.tier, ev: ev }); }}
           onPick={function(ti){ setPicking(false); setPrep({ tier: ti, ev: null }); }} />)}
-        {prep && (<PrepScreen S={S} ev={prep.ev} tier={prep.tier} gaps={prep.ev ? eventGaps(S, prep.ev) : null} topTier={Math.max.apply(null, availableTiers(S))} onCancel={function(){ var t = prep.tier; setPrep(null); if (t < 5) setPicking(true); }} onConfirm={confirmPrep} />)}
+        {prep && (<PrepScreen S={S} ev={prep.ev} tier={prep.tier} tr={effTr(S.player)} topTier={Math.max.apply(null, availableTiers(S))} onCancel={function(){ var t = prep.tier; setPrep(null); if (t < 5) setPicking(true); }} onConfirm={confirmPrep} />)}
         {gala && (<SeasonGala S={S} champ={gala.champ} runnerUp={gala.runnerUp} champRank={gala.champRank} awards={gala.awards} you={gala.you} hall={gala.hall} goal={gala.goal} onDone={finishGala} />)}
         {achQ.length > 0 && (<AchToast queue={achQ} onShown={function(){ setAchQ(function(q){ return q.slice(1); }); }} onOpen={function(){ setAchQ([]); setShowAch(true); }} />)}
         {showAch && (<AchievementsSheet S={S} onClose={function(){ setShowAch(false); }} />)}
@@ -950,7 +970,7 @@ export default function Arena(props) {
 
           {hubTab === "train" && (
             <div>
-              {sectionTitle("Training Camp", "Spend training points between tournaments. Stats only count relative to your opponent.")}
+              {sectionTitle("Training Camp", "Spend training points between tournaments. Every level makes your own bar easier.")}
               <div style={card({textAlign:"center",marginBottom:10,padding:"10px 12px"})}>
                 <div style={label()}>Training points</div>
                 <div style={display(30, C.goldInk)}>{tpNow} TP</div>
@@ -1035,7 +1055,7 @@ export default function Arena(props) {
                   <div style={card({padding:"10px 12px",background:C.cardWarm})}>
                     <div style={label(C.goldInk)}>How training works</div>
                     <div style={{fontSize:13,color:C.textSoft,lineHeight:1.5,marginTop:4}}>
-                      Only the <b style={{color:C.text}}>gap</b> to your opponent matters — if you both have ⚡10, it cancels out, and if she's ahead the effect works <b style={{color:C.text}}>against</b> you. The dark tick on each bar is the average of riders ranked near you. Rivals train too, with points they earn just like you.
+                      Your levels build <b style={{color:C.text}}>your own bar</b> — slower, a wider gold zone, more points. Hers build hers, never yours. Each level gives a little less than the one before. The dark tick on each bar is the average of riders ranked near you. Rivals train too, with points they earn just like you.
                     </div>
                     <div style={{fontSize:12,color:C.textMuted,marginTop:6,fontWeight:700}}>Total {total}/100{total>=100?" · fully trained — the rest is your timing":""}</div>
                   </div>
@@ -1254,7 +1274,7 @@ export default function Arena(props) {
 
         {pm && ts.alive && opp && (
           <div>
-            <PowerBar key={"t-"+ts.round} tier={ts.tierIdx} cond={ts.cond} gear={ts.gear || null} fit={fitOf(S.player)} oppFit={afterMatches(fitOf(opp), ts.round, tier.bo)} oppGear={kitOfNpc(S, opp, ts.cond, ts.tierIdx, rankMap(S)[opp.id])} eventName={ts.eventName} road={ts.log.filter(function(m){ return m.won; }).map(function(m){ return { name: sh(m.opp), id: m.oppId, round: m.round }; })} coach={tipOn("match")} scout={scoutT} onDone={onTR} oppSkill={opp.skill||50} diff={roundDiff(ts.tierIdx, ts.round)} tr={effTr(S.player)} otr={effTr(opp)} playerName={S.pName} playerEmoji="⚔️" oppName={sh(opp.name)} oppEmoji={opp.emoji||"👤"} oppId={opp.id} oppRank={oppRank} fans={fansOf(S.player)} oppFans={crowdLove(opp, oppRank)} tierColor={tier.col} roundLabel={rNames[ts.round]}
+            <PowerBar key={"t-"+ts.round} tier={ts.tierIdx} cond={ts.cond} gear={ts.gear || null} fit={fitOf(S.player)} oppFit={afterMatches(fitOf(opp), ts.round, tier.bo)} oppGear={kitOfNpc(S, opp, ts.cond, ts.tierIdx, rankMap(S)[opp.id])} eventName={ts.eventName} road={ts.log.filter(function(m){ return m.won; }).map(function(m){ return { name: sh(m.opp), id: m.oppId, round: m.round }; })} coach={tipOn("match")} scout={scoutT} onDone={onTR} oppSkill={opp.skill||50} diff={roundDiff(ts.tierIdx, ts.round)} tr={effTr(S.player)} otr={effTr(opp)} playerName={S.pName} playerEmoji="⚔️" oppName={sh(opp.name)} oppEmoji={opp.emoji||"👤"} oppId={opp.id} oppRank={oppRank} myRank={pRank} fans={fansOf(S.player)} oppFans={crowdLove(opp, oppRank)} tierColor={tier.col} roundLabel={rNames[ts.round]}
               tierName={ts.eventName || tier.name} youSub={"World #"+pRank} foeSub={"World #"+oppRank+" · "+talentLabel(opp.skill)}
               isFinal={ts.round >= tier.rounds-1} nextLabel={ts.round < tier.rounds-1 ? rNames[ts.round+1] : null} eliminated={true}
               stakes={{ pts: tier.pts[ts.round], money: (tier.money||[])[ts.round]||0 }}
@@ -1302,7 +1322,7 @@ export default function Arena(props) {
           <MatchHeader tierName={"Season " + S.sNum + " Finals"} tierColor="#a855f7" roundLabel={fs.phase==="final"?"World Final":fs.phase==="semis"?"Semifinal":"Group Stage"}
             bestOf={FINALS_BO} rounds={["Group Stage","Semifinal","World Final"]} roundIdx={fs.phase==="final"?2:fs.phase==="semis"?1:0}
             onScout={function(){ setShowScout(true); }} onHelp={function(){ setHelp(true); }} />
-          <PowerBar key={"f-"+fs.phase+"-"+fopp.id} tier={6} road={(fs.log||[]).filter(function(m){ return m.won; }).map(function(m){ return { name: sh(m.opp), round: m.phase === "groups" ? "Groups" : "Semifinal" }; })} scout={scoutF} onDone={onFR} oppSkill={fopp.skill||60} diff={fs.phase==="final"?5:fs.phase==="semis"?4:3} tr={effTr(S.player)} otr={effTr(fopp)} fit={fitOf(S.player)} oppFit={afterMatches(fitOf(fopp), finalsRidden(fs, fopp.id), FINALS_BO)} playerName={S.pName} playerEmoji="⚔️" oppName={sh(fopp.name)} oppEmoji={fopp.emoji||"👤"} oppId={fopp.id} oppRank={fRank} fans={fansOf(S.player)} oppFans={crowdLove(fopp, fRank)} tierColor={fs.phase==="final"?"#b45309":"#8b5cf6"} roundLabel={fs.phase==="final"?"World Final":fs.phase==="semis"?"Semifinal":"Group Stage"}
+          <PowerBar key={"f-"+fs.phase+"-"+fopp.id} tier={6} road={(fs.log||[]).filter(function(m){ return m.won; }).map(function(m){ return { name: sh(m.opp), round: m.phase === "groups" ? "Groups" : "Semifinal" }; })} scout={scoutF} onDone={onFR} oppSkill={fopp.skill||60} diff={fs.phase==="final"?5:fs.phase==="semis"?4:3} tr={effTr(S.player)} otr={effTr(fopp)} fit={fitOf(S.player)} oppFit={afterMatches(fitOf(fopp), finalsRidden(fs, fopp.id), FINALS_BO)} playerName={S.pName} playerEmoji="⚔️" oppName={sh(fopp.name)} oppEmoji={fopp.emoji||"👤"} oppId={fopp.id} oppRank={fRank} myRank={pRank} fans={fansOf(S.player)} oppFans={crowdLove(fopp, fRank)} tierColor={fs.phase==="final"?"#b45309":"#8b5cf6"} roundLabel={fs.phase==="final"?"World Final":fs.phase==="semis"?"Semifinal":"Group Stage"}
           tierName={"Season "+S.sNum+" Finals"} youSub={"World #"+pRank} foeSub={talentLabel(fopp.skill)}
           isFinal={fs.phase==="final"} nextLabel={fs.phase==="semis"?"World Final":null} eliminated={fs.phase!=="groups"}
           bestOf={FINALS_BO} initialProgress={fs.match}

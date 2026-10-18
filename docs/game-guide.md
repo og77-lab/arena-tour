@@ -53,10 +53,10 @@ Each tournament is a knockout bracket (32 riders, 64 at a Slam). Every round you
 Each week several tournaments run at once in every tier, and all 1,000 riders play one of them. Tap a tier to see its events. Each card shows:
 - **A picture of the lanes** and the event's name. The lanes change the match for **both** riders, and each makes one stat count more:
   - ☀️ **Classic** — dry, packed earth on a fair day. Nothing changes: pure timing.
-  - 🌧️ **Muddy lanes** — rain-soaked dirt. The roosters slip, so the bar runs 10% faster for both riders, and the **Reflexes (slower bar)** gap counts double.
-  - 🌬️ **Windy coast** — a seaside ground in the gusts. The gold zone is 2% narrower for both, the **Steady Stride (bigger gold) (gold zone)** gap counts double, and seaside sponsors pay +10% prize money.
-  - 🔥 **Heatwave** — baking sun. The bar speeds up 40% more after every strike, and the **Stamina (less speed-up) (speed-up)** gap counts double.
-  - 🌼 **Village green** — soft grass at a village fete. The gold zone is 1.5% wider and every stat gap counts half: the underdog's best chance (−10% points and money).
+  - 🌧️ **Muddy lanes** — rain-soaked dirt. The roosters slip, so the bar runs 10% faster for both riders, and the **Reflexes (slower bar)** counts double.
+  - 🌬️ **Windy coast** — a seaside ground in the gusts. The gold zone is 2% narrower for both, the **Steady Stride (bigger gold)** counts double, and seaside sponsors pay +10% prize money.
+  - 🔥 **Heatwave** — baking sun. The bar speeds up 40% more after every strike, and the **Stamina (less speed-up)** counts double.
+  - 🌼 **Village green** — soft grass at a village fete. The gold zone is 1.5% wider and every stat counts half: the underdog's best chance (−10% points and money).
 - **Entrants (★).** Who signed up:
   - ★★★ tough entrants: mostly the tier's top-ranked riders, +10% points.
   - ★★ mixed entrants.
@@ -136,9 +136,10 @@ On top of the base score:
 
 | What | What it does |
 |---|---|
-| 1 · The stat gap | Each stat is your level minus hers. Even levels cancel out. Ahead: a slower bar, a wider zone, extra points. Behind: the opposite. |
-| 2 · The round | Each tier starts a step harder, and each round within a tournament adds a little more. This narrows the gold zone and speeds the bar for both of you, whatever your stats. |
-| 3 · Her talent | How accurate she is. It doesn't touch your bar — it decides how high her scores tend to be. |
+| 1 · Your levels | Your own levels build your own bar: a slower bar, a wider gold zone, extra points, softer misses. Her levels build her bar, never yours. |
+| 2 · The round | Each tier starts a step harder, and each round adds a little more: a narrower gold zone and a faster bar for both of you. |
+| 3 · Hands | Where you stop is your finger. Where she stops is her talent (how close to the centre she lands, a little worse on a faster bar, with a form for the day). Your profile shows your hands on the same scale. |
+| 3b · Nerves | Facing someone ranked many times higher (×30+) shrinks the underdog's gold zone by up to 1%, less with every set she wins. Close ranks: nothing. |
 | 4 · The lanes | Mud, wind, heat or green bend the bar for both of you and weight one stat. |
 | 5 · Kit and tiredness | Your lance, saddle and fitness bend your bar; hers bend hers. |
 
@@ -146,24 +147,24 @@ Example — the width of your gold zone with Steady Stride (bigger gold):
 
 | Situation | Gold zone |
 |---|---|
-| Futures round 1, even levels | 13% of the bar |
-| Same, you 5 levels ahead | 19% |
-| Same, she's 5 levels ahead | 7% |
-| Masters final, even levels | about 5% |
+| Futures round 1, no training | 12% of the bar |
+| Same, Steady Stride 5 | 13.7% |
+| Same, Steady Stride 10 | 15% |
+| Masters final, Steady Stride 15 | about 6.6% |
 
 The gold zone never shrinks to nothing: once it is under 8% of the bar, every further squeeze (a late round, a stronger rider, wind, tiredness, gear) counts less and less, so it bottoms out around 4–5%. The bar never gets impossibly fast or slow either.
 
 ## 9. Stats & training
 
-Six stats, each from level 0 to 20 — each one moves one element of the match, and the game always names it with the stat: **Reflexes (slower bar) · bar speed**, **Steady Stride (bigger gold) · gold zone**, **Aim (extra points) · every strike**, **Stubbornness (softer misses) · misses**, **Stamina (less speed-up) · speed-up**, **Bounce-back · recovery**. three for the granny, two for the rooster, and 🔋 Bounce-back for recovery. For the first five **only the gap to your opponent counts**: if you both have 5 Aim (extra points), it cancels out. Bounce-back counts on its own. An injury knocks a few levels off a stat until it heals.
+Six stats, each from level 0 to 20 — each one moves one element of the match, and the game always names it with the stat: **Reflexes (slower bar) · bar speed**, **Steady Stride (bigger gold) · gold zone**, **Aim (extra points) · every strike**, **Stubbornness (softer misses) · misses**, **Stamina (less speed-up) · speed-up**, **Bounce-back · recovery**. three for the granny, two for the rooster, and 🔋 Bounce-back for recovery. Every level builds **your own bar**; her levels build hers. Each level gives a little less than the one before (level 20 works like 11). A new granny starts with **10 points** to spread however she likes. An injury knocks a few levels off a stat until it heals.
 
-| Stat | What it does | Each level ahead |
+| Stat | What it does | Each level (first levels) |
 |---|---|---|
-| ⚡ Reflexes (slower bar) | The marker sweeps slower | Bar about 3–4% slower |
-| 🎯 Aim (extra points) | Extra points on every strike | +1.5 points per strike |
-| 🛡️ Stubbornness (softer misses) | Your bad strikes aren't as bad | Floor +1.5 points |
-| 🫀 Stamina (less speed-up) | The bar speeds up less as the match goes on | About 5% less speed-up |
-| 🐾 Steady Stride (bigger gold) | A wider gold zone | +1.2% of the bar |
+| ⚡ Reflexes (slower bar) | The marker sweeps slower | Bar 3% slower |
+| 🎯 Aim (extra points) | Extra points on every strike | +0.5 points per strike |
+| 🛡️ Stubbornness (softer misses) | Your bad strikes aren't as bad | Misses lose 5% fewer points, floor +1.5 |
+| 🫀 Stamina (less speed-up) | The bar speeds up less as the match goes on | 7% less speed-up |
+| 🐾 Steady Stride (bigger gold) | A wider gold zone | +0.4% of the bar |
 | 🔋 Bounce-back | Granny and rooster win back more fitness after every tournament | +0.7% fitness back (double in a rest week; not against her) |
 
 **Training points (TP).** Everyone on tour — you and every rival — earns TP by the same rule every week: **8 for turning up, plus a third of the ranking points you won.** A deep run buys you a few levels on the riders who went out early; the edge fades once you move up to a tier where everyone is winning that much. You also get **sponsor TP** from your fans (one per 10 fans).

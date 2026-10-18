@@ -8,7 +8,7 @@
      gold   points added when you land in the gold
      miss   points added when you land outside it
      aim    points added to every strike
-     stat   a stat gap counts more or less
+     stat   a stat counts more or less in these lanes
      pts / money / fit   ranking points, prize money, fitness */
 
 import { C, FONT } from "../ui/theme";
@@ -50,8 +50,8 @@ export function effectsOf(fx, gaps) {
     var allSame = ks.length >= 3 && ks.every(function (k) { return fx.w[k] === fx.w[ks[0]]; });
     if (!gaps) {
       /* No player to compare with (the guide): say it plainly */
-      if (allSame) out.push({ k: "stat", s: "all", v: fx.w[ks[0]], good: null, text: "Every stat gap counts " + (fx.w[ks[0]] === 0.5 ? "half" : "×" + fx.w[ks[0]]) });
-      else ks.forEach(function (k) { out.push({ k: "stat", s: k, v: fx.w[k], good: null, text: STAT_NAME[k] + " gap counts " + (fx.w[k] === 2 ? "double" : fx.w[k] === 0.5 ? "half" : "×" + fx.w[k]) + " (" + STAT_ELEMENT[k].what + ")" }); });
+      if (allSame) out.push({ k: "stat", s: "all", v: fx.w[ks[0]], good: null, text: "Every stat counts " + (fx.w[ks[0]] === 0.5 ? "half" : "×" + fx.w[ks[0]]) + " here" });
+      else ks.forEach(function (k) { out.push({ k: "stat", s: k, v: fx.w[k], good: null, text: STAT_NAME[k] + " counts " + (fx.w[k] === 2 ? "double" : fx.w[k] === 0.5 ? "half" : "×" + fx.w[k]) + " here (" + STAT_PLAIN[k] + ")" }); });
     } else {
       /* With your gaps: what the weighting adds to (or takes from) YOUR bar, in the bar's own terms */
       ks.forEach(function (k) {
@@ -133,6 +133,6 @@ export function Legend() {
   );
 }
 
-/* What one level of each stat does, as a chip (the gap to your opponent, except Bounce-back) */
-var STAT_FX = { r: { speed: 0.96 }, f: { aim: 1.5 }, g: { floor: 1.5 }, s: { accel: 0.95 }, p: { zone: 1.2 }, b: { fit: 0.7 } };
+/* What one level of each stat does to your own bar, as a chip (first levels; higher ones give a little less) */
+var STAT_FX = { r: { speed: 0.97 }, f: { aim: 0.5 }, g: { floor: 1.5 }, s: { accel: 0.93 }, p: { zone: 0.4 }, b: { fit: 0.7 } };
 export function statEffect(k) { return effectsOf(STAT_FX[k] || {}); }

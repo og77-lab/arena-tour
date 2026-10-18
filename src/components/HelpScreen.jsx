@@ -102,7 +102,7 @@ export default function HelpScreen(props) {
               return (<div key={s.k}>{head && (<div style={{ fontSize: 12, fontWeight: 900, letterSpacing: 1, color: "#57534e", margin: i ? "6px 0 2px" : "0 0 2px" }}>{s.who === "granny" ? "👵 GRANNY — rider skills" : s.who === "rooster" ? "🐓 ROOSTER — mount conditioning" : "🔋 BOTH — recovery"}</div>)}<div style={{ fontSize: 13, padding: "2px 0", color: "#475569" }}><b style={{color:"#0f172a"}}>{s.icon} {s.label}{s.el ? " (" + s.el + ")" : ""}</b> — {s.what}. <i>Each level ahead: {s.per.charAt(0).toLowerCase() + s.per.slice(1)}.</i></div></div>);
             })}
           </div>
-          <div style={{ fontSize: 13, color: "#64748b", marginTop: 4 }}>Example: You have ⚡8, opponent has ⚡5 → net +3 → bar is noticeably slower for you. If both are ⚡8 → cancels out completely.</div>
+          <div style={{ fontSize: 13, color: "#64748b", marginTop: 4 }}>Example: ⚡ Reflexes 8 → your bar runs about 19% slower than an untrained rider's. Her Reflexes slow only her bar. completely.</div>
         </div>
 
         <div style={{ marginBottom: 14 }}>

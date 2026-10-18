@@ -55,15 +55,16 @@ export function FitnessMini(props) {
 }
 
 /* Home card: your fans (and why they moved this week), your Knitter following, and what fans are for */
-/* followers → where fans settle → fans → what they give you, one step per line */
+/* What your crowd love gives you right now, and where it's heading — plain lines, real numbers */
 export function FanChain(props) {
-  var c = props.c, k = props.k, e = c.edge, row = { display: "flex", gap: 6, alignItems: "baseline", fontSize: 12, lineHeight: 1.35, marginTop: 3 };
-  var arrow = (<span style={{ color: C.textMuted, fontWeight: 900 }}>↳</span>);
+  var c = props.c, k = props.k, e = c.edge, row = { fontSize: 12.5, lineHeight: 1.4, marginTop: 3 };
   return (
-    <div style={{ marginTop: 6, padding: "6px 8px", borderRadius: 8, background: "rgba(190,18,60,0.06)", color: C.textSoft }}>
-      <div style={row}><span>🧶</span><span><b>{k(c.fol)} followers</b> → your fans drift back toward <b>{c.settle}</b> each week{c.lift ? (<span> ({c.base} for your rank <b style={{ color: C.greenInk }}>+{c.lift}</b> from followers)</span>) : (<span> (followers add +0 until 1K)</span>)}</span></div>
-      <div style={row}>{arrow}<span><b>❤️ {c.fans} fans</b> → <b style={{ color: C.greenInk }}>+{c.tp} training pts</b> a week from sponsors</span></div>
-      <div style={row}>{arrow}<span>In the stands vs a typical rival (❤️ {c.typLove}): {e > 0.05 ? (<b style={{ color: C.greenInk }}>your gold zone +{e.toFixed(1)}%</b>) : e < -0.05 ? (<b style={{ color: C.redInk }}>her gold zone +{(-e).toFixed(1)}%</b>) : (<b>even</b>)}{Math.abs(e) > 0.05 ? ", doubled on match point" : ""}</span></div>
+    <div style={{ marginTop: 6, padding: "6px 9px", borderRadius: 8, background: "rgba(190,18,60,0.06)", color: C.textSoft }}>
+      <div style={{ fontSize: 10.5, fontWeight: 900, letterSpacing: 1, color: "#be123c" }}>WHAT ❤️ {c.fans} GIVES YOU</div>
+      <div style={row}>• <b style={{ color: C.greenInk }}>+{c.tp} training points</b> a week from sponsors</div>
+      <div style={row}>• Riders near your rank have about ❤️ {c.typLove}. Against them: {e > 0.05 ? (<b style={{ color: C.greenInk }}>your gold zone +{e.toFixed(1)}%</b>) : e < -0.05 ? (<b style={{ color: C.redInk }}>her gold zone +{(-e).toFixed(1)}%</b>) : (<b>no edge either way</b>)}{Math.abs(e) > 0.05 ? " (×2 on match point)" : ""}</div>
+      <div style={{ fontSize: 10.5, fontWeight: 900, letterSpacing: 1, color: "#be123c", marginTop: 6 }}>WHERE IT'S HEADING</div>
+      <div style={row}>Each week it slides 10% toward <b>{c.settle}</b> ({c.base} for your rank{c.lift ? (<span> + <b style={{ color: C.greenInk }}>{c.lift}</b> for {k(c.fol)} followers</span>) : ""}), then your results move it.</div>
     </div>
   );
 }
@@ -75,18 +76,19 @@ export function FansCard(props) {
   return (
     <div style={card({ padding: "10px 12px", fontFamily: FONT })}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-        <span style={label("#be123c")}>Fans & Knitter</span>
+        <span style={label("#be123c")}>Crowd love & Knitter</span>
         <span style={{ fontSize: 11, fontWeight: 800, color: C.textSoft }}>🧶 {k(fol)} followers{w && w.fol ? (<b style={{ color: C.greenInk }}> +{k(w.fol)}</b>) : null}</span>
       </div>
       <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginTop: 4 }}>
-        <span style={{ fontSize: 22, fontWeight: 900, color: "#be123c" }}>❤️ {fans}</span>
+        <span style={{ fontSize: 22, fontWeight: 900, color: "#be123c" }}>❤️ {fans}<span style={{ fontSize: 13, color: C.textMuted }}>/100</span></span>
         {w && (<span style={{ fontSize: 14, fontWeight: 900, color: d > 0 ? C.greenInk : d < 0 ? C.redInk : C.textMuted }}>{d > 0 ? "▲ +" + d : d < 0 ? "▼ " + d : "±0"} this week</span>)}
       </div>
       {w && w.parts && w.parts.length > 0 && (<div style={{ fontSize: 12, fontWeight: 800, color: C.textSoft, marginTop: 2 }}>
         {w.parts.map(function (x, i) { return (<span key={i}>{i ? " · " : ""}{x[0]} <b style={{ color: x[1] > 0 ? C.greenInk : C.redInk }}>{x[1] > 0 ? "+" : ""}{x[1]}</b></span>); })}
       </div>)}
+      <div style={{ fontSize: 11.5, color: C.textMuted, marginTop: 3 }}>A score of how much the crowd loves you, not a head count. Your Knitter followers are the people.</div>
       <FanChain c={fanChain(p, props.rank)} k={k} />
-      <button onClick={function () { rs[1](!open); }} style={{ marginTop: 6, width: "100%", padding: "6px 8px", borderRadius: 8, border: "1.5px solid #fecdd3", background: open ? "#fff1f2" : "#fff", color: "#be123c", fontWeight: 900, fontSize: 12, fontFamily: FONT, cursor: "pointer" }}>📜 {open ? "Hide the fan rules" : "All the fan rules"}</button>
+      <button onClick={function () { rs[1](!open); }} style={{ marginTop: 6, width: "100%", padding: "6px 8px", borderRadius: 8, border: "1.5px solid #fecdd3", background: open ? "#fff1f2" : "#fff", color: "#be123c", fontWeight: 900, fontSize: 12, fontFamily: FONT, cursor: "pointer" }}>📜 {open ? "Hide the rules" : "All the crowd love rules"}</button>
       {open && (<div style={{ marginTop: 6 }}><FanRules /></div>)}
     </div>
   );
