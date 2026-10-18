@@ -8,6 +8,7 @@ import { C, FONT, display, label, card } from "../ui/theme";
 import { ACHIEVEMENTS, ACH_GROUPS, achievementById } from "../engine/achievements";
 import { playRankUp } from "../sounds";
 import { vibrate } from "./fx";
+import Icon from "./Icons";
 
 const { useEffect } = React;
 
@@ -67,7 +68,7 @@ export default function AchievementsSheet(props) {
       <motion.div onClick={function (e) { e.stopPropagation(); }} initial={{ y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ type: "spring", stiffness: 320, damping: 28 }}
         style={card({ maxWidth: 520, margin: "0 auto", padding: "14px 12px", background: C.page })}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <span style={display(26)}>🏅 Achievements</span>
+          <span style={Object.assign(display(26), { display: "inline-flex", alignItems: "center", gap: 8 })}><Icon name="medal" size={28} />Achievements</span>
           <button aria-label="Close" onClick={props.onClose} style={{ width: 34, height: 34, borderRadius: "50%", border: "2px solid " + C.ink, background: "#fff", fontSize: 18, fontWeight: 900, cursor: "pointer", color: C.ink }}>×</button>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 8 }}>

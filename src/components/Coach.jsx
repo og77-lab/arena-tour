@@ -6,6 +6,7 @@ import * as React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { C, FONT, display, button } from "../ui/theme";
 import { Face, paletteFor } from "./Rider";
+import Icon from "./Icons";
 
 const { useState } = React;
 
@@ -57,7 +58,7 @@ export function CoachCard(props) {
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div style={{ position: "relative", flexShrink: 0 }}>
             <Face palette={COACH_PAL} size={52} />
-            <span aria-hidden style={{ position: "absolute", right: -6, bottom: -4, fontSize: 18 }}>📣</span>
+            <span aria-hidden style={{ position: "absolute", right: -7, bottom: -5 }}><Icon name="whistle" size={20} /></span>
           </div>
           <div style={{ minWidth: 0 }}>
             <div style={{ fontSize: 10, fontWeight: 900, letterSpacing: 1.6, color: C.goldInk, textTransform: "uppercase" }}>{COACH_NAME}{pages.length > 1 ? " · " + (i + 1) + "/" + pages.length : ""}</div>

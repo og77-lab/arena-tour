@@ -8,6 +8,7 @@ import { TIERS } from "../models/constants";
 import { C, FONT, display, label, card, money, button } from "../ui/theme";
 import { effectsOf, EffectList, Legend } from "./Effect";
 import { LaneTile, CompareLanes } from "./Lanes";
+import Icon from "./Icons";
 
 export default function TierSheet(props) {
   var avail = props.available || [];
@@ -31,7 +32,7 @@ export default function TierSheet(props) {
           <span style={{ fontSize: 13, color: C.textSoft }}>You're <b style={{ color: C.goldInk }}>#{props.rank}</b>. Tiers open as you climb.</span>
         </div>
         <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
-          <button onClick={function () { setLanes(!lanes); setLegend(false); }} style={{ flex: 1, fontFamily: FONT, fontSize: 12, fontWeight: 900, color: lanes ? "#fff" : C.ink, background: lanes ? C.night : C.card, border: "2px solid " + (lanes ? C.nightDeep : C.lineStrong), borderRadius: 10, padding: "6px 4px", cursor: "pointer" }}>🗺 Compare the 5 lanes</button>
+          <button onClick={function () { setLanes(!lanes); setLegend(false); }} style={{ flex: 1, fontFamily: FONT, fontSize: 12, fontWeight: 900, color: lanes ? "#fff" : C.ink, background: lanes ? C.night : C.card, border: "2px solid " + (lanes ? C.nightDeep : C.lineStrong), borderRadius: 10, padding: "6px 4px", cursor: "pointer" }}><Icon name="map" size={16} style={{ verticalAlign: "-3px", marginRight: 4 }} />Compare the 5 lanes</button>
           
         </div>
         {lanes && (<CompareLanes />)}
@@ -48,14 +49,14 @@ export default function TierSheet(props) {
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                     <span style={{ fontSize: 16, fontWeight: 900, color: C.text }}>{t.name}</span>
-                    {ok && ti === props.paid && (<span style={{ fontSize: 9, fontWeight: 900, letterSpacing: 1, color: "#fff", background: "#7c3aed", padding: "2px 6px", borderRadius: 10 }}>🎟 PAID ENTRY</span>)}
-                    {ok && ti === props.wildcard && ti !== props.paid && (<span style={{ fontSize: 9, fontWeight: 900, letterSpacing: 1, color: "#fff", background: "#be123c", padding: "2px 6px", borderRadius: 10 }}>🎟 FAN WILDCARD</span>)}
+                    {ok && ti === props.paid && (<span style={{ fontSize: 9, fontWeight: 900, letterSpacing: 1, color: "#fff", background: "#7c3aed", padding: "2px 6px", borderRadius: 10 }}>PAID ENTRY</span>)}
+                    {ok && ti === props.wildcard && ti !== props.paid && (<span style={{ fontSize: 9, fontWeight: 900, letterSpacing: 1, color: "#fff", background: "#be123c", padding: "2px 6px", borderRadius: 10 }}>FAN WILDCARD</span>)}
                     {ok && ti === best && ti !== props.wildcard && ti !== props.paid && (<span style={{ fontSize: 9, fontWeight: 900, letterSpacing: 1, color: "#fff", background: C.greenInk, padding: "2px 6px", borderRadius: 10 }}>TOP TIER OPEN</span>)}
                   </div>
                   <div style={{ fontSize: 12, color: C.textSoft, marginTop: 2 }}>
                     Best of {t.bo || 3} sets · {t.size} riders · ranks {t.rankRange[0]}–{t.rankRange[1] > 1000 ? "1000" : t.rankRange[1]}
                   </div>
-                  {!ok && (<div style={{ fontSize: 11, fontWeight: 800, color: C.redInk, marginTop: 2 }}>🔒 Not open at #{props.rank}</div>)}
+                  {!ok && (<div style={{ fontSize: 11, fontWeight: 800, color: C.redInk, marginTop: 2 }}><Icon name="lock" size={13} style={{ verticalAlign: "-2px", marginRight: 4 }} />Not open at #{props.rank}</div>)}
                 </div>
                 <div style={{ textAlign: "right", flexShrink: 0 }}>
                   {ok && evOf(ti).length > 0 ? (<span style={{ fontSize: 12, fontWeight: 900, color: t.col }}>{evOf(ti).length} event{evOf(ti).length > 1 ? "s" : ""} {open === ti ? "▲" : "▼"}</span>) : (<span>
@@ -78,11 +79,11 @@ export default function TierSheet(props) {
         {props.rest && props.onRest && (
           <div style={card({ marginTop: 12, padding: "10px 12px", background: "#f0f9ff", borderColor: "#bae6fd" })}>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <span aria-hidden style={{ fontSize: 28 }}>😴</span>
+              <Icon name="sleep" size={30} />
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 14, fontWeight: 900, color: C.text }}>Rest this week</div>
                 <div style={{ fontSize: 12, color: C.textSoft, lineHeight: 1.4 }}>
-                  You're at 👵{props.rest.fit.g}% 🐓{props.rest.fit.r}%. Resting brings back <b style={{ color: C.greenInk }}>👵+{props.rest.g} 🐓+{props.rest.r}</b> (after a tournament: +{props.rest.ng} / +{props.rest.nr}). No points this week{props.rest.def ? ", and the " + props.rest.def + " points you won here last season drop off" : ""}.
+                  You're at granny {props.rest.fit.g}% · rooster {props.rest.fit.r}%. Resting brings back <b style={{ color: C.greenInk }}>+{props.rest.g} / +{props.rest.r}</b> (after a tournament: +{props.rest.ng} / +{props.rest.nr}). No points this week{props.rest.def ? ", and the " + props.rest.def + " points you won here last season drop off" : ""}.
                 </div>
               </div>
               <button onClick={props.onRest} style={button("ghost", { padding: "8px 12px", fontSize: 13, flexShrink: 0 })}>Rest</button>
@@ -96,7 +97,7 @@ export default function TierSheet(props) {
           return (
             <div style={card({ marginTop: 12, padding: "10px 12px", background: "#faf5ff", borderColor: "#d8b4fe" })}>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <span aria-hidden style={{ fontSize: 26 }}>🎟️</span>
+                <Icon name="ticket" size={28} />
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 14, fontWeight: 900, color: C.text }}>Buy your way into {t.name}</div>
                   <div style={{ fontSize: 12, color: C.textSoft, lineHeight: 1.35 }}>

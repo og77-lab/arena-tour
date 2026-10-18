@@ -96,7 +96,7 @@ function roundDiff(tierIdx, round) { return [0, 1, 2, 3, 4, 3][tierIdx] + round 
 /* Tale of the tape: both riders' fitness right now (hers after the rounds she has ridden this week) */
 function fitRows(S, o) {
   var me = fitOf(S.player), her = o._fit || fitOf(o);
-  return [{ icon: "❤️", label: "Crowd love", what: "The stands back the rider they love more: a slightly wider gold zone for her", who: "crowd", you: fansOf(S.player), foe: o._love != null ? o._love : 0 },
+  return [{ icon: "❤️", label: "Crowd love", what: "The stands back the rider they love more: a slightly wider gold zone for her", who: "crowd", you: fansOf(S.player), foe: o._love != null ? o._love : crowdLove(o, rankMap(S)[o.id] || 500) },
     { icon: "👵", label: "Granny fitness", what: "Tired grannies get a narrower gold zone and weaker misses", who: "fitness", you: me.g, foe: her.g },
     { icon: "🐓", label: "Rooster fitness", what: "Tired roosters make the bar run faster", who: "fitness", you: me.r, foe: her.r }];
 }
@@ -993,9 +993,9 @@ export default function Arena(props) {
                   var can = !used && cash >= price;
                   return (
                     <div key={key} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 0",borderTop:"1px dashed "+C.line}}>
-                      <span aria-hidden style={{fontSize:24,width:30,textAlign:"center"}}>{icon}</span>
+                      <IconTile name={icon} tint={key === "coach" ? "#fef3c7" : key === "ped" ? "#fef3c7" : "#e0f2fe"} size={40} />
                       <div style={{flex:1,minWidth:0}}>
-                        <div style={{fontSize:14,fontWeight:900,color:C.text}}>{title}</div>
+                        <div style={{fontFamily:"'Fredoka','Nunito',sans-serif",fontSize:15,fontWeight:600,color:C.text}}>{title}</div>
                         <div style={{fontSize:12,color:C.textSoft,lineHeight:1.35}}>{sub}</div>
                       </div>
                       <button onClick={onBuy} disabled={!can} style={button(can?"gold":"ghost",{padding:"7px 10px",fontSize:12.5,flexShrink:0,opacity:can?1:0.55})}>{cta} · {money(price)}</button>
@@ -1006,15 +1006,15 @@ export default function Arena(props) {
                   <div style={card({marginBottom:10,padding:"10px 12px"})}>
                     <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline"}}>
                       <span style={label(C.goldInk)}>This week's investment</span>
-                      <span style={{fontSize:12,fontWeight:900,color:C.greenInk}}>💰 {money(cash)}</span>
+                      <span style={{display:"inline-flex",alignItems:"center",gap:4,fontSize:13,fontWeight:900,color:C.greenInk}}><Icon name="coin" size={16} />{money(cash)}</span>
                     </div>
                     <div style={{fontSize:12,color:C.textSoft,margin:"3px 0 4px",lineHeight:1.35}}>
-                      {used ? (<span>✅ Done for this week ({used.kind === "coach" ? "private session" : used.kind === "entry" ? "paid entry" : used.kind === "staff" ? "physio booked" : "pedigree certificate"}). Play this week's tournament to unlock the next one.</span>)
+                      {used ? (<span><Icon name="check" size={14} style={{ verticalAlign: "-2px", marginRight: 3 }} />Done for this week ({used.kind === "coach" ? "private session" : used.kind === "entry" ? "paid entry" : used.kind === "staff" ? "physio booked" : "pedigree certificate"}). Play this week's tournament to unlock the next one.</span>)
                         : "Pick one per tournament week: a private session, physio for fitness, a paid entry (from the tournament list), or a pedigree certificate."}
                     </div>
-                    {row("📣", "Private session with Coach Hettie", "+" + COACH_TP + " training points. Priced to the prizes at your level.", cp, bookCoach, "+" + COACH_TP + " TP", "coach")}
-                    {STAFF.map(function(st){ var f = fitOf(S.player); return row(st.icon, st.name, st.sub + " " + (st.g ? "👵 +" + st.g + "% " : "") + (st.r ? "🐓 +" + st.r + "%" : "") + " fitness now (you're at 👵" + f.g + " 🐓" + f.r + ").", staffPrice(st), function(){ bookStaff(st.id); }, "Book", st.id); })}
-                    {ped && row("🧬", "Rooster pedigree certificate", "Lifts Stamina (less speed-up) and Steady Stride (bigger gold)'s cap to level " + ped.cap + ". Everything you've trained stays.", ped.price, buyPedigree, "Lv " + ped.cap, "ped")}
+                    {row("whistle", "Private session with Coach Hettie", "+" + COACH_TP + " training points. Priced to the prizes at your level.", cp, bookCoach, "+" + COACH_TP + " TP", "coach")}
+                    {STAFF.map(function(st){ var f = fitOf(S.player); return row(st.id === "nurse" ? "cross" : st.id === "doctor" ? "bone" : "tub", st.name, st.sub + " " + [st.g ? "granny +" + st.g + "%" : "", st.r ? "rooster +" + st.r + "%" : ""].filter(Boolean).join(", ") + " fitness now (you're at " + f.g + "% / " + f.r + "%).", staffPrice(st), function(){ bookStaff(st.id); }, "Book", st.id); })}
+                    {ped && row("scroll", "Rooster pedigree certificate", "Lifts Stamina (less speed-up) and Steady Stride (bigger gold)'s cap to level " + ped.cap + ". Everything you've trained stays.", ped.price, buyPedigree, "Lv " + ped.cap, "ped")}
                   </div>
                 );
               })()}
@@ -1024,7 +1024,7 @@ export default function Arena(props) {
                     <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:4}}>
                       <TrainStage who={g.who} fx={trainFx && trainFx.who === g.who ? trainFx : null} w={112} h={80} />
                       <div>
-                        <div style={display(20)}>{g.icon} {g.title}</div>
+                        <div style={Object.assign(display(20), {display:"flex",alignItems:"center",gap:6})}><Icon name={g.who === "granny" ? "granny" : g.who === "rooster" ? "rooster" : "battery"} size={24} />{g.title}</div>
                         <div style={label(C.textSoft)}>{g.who === "rooster" ? (S.player.roosterName || roosterName(1)) + " · " + g.sub : g.sub}</div>
                       </div>
                     </div>
@@ -1141,18 +1141,18 @@ export default function Arena(props) {
               var t = p.tr||{};
               return (
                 <div key={p.id+"-"+i} data-me-row={p.isP ? "1" : undefined} onClick={function(){setProf({p:p,rank:i+1})}} style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8,padding:"5px 8px",background:p.isP?C.goldSoft:i%2===0?C.cardWarm:"transparent",borderRadius:8,cursor:"pointer",borderLeft:i<16?"3px solid "+(i<4?C.gold:i<8?"#22c55e":i<12?"#3b82f6":"#64748b"):"3px solid transparent"}}>
-                  <span style={{color:i<3?C.goldInk:C.textMuted,fontWeight:900,fontSize:13,width:34,textAlign:"right",flexShrink:0}}>#{i+1}</span>
+                  <span style={{width:34,flexShrink:0,display:"flex",justifyContent:"flex-end"}}>{i<3 ? (<span style={{width:28,height:28,borderRadius:"50%",display:"inline-flex",alignItems:"center",justifyContent:"center",fontFamily:"'Fredoka','Nunito',sans-serif",fontWeight:700,fontSize:14,color:"#3f2a1d",background:["linear-gradient(180deg,#fde68a,#f59e0b)","linear-gradient(180deg,#f1f5f9,#94a3b8)","linear-gradient(180deg,#fed7aa,#c2410c)"][i],boxShadow:"inset 0 -2px 0 rgba(63,42,29,0.18)"}}>{i+1}</span>) : (<span style={{fontFamily:"'Fredoka','Nunito',sans-serif",fontWeight:600,fontSize:14,color:C.textMuted}}>#{i+1}</span>)}</span>
                   <Face palette={p.isP ? PLAYER_PALETTE : paletteFor(p.id, i+1)} size={34} />
                   <div style={{minWidth:0,flex:1}}>
                     <div style={{fontSize:14,color:C.text,fontWeight:p.isP?900:700,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
-                      {p.isP?S.pName+" ⭐":(p.emoji||"")+" "+sh(p.name)}{!p.isP && standing(i+1) ? " " + standing(i+1).icon : ""}
+                      {p.isP?(<span>{S.pName} <span style={{fontSize:10,fontWeight:900,color:"#fff",background:"#b45309",borderRadius:6,padding:"1px 5px",verticalAlign:"1px"}}>YOU</span></span>):(p.emoji||"")+" "+sh(p.name)}{!p.isP && standing(i+1) ? " " + standing(i+1).icon : ""}
                     </div>
                     <div style={{fontSize:12,color:C.textMuted,marginTop:1,fontWeight:600}}>
                       {p.isP?"":"Talent "}{p.isP?"":((p.skill||0)>80?"Elite":(p.skill||0)>60?"Strong":(p.skill||0)>40?"Average":"Developing")}{p.isP?"":" · "}{STATS.map(function(st){ return (<span key={st.k} style={{ whiteSpace: "nowrap", marginRight: 5 }}><StatIcon k={st.k} size={12} style={{ verticalAlign: "-2px", marginRight: 1 }} />{t[st.k]||0}</span>); })}
                     </div>
                   </div>
                   <div style={{textAlign:"right"}}>
-                    <div style={{fontSize:14,fontWeight:900,color:C.text}}>{(p.sp||0).toLocaleString()}</div>
+                    <div style={{fontFamily:"'Fredoka','Nunito',sans-serif",fontSize:16,fontWeight:600,color:C.text}}>{(p.sp||0).toLocaleString()}</div>
                     <div style={{fontSize:11,color:C.textMuted,fontWeight:600}}>all-time {(p.ap||0).toLocaleString()}</div>
                   </div>
                 </div>

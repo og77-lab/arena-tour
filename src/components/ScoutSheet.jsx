@@ -65,7 +65,7 @@ export default function ScoutSheet(props) {
 
         <div style={card({ padding: "8px 12px", marginTop: 10, background: C.cardWarm })}>
           {sc.standing && (<div style={{ fontSize: 13, fontWeight: 900, color: C.goldInk, marginBottom: 3 }}>{sc.standing.icon} {sc.standing.tag} of the tour{sc.titles ? " · " + sc.titles + " titles" : ""}</div>)}
-          <div style={{ fontSize: 13, color: C.text, fontWeight: 700 }}>🐓 Rides <b>{sc.rooster}</b></div>
+          <div style={{ fontSize: 13, color: C.text, fontWeight: 700 }}><Icon name="rooster" size={16} style={{ verticalAlign: "-3px", marginRight: 4 }} />Rides <b>{sc.rooster}</b></div>
           <div style={{ fontSize: 13, color: C.textSoft, marginTop: 2, fontStyle: "italic" }}>“{sc.trait}”</div>
         </div>
 
@@ -75,7 +75,7 @@ export default function ScoutSheet(props) {
             var head = i === 0 || sc.stats[i - 1].who !== s.who;
             return (
               <div key={s.label}>
-                {head && s.who && (<div style={{ fontSize: 12, fontWeight: 900, color: C.text, margin: i ? "8px 0 0" : "2px 0 0" }}>{s.who === "granny" ? "👵 Granny" : s.who === "fitness" ? "💪 Fitness today" : s.who === "crowd" ? "📣 The stands" : "🐓 Rooster"}</div>)}
+                {head && s.who && (<div style={{ fontSize: 12, fontWeight: 900, color: C.text, margin: i ? "8px 0 0" : "2px 0 0" }}><span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}><Icon name={s.who === "granny" ? "granny" : s.who === "fitness" ? "battery" : s.who === "crowd" ? "heart" : "rooster"} size={16} />{s.who === "granny" ? "Granny" : s.who === "fitness" ? "Fitness today" : s.who === "crowd" ? "The stands" : "Rooster"}</span></div>)}
                 <ScoutStatRow s={s} first={head} />
               </div>
             );

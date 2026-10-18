@@ -16,6 +16,7 @@ import { TIERS } from "../models/constants";
 import { C, FONT, display, label, card, button, money } from "../ui/theme";
 import { REDUCED_MOTION } from "./fx";
 import { FitnessMini } from "./Fitness";
+import Icon from "./Icons";
 
 var MAVIS = [
   "No refunds. No crying. Biscuits for regulars.",
@@ -64,7 +65,7 @@ export default function PrepScreen(props) {
       {/* Header: the tournament you picked */}
       <div style={{ padding: "calc(env(safe-area-inset-top) + 10px) 12px 8px", borderBottom: "2px solid " + C.line, background: C.cardWarm }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={display(20)}>🧰 Get ready</span>
+          <span style={Object.assign(display(20), { display: "inline-flex", alignItems: "center", gap: 6 })}><Icon name="bag" size={22} />Get ready</span>
           <span style={{ flex: 1 }} />
           <button onClick={props.onCancel} aria-label="Back to the tournament list" style={{ background: "none", border: "none", fontSize: 22, color: C.textSoft, cursor: "pointer", padding: 4 }}>✕</button>
         </div>
@@ -80,9 +81,9 @@ export default function PrepScreen(props) {
         {cd && (<div style={{ marginTop: 6 }}><LaneRow cond={ev.cond} w={36} h={28} compact={true} verdict={props.verdict || null} />
           <div style={{ fontSize: 11, color: C.textSoft, lineHeight: 1.35, marginTop: 3 }}>{cd.about}</div></div>)}
         <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
-          {[["locker", "🎒 Your locker"], ["shop", "🛒 Mavis's shop"]].map(function (t) {
+          {[["locker", "Your locker", "bag"], ["shop", "Mavis's shop", "cart"]].map(function (t) {
             var on = tab === t[0];
-            return (<button key={t[0]} onClick={function () { setTab(t[0]); }} style={button(on ? "night" : "ghost", { flex: 1, padding: "8px 6px", fontSize: 13 })}>{t[1]}{t[0] === "shop" && Object.keys(cart).length ? " (" + Object.keys(cart).reduce(function (a, k) { return a + cart[k]; }, 0) + ")" : ""}</button>);
+            return (<button key={t[0]} onClick={function () { setTab(t[0]); }} style={button(on ? "night" : "ghost", { flex: 1, padding: "8px 6px", fontSize: 13 })}><Icon name={t[2]} size={17} style={{ verticalAlign: "-3px", marginRight: 5 }} />{t[1]}{t[0] === "shop" && Object.keys(cart).length ? " (" + Object.keys(cart).reduce(function (a, k) { return a + cart[k]; }, 0) + ")" : ""}</button>);
           })}
         </div>
       </div>
@@ -115,7 +116,7 @@ export default function PrepScreen(props) {
                     })}
                     {items.length < 2 && (
                       <button onClick={function () { setTab("shop"); }} style={Object.assign(card({ padding: "8px 4px", borderStyle: "dashed" }), { cursor: "pointer", fontFamily: FONT, background: "transparent", color: C.textMuted, fontSize: 12, fontWeight: 800 })}>
-                        <div aria-hidden style={{ fontSize: 30 }}>🛒</div>Shop for more
+                        <div aria-hidden style={{ lineHeight: 0, marginBottom: 4 }}><Icon name="cart" size={30} /></div>Shop for more
                       </button>
                     )}
                   </div>
@@ -132,7 +133,7 @@ export default function PrepScreen(props) {
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 14, fontWeight: 900, color: C.text }}>Mavis Bodkin's Jousting Emporium</div>
                 <div style={{ fontSize: 12, fontStyle: "italic", color: C.textSoft, lineHeight: 1.3 }}>"{quote}"</div>
-                <div style={{ fontSize: 11.5, fontWeight: 900, color: C.greenInk, marginTop: 2 }}>💰 You have {money(cash)}</div>
+                <div style={{ fontSize: 11.5, fontWeight: 900, color: C.greenInk, marginTop: 2 }}><Icon name="coin" size={14} style={{ verticalAlign: "-2px", marginRight: 4 }} />You have {money(cash)}</div>
               </div>
             </div>
             <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
@@ -174,7 +175,7 @@ export default function PrepScreen(props) {
         </div>
         <Numbers S={S} ev={ev} tier={props.tier} tr={props.tr} kit={shown} preview={preview} />
         <button onClick={confirm} disabled={!canPay} style={button(canPay ? "gold" : "ghost", { width: "100%", padding: "12px 10px", fontSize: 16, opacity: canPay ? 1 : 0.6 })}>
-          {canPay ? (cost > 0 ? "✅ Pay " + money(cost) + " & ride" : "✅ Confirm & ride") : "Not enough money — take something out"}
+          {canPay ? (cost > 0 ? "Pay " + money(cost) + " & ride" : "Confirm & ride") : "Not enough money — take something out"}
         </button>
       </div>
     </div>,
@@ -238,9 +239,9 @@ function Numbers(props) {
         <line x1={ctr} y1="2" x2={ctr} y2="12" stroke="#1c1917" strokeWidth="0.5" />
       </svg>
       <div style={{ display: "flex", gap: 6, marginTop: 5 }}>
-        {tile("🎯", zK.toFixed(1) + "%", zK - zN, true, 0.05, "%")}
-        {tile("⚡", Math.round(sK) + "%", sK - sN, false, 0.5, "%")}
-        {tile("⭐", pK.toFixed(1), pK - pN, true, 0.05, "")}
+        {tile((<Icon name="target" size={18} />), zK.toFixed(1) + "%", zK - zN, true, 0.05, "%")}
+        {tile((<Icon name="bolt" size={18} />), Math.round(sK) + "%", sK - sN, false, 0.5, "%")}
+        {tile((<Icon name="rank" size={18} />), pK.toFixed(1), pK - pN, true, 0.05, "")}
       </div>
       <div style={{ display: "flex", gap: 6, fontSize: 10.5, color: C.textMuted, fontWeight: 800, textAlign: "center", marginTop: 2 }}>
         <span style={{ flex: 1 }}>gold zone</span><span style={{ flex: 1 }}>bar speed</span><span style={{ flex: 1 }}>points / strike</span>
