@@ -8,6 +8,8 @@ import { playVictoryBig, playDefeatBig, playCrack } from "../sounds";
 import { Sparks, CountUp, vibrate, REDUCED_MOTION } from "./fx";
 import { Rider } from "./Rider";
 
+var DISPLAY = "'Fredoka', 'Nunito', sans-serif";
+
 const { useState, useEffect } = React;
 
 /* Sits upright for a beat, then the granny topples off her chicken */
@@ -68,14 +70,14 @@ function Victory(props) {
             return (
               <motion.span key={i} initial={{ scale: 3.2, opacity: 0, y: -24 }} animate={{ scale: 1, opacity: 1, y: 0 }}
                 transition={{ type: "spring", stiffness: 520, damping: 17, delay: 0.25 + i * 0.055 }}
-                style={{ display: "inline-block", fontSize: champion ? 42 : 48, fontWeight: 900, fontStyle: "italic", color: "#fff", letterSpacing: 3, textShadow: "0 4px 0 #92400e, 0 0 24px rgba(250,204,21,0.95)" }}>
+                style={{ display: "inline-block", fontSize: champion ? 42 : 48, fontFamily: DISPLAY, fontWeight: 700, color: "#fff", letterSpacing: 3, textShadow: "0 4px 0 #92400e, 0 0 24px rgba(250,204,21,0.95)" }}>
                 {ch}
               </motion.span>
             );
           })}
         </div>
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }}
-          style={{ marginTop: 16, fontSize: 30, fontWeight: 900, color: "#fff", textShadow: "0 2px 10px rgba(0,0,0,0.5)", lineHeight: 1.1 }}>
+          style={{ marginTop: 16, fontFamily: DISPLAY, fontSize: 30, fontWeight: 700, color: "#fff", textShadow: "0 2px 10px rgba(0,0,0,0.5)", lineHeight: 1.1 }}>
           {props.setsWon}
           <span style={{ opacity: 0.55, margin: "0 10px", fontSize: 22 }}>–</span>
           <span style={{ opacity: 0.75 }}>{props.setsLost}</span>
@@ -85,7 +87,7 @@ function Victory(props) {
 
         <motion.div initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 1.05, type: "spring", stiffness: 260, damping: 22 }} style={{ marginTop: 16 }}>
           <div style={{ fontSize: 11, color: "#fde68a", fontWeight: 900, letterSpacing: 4 }}>{champion ? "TITLE WON" : props.nextLabel ? "ADVANCING TO" : (props.roundLabel || "MATCH").toUpperCase()}</div>
-          <div style={{ fontSize: 24, fontWeight: 900, color: "#fff", textTransform: "uppercase", letterSpacing: 1.5, textShadow: "0 0 18px rgba(250,204,21,0.8)", animation: REDUCED_MOTION ? "none" : "pulse 1.6s ease infinite 1.4s" }}>
+          <div style={{ fontFamily: DISPLAY, fontSize: 24, fontWeight: 700, color: "#fff", textTransform: "uppercase", letterSpacing: 1.5, textShadow: "0 0 18px rgba(250,204,21,0.8)", animation: REDUCED_MOTION ? "none" : "pulse 1.6s ease infinite 1.4s" }}>
             {champion ? (props.tierName || "The Crown") : props.nextLabel || "Win secured"}
           </div>
         </motion.div>
@@ -105,7 +107,7 @@ function Victory(props) {
 function Defeat(props) {
   var word = props.eliminated ? "ELIMINATED" : "DEFEAT";
   var size = props.eliminated ? 40 : 54;
-  var textStyle = { fontSize: size, fontWeight: 900, fontStyle: "italic", letterSpacing: 3, color: "#ef4444", textShadow: "0 4px 0 #450a0a, 0 0 26px rgba(239,68,68,0.7)", whiteSpace: "nowrap", lineHeight: 1.1 };
+  var textStyle = { fontSize: size, fontFamily: DISPLAY, fontWeight: 700, letterSpacing: 3, color: "#ef4444", textShadow: "0 4px 0 #450a0a, 0 0 26px rgba(239,68,68,0.7)", whiteSpace: "nowrap", lineHeight: 1.1 };
   var topClip = "polygon(0 0,100% 0,100% 47%,0 60%)", botClip = "polygon(0 60%,100% 47%,100% 100%,0 100%)";
   return (
     <div style={{ position: "absolute", inset: 0, background: "radial-gradient(circle at 50% 38%,#3f0d0d 0%,#1c1917 55%,#050505 100%)", boxShadow: "inset 0 0 180px rgba(220,38,38,0.45)" }}>
@@ -133,7 +135,7 @@ function Defeat(props) {
           {props.eliminated ? "Knocked out in the " + (props.roundLabel || "tournament") : props.foeName + " takes this one"}
         </motion.div>
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.95 }}
-          style={{ marginTop: 6, fontSize: 28, fontWeight: 900, color: "#e5e7eb" }}>
+          style={{ marginTop: 6, fontFamily: DISPLAY, fontSize: 28, fontWeight: 700, color: "#e5e7eb" }}>
           <span style={{ opacity: 0.75 }}>{props.setsWon}</span><span style={{ opacity: 0.4, margin: "0 10px", fontSize: 20 }}>–</span><span style={{ color: "#f87171" }}>{props.setsLost}</span>
         </motion.div>
         <div style={{ fontSize: 11, color: "rgba(255,255,255,0.8)", fontWeight: 700, letterSpacing: 2, marginBottom: 10 }}>SETS · vs {props.foeName} · AVG {Math.round(props.pa)}–{Math.round(props.oa)}</div>

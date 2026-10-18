@@ -7,6 +7,8 @@ import { bs } from "../models/formulas";
 import { playVictory, playDefeat, playImpact, playHeartbeat } from "../sounds";
 import { Sparks, CountUp, vibrate, REDUCED_MOTION } from "./fx";
 
+var DISPLAY = "'Fredoka', 'Nunito', sans-serif";
+
 const { useState, useEffect } = React;
 
 function avg(a) { var s = 0; for (var i = 0; i < a.length; i++) s += a[i]; return a.length ? s / a.length : 0; }
@@ -71,11 +73,11 @@ export default function SetBreak(props) {
         </motion.div>
 
         <motion.div initial={{ scale: 2.8, opacity: 0, rotate: -14 }} animate={{ scale: 1, opacity: 1, rotate: -5 }} transition={{ type: "spring", stiffness: 480, damping: 16, delay: 0.05 }}
-          style={{ marginTop: 10, padding: "6px 22px", border: "4px solid " + accent, color: accent, fontSize: 34, fontWeight: 900, letterSpacing: 4, borderRadius: 8, background: "rgba(0,0,0,0.35)", textShadow: "0 0 18px " + accent, animation: REDUCED_MOTION ? "none" : "arenaShake 0.35s ease 0.2s" }}>
+          style={{ marginTop: 10, padding: "6px 22px", border: "4px solid " + accent, color: accent, fontFamily: DISPLAY, fontSize: 34, fontWeight: 700, letterSpacing: 4, borderRadius: 8, background: "rgba(0,0,0,0.35)", textShadow: "0 0 18px " + accent, animation: REDUCED_MOTION ? "none" : "arenaShake 0.35s ease 0.2s" }}>
           {won ? "SET WON" : "SET LOST"}
         </motion.div>
 
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.35 }} style={{ marginTop: 14, fontSize: 26, fontWeight: 900, color: "#fff" }}>
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.35 }} style={{ marginTop: 14, fontFamily: DISPLAY, fontSize: 26, fontWeight: 700, color: "#fff" }}>
           <span style={{ color: "#fde68a" }}><CountUp to={Math.round(myAvg)} duration={500} delay={350} /></span>
           <span style={{ opacity: 0.4, margin: "0 10px", fontSize: 18 }}>–</span>
           <span style={{ color: "#fca5a5" }}><CountUp to={Math.round(opAvg)} duration={500} delay={350} /></span>
@@ -93,7 +95,7 @@ export default function SetBreak(props) {
             <div style={{ fontSize: 11, color: "#fde68a", fontWeight: 900, letterSpacing: 1.5, maxWidth: 90, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{props.youName}</div>
             <Pips need={need} count={w} color="#facc15" />
           </div>
-          <div style={{ fontSize: 40, fontWeight: 900, color: "#fff", lineHeight: 1 }}>{w}<span style={{ opacity: 0.4, margin: "0 6px" }}>–</span>{l}</div>
+          <div style={{ fontFamily: DISPLAY, fontSize: 40, fontWeight: 700, color: "#fff", lineHeight: 1 }}>{w}<span style={{ opacity: 0.4, margin: "0 6px" }}>–</span>{l}</div>
           <div style={{ textAlign: "center" }}>
             <div style={{ fontSize: 11, color: "#fca5a5", fontWeight: 900, letterSpacing: 1.5, maxWidth: 90, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{props.foeName}</div>
             <Pips need={need} count={l} color="#ef4444" />
@@ -102,7 +104,7 @@ export default function SetBreak(props) {
 
         {/* What's at stake next */}
         <motion.div initial={{ y: 24, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.85, type: "spring", stiffness: 260, damping: 22 }} style={{ marginTop: 18 }}>
-          <div style={{ fontSize: 26, fontWeight: 900, fontStyle: "italic", letterSpacing: 2, color: next.col, textShadow: "0 0 18px " + next.col, animation: tense && !REDUCED_MOTION ? "pulse 0.9s ease infinite 1s" : "none" }}>{next.tag}</div>
+          <div style={{ fontSize: 26, fontFamily: DISPLAY, fontWeight: 700, letterSpacing: 2, color: next.col, textShadow: "0 0 18px " + next.col, animation: tense && !REDUCED_MOTION ? "pulse 0.9s ease infinite 1s" : "none" }}>{next.tag}</div>
           <div style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", fontWeight: 700, marginTop: 2 }}>{next.sub}</div>
         </motion.div>
 

@@ -9,6 +9,8 @@ import { Rider } from "./Rider";
 import { Sparks, CountUp, REDUCED_MOTION, vibrate } from "./fx";
 import { playVictoryBig, playTitle, playCrowdRoar, playDefeatBig, playClang } from "../sounds";
 
+var DISPLAY = "'Fredoka', 'Nunito', sans-serif";
+
 const { useEffect, useRef, useMemo } = React;
 
 function GoldRain() {
@@ -77,7 +79,7 @@ export default function FinalOutro(props) {
         </div>
 
         <motion.div initial={{ scale: 2.4, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ delay: won ? 2.1 : 1.1, type: "spring", stiffness: 300, damping: 13 }}
-          style={{ fontSize: won ? 52 : 38, fontWeight: 900, fontStyle: "italic", lineHeight: 1.02, marginTop: 6,
+          style={{ fontSize: won ? 52 : 38, fontFamily: DISPLAY, fontWeight: 700, lineHeight: 1.02, marginTop: 6,
             color: won ? "#fffbeb" : "#e2e8f0", textShadow: won ? "0 2px 0 #fde68a, 0 4px 0 #f59e0b, 0 7px 0 #b45309, 0 0 30px rgba(251,191,36,0.9)" : "0 3px 0 #475569, 0 6px 14px rgba(0,0,0,0.5)" }}>
           {won ? "CHAMPION!" : "SO CLOSE."}
         </motion.div>

@@ -1,5 +1,5 @@
 import * as React from "react";
-import Icon, { StatIcon } from "./components/Icons";
+import Icon, { StatIcon, IconTile } from "./components/Icons";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
 import { syncAchievements, saveGameToCloud, loadGameFromCloud } from "./firebase";
@@ -1195,7 +1195,7 @@ export default function Arena(props) {
 
           {hubTab === "more" && (function(){
             var rowStyle = Object.assign(card({padding:"12px 14px",marginBottom:8}), {display:"flex",alignItems:"center",justifyContent:"space-between",width:"100%",cursor:"pointer",textAlign:"left",fontFamily:FONT});
-            var labelStyle = {fontSize:15,fontWeight:900,color:C.text};
+            var labelStyle = {fontFamily:"'Fredoka','Nunito',sans-serif",fontSize:16,fontWeight:600,color:C.text};
             var hintStyle = {fontSize:12,color:C.textSoft,marginTop:2};
             return (
               <div>
@@ -1203,7 +1203,7 @@ export default function Arena(props) {
                 {props.account && (
                   <div style={Object.assign(card({padding:"12px 14px",marginBottom:8}), {display:"flex",alignItems:"center",justifyContent:"space-between",gap:10})}>
                     <div style={{minWidth:0}}>
-                      <div style={labelStyle}>{props.account.guest ? "👤 Playing as a guest" : "👤 Your account"}</div>
+                      <div style={labelStyle}>{props.account.guest ? "Playing as a guest" : "Your account"}</div>
                       <div style={Object.assign({}, hintStyle, {overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"})}>{props.account.guest ? "Saved on this device only — sign in to keep it in the cloud" : props.account.email}</div>
                     </div>
                     {props.account.guest
@@ -1212,49 +1212,49 @@ export default function Arena(props) {
                   </div>
                 )}
                 <button onClick={function(){setShowLb(true)}} style={rowStyle}>
-                  <div><div style={labelStyle}>🌍 World Leaderboard</div><div style={hintStyle}>Real players — best ranks, titles and prize money</div></div>
+                  <div style={{display:"flex",alignItems:"center",gap:12,minWidth:0}}><IconTile name="globe" tint="#e0f2fe" size={40} /><div style={{minWidth:0}}><div style={labelStyle}>World Leaderboard</div><div style={hintStyle}>Real players — best ranks, titles and prize money</div></div></div>
                   <span style={{color:C.goldInk,fontSize:20,fontWeight:900}}>›</span>
                 </button>
                 <button onClick={function(){setShowAch(true)}} style={rowStyle}>
-                  <div><div style={labelStyle}>🏅 Achievements</div><div style={hintStyle}>{achCount(S)} of {ACHIEVEMENTS.length} badges earned</div></div>
+                  <div style={{display:"flex",alignItems:"center",gap:12,minWidth:0}}><IconTile name="medal" tint="#fef3c7" size={40} /><div style={{minWidth:0}}><div style={labelStyle}>Achievements</div><div style={hintStyle}>{achCount(S)} of {ACHIEVEMENTS.length} badges earned</div></div></div>
                   <span style={{color:C.goldInk,fontSize:20,fontWeight:900}}>›</span>
                 </button>
                 <button onClick={function(){ setShowGuide(true); }} style={Object.assign({}, rowStyle, {background:"linear-gradient(180deg,#fff,#fffbeb)",borderColor:C.lineStrong})}>
-                  <div><div style={labelStyle}>📖 Game Guide</div><div style={hintStyle}>Every tab, rule and number, explained</div></div>
+                  <div style={{display:"flex",alignItems:"center",gap:12,minWidth:0}}><IconTile name="book" tint="#fef3c7" size={40} /><div style={{minWidth:0}}><div style={labelStyle}>Game Guide</div><div style={hintStyle}>Every tab, rule and number, explained</div></div></div>
                   <span style={{color:C.goldInk,fontSize:20,fontWeight:900}}>›</span>
                 </button>
                 <button onClick={replayTips} style={rowStyle}>
-                  <div><div style={labelStyle}>🎓 Replay the tutorial</div><div style={hintStyle}>Coach Hettie's tips again, on this save — your season isn't touched</div></div>
+                  <div style={{display:"flex",alignItems:"center",gap:12,minWidth:0}}><IconTile name="cap" tint="#e2e8f0" size={40} /><div style={{minWidth:0}}><div style={labelStyle}>Replay the tutorial</div><div style={hintStyle}>Coach Hettie's tips again, on this save — your season isn't touched</div></div></div>
                   <span style={{color:C.goldInk,fontSize:20,fontWeight:900}}>›</span>
                 </button>
                 <button onClick={function(){setHelp(true)}} style={rowStyle}>
-                  <div><div style={labelStyle}>❓ How to Play</div><div style={hintStyle}>Sets, strikes and training explained</div></div>
+                  <div style={{display:"flex",alignItems:"center",gap:12,minWidth:0}}><IconTile name="question" tint="#ede9fe" size={40} /><div style={{minWidth:0}}><div style={labelStyle}>How to Play</div><div style={hintStyle}>Sets, strikes and training explained</div></div></div>
                   <span style={{color:C.goldInk,fontSize:20,fontWeight:900}}>›</span>
                 </button>
                 <button onClick={toggleMusic} style={rowStyle}>
-                  <div><div style={labelStyle}>{musicOn?"🎵":"🔕"} Music</div><div style={hintStyle}>Tunes on the menus — never two of the same in a row</div></div>
+                  <div style={{display:"flex",alignItems:"center",gap:12,minWidth:0}}><IconTile name={musicOn?"music":"mute"} tint="#fce7f3" size={40} /><div style={{minWidth:0}}><div style={labelStyle}>Music</div><div style={hintStyle}>Tunes on the menus — never two of the same in a row</div></div></div>
                   <span style={{color:musicOn?C.greenInk:C.redInk,fontSize:14,fontWeight:900,letterSpacing:0.5}}>{musicOn?"ON":"OFF"}</span>
                 </button>
                 <button onClick={toggleMute} style={rowStyle}>
-                  <div><div style={labelStyle}>{mutedState?"🔇":"🔊"} Sound Effects</div><div style={hintStyle}>Clucks, clangs, fanfares</div></div>
+                  <div style={{display:"flex",alignItems:"center",gap:12,minWidth:0}}><IconTile name={mutedState?"mute":"speaker"} tint="#fef3c7" size={40} /><div style={{minWidth:0}}><div style={labelStyle}>Sound Effects</div><div style={hintStyle}>Clucks, clangs, fanfares</div></div></div>
                   <span style={{color:mutedState?C.redInk:C.greenInk,fontSize:14,fontWeight:900,letterSpacing:0.5}}>{mutedState?"OFF":"ON"}</span>
                 </button>
                 {userId && (
                   <button onClick={function(){doSync(S)}} disabled={syncing} style={Object.assign({},rowStyle,{opacity:syncing?0.6:1})}>
-                    <div><div style={labelStyle}>☁️ Sync to Leaderboard</div><div style={hintStyle}>Post your achievements to the global leaderboard</div></div>
+                    <div style={{display:"flex",alignItems:"center",gap:12,minWidth:0}}><IconTile name="cloud" tint="#e0f2fe" size={40} /><div style={{minWidth:0}}><div style={labelStyle}>Sync to Leaderboard</div><div style={hintStyle}>Post your achievements to the global leaderboard</div></div></div>
                     <span style={{color:C.greenInk,fontSize:14,fontWeight:900}}>{syncing?"...":"Sync"}</span>
                   </button>
                 )}
                 <button onClick={exportSave} style={rowStyle}>
-                  <div><div style={labelStyle}>💾 Export Save</div><div style={hintStyle}>Download your game as a file</div></div>
+                  <div style={{display:"flex",alignItems:"center",gap:12,minWidth:0}}><IconTile name="download" tint="#dcfce7" size={40} /><div style={{minWidth:0}}><div style={labelStyle}>Export Save</div><div style={hintStyle}>Download your game as a file</div></div></div>
                   <span style={{color:C.textSoft,fontSize:20,fontWeight:900}}>›</span>
                 </button>
                 <button onClick={function(){fileRef.current&&fileRef.current.click()}} style={rowStyle}>
-                  <div><div style={labelStyle}>📂 Import Save</div><div style={hintStyle}>Load a previously exported file</div></div>
+                  <div style={{display:"flex",alignItems:"center",gap:12,minWidth:0}}><IconTile name="upload" tint="#fef3c7" size={40} /><div style={{minWidth:0}}><div style={labelStyle}>Import Save</div><div style={hintStyle}>Load a previously exported file</div></div></div>
                   <span style={{color:C.textSoft,fontSize:20,fontWeight:900}}>›</span>
                 </button>
                 <button onClick={newGame} style={Object.assign({},rowStyle,{borderColor:"#fecaca",background:"#fff5f5",marginTop:16})}>
-                  <div><div style={Object.assign({},labelStyle,{color:C.redInk})}>🔄 Restart Game</div><div style={hintStyle}>Erase this save and start over</div></div>
+                  <div style={{display:"flex",alignItems:"center",gap:12,minWidth:0}}><IconTile name="restart" tint="#fee2e2" size={40} /><div style={{minWidth:0}}><div style={Object.assign({},labelStyle,{color:C.redInk})}>Restart Game</div><div style={hintStyle}>Erase this save and start over</div></div></div>
                   <span style={{color:C.redInk,fontSize:20,fontWeight:900}}>›</span>
                 </button>
               </div>

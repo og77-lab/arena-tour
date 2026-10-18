@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { registerUser, loginUser } from './firebase'
 
-const FONT = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+const FONT = "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
 
 export default function LoginScreen({ onGuest }) {
   const [mode, setMode] = useState('login')
@@ -34,42 +34,42 @@ export default function LoginScreen({ onGuest }) {
 
   const W = {
     minHeight: 'calc(100dvh / var(--z, 1))',
-    background: '#f8fafc',
+    background: 'radial-gradient(120% 70% at 50% 0%, #fff3c4 0%, #fff8e7 55%, #fdf0d0 100%)',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
-    fontFamily: FONT, color: '#0f172a', padding: 20
+    fontFamily: FONT, color: '#1c1917', padding: 20
   }
 
   const inputStyle = {
-    width: '100%', padding: '12px 14px', borderRadius: 8,
-    border: '1px solid #e5e7eb', background: '#ffffff', color: '#0f172a',
-    fontSize: 14, outline: 'none', boxSizing: 'border-box'
+    width: '100%', padding: '13px 14px', borderRadius: 12,
+    border: '1px solid rgba(63,42,29,0.14)', background: '#fffdf7', color: '#1c1917',
+    fontSize: 15, outline: 'none', boxSizing: 'border-box', fontFamily: FONT, fontWeight: 700
   }
 
   return (
     <div style={W}>
       <div style={{ width: '100%', maxWidth: 360 }}>
         <div style={{ textAlign: 'center', marginBottom: 30 }}>
-          <img src="/icon-192.png" alt="" width="84" height="84" style={{ borderRadius: 20, marginBottom: 10, border: '3px solid #3f2a1d', boxShadow: '0 4px 0 #3f2a1d' }} />
-          <div style={{ fontSize: 11, fontWeight: 900, letterSpacing: 5, color: '#92400e' }}>THE GRAND</div>
-          <div style={{ fontSize: 26, fontWeight: 900, fontStyle: 'italic', color: '#1c1917', lineHeight: 1.1 }}>Granny Rooster Joust</div>
-          <div style={{ fontSize: 12, color: '#57534e', marginTop: 4, fontWeight: 700 }}>Sign in to save your granny's career in the cloud</div>
+          <img src="/icon-192.png" alt="" width="84" height="84" style={{ borderRadius: 24, marginBottom: 12, boxShadow: '0 2px 0 rgba(63,42,29,0.25), 0 10px 26px rgba(146,64,14,0.28)' }} />
+          <div style={{ fontFamily: "'Fredoka', 'Nunito', sans-serif", fontSize: 14, fontWeight: 600, letterSpacing: 4, color: '#b45309' }}>THE GRAND</div>
+          <div style={{ fontFamily: "'Fredoka', 'Nunito', sans-serif", fontSize: 32, fontWeight: 700, color: '#1c1917', lineHeight: 1.05 }}>Granny Rooster Joust</div>
+          <div style={{ fontSize: 13.5, color: '#57534e', marginTop: 6, fontWeight: 700 }}>Sign in to save your granny's career in the cloud</div>
         </div>
 
         <div style={{
           background: '#ffffff',
-          border: '1px solid #e5e7eb',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-          borderRadius: 12, padding: 24
+          border: '1px solid rgba(63,42,29,0.07)',
+          boxShadow: '0 1px 2px rgba(63,42,29,0.07), 0 10px 26px rgba(63,42,29,0.10)',
+          borderRadius: 20, padding: 22
         }}>
-          <div style={{ display: 'flex', marginBottom: 20, borderRadius: 8, overflow: 'hidden', border: '1px solid #e5e7eb' }}>
+          <div style={{ display: 'flex', marginBottom: 18, borderRadius: 14, padding: 4, background: '#f6eedb', gap: 4 }}>
             {['login', 'register'].map(m => (
               <button key={m} onClick={() => { setMode(m); setError(''); }}
                 style={{
-                  flex: 1, padding: '10px 0', border: 'none', cursor: 'pointer',
-                  background: mode === m ? '#1e40af' : 'transparent',
-                  color: mode === m ? '#fff' : '#64748b',
-                  fontSize: 13, fontWeight: 700, letterSpacing: 0.5,
-                  textTransform: 'uppercase'
+                  flex: 1, padding: '9px 0', border: 'none', cursor: 'pointer', borderRadius: 10,
+                  background: mode === m ? '#ffffff' : 'transparent',
+                  boxShadow: mode === m ? '0 1px 2px rgba(63,42,29,0.12), 0 3px 8px rgba(63,42,29,0.08)' : 'none',
+                  color: mode === m ? '#1c1917' : '#78716c',
+                  fontFamily: "'Fredoka', 'Nunito', sans-serif", fontSize: 15, fontWeight: 600
                 }}
               >
                 {m === 'login' ? 'Sign In' : 'Register'}
@@ -79,12 +79,12 @@ export default function LoginScreen({ onGuest }) {
 
           <form onSubmit={handleSubmit}>
             <div style={{ marginBottom: 14 }}>
-              <label style={{ fontSize: 11, color: '#64748b', fontWeight: 700, marginBottom: 4, display: 'block', textTransform: 'uppercase', letterSpacing: 1 }}>Email</label>
+              <label style={{ fontSize: 12.5, color: '#57534e', fontWeight: 800, marginBottom: 5, display: 'block' }}>Email</label>
               <input type="email" value={email} onChange={e => setEmail(e.target.value)}
                 style={inputStyle} placeholder="granny@joust.com" required />
             </div>
             <div style={{ marginBottom: 20 }}>
-              <label style={{ fontSize: 11, color: '#64748b', fontWeight: 700, marginBottom: 4, display: 'block', textTransform: 'uppercase', letterSpacing: 1 }}>Password</label>
+              <label style={{ fontSize: 12.5, color: '#57534e', fontWeight: 800, marginBottom: 5, display: 'block' }}>Password</label>
               <input type="password" value={password} onChange={e => setPassword(e.target.value)}
                 style={inputStyle} placeholder="Min 6 characters" required minLength={6} />
             </div>
@@ -97,10 +97,10 @@ export default function LoginScreen({ onGuest }) {
 
             <button type="submit" disabled={loading}
               style={{
-                width: '100%', padding: '14px 0', borderRadius: 8, border: 'none',
-                background: loading ? '#e5e7eb' : '#1e40af', color: loading ? '#64748b' : '#ffffff',
-                fontSize: 14, fontWeight: 900, cursor: loading ? 'default' : 'pointer',
-                letterSpacing: 1, textTransform: 'uppercase'
+                width: '100%', padding: '15px 0', borderRadius: 14, border: 'none',
+                background: loading ? '#e7e5e4' : 'linear-gradient(180deg,#ffd75e 0%,#f5a311 100%)', color: loading ? '#78716c' : '#3f2a1d',
+                boxShadow: loading ? 'none' : '0 2px 0 #c97a06, 0 8px 18px rgba(245,158,11,0.32)',
+                fontFamily: "'Fredoka', 'Nunito', sans-serif", fontSize: 18, fontWeight: 600, cursor: loading ? 'default' : 'pointer', letterSpacing: 0.3
               }}
             >
               {loading ? '...' : mode === 'login' ? '🐓 Saddle up' : '🐓 Join the joust'}
@@ -110,10 +110,10 @@ export default function LoginScreen({ onGuest }) {
 
         <button onClick={onGuest}
           style={{
-            width: '100%', padding: '12px 0', borderRadius: 8, border: '1px solid #e5e7eb',
-            background: '#ffffff', color: '#475569',
-            fontSize: 13, fontWeight: 700, cursor: 'pointer',
-            marginTop: 12, letterSpacing: 0.5
+            width: '100%', padding: '13px 0', borderRadius: 14, border: '1px solid rgba(63,42,29,0.12)',
+            background: 'rgba(255,255,255,0.7)', color: '#57534e',
+            fontFamily: FONT, fontSize: 14, fontWeight: 800, cursor: 'pointer',
+            marginTop: 12
           }}
         >
           Play as Guest (local save only)

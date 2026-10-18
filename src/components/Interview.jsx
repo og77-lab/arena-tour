@@ -9,6 +9,8 @@ import { scoreAnswer, TONE_LABEL } from "../engine/interview";
 import { REDUCED_MOTION } from "./fx";
 import { playClash, playDefeat } from "../sounds";
 
+var DISPLAY = "'Fredoka', 'Nunito', sans-serif";
+
 const { useState, useRef } = React;
 
 function Flashes() {
@@ -101,7 +103,7 @@ export default function Interview(props) {
           <motion.div initial={{ y: 20, opacity: 0, scale: 0.9 }} animate={{ y: 0, opacity: 1, scale: 1 }} transition={{ type: "spring", stiffness: 300, damping: 20 }}
             style={{ marginTop: 18, background: "#fff", borderRadius: 16, padding: "12px 14px", textAlign: "center", boxShadow: "0 4px 0 #0b1226" }}>
             <div style={{ fontSize: 12, fontWeight: 900, letterSpacing: 2, color: "#57534e" }}>THE CROWD'S VERDICT</div>
-            <div style={{ fontSize: 30, fontWeight: 900, color: res.outcome.delta >= 0 ? "#be123c" : "#57534e", marginTop: 2 }}>
+            <div style={{ fontFamily: DISPLAY, fontSize: 30, fontWeight: 700, color: res.outcome.delta >= 0 ? "#be123c" : "#57534e", marginTop: 2 }}>
               ❤️ {res.outcome.delta >= 0 ? "+" : "−"}{Math.abs(res.outcome.delta)}
             </div>
             <div style={{ fontSize: 14, fontWeight: 800, color: "#1c1917" }}>{res.outcome.reaction}</div>
