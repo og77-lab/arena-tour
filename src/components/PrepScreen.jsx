@@ -218,28 +218,34 @@ function Numbers(props) {
     { k: "speed", v: 1.2, label: "Bar speed", get: barSpeed, f: function (v) { return Math.round(v) + "%"; }, up: false, eps: 0.5 },
     { k: "aim", v: 2, label: "Points / strike", get: pointsPerStrike, f: function (v) { return v.toFixed(1); }, up: true, eps: 0.05 }
   ];
-  function cell(r, a, b, strong) {
-    var va = r.get(a), vb = r.get(b), d = va - vb, same = Math.abs(d) < r.eps, good = same ? null : (d > 0) === r.up;
-    return (<span style={{ fontWeight: strong ? 900 : 800, textAlign: "right", whiteSpace: "nowrap", color: good === true ? C.greenInk : good === false ? C.redInk : C.text }}>{r.f(va)}{same ? "" : good ? " ▲" : " ▼"}</span>);
+  /* the picture: your bar here, gold zone at its real width; dashed = plain lanes, fresh, no kit */
+  var zN = matchNumbers(normal).zone, zK = matchNumbers(kit).zone, sN = barSpeed(normal), sK = barSpeed(kit), pN = pointsPerStrike(normal), pK = pointsPerStrike(kit);
+  function tile(icon, val, d, up, eps, unit) {
+    var good = Math.abs(d) < eps ? null : (d > 0) === up;
+    return (<div style={{ flex: 1, textAlign: "center", padding: "6px 2px", borderRadius: 10, background: good === true ? "#f0fdf4" : good === false ? "#fef2f2" : "#fafaf9", border: "1.5px solid " + (good === true ? "#86efac" : good === false ? "#fca5a5" : C.line) }}>
+      <div style={{ fontSize: 15 }}>{icon}</div>
+      <div style={{ fontSize: 18, fontWeight: 900, color: C.text, lineHeight: 1.1 }}>{val}</div>
+      <div style={{ fontSize: 11.5, fontWeight: 900, color: good === true ? C.greenInk : good === false ? C.redInk : C.textMuted }}>{good == null ? "=" : (good ? "▲ " : "▼ ") + (d > 0 ? "+" : "−") + Math.abs(d).toFixed(unit === "%" && Math.abs(d) >= 10 ? 0 : 1) + (unit || "")}</div>
+    </div>);
   }
+  var W = 100, ctr = 72;
   return (
     <div style={{ marginBottom: 7 }}>
-      <div style={{ display: "grid", gridTemplateColumns: "auto 1fr auto auto auto", columnGap: 8, rowGap: 3, alignItems: "center", fontSize: 12.5 }}>
-        <span /><span />
-        <span style={{ fontSize: 9.5, fontWeight: 900, color: C.textMuted, textAlign: "right" }}>PLAIN · FRESH</span>
-        <span style={{ fontSize: 9.5, fontWeight: 900, color: C.textMuted, textAlign: "right" }}>THESE LANES</span>
-        <span style={{ fontSize: 9.5, fontWeight: 900, color: props.preview ? "#0369a1" : C.textMuted, textAlign: "right" }}>{props.preview ? "TRYING ON" : "WITH KIT"}</span>
-        {rows.map(function (r) {
-          return [
-            <MiniBar key={r.k + "b"} k={r.k} v={r.v} />,
-            <span key={r.k + "l"} style={{ fontWeight: 800, color: C.text }}>{r.label}</span>,
-            <span key={r.k + "n"} style={{ fontWeight: 800, color: C.textSoft, textAlign: "right" }}>{r.f(r.get(normal))}</span>,
-            <span key={r.k + "h"}>{cell(r, here, normal, false)}</span>,
-            <span key={r.k + "k"}>{cell(r, kit, here, true)}</span>
-          ];
-        })}
+      <svg viewBox="0 0 100 14" preserveAspectRatio="none" style={{ width: "100%", height: 26, display: "block" }} aria-hidden>
+        <rect x="0.5" y="2" width="99" height="10" rx="5" fill="#292524" />
+        <rect x={ctr - zK / 2} y="2" width={zK} height="10" fill={props.preview ? "#38bdf8" : "#facc15"} />
+        <rect x={ctr - zN / 2} y="1.2" width={zN} height="11.6" fill="none" stroke="#fff" strokeWidth="0.6" strokeDasharray="1.2 0.8" vectorEffect="non-scaling-stroke" />
+        <line x1={ctr} y1="2" x2={ctr} y2="12" stroke="#1c1917" strokeWidth="0.5" />
+      </svg>
+      <div style={{ display: "flex", gap: 6, marginTop: 5 }}>
+        {tile("🎯", zK.toFixed(1) + "%", zK - zN, true, 0.05, "%")}
+        {tile("⚡", Math.round(sK) + "%", sK - sN, false, 0.5, "%")}
+        {tile("⭐", pK.toFixed(1), pK - pN, true, 0.05, "")}
       </div>
-      <div style={{ fontSize: 10.5, color: C.textMuted, marginTop: 3 }}>Your own bar in round 1, from your levels (100% speed = an untrained rider's bar). These lanes include your tiredness. Green ▲ better, red ▼ worse. Tap an item to try it on.</div>
+      <div style={{ display: "flex", gap: 6, fontSize: 10.5, color: C.textMuted, fontWeight: 800, textAlign: "center", marginTop: 2 }}>
+        <span style={{ flex: 1 }}>gold zone</span><span style={{ flex: 1 }}>bar speed</span><span style={{ flex: 1 }}>points / strike</span>
+      </div>
+      <div style={{ fontSize: 10.5, color: C.textMuted, marginTop: 2, textAlign: "center" }}>▲▼ vs plain lanes, fresh, no kit (dashed)</div>
     </div>
   );
 }

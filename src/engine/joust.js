@@ -66,12 +66,16 @@ export function addHands(hm, sample) {
 }
 export function handsTalent(hm) { return hm && hm.n >= 30 ? Math.round(talentOfHands(hm.m / 0.73)) : null; }
 
-/* ── Nerves ── the much lower-ranked rider feels it: by how many times lower she's ranked, not by places.
-   Under ×3 (700 v 720, or 999 v 400) it's nothing; ×3 is −0.3%, ×30 about −0.9%. It fades with every set she wins. */
+/* ── Nerves ── the lower-ranked rider feels it, two ways (the bigger one counts, they don't add up):
+   · by how many times lower she's ranked: under ×3 nothing, ×3 −0.3%, ×30 about −0.9%, never more than 1%;
+   · facing a star: a top-3 rider costs −0.6% (−0.3% if you're top 10 yourself), a top-10 rider −0.4% (nothing if
+     you're top 10 too). It fades with every set she wins. */
 export function nerves(myRank, herRank, setsWon) {
-  var ratio = (myRank || 1000) / Math.max(1, herRank || 1000);
-  if (ratio < 3) return 0;
-  return Math.round(Math.min(1, 0.6 * Math.log10(ratio)) * Math.max(0, 1 - 0.4 * (setsWon || 0)) * 100) / 100;
+  myRank = myRank || 1000; herRank = Math.max(1, herRank || 1000);
+  if (herRank >= myRank) return 0;
+  var ratio = myRank / herRank, byRank = ratio < 3 ? 0 : Math.min(1, 0.6 * Math.log10(ratio));
+  var star = herRank <= 3 ? (myRank <= 10 ? 0.3 : 0.6) : herRank <= 10 && myRank > 10 ? 0.4 : 0;
+  return Math.round(Math.max(byRank, star) * Math.max(0, 1 - 0.4 * (setsWon || 0)) * 100) / 100;
 }
 
 /* ── A whole match between two rivals, on these rules ── who: { tr, talent, kit, fit, rank, love }
