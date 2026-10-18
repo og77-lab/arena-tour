@@ -205,7 +205,7 @@ function body(id) {
       <H>How your opponent scores</H>
       <P>She strikes on the same kind of bar and is scored by the same rule. Her <B>talent</B> decides how tightly she groups around the centre — a gifted granny lands near 100 time after time, a developing one sprays all over. The round's speed spreads her out just as it does you.</P>
       <H>The crowd's roar</H>
-      <P>On the last strike of a set with the match on the line, a crowd that loves you widens your gold zone: <B>+1%</B> of the bar with 60+ fans, <B>+2%</B> with 85+.</P>
+      <P><B>The stands:</B> whoever the crowd loves more gets a slightly wider gold zone — <B>+1% of the bar per 25 ❤️ more</B> than the other rider (at most +1.5%), doubled on match-point strikes.</P>
     </>);
 
     case "difficulty": return (<>

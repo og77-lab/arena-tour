@@ -8,7 +8,9 @@
 
 You're a granny on a rooster, starting at **#1000 of 1,000** on the world jousting tour. Every week you ride in a tournament, win matches with well-timed strikes, earn ranking points, prize money and training, and climb — from the dusty Futures lanes to the golden helmets of the top ten.
 
-Every one of the 999 other grannies is a full rider too: she plays her own tournaments, earns points, trains by the same rules as you, and has her own face, rooster, trait and opinions.
+Every one of the 999 other grannies is a full rider too: she plays her own tournaments, earns points, trains by the same rules as you, and has her own face, rooster, trait and opinions. Her matches against other rivals are played on the very same engine as yours, strike by strike.
+
+**Your starting talent.** Before your first event you spread **10 points** over the six stats — any way you like, even all in one. Older saves get the same 10 points once.
 
 > 📣 The whole game rests on one skill: stopping the moving marker on the centre of the gold zone. Everything else — training, money, fans — shifts the odds, but your timing decides matches.
 
@@ -128,9 +130,15 @@ On top of the base score:
 - There's almost no luck: ±1 point. The same strike always scores about the same.
 - Labels: **PERFECT!** 96+, **GOLD!** inside the zone, **CLOSE** just outside, **MISS** beyond.
 
-**How your opponent scores.** She strikes on the same kind of bar and is scored by the same rule — her lanes, her kit and her tiredness count exactly as yours do. Her **talent** decides how tightly she groups around the centre — a gifted granny lands near 100 time after time, a developing one sprays all over. The round's speed spreads her out just as it does you.
+**How your opponent scores.** She strikes on **her own bar**, built exactly like yours but from **her** levels, her lanes, her kit, her tiredness and her crowd, and she's scored by the same rule. Where she stops is down to her **hands** — her talent: a gifted granny lands near the centre time after time, a developing one wobbles more, and everyone wobbles a little more as their bar runs faster. Each match she has a **form for the day** (about ±8%), and her bad strikes stay bad, not disasters: a set in the 20s or 30s only comes from real weakness or tiredness.
 
-**The crowd's roar.** On the last strike of a set with the match on the line, a crowd that loves you widens your gold zone: **+1%** of the bar with 60+ fans, **+2%** with 85+.
+**Talent and potential.** A rival's talent grows slowly through her career, up to her **potential**. Only **five** riders on the whole tour can ever reach 90 — one a touch above the rest, one close behind her, and three just over the line.
+
+**Your hands.** Your hands are your own finger. Your profile measures them from your last 200 strikes (how far from the centre you stop, allowing for the bar's speed) and shows them on the same scale as a rival's talent — "Your hands ≈ 64". It's a mirror only; it never changes a score.
+
+**Nerves.** A rider facing someone ranked many times higher feels it: her gold zone is up to 1% smaller — nothing for close ranks (700 v 720), about −0.9% at ×30 — and it fades with every set she wins. It works the same for you, for her, and in rival-vs-rival matches. The status line in the match shows it (😰).
+
+**The stands.** Whoever the crowd loves more gets a slightly wider gold zone: **+1% of the bar per 25 ❤️ more** than the other rider (at most +1.5%), **doubled on match-point strikes**.
 
 ## 8. Difficulty
 
@@ -243,14 +251,14 @@ Lances and saddles from Mavis's shop are bought on the Get ready screen and don'
 
 ## 13. Fans, Knitter & the press
 
-Your **fans** (❤️, 0–100, starting at 20) are how much the crowd loves you. The **Fans & Knitter** card on Home shows your fans, how much they moved this week and why (*riding +6 · interview +3 · weekly drift −1*), and your Knitter followers.
+Your **crowd love** (❤️, 0–100, starting at 20) is a score of how much the crowd loves you — not a head count; your Knitter **followers** are the people. The **Crowd love & Knitter** card on Home (tap ❤️ Crowd at the top to jump to it) shows your crowd love, how much they moved this week and why (*riding +6 · interview +3 · weekly drift −1*), and your Knitter followers.
 
-**Why fans matter**
-- **Sponsors:** one training point every week for each 10 fans.
+**What crowd love gives you** (the card shows each in numbers, and 📜 opens all the rules)
+- **Sponsors:** one training point every week for each 10 ❤️.
 - **Wildcards (only if you are nearly in):** 70+ fans and a rank within 15% of the tier above's cut (Tour 500: 201–230, Masters: 101–115); for a Slam, 80+ fans and rank 65–74.
 - **The stands:** the crowd backs whichever rider it loves more — a slightly wider gold zone for the favourite (up to +1.5% of the bar), doubled on match-point strikes. Your rivals have crowds too; the tale of the tape shows both (📣 The stands).
 
-**What moves them**
+**What moves it**
 - **Riding:** each win +1, a comeback +2, a real upset +2, each loss −1 (at most +6 a week), plus a title bonus (+4, +10 for a Slam). The closer you are to 100, the harder each point comes.
 - **Interviews:** see below.
 - **Promises:** a bold answer is a promise for the next tournament — reach the semifinals and it's +6; fall short and it's −5.
@@ -284,7 +292,7 @@ Your **arch-rival** is the granny you keep meeting — preferably the one who ke
 
 The Ranks tab lists all 1,000 riders by season points and opens on your own row, with 25 above and below ("show 25 more" to see further). Switch to **Top 50** to see the leaders. Golden helmets mark the top ten; the world #1 wears the crown.
 
-**Profiles.** Tap any granny for her profile: her rider and rooster, trait and quote, ranks and points, natural talent and potential, training levels, titles, and your head-to-head — every match with its result in sets and each set's score.
+**Profiles.** Tap any granny for her profile: her rider and rooster, trait and quote, ranks and points, crowd love and followers (and what they mean when you meet), natural talent (her hands) and potential — or, on yours, your measured hands — training levels, titles, and your head-to-head — every match with its result in sets and each set's score.
 
 Tap your own card on Home for your profile. The ✏️ buttons rename your granny and your rooster.
 
