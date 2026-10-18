@@ -42,9 +42,10 @@ export function landScore(d, bar, jitter) {
   return { inZ: inZ, base: base + (jitter || 0), total: Math.max(0, Math.min(100, base + (jitter || 0) + bar.aim + (inZ ? bar.gold : bar.miss))) };
 }
 
-/* ── Hands ── a rider's wobble, in "bar at normal speed" units: talent 30 → 6.7, 66 → 4.5, 90 → 3.1.
-   Set so a rival's hands are like a real player's at her rank (7 − 0.05×talent made them sharper than people) */
-export var HANDS = { a: 8.5, b: 0.06 };
+/* ── Hands ── a rider's wobble, in "% of a normal-speed bar" units (a normal bar crosses 144% a second, so 1 unit ≈ 7 ms).
+   Anchored to how precisely people can stop a moving marker — not to any one player: talent 90 ≈ elite (~18 ms, 2.6),
+   50 ≈ an average practised player (~40 ms, 6.5), 20 ≈ a beginner (~65 ms, 9.4). Your hands are measured on this scale. */
+export var HANDS = { a: 11.35, b: 0.097 };
 export function handsOf(talent) { return Math.max(1, HANDS.a - (talent || 50) * HANDS.b); }
 export function talentOfHands(h) { return Math.max(0, Math.min(100, (HANDS.a - h) / HANDS.b)); }
 function gauss(rnd) { var u = 0, v = 0; while (!u) u = rnd(); while (!v) v = rnd(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
