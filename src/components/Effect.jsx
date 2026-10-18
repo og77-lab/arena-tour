@@ -13,6 +13,7 @@
 
 import { C, FONT } from "../ui/theme";
 import { REDUCED_MOTION } from "./fx";
+import { effLevel, LV } from "../engine/joust";
 
 var STAT_ICON = { r: "⚡", p: "🐾", f: "🎯", s: "🫀", g: "🛡️", b: "🔋", all: "📊" };
 var STAT_NAME = { r: "Reflexes", p: "Steady Stride", f: "Aim", s: "Stamina", g: "Stubbornness", b: "Bounce-back" };
@@ -135,4 +136,12 @@ export function Legend() {
 
 /* What one level of each stat does to your own bar, as a chip (first levels; higher ones give a little less) */
 var STAT_FX = { r: { speed: 0.97 }, f: { aim: 0.5 }, g: { floor: 1.5 }, s: { accel: 0.93 }, p: { zone: 0.4 }, b: { fit: 0.7 } };
-export function statEffect(k) { return effectsOf(STAT_FX[k] || {}); }
+/* With a level (lv): what the NEXT level adds to your bar, after the gentle drop-off at high levels (engine/joust) */
+function r1(v) { return Math.round(v * 10) / 10; }
+export function statEffect(k, lv) {
+  if (lv == null || k === "b") return effectsOf(STAT_FX[k] || {});
+  var dl = effLevel(lv + 1) - effLevel(lv);
+  var fx = k === "r" ? { speed: 1 - Math.max(0.01, r1(dl * LV.r * 100) / 100) } : k === "s" ? { accel: 1 - Math.max(0.01, Math.round(dl * LV.s * 100) / 100) } :
+    k === "p" ? { zone: r1(dl * LV.p) } : k === "f" ? { aim: r1(dl * LV.f) } : k === "g" ? { floor: r1(dl * LV.g) } : {};
+  return effectsOf(fx);
+}

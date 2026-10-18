@@ -214,7 +214,7 @@ function body(id) {
         ["1 · Your levels", "Your own levels build your own bar: a slower bar, a wider gold zone, extra points, softer misses. Her levels build her bar, never yours."],
         ["2 · The round", "Each tier starts a step harder, and each round within a tournament adds a little more. This narrows the gold zone and speeds the bar for both of you."],
         ["3 · Hands", "Where you stop on your bar is your finger. Where she stops is her talent: how close to the centre she lands, a little worse when her bar runs faster, with a form for the day."],
-        ["4 · Nerves", "Facing a rider ranked many times higher (×30 or more) shrinks the underdog's gold zone by up to 1%, less with every set she wins. Close ranks: nothing."]
+        ["4 · Nerves", "Facing a rider ranked at least 3 times higher shrinks the underdog's gold zone: −0.3% at ×3, about −0.9% at ×30, never more than 1%, and less with every set she wins. Closer ranks: nothing."]
       ]} />
       <P>An example — the width of your gold zone with Steady Stride (bigger gold):</P>
       <Table head={["Situation", "Gold zone"]} rows={[

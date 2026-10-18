@@ -136,7 +136,7 @@ On top of the base score:
 
 **Your hands.** Your hands are your own finger. Your profile measures them from your last 200 strikes (how far from the centre you stop, allowing for the bar's speed) and shows them on the same scale as a rival's talent — "Your hands ≈ 64". It's a mirror only; it never changes a score.
 
-**Nerves.** A rider facing someone ranked many times higher feels it: her gold zone is up to 1% smaller — nothing for close ranks (700 v 720), about −0.9% at ×30 — and it fades with every set she wins. It works the same for you, for her, and in rival-vs-rival matches. The status line in the match shows it (😰).
+**Nerves.** A rider facing someone ranked many times higher feels it: her gold zone is up to 1% smaller — nothing under ×3 (700 v 720, or 999 v 400), −0.3% at ×3, about −0.9% at ×30 — and it fades with every set she wins. It works the same for you, for her, and in rival-vs-rival matches. The status line in the match shows it (😰).
 
 **The stands.** Whoever the crowd loves more gets a slightly wider gold zone: **+1% of the bar per 25 ❤️ more** than the other rider (at most +1.5%), **doubled on match-point strikes**.
 
@@ -147,7 +147,7 @@ On top of the base score:
 | 1 · Your levels | Your own levels build your own bar: a slower bar, a wider gold zone, extra points, softer misses. Her levels build her bar, never yours. |
 | 2 · The round | Each tier starts a step harder, and each round adds a little more: a narrower gold zone and a faster bar for both of you. |
 | 3 · Hands | Where you stop is your finger. Where she stops is her talent (how close to the centre she lands, a little worse on a faster bar, with a form for the day). Your profile shows your hands on the same scale. |
-| 3b · Nerves | Facing someone ranked many times higher (×30+) shrinks the underdog's gold zone by up to 1%, less with every set she wins. Close ranks: nothing. |
+| 3b · Nerves | Facing someone ranked at least 3 times higher shrinks the underdog's gold zone: −0.3% at ×3, about −0.9% at ×30, never more than 1%, less with every set she wins. Closer ranks: nothing. |
 | 4 · The lanes | Mud, wind, heat or green bend the bar for both of you and weight one stat. |
 | 5 · Kit and tiredness | Your lance, saddle and fitness bend your bar; hers bend hers. |
 

@@ -59,16 +59,18 @@ export function npcMiss(talent, form, spd, rnd) {
    last ~200 strikes. A rival's typical |wobble| is 0.73 of her hands figure (her bad strikes stop at two wobbles out). */
 export function handsSample(d, spd) { return d * BASE.speed / Math.max(0.5, spd); }
 export function addHands(hm, sample) {
+  /* one wild strike (a fumbled tap) counts as at most three times your usual miss, so it can't skew the picture */
+  if (hm && hm.n >= 10) sample = Math.min(sample, hm.m * 3);
   var n = Math.min(200, ((hm && hm.n) || 0) + 1), m = hm && hm.n ? hm.m + (sample - hm.m) / n : sample;
   return { n: n, m: Math.round(m * 1000) / 1000 };
 }
 export function handsTalent(hm) { return hm && hm.n >= 30 ? Math.round(talentOfHands(hm.m / 0.73)) : null; }
 
 /* ── Nerves ── the much lower-ranked rider feels it: by how many times lower she's ranked, not by places.
-   ×1.03 (700 v 720) is nothing; ×30 is about −0.9% gold zone. It fades with every set she wins. */
+   Under ×3 (700 v 720, or 999 v 400) it's nothing; ×3 is −0.3%, ×30 about −0.9%. It fades with every set she wins. */
 export function nerves(myRank, herRank, setsWon) {
   var ratio = (myRank || 1000) / Math.max(1, herRank || 1000);
-  if (ratio <= 1.5) return 0;
+  if (ratio < 3) return 0;
   return Math.round(Math.min(1, 0.6 * Math.log10(ratio)) * Math.max(0, 1 - 0.4 * (setsWon || 0)) * 100) / 100;
 }
 

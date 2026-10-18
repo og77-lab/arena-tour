@@ -11,7 +11,8 @@ export function bs(bg, c) {
 /* Player+all NPCs sorted by season points (SP) */
 export function getRanked(S) {
   var all = [Object.assign({}, S.player, { name: S.pName })].concat(S.npcs);
-  all.sort(function (a, b) { return (b.sp || 0) - (a.sp || 0); });
+  /* level on points: you rank behind the rival (so a brand-new granny starts at #1000) */
+  all.sort(function (a, b) { return (b.sp || 0) - (a.sp || 0) || (a.isP ? 1 : 0) - (b.isP ? 1 : 0); });
   return all;
 }
 

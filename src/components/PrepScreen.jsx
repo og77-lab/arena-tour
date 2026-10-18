@@ -206,8 +206,8 @@ function Effects(props) {
   );
 }
 
-/* Your numbers in three rows — gold zone, bar speed, points per strike — and three steps: a normal match → this
-   tournament (its lanes, your stats against its entrants, your tiredness) → this tournament with your kit.
+/* Your own bar in three rows — gold zone, bar speed, points per strike — round 1 of this tier, in three steps:
+   plain lanes and fresh → these lanes and your tiredness → the same with your kit. All from your own levels.
    Points per strike sums everything up: it's what an average-timed rider would score with those numbers. */
 function Numbers(props) {
   var p = props.S.player, cond = props.ev ? props.ev.cond : "classic";
@@ -226,8 +226,8 @@ function Numbers(props) {
     <div style={{ marginBottom: 7 }}>
       <div style={{ display: "grid", gridTemplateColumns: "auto 1fr auto auto auto", columnGap: 8, rowGap: 3, alignItems: "center", fontSize: 12.5 }}>
         <span /><span />
-        <span style={{ fontSize: 9.5, fontWeight: 900, color: C.textMuted, textAlign: "right" }}>NORMAL</span>
-        <span style={{ fontSize: 9.5, fontWeight: 900, color: C.textMuted, textAlign: "right" }}>THIS EVENT</span>
+        <span style={{ fontSize: 9.5, fontWeight: 900, color: C.textMuted, textAlign: "right" }}>PLAIN · FRESH</span>
+        <span style={{ fontSize: 9.5, fontWeight: 900, color: C.textMuted, textAlign: "right" }}>THESE LANES</span>
         <span style={{ fontSize: 9.5, fontWeight: 900, color: props.preview ? "#0369a1" : C.textMuted, textAlign: "right" }}>{props.preview ? "TRYING ON" : "WITH KIT"}</span>
         {rows.map(function (r) {
           return [
@@ -239,7 +239,7 @@ function Numbers(props) {
           ];
         })}
       </div>
-      <div style={{ fontSize: 10.5, color: C.textMuted, marginTop: 3 }}>Green ▲ is better for you, red ▼ worse. Tap an item to try it on.</div>
+      <div style={{ fontSize: 10.5, color: C.textMuted, marginTop: 3 }}>Your own bar in round 1, from your levels (100% speed = an untrained rider's bar). These lanes include your tiredness. Green ▲ better, red ▼ worse. Tap an item to try it on.</div>
     </div>
   );
 }

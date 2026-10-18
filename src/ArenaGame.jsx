@@ -8,9 +8,10 @@ import { W, CSS, EMO, TIERS, RN5, RN6, HN, HC, HI, TOTAL_EVENTS, FINALS_BO, STAT
 import { sh, bs, nW, pRankOf, getRanked, getARanked, trainCost, weeklyTP } from "./models/formulas";
 import { sSet, sGet, stamp, pickNewest, queueCloudSave, cancelCloudSave } from "./engine/persistence";
 import { pack, unpack } from "./engine/codec";
-import { addHands, simMatch, handsTalent } from "./engine/joust";
+import { addHands, simMatch, handsTalent, riderBar, BASE } from "./engine/joust";
 import { shapePotentials } from "./engine/npcGenerator";
 import StartTalent from "./components/StartTalent";
+import KnitterFeed from "./components/KnitterFeed";
 import { followersOf, followersGain, followersLift, crowdLove, weekKnits, fmtFollowers, fanChain } from "./engine/social";
 import { mkSeason } from "./engine/seasonManager";
 import PowerBar from "./components/PowerBar";
@@ -134,14 +135,20 @@ function eventGaps(S, ev) { var byId = {}; S.npcs.forEach(function (n) { byId[n.
 /* Finals matches a rider has already ridden (for her tiredness) */
 function finalsRidden(f, id) { var n = 0; (f.gm || []).concat(f.semis || []).forEach(function (m) { if (m && m.w && ((m.a && m.a.id === id) || (m.b && m.b.id === id))) n++; }); return n; }
 
-function buildScout(S, o, oRank, d) {
-  var mine = effTr(S.player), hers = effTr(o);
+function buildScout(S, o, oRank, d, me) {
+  var mine = effTr(S.player), hers = effTr(o), cond = (me && me.cond) || "classic";
+  /* today's bars, each from her own abilities (engine/joust): round 1 of this match's difficulty */
+  var myBar = riderBar({ tr: mine, diff: d || 0, cond: cond, kit: me && me.gear, fit: fitOf(S.player) });
+  var herBar = riderBar({ tr: hers, diff: d || 0, cond: cond, kit: o._kit, fit: o._fit || fitOf(o) });
+  var normal = BASE.speed + (d || 0) * BASE.speedPerDiff;
   var meetings = (S.player.h2h && S.player.h2h[o.id]) || [];
   var w = meetings.filter(function (m) { return m.w; }).length;
   return {
     name: sh(o.name), emoji: o.emoji || "", palette: paletteFor(o.id, oRank), rank: oRank, talent: talentLabel(o.skill), pts: o.sp || 0,
     rooster: roosterName(o.id), trait: trait(o.id), standing: standing(oRank), titles: (o.best && o.best.titles) || 0,
-    you: { rank: pRankOf(S), pts: S.player.sp || 0 },
+    you: { rank: pRankOf(S), pts: S.player.sp || 0, hands: handsTalent(S.player.hm) },
+    hands: Math.round(o.skill || 50),
+    bars: { you: { zone: myBar.zone, speed: myBar.speed / normal * 100 }, foe: { zone: herBar.zone, speed: herBar.speed / normal * 100 } },
     h2h: { w: w, l: meetings.length - w }, rival: !!(S.player.rival && S.player.rival.id === o.id),
     kit: o._kit ? kitIcons(o._kit) : null,
     injuries: ((S.player.inj || []).map(function (x) { return "You " + injuryText(x); })).concat((o.inj || []).map(function (x) { return "Her " + injuryText(x); })),
@@ -222,6 +229,7 @@ export default function Arena(props) {
   var _paper = useState(null), paper = _paper[0], setPaper = _paper[1];
   var _interview = useState(null), interview = _interview[0], setInterview = _interview[1];
   var _newsIdx = useState(0), newsIdx = _newsIdx[0], setNewsIdx = _newsIdx[1];
+  var _newsMode = useState("paper"), newsMode = _newsMode[0], setNewsMode = _newsMode[1]; /* News tab: the paper or the Knitter feed */
   var _gala = useState(null), gala = _gala[0], setGala = _gala[1];
   var _trainFx = useState(null), trainFx = _trainFx[0], setTrainFx = _trainFx[1];
   var _showLb = useState(false), showLb = _showLb[0], setShowLb = _showLb[1];
@@ -1036,7 +1044,7 @@ export default function Arena(props) {
                           })()}
                           <div style={{fontSize:13,color:C.text,fontWeight:700,lineHeight:1.4}}>{st.what}.</div>
                           <div style={{display:"grid",gridTemplateColumns:"auto 1fr",columnGap:8,rowGap:2,fontSize:12.5,color:C.textSoft,marginTop:4,lineHeight:1.35}}>
-                            <span style={{fontWeight:900,color:C.goldInk}}>Each level</span><span><EffectList list={statEffect(st.k)} /></span>
+                            <span style={{fontWeight:900,color:C.goldInk}}>{lv >= cap ? "At max" : "Next level"}</span><span>{lv >= cap ? "Lv " + lv + " — no more levels" : (<EffectList list={statEffect(st.k, lv)} />)}</span>
                             <span style={{fontWeight:900,color:C.goldInk}}>Train it if</span><span>{st.best.charAt(0).toLowerCase() + st.best.slice(1)}</span>
                             <span style={{fontWeight:900,color:C.goldInk}}>Vs rivals</span>
                             <span>{(function(){ var rv = rivalTr[st.k] || 0, gap = Math.round((lv - rv) * 10) / 10;
@@ -1098,8 +1106,17 @@ export default function Arena(props) {
             var issues = S.news || [];
             var idx = Math.min(newsIdx, Math.max(0, issues.length - 1));
             var issue = issues.length ? issues[idx] : buildSpecialEdition(S);
+            var modeBar = (
+              <div style={{ display: "flex", gap: 6, marginBottom: 10 }}>
+                {[["paper", "📰 The Daily Cluck"], ["knitter", "🧶 Knitter"]].map(function (m) { var on = newsMode === m[0]; return (
+                  <button key={m[0]} onClick={function(){ setNewsMode(m[0]); try { window.scrollTo(0, 0); } catch (e) {} }} style={{ flex: 1, padding: "9px 8px", borderRadius: 10, fontWeight: 900, fontSize: 14, fontFamily: FONT, cursor: "pointer",
+                    background: on ? (m[0] === "knitter" ? "#0e7490" : "#1c1917") : "#fff", color: on ? "#fff" : C.text, border: "1.5px solid " + (m[0] === "knitter" ? "#0e7490" : "#1c1917") }}>{m[1]}</button>); })}
+              </div>
+            );
+            if (newsMode === "knitter") return (<div>{modeBar}<KnitterFeed issues={issues} kit={S.player.kit} /></div>);
             return (
               <div>
+                {modeBar}
                 {sectionTitle("The Daily Cluck", issues.length ? "A fresh issue after every tournament — your run, your rivals, the world's best." : "A special edition for now. Your first real issue prints after your first tournament.")}
                 {issues.length > 0 && (
                   <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 6, marginBottom: 6 }}>
@@ -1115,7 +1132,7 @@ export default function Arena(props) {
                     })}
                   </div>
                 )}
-                <CluckPaper issue={issue} inline={true} />
+                <CluckPaper issue={issue} inline={true} onKnitter={function(){ setNewsMode("knitter"); try { window.scrollTo(0, 0); } catch (e) {} }} />
               </div>
             );
           })()}
@@ -1256,7 +1273,7 @@ export default function Arena(props) {
     var opp = pm ? (pm.a.isP ? pm.b : pm.a) : null;
     var oppRank = 0; if (opp) { for (var oi = 0; oi < ranked.length; oi++) if (ranked[oi].id===opp.id){oppRank=oi+1;break;} }
     var matchDiff = roundDiff(ts.tierIdx, ts.round);
-    var scoutT = opp ? Object.assign(buildScout(S, Object.assign({}, opp, { _fit: afterMatches(fitOf(opp), ts.round, tier.bo), _kit: kitOfNpc(S, opp, ts.cond, ts.tierIdx, rankMap(S)[opp.id]), _love: crowdLove(opp, rankMap(S)[opp.id]) }), oppRank, matchDiff), { cond: ts.cond || "classic", gaps: gapsVs(S, [opp]) }) : null;
+    var scoutT = opp ? Object.assign(buildScout(S, Object.assign({}, opp, { _fit: afterMatches(fitOf(opp), ts.round, tier.bo), _kit: kitOfNpc(S, opp, ts.cond, ts.tierIdx, rankMap(S)[opp.id]), _love: crowdLove(opp, rankMap(S)[opp.id]) }), oppRank, matchDiff, { cond: ts.cond, gear: ts.gear || null }), { cond: ts.cond || "classic", gaps: gapsVs(S, [opp]) }) : null;
     return (
       <motion.div key="tourney" {...screenAnim} style={Object.assign({}, W, { background: C.page })}>
         <style dangerouslySetInnerHTML={{__html:CSS}} />

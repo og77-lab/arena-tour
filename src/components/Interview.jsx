@@ -108,7 +108,7 @@ export default function Interview(props) {
             <div style={{ fontSize: 12.5, color: "#44403c", marginTop: 6, textAlign: "left", lineHeight: 1.5 }}>
               {(res.outcome.parts || []).map(function (x, i) { return (<div key={i}><b style={{ color: x.v > 0 ? "#15803d" : "#b91c1c" }}>{x.v > 0 ? "+" : "−"}{Math.abs(x.v)}</b> {x.why}</div>); })}
             </div>
-            <div style={{ fontSize: 12, fontWeight: 700, color: "#57534e", marginTop: 4 }}>Fans now <b style={{ color: "#1c1917" }}>{after}</b> / 100{pick && pick.tone === "bold" ? " · They'll remember that promise next week." : ""}</div>
+            <div style={{ fontSize: 12, fontWeight: 700, color: "#57534e", marginTop: 4 }}>Crowd love now <b style={{ color: "#1c1917" }}>{after}</b> / 100{pick && pick.tone === "bold" ? " · They'll remember that promise next week." : ""}</div>
             <button onClick={function () { props.onDone(res.issue); }}
               style={{ marginTop: 12, width: "100%", background: "#1c1917", color: "#f4ecd8", border: "none", borderRadius: 12, padding: "12px 16px", fontFamily: "Georgia, serif", fontWeight: 900, fontSize: 15, letterSpacing: 1, cursor: "pointer" }}>
               📰 Read The Daily Cluck →

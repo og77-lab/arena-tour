@@ -76,8 +76,9 @@ function TaleOfTape(props) {
         </div>
       </div>
       {row("World rank", y.rank ? "#" + y.rank : "—", "#" + sc.rank, y.rank && sc.rank ? sc.rank - y.rank : 0)}
-      {row("Season points", (y.pts || 0).toLocaleString(), (sc.pts || 0).toLocaleString(), (y.pts || 0) - (sc.pts || 0))}
-      {row("Talent", "—", sc.talent, 0)}
+      {row("🖐 Hands", y.hands != null ? y.hands : "—", sc.hands != null ? sc.hands : sc.talent, y.hands != null && sc.hands != null ? y.hands - sc.hands : 0)}
+      {sc.bars && row("Gold zone today", sc.bars.you.zone.toFixed(1) + "%", sc.bars.foe.zone.toFixed(1) + "%", Math.round((sc.bars.you.zone - sc.bars.foe.zone) * 10))}
+      {sc.bars && row("Bar speed today", Math.round(sc.bars.you.speed) + "%", Math.round(sc.bars.foe.speed) + "%", Math.round(sc.bars.foe.speed - sc.bars.you.speed))}
       {sc.stats.map(function (s) {
         var head = s.who !== prevWho; prevWho = s.who;
         return (

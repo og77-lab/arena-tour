@@ -1,7 +1,6 @@
 /* ═══ DailyCluck ═══ The weekly cartoon newspaper: you, your tournament, riders at your level, the world's best */
 
 import * as React from "react";
-import Selfie from "./Selfie";
 import { fmtFollowers as fmtK } from "../engine/social";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
@@ -446,25 +445,13 @@ export function CluckPaper(props) {
           </section>
         )}
 
-        {/* Knitter: what the grannies posted this week */}
+        {/* Knitter lives in its own feed (News → 🧶 Knitter); the paper just points there */}
         {is.knits && is.knits.length > 0 && (
           <section>
-            <Kicker col="#0e7490">🧶 On Knitter this week</Kicker>
-            {is.knits.map(function (k, i) {
-              return (
-                <div key={i} style={{ display: "flex", gap: 8, padding: "7px 8px", marginTop: 6, border: "1.5px solid " + RULE, background: "rgba(255,255,255,0.55)", borderRadius: 8 }}>
-                  {k.fan ? (<span aria-hidden style={{ width: 30, height: 30, borderRadius: "50%", background: "#e0f2fe", border: "1.5px solid " + INK, display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 16, flexShrink: 0 }}>📣</span>) : (<Face palette={k.isP ? PLAYER_PALETTE : paletteFor(k.id, k.rank || 500)} size={30} />)}
-                  <div style={{ flex: 1, minWidth: 0, fontFamily: SERIF }}>
-                    <div style={{ fontSize: 12.5 }}><b>{k.emoji} {k.name}</b> <span style={{ color: "#78716c" }}>{k.handle || "@" + (k.name || "").split(" ")[0] + "Jousts"} · {fmtK(k.followers)} followers</span></div>
-                    <div style={{ fontSize: 14, lineHeight: 1.35, marginTop: 2 }}>{k.text}</div>
-                    {k.photo && (<div style={{ marginTop: 5 }}><Selfie seed={k.photo.seed} text={k.photo.place} who={k.photo.who || undefined} palette={k.isP ? PLAYER_PALETTE : paletteFor(k.id, k.rank || 500)} h={128} /></div>)}
-                    <div style={{ fontSize: 11.5, color: "#78716c", marginTop: 2 }}>❤️ {fmtK(k.likes)} · 🔁 {fmtK(Math.round(k.likes / 6))}</div>
-                    {k.reply && (<div style={{ fontSize: 12.5, marginTop: 4, paddingLeft: 8, borderLeft: "2px solid " + RULE, color: "#44403c" }}><b>{k.reply.name}:</b> {k.reply.text}</div>)}
-                  </div>
-                </div>
-              );
-            })}
-            {is.fanChain && (<Body><span style={{ display: "inline-block", marginTop: 6, fontSize: 13 }}><b>What it means for you:</b> {fmtK(is.fanChain.fol)} followers{is.fanChain.lift ? " lift your fans' resting level by +" + is.fanChain.lift + " (to " + is.fanChain.settle + ")" : " — not enough yet to lift your fans (that starts at 1K)"}. With ❤️ {is.fanChain.fans} fans the sponsors pay <b>+{is.fanChain.tp} training pts</b> a week{is.fanChain.edge > 0 ? ", and the stands give you a +" + is.fanChain.edge + "% wider gold zone against a typical rival" : is.fanChain.edge < 0 ? ", but a typical rival has the louder stands (+" + (-is.fanChain.edge) + "% gold zone for her)" : ""}.</span></Body>)}
+            <div onClick={props.onKnitter} style={{ display: "flex", alignItems: "center", gap: 8, padding: "7px 10px", border: "1.5px solid " + RULE, borderRadius: 8, background: "rgba(255,255,255,0.55)", cursor: props.onKnitter ? "pointer" : "default", fontFamily: SERIF, fontSize: 13.5 }}>
+              <span style={{ fontSize: 18 }}>🧶</span>
+              <span style={{ flex: 1 }}><b>{is.knits.length} new knits this week</b>{is.knits[0] && is.knits[0].isP ? " — including yours" : ""}. {props.onKnitter ? "Read them on Knitter ›" : "Read them under News → 🧶 Knitter."}</span>
+            </div>
           </section>
         )}
 
