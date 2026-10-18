@@ -46,11 +46,11 @@ export default function Interview(props) {
   var after = res ? res.after : props.fans;
 
   return createPortal(
-    <div style={{ position: "fixed", inset: 0, zIndex: 955, background: "radial-gradient(circle at 50% 20%,#1e3a8a 0%,#0f172a 65%)", fontFamily: FONT, overflowY: "auto", display: "flex" }}>
+    <div style={{ position: "fixed", inset: 0, zIndex: 955, background: "radial-gradient(120% 70% at 50% 0%, #4057b8 0%, #22306a 42%, #0f172a 100%)", fontFamily: FONT, overflowY: "auto", display: "flex" }}>
       <Flashes />
       <div style={{ margin: "auto", width: "min(100%, 460px)", padding: "18px 14px 24px", boxSizing: "border-box", position: "relative" }}>
         <div style={{ textAlign: "center" }}>
-          <span style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "#fff", color: "#1c1917", borderRadius: 20, padding: "4px 12px", fontWeight: 900, fontSize: 12, letterSpacing: 1, boxShadow: "0 3px 0 #0b1226" }}>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "#fff", color: "#1c1917", borderRadius: 20, padding: "4px 12px", fontWeight: 900, fontSize: 12, letterSpacing: 1, boxShadow: "0 6px 16px rgba(0,0,0,0.3)" }}>
             {iv.outlet.icon} {iv.outlet.name.toUpperCase()} · LIVE
           </span>
           <div style={{ fontSize: 11, fontWeight: 900, letterSpacing: 3, color: "#93c5fd", marginTop: 10 }}>POST-TOURNAMENT PRESS</div>
@@ -74,7 +74,7 @@ export default function Interview(props) {
         <div style={{ display: "flex", alignItems: "flex-start", gap: 10, marginTop: 14 }}>
           <span aria-hidden style={{ fontSize: 34, lineHeight: 1 }}>🎤</span>
           <motion.div initial={{ scale: 0.85, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", stiffness: 320, damping: 20 }}
-            style={{ flex: 1, background: "#fff", color: "#1c1917", borderRadius: 16, padding: "12px 14px", fontWeight: 800, fontSize: 16, lineHeight: 1.35, boxShadow: "0 4px 0 #0b1226" }}>
+            style={{ flex: 1, background: "#fff", color: "#1c1917", borderRadius: 16, padding: "12px 14px", fontWeight: 800, fontSize: 16, lineHeight: 1.35, boxShadow: "0 10px 28px rgba(0,0,0,0.35)" }}>
             {iv.question}
           </motion.div>
         </div>
@@ -90,8 +90,8 @@ export default function Interview(props) {
             return (
               <motion.button key={i} onClick={function () { choose(a); }} disabled={!!pick}
                 initial={{ x: 30, opacity: 0 }} animate={{ x: 0, opacity: dim ? 0.35 : 1 }} transition={{ delay: 0.15 + i * 0.08 }}
-                style={{ textAlign: "left", fontFamily: FONT, fontSize: 15, fontWeight: 700, lineHeight: 1.35, padding: "12px 14px", borderRadius: 14, cursor: pick ? "default" : "pointer",
-                  background: chosen ? "#fde68a" : "rgba(255,255,255,0.1)", color: chosen ? "#1c1917" : "#fff", border: "2px solid " + (chosen ? "#3f2a1d" : "rgba(255,255,255,0.3)") }}>
+                style={{ textAlign: "left", fontFamily: FONT, fontSize: 15, fontWeight: 700, lineHeight: 1.35, padding: "12px 14px", cursor: pick ? "default" : "pointer",
+                  background: chosen ? "linear-gradient(180deg,#fff1b8,#fcd34d)" : "rgba(255,255,255,0.09)", color: chosen ? "#1c1917" : "#fff", border: "1px solid " + (chosen ? "rgba(255,255,255,0.6)" : "rgba(255,255,255,0.22)"), boxShadow: chosen ? "0 0 0 3px rgba(252,211,77,0.35), 0 10px 24px rgba(0,0,0,0.3)" : "0 4px 14px rgba(0,0,0,0.18)", backdropFilter: "blur(4px)", borderRadius: 16 }}>
                 <span style={{ display: "block", fontSize: 11, fontWeight: 900, letterSpacing: 0.5, marginBottom: 3, color: chosen ? "#57534e" : "#fde68a" }}>{(TONE_LABEL[a.tone] || {}).icon} {((TONE_LABEL[a.tone] || {}).name || "").toUpperCase()}</span>
                 “{a.text}”
               </motion.button>
@@ -101,7 +101,7 @@ export default function Interview(props) {
 
         {res && (
           <motion.div initial={{ y: 20, opacity: 0, scale: 0.9 }} animate={{ y: 0, opacity: 1, scale: 1 }} transition={{ type: "spring", stiffness: 300, damping: 20 }}
-            style={{ marginTop: 18, background: "#fff", borderRadius: 16, padding: "12px 14px", textAlign: "center", boxShadow: "0 4px 0 #0b1226" }}>
+            style={{ marginTop: 18, background: "#fff", borderRadius: 16, padding: "12px 14px", textAlign: "center", boxShadow: "0 10px 28px rgba(0,0,0,0.35)" }}>
             <div style={{ fontSize: 12, fontWeight: 900, letterSpacing: 2, color: "#57534e" }}>THE CROWD'S VERDICT</div>
             <div style={{ fontFamily: DISPLAY, fontSize: 30, fontWeight: 700, color: res.outcome.delta >= 0 ? "#be123c" : "#57534e", marginTop: 2 }}>
               ❤️ {res.outcome.delta >= 0 ? "+" : "−"}{Math.abs(res.outcome.delta)}

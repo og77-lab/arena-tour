@@ -23,8 +23,8 @@ function FanBox(props) {
   return (
     <div style={{ background: "#fff1f2", border: "1.5px solid #fecdd3", borderRadius: 8, padding: "7px 9px", marginBottom: 10 }}>
       <div style={{ display: "flex", gap: 14, alignItems: "baseline" }}>
-        <span style={{ fontSize: 17, fontWeight: 900, color: "#be123c" }}>❤️ {love}<span style={{ fontSize: 12, color: "#64748b" }}>/100 crowd love</span></span>
-        <span style={{ fontSize: 15, fontWeight: 900, color: "#0e7490" }}>🧶 {fmtFollowers(fol)} <span style={{ fontSize: 12, color: "#64748b" }}>followers</span></span>
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontFamily: "'Fredoka', 'Nunito', sans-serif", fontSize: 19, fontWeight: 600, color: "#be123c" }}><Icon name="heart" size={20} />{love}<span style={{ fontSize: 12, color: "#64748b" }}>/100 crowd love</span></span>
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontFamily: "'Fredoka', 'Nunito', sans-serif", fontSize: 17, fontWeight: 600, color: "#0e7490" }}><Icon name="yarn" size={19} />{fmtFollowers(fol)} <span style={{ fontSize: 12, color: "#64748b" }}>followers</span></span>
       </div>
       <div style={{ fontSize: 12.5, color: "#44403c", marginTop: 3, lineHeight: 1.35 }}>{line} <button onClick={function () { rs[1](!rs[0]); }} style={{ border: "none", background: "none", padding: 0, color: "#be123c", fontWeight: 900, fontSize: 12.5, cursor: "pointer", textDecoration: "underline" }}>{rs[0] ? "hide rules" : "📜 rules"}</button></div>
       {rs[0] && (<div style={{ marginTop: 6, background: "#fff", borderRadius: 6, padding: "6px 8px" }}><FanRules /></div>)}
@@ -99,7 +99,7 @@ export default function Profile(props) {
             { l: "Season Prize $", v: "$"+(function(m){return m>=1000000?(m/1000000).toFixed(1)+"M":m>=1000?Math.round(m/1000)+"K":m})(p.isP?(p.seasonMoney||0):(Math.round((p.sp||0)*3))), c: "#22c55e" },
             { l: "Career Prize $", v: "$"+(function(m){return m>=1000000?(m/1000000).toFixed(1)+"M":m>=1000?Math.round(m/1000)+"K":m})(p.isP?(p.money||0):((b.careerMoney||0))), c: "#16a34a" }
           ].map(function (s, i) {
-            return (<div key={i} style={{ background: "#ffffff", borderRadius: 6, padding: "6px 8px" }}><div style={{ fontSize: 13, color: "#64748b", marginBottom: 1 }}>{s.l}</div><div style={{ fontSize: 16, fontWeight: 800, color: s.c }}>{s.v}</div></div>);
+            return (<div key={i} style={{ background: "#ffffff", borderRadius: 14, padding: "8px 10px", boxShadow: "0 1px 2px rgba(63,42,29,0.06), 0 3px 10px rgba(63,42,29,0.06)" }}><div style={{ fontSize: 12, fontWeight: 800, color: "#78716c", marginBottom: 1 }}>{s.l}</div><div style={{ fontFamily: "'Fredoka', 'Nunito', sans-serif", fontSize: 16, fontWeight: 800, color: s.c }}>{s.v}</div></div>);
           })}
         </div>
         {/* Skill + Potential bar for NPCs */}
@@ -143,18 +143,18 @@ export default function Profile(props) {
         {/* Training + training total */}
         <div style={{ marginBottom: 10 }}>
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-            <span style={{ fontSize: 14, color: "#64748b", fontWeight: 700 }}>TRAINING LEVELS</span>
+            <span style={{ fontFamily: "'Fredoka', 'Nunito', sans-serif", fontSize: 16, fontWeight: 600, color: "#1c1917" }}>Training levels</span>
             <span style={{ fontSize: 13, color: "#7c3aed", fontWeight: 700 }}>{totalTr}/100</span>
           </div>
           {STATS.map(function(st){ return { k: st.k, i: st.icon, l: st.label, el: st.el, c: st.col, who: st.who }; }).map(function(s, si, all){
             var lv = t[s.k]||0;
             var head = si === 0 || all[si - 1].who !== s.who;
-            return (<div key={s.k}>{head && (<div style={{ fontSize: 11, fontWeight: 900, letterSpacing: 1.2, color: "#57534e", margin: si ? "6px 0 2px" : "0 0 2px" }}>{s.who === "granny" ? "👵 GRANNY" : s.who === "rooster" ? "🐓 ROOSTER" : "🔋 BOTH"}</div>)}<div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}><span style={{ color: "#1c1917", fontWeight: 700, fontSize: 13, width: 112, flexShrink: 0, lineHeight: 1.1 }}><StatIcon k={s.k} size={15} style={{ verticalAlign: "-3px", marginRight: 3 }} />{s.l}{s.el && (<span style={{ display: "block", fontSize: 10.5, fontWeight: 600, color: "#78716c", paddingLeft: 18 }}>({s.el})</span>)}</span><div style={{ flex: 1, display: "flex", gap: 1 }}>{Array.from({length:20}).map(function(_,i){return (<div key={i} style={{flex:1,height:5,borderRadius:2,background:i<lv?s.c:"#f1f5f9"}}/>);})}</div><span style={{fontSize:14,color:"#475569",width:20,textAlign:"right"}}>{lv}</span></div></div>);
+            return (<div key={s.k}>{head && (<div style={{ fontSize: 11, fontWeight: 900, letterSpacing: 1.2, color: "#57534e", margin: si ? "6px 0 2px" : "0 0 2px" }}><span style={{ display: "inline-flex", alignItems: "center", gap: 5, letterSpacing: 0.3, fontSize: 12, fontWeight: 800 }}><Icon name={s.who === "granny" ? "granny" : s.who === "rooster" ? "rooster" : "battery"} size={16} />{s.who === "granny" ? "Granny" : s.who === "rooster" ? "Rooster" : "Both"}</span></div>)}<div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}><span style={{ color: "#1c1917", fontWeight: 700, fontSize: 13, width: 112, flexShrink: 0, lineHeight: 1.1 }}><StatIcon k={s.k} size={15} style={{ verticalAlign: "-3px", marginRight: 3 }} />{s.l}{s.el && (<span style={{ display: "block", fontSize: 10.5, fontWeight: 600, color: "#78716c", paddingLeft: 18 }}>({s.el})</span>)}</span><div style={{ flex: 1, display: "flex", gap: 1 }}>{Array.from({length:20}).map(function(_,i){return (<div key={i} style={{flex:1,height:5,borderRadius:2,background:i<lv?s.c:"#f1f5f9"}}/>);})}</div><span style={{fontSize:14,color:"#475569",width:20,textAlign:"right"}}>{lv}</span></div></div>);
           })}
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 6 }}>
-          {[{ l: "🏆 Titles", v: b.titles||0 }, { l: "👑 GS Titles", v: b.gsTitles||0 }, { l: "⭐ Finals", v: b.finals||0 }].map(function(s,i){
-            return (<div key={i} style={{ background: "#ffffff", borderRadius: 6, padding: "6px 8px", textAlign: "center" }}><div style={{ fontSize: 16, fontWeight: 800, color: "#b45309" }}>{s.v}</div><div style={{ fontSize: 13, color: "#64748b" }}>{s.l}</div></div>);
+          {[{ l: "Titles", ic: "trophy", v: b.titles||0 }, { l: "Slam titles", ic: "crown", v: b.gsTitles||0 }, { l: "Finals", ic: "rank", v: b.finals||0 }].map(function(s,i){
+            return (<div key={i} style={{ background: "#ffffff", borderRadius: 14, padding: "8px 10px", boxShadow: "0 1px 2px rgba(63,42,29,0.06), 0 3px 10px rgba(63,42,29,0.06)", textAlign: "center" }}><Icon name={s.ic} size={22} /><div style={{ fontFamily: "'Fredoka', 'Nunito', sans-serif", fontSize: 20, fontWeight: 600, color: "#b45309", lineHeight: 1.1 }}>{s.v}</div><div style={{ fontSize: 12, fontWeight: 800, color: "#78716c" }}>{s.l}</div></div>);
           })}
         </div>
         {/* Head-to-Head */}
@@ -163,9 +163,9 @@ export default function Profile(props) {
           for (var hi = 0; hi < props.h2h.length; hi++) { if (props.h2h[hi].w) wins++; else losses++; }
           var last5 = props.h2h.slice(-5).reverse();
           return (
-            <div style={{ marginTop: 10, padding: 8, background: "#ffffff", borderRadius: 8, border: "1px solid #f1f5f9" }}>
+            <div style={{ marginTop: 10, padding: 10, background: "#ffffff", borderRadius: 14, padding: "8px 10px", boxShadow: "0 1px 2px rgba(63,42,29,0.06), 0 3px 10px rgba(63,42,29,0.06)" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                <span style={{ fontSize: 13, color: "#475569", fontWeight: 700, letterSpacing: 0.5, textTransform: "uppercase" }}>Head-to-Head</span>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}><Icon name="lances" size={18} /><span style={{ fontFamily: "'Fredoka', 'Nunito', sans-serif", fontSize: 16, fontWeight: 600, color: "#1c1917" }}>Head-to-head</span></span>
                 <span style={{ fontSize: 14, fontWeight: 800 }}>
                   <span style={{ color: "#22c55e" }}>{wins}W</span>
                   <span style={{ color: "#94a3b8", margin: "0 3px" }}>–</span>
@@ -214,8 +214,8 @@ export default function Profile(props) {
           var iconFor = function(t){ return t === "title" ? "🏆" : t === "gs" ? "👑" : t === "peak" ? "📈" : t === "start" ? "🌱" : "•"; };
           var colorFor = function(t){ return t === "title" ? "#b45309" : t === "gs" ? "#f59e0b" : t === "peak" ? "#22c55e" : t === "start" ? "#4f46e5" : "#475569"; };
           return (
-            <div style={{ marginTop: 10, padding: 10, background: "#ffffff", borderRadius: 8, border: "1px solid #f1f5f9" }}>
-              <div style={{ fontSize: 13, color: "#475569", fontWeight: 700, letterSpacing: 0.5, textTransform: "uppercase", marginBottom: 8 }}>📅 Career Timeline</div>
+            <div style={{ marginTop: 10, padding: 12, background: "#ffffff", borderRadius: 14, padding: "8px 10px", boxShadow: "0 1px 2px rgba(63,42,29,0.06), 0 3px 10px rgba(63,42,29,0.06)" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}><Icon name="calendar" size={18} /><span style={{ fontFamily: "'Fredoka', 'Nunito', sans-serif", fontSize: 16, fontWeight: 600, color: "#1c1917" }}>Career timeline</span></div>
               <div style={{ position: "relative", paddingLeft: 20 }}>
                 <div style={{ position: "absolute", left: 7, top: 4, bottom: 4, width: 2, background: "#f1f5f9" }} />
                 {shown.map(function(ev, i){

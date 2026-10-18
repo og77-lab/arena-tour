@@ -12,7 +12,7 @@ import { pack, unpack } from "./engine/codec";
 import { addHands, simMatch, handsTalent, riderBar, BASE } from "./engine/joust";
 import { shapePotentials } from "./engine/npcGenerator";
 import StartTalent from "./components/StartTalent";
-import KnitterFeed from "./components/KnitterFeed";
+import { KnitterSheet } from "./components/KnitterFeed";
 import { followersOf, followersGain, followersLift, crowdLove, weekKnits, fmtFollowers, fanChain } from "./engine/social";
 import { mkSeason } from "./engine/seasonManager";
 import PowerBar from "./components/PowerBar";
@@ -230,7 +230,7 @@ export default function Arena(props) {
   var _paper = useState(null), paper = _paper[0], setPaper = _paper[1];
   var _interview = useState(null), interview = _interview[0], setInterview = _interview[1];
   var _newsIdx = useState(0), newsIdx = _newsIdx[0], setNewsIdx = _newsIdx[1];
-  var _newsMode = useState("paper"), newsMode = _newsMode[0], setNewsMode = _newsMode[1]; /* News tab: the paper or the Knitter feed */
+  var _knitter = useState(false), showKnitter = _knitter[0], setShowKnitter = _knitter[1]; /* Knitter, the granny social network (opened from Home or the paper) */
   var _gala = useState(null), gala = _gala[0], setGala = _gala[1];
   var _trainFx = useState(null), trainFx = _trainFx[0], setTrainFx = _trainFx[1];
   var _showLb = useState(false), showLb = _showLb[0], setShowLb = _showLb[1];
@@ -882,21 +882,22 @@ export default function Arena(props) {
   if (scr === "loading") return (<motion.div key="loading" {...screenAnim} style={Object.assign({},W,{background:C.page,display:"flex",alignItems:"center",justifyContent:"center"})}><style dangerouslySetInnerHTML={{__html:CSS}} /><span style={{color:C.goldInk,fontSize:16,fontWeight:800}}>🐓 Saddling the roosters…</span></motion.div>);
 
   if (scr === "title") return (
-    <motion.div key="title" {...screenAnim} style={Object.assign({},W,{background:C.page,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",textAlign:"center",fontFamily:FONT})}>
+    <motion.div key="title" {...screenAnim} style={Object.assign({},W,{background:"radial-gradient(120% 70% at 50% 0%, #fff3c4 0%, #fff8e7 55%, #fdf0d0 100%)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",textAlign:"center",fontFamily:FONT})}>
       <style dangerouslySetInnerHTML={{__html:CSS}} />
-      <img src="/icon-192.png" alt="" width="96" height="96" style={{borderRadius:22,border:"3px solid "+C.ink,boxShadow:"0 4px 0 "+C.ink}} />
-      <div style={Object.assign(label(C.goldInk),{marginTop:14,letterSpacing:5})}>The Grand</div>
-      <h1 style={Object.assign(display(30),{margin:"2px 0 6px"})}>Granny Rooster Joust</h1>
+      <img src="/icon-192.png" alt="" width="96" height="96" style={{borderRadius:26,boxShadow:"0 2px 0 rgba(63,42,29,0.25), 0 10px 26px rgba(146,64,14,0.28)"}} />
+      <div style={{marginTop:14,fontFamily:"'Fredoka','Nunito',sans-serif",fontSize:14,fontWeight:600,letterSpacing:4,color:"#b45309"}}>THE GRAND</div>
+      <h1 style={Object.assign(display(32),{margin:"2px 0 6px"})}>Granny Rooster Joust</h1>
       <p style={{color:C.textSoft,fontSize:13,margin:"0 0 16px",fontWeight:700}}>1000 grannies · 5 tournament tiers · Grand Slams · Season Finals</p>
-      <div style={card({padding:18,maxWidth:320,width:"100%",boxSizing:"border-box"})}>
-        <div style={Object.assign(label(C.textSoft),{marginBottom:6})}>Name your granny</div>
+      <div style={card({padding:"14px 18px 18px",maxWidth:320,width:"100%",boxSizing:"border-box",borderRadius:20})}>
+        <div style={{display:"flex",justifyContent:"center",margin:"-4px 0 4px"}}><Rider palette={PLAYER_PALETTE} width={120} pose="cheer" /></div>
+        <div style={{fontFamily:"'Fredoka','Nunito',sans-serif",fontSize:18,fontWeight:600,color:C.text,marginBottom:8}}>Name your granny</div>
         <input value={inp} onChange={function(e){setInp(e.target.value)}} placeholder="e.g. Grandma Ruth, Nana Rosa…" onKeyDown={function(e){if(e.key==="Enter"&&inp.trim())newSeason()}}
-          style={{width:"100%",padding:12,borderRadius:10,border:"2px solid "+C.lineStrong,background:C.cardWarm,color:C.text,fontSize:16,fontWeight:800,outline:"none",boxSizing:"border-box",textAlign:"center",marginBottom:10,fontFamily:FONT}} />
+          style={{width:"100%",padding:13,borderRadius:14,border:"1px solid rgba(63,42,29,0.16)",background:"#fffdf7",color:C.text,fontSize:17,fontWeight:800,outline:"none",boxSizing:"border-box",textAlign:"center",marginBottom:12,fontFamily:FONT,boxShadow:"inset 0 1px 2px rgba(63,42,29,0.06)"}} />
         <button onClick={function(){if(inp.trim())newSeason();}} disabled={!inp.trim()} style={button("gold",{width:"100%",marginBottom:8,opacity:inp.trim()?1:0.45})}>Saddle up · Season 1</button>
-        <button onClick={function(){fileRef.current&&fileRef.current.click()}} style={button("ghost",{width:"100%",fontSize:13})}>📂 Load a save file</button>
+        <button onClick={function(){fileRef.current&&fileRef.current.click()}} style={button("ghost",{width:"100%",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center",gap:8})}><Icon name="upload" size={18} />Load a save file</button>
         <input ref={fileRef} type="file" accept=".json" onChange={importSave} style={{display:"none"}} />
       </div>
-      <div style={card({marginTop:12,maxWidth:320,width:"100%",boxSizing:"border-box",padding:"10px 12px",textAlign:"left",background:C.cardWarm})}>
+      <div style={card({marginTop:12,maxWidth:320,width:"100%",boxSizing:"border-box",padding:"12px 14px",textAlign:"left",background:"rgba(255,255,255,0.7)"})}>
         <div style={label(C.goldInk)}>How a season works</div>
         <div style={{color:C.textSoft,fontSize:13,lineHeight:1.55,marginTop:4}}>20 events: <b style={{color:C.text}}>4 blocks</b> of weekly tournaments, each closed by a <b style={{color:C.text}}>Grand Slam</b>. Climb from Futures to Masters as your rank rises. The <b style={{color:C.text}}>top 16</b> ride in the Season Finals.</div>
       </div>
@@ -939,6 +940,7 @@ export default function Arena(props) {
         <style dangerouslySetInnerHTML={{__html:CSS}} />
         {confetti && (<Confetti />)}
         {prof && (<Profile player={prof.p} rank={prof.rank} me={S.player} myRank={pRank} roosterName={S.player.roosterName} onRenameRooster={renameRooster} onRenamePlayer={renamePlayer} isRival={!!(S.player.rival && prof.p.id === S.player.rival.id)} playerName={S.pName} h2h={!prof.p.isP && S.player.h2h ? (S.player.h2h[prof.p.id] || []) : null} timeline={prof.p.isP ? (S.player.timeline || []) : null} onClose={function(){setProf(null)}} />)}
+        {showKnitter && (<KnitterSheet issues={S.news || []} kit={S.player.kit} onClose={function(){ setShowKnitter(false); }} />)}
         {S.player.startPts > 0 && (<StartTalent points={S.player.startPts} tr={S.player.tr} onDone={function(add){ var t = Object.assign({}, S.player.tr || {}); Object.keys(add).forEach(function(k){ t[k] = (t[k] || 0) + add[k]; }); var np = Object.assign({}, S.player, { tr: t }); delete np.startPts; save(Object.assign({}, S, { player: np })); }} />)}
         {showHelp && (<HelpScreen onClose={function(){setHelp(false)}} />)}
         {hubTip && (<CoachCard key={hubTip} id={hubTip} vars={{ name: S.pName, rival: S.player.rival ? S.player.rival.name : null }} onDone={function(all){ markTip(hubTip, all); }} />)}
@@ -969,7 +971,7 @@ export default function Arena(props) {
           {hubTab === "home" && (
             <HomeTab S={S} pRank={pRank} curEvent={curEvent} seasonDone={seasonDone}
               onPlay={playCurrent} onFinals={startFinals} onNextSeason={openGala}
-              onReadPaper={function(){ goTab("news"); }}
+              onReadPaper={function(){ goTab("news"); }} onKnitter={function(){ setShowKnitter(true); }}
               ach={{ n: achCount(S), total: ACHIEVEMENTS.length }} onAch={function(){ setShowAch(true); }}
               rival={S.player.rival ? { p: S.player.rival, rank: rankMap(S)[S.player.rival.id], rec: rivalRecord(S.player) } : null}
               onRival={function(){ var rp = S.npcs.filter(function(n){ return n.id === S.player.rival.id; })[0]; if (rp) setProf({ p: rp, rank: rankMap(S)[rp.id] }); }}
@@ -1107,17 +1109,8 @@ export default function Arena(props) {
             var issues = S.news || [];
             var idx = Math.min(newsIdx, Math.max(0, issues.length - 1));
             var issue = issues.length ? issues[idx] : buildSpecialEdition(S);
-            var modeBar = (
-              <div style={{ display: "flex", gap: 6, marginBottom: 10 }}>
-                {[["paper", "📰 The Daily Cluck"], ["knitter", "🧶 Knitter"]].map(function (m) { var on = newsMode === m[0]; return (
-                  <button key={m[0]} onClick={function(){ setNewsMode(m[0]); try { window.scrollTo(0, 0); } catch (e) {} }} style={{ flex: 1, padding: "9px 8px", borderRadius: 10, fontWeight: 900, fontSize: 14, fontFamily: FONT, cursor: "pointer",
-                    background: on ? (m[0] === "knitter" ? "#0e7490" : "#1c1917") : "#fff", color: on ? "#fff" : C.text, border: "1.5px solid " + (m[0] === "knitter" ? "#0e7490" : "#1c1917") }}>{m[1]}</button>); })}
-              </div>
-            );
-            if (newsMode === "knitter") return (<div>{modeBar}<KnitterFeed issues={issues} kit={S.player.kit} /></div>);
             return (
               <div>
-                {modeBar}
                 {sectionTitle("The Daily Cluck", issues.length ? "A fresh issue after every tournament — your run, your rivals, the world's best." : "A special edition for now. Your first real issue prints after your first tournament.")}
                 {issues.length > 0 && (
                   <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 6, marginBottom: 6 }}>
@@ -1133,7 +1126,7 @@ export default function Arena(props) {
                     })}
                   </div>
                 )}
-                <CluckPaper issue={issue} inline={true} onKnitter={function(){ setNewsMode("knitter"); try { window.scrollTo(0, 0); } catch (e) {} }} />
+                <CluckPaper issue={issue} inline={true} onKnitter={function(){ setShowKnitter(true); }} />
               </div>
             );
           })()}

@@ -5,6 +5,7 @@ import { TIERS, TOTAL_EVENTS } from "../models/constants";
 import { sh } from "../models/formulas";
 import { C, FONT, display, label, card, button, pill, money, BODY, HEAD, card2, title2, cap2, button2 } from "../ui/theme";
 import Icon, { IconTile } from "./Icons";
+import { KnitterPreview } from "./KnitterFeed";
 import { Rider, Face, PLAYER_PALETTE, paletteFor, withKit } from "./Rider";
 import RankSparkline from "./RankSparkline";
 import { FitnessCard, FansCard } from "./Fitness";
@@ -133,6 +134,7 @@ export default function HomeTab(props) {
 
       <FitnessCard player={S.player} roosterName={S.player.roosterName} onTrain={props.onTrain} />
       <div id="fans-card"><FansCard player={S.player} rank={props.pRank} /></div>
+      <KnitterPreview issues={S.news || []} kit={S.player.kit} onOpen={props.onKnitter} />
 
       {/* Training nudge when points are waiting */}
       {(tr.tp || 0) >= 15 && (<Row onClick={props.onTrain} icon="dumbbell" tint="#e0e7ff" title={tr.tp + " training points to spend"} sub="Every level makes your own bar easier" />)}

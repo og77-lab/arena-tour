@@ -450,7 +450,7 @@ export function CluckPaper(props) {
           <section>
             <div onClick={props.onKnitter} style={{ display: "flex", alignItems: "center", gap: 8, padding: "7px 10px", border: "1.5px solid " + RULE, borderRadius: 8, background: "rgba(255,255,255,0.55)", cursor: props.onKnitter ? "pointer" : "default", fontFamily: SERIF, fontSize: 13.5 }}>
               <span style={{ fontSize: 18 }}>🧶</span>
-              <span style={{ flex: 1 }}><b>{is.knits.length} new knits this week</b>{is.knits[0] && is.knits[0].isP ? " — including yours" : ""}. {props.onKnitter ? "Read them on Knitter ›" : "Read them under News → 🧶 Knitter."}</span>
+              <span style={{ flex: 1 }}><b>{is.knits.length} new knits this week</b>{is.knits[0] && is.knits[0].isP ? " — including yours" : ""}. {props.onKnitter ? "Read them on Knitter ›" : "Read them on Knitter, from Home."}</span>
             </div>
           </section>
         )}
