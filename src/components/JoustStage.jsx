@@ -79,9 +79,12 @@ export default function JoustStage(props) {
     var side = isYou ? { left: IDLE_X } : { right: IDLE_X };
     return (
       <div style={Object.assign({ position: "absolute", bottom: GROUND - 6, width: rw, transform: "translateX(" + (isYou ? st.dx : -st.dx) + "px)", transition: st.ease, zIndex: isYou ? 3 : 2 }, side)}>
-        {st.running && !REDUCED_MOTION && (
-          <div aria-hidden style={{ position: "absolute", bottom: 2, [isYou ? "left" : "right"]: rw * 0.32, width: 14, height: 9, borderRadius: "50%", background: cond === "mud" ? "rgba(74,53,25,0.75)" : cond === "green" ? "rgba(77,124,15,0.45)" : "rgba(161,128,82,0.55)", animation: "dustPuff 0.35s ease-out infinite", transform: isYou ? "none" : "scaleX(-1)" }} />
-        )}
+        {/* a soft shadow on the ground under the rooster, stretching as it runs */}
+        <div aria-hidden style={{ position: "absolute", bottom: -3, left: rw * 0.18, width: rw * 0.64, height: 9, borderRadius: "50%", background: "radial-gradient(ellipse,rgba(40,25,10,0.38) 0%,rgba(40,25,10,0) 70%)", transform: st.running ? "scaleX(1.18)" : "none", transition: "transform 0.3s" }} />
+        {st.running && !REDUCED_MOTION && [0, 1, 2].map(function (i) {
+          var dust = cond === "mud" ? "rgba(74,53,25,0.7)" : cond === "green" ? "rgba(132,204,22,0.4)" : "rgba(196,160,104,0.7)";
+          return (<div key={"d" + i} aria-hidden style={{ position: "absolute", bottom: 0, [isYou ? "left" : "right"]: rw * (0.22 + i * 0.07), width: 16 + i * 4, height: 10 + i * 2, borderRadius: "50%", background: "radial-gradient(circle," + dust + " 0%,rgba(0,0,0,0) 72%)", animation: "dustTrail 0.5s ease-out " + (i * 0.11) + "s infinite", transform: isYou ? "none" : "scaleX(-1)" }} />);
+        })}
         {/* Mud flies when the roosters run */}
         {st.running && !REDUCED_MOTION && cond === "mud" && [0, 1, 2].map(function (i) {
           return (<div key={i} aria-hidden style={{ position: "absolute", bottom: 4, [isYou ? "left" : "right"]: rw * (0.25 + i * 0.06), width: 5, height: 5, borderRadius: "50%", background: "#4a3519",
@@ -93,7 +96,9 @@ export default function JoustStage(props) {
   }
 
   return (
-    <div ref={ref} style={{ position: "relative", height: H, margin: "2px -2px 0", overflow: "hidden", borderRadius: 10 }}>
+    <div ref={ref} style={{ position: "relative", height: H, margin: "2px -2px 0", overflow: "hidden", borderRadius: 14, boxShadow: "0 2px 0 rgba(63,42,29,0.10), 0 8px 20px rgba(63,42,29,0.14)" }}>
+     {/* everything inside shakes on a big clash — the stage only, never the controls below it */}
+     <div style={{ position: "absolute", inset: 0, animation: impact && a && !REDUCED_MOTION ? (function () { var t = Math.floor(a.id) % 2 ? "B" : ""; return a.perfect ? "zoomPunch" + t + " 0.32s ease-out, stageShakeBig" + t + " 0.42s ease-out" : phase === "finale" ? "stageShakeBig" + t + " 0.45s ease-out" : a.big ? "stageShake" + t + " 0.32s ease-out" : "none"; })() : "none" }}>
       {/* The crowd: cheers when you win the clash, groans when she does, parties when you win the match */}
       <ArenaBackdrop W={W} groundTop={groundTop} tierColor={props.tierColor} tier={props.tier} cond={props.cond} cheerId={a ? a.id : 0}
         cheer={phase === "finale" ? (a.youWon ? "party" : "groan") : impact ? (a.youWon ? (a.big ? "big" : "cheer") : "groan") : (!a && v === "won") ? "party" : null} />
@@ -129,11 +134,18 @@ export default function JoustStage(props) {
       {landed && (
         <div key={"land-" + a.id} aria-hidden style={{ position: "absolute", left: loserIsFoe ? W - meet + 26 - 30 * k : meet - 26 + 30 * k, top: groundTop - 14, width: 110, height: 34, marginLeft: -55, borderRadius: "50%", background: "radial-gradient(ellipse,rgba(161,128,82,0.75) 0%,rgba(161,128,82,0.35) 45%,transparent 70%)", animation: "flashBoom 0.7s ease-out 0.35s both", pointerEvents: "none", zIndex: 4 }} />
       )}
+      {/* the clash raises a ring of dust on the lane */}
+      {impact && (<div key={"ring-" + a.id} aria-hidden style={{ position: "absolute", left: W / 2 - 46, top: groundTop - 16, width: 92, height: 24, borderRadius: "50%", border: "3px solid rgba(196,160,104,0.7)", background: "radial-gradient(ellipse,rgba(196,160,104,0.35) 0%,rgba(196,160,104,0) 70%)", animation: "dustRing 0.55s ease-out forwards", pointerEvents: "none", zIndex: 4 }} />)}
+      {/* PERFECT: a golden burst where the lances meet */}
+      {impact && a.perfect && (<div key={"gold-" + a.id} aria-hidden style={{ position: "absolute", left: W / 2 - 40, top: groundTop - 62 * k - 40, width: 80, height: 80, borderRadius: "50%", background: "radial-gradient(circle,rgba(253,224,71,0.95) 0%,rgba(250,204,21,0.6) 30%,rgba(250,204,21,0) 70%)", boxShadow: "0 0 30px 10px rgba(250,204,21,0.45)", animation: "goldBurst 0.6s ease-out forwards", pointerEvents: "none", zIndex: 5 }} />)}
       {impact && a.word && (
-        <div key={"w-" + a.id} aria-hidden style={{ position: "absolute", left: "50%", top: "30%", zIndex: 7, pointerEvents: "none", fontSize: a.big ? 30 : 22, fontWeight: 900, fontStyle: "italic", letterSpacing: 1, whiteSpace: "nowrap", color: a.youWon ? "#facc15" : "#f87171", textShadow: "-2px -2px 0 #3f2a1d, 2px -2px 0 #3f2a1d, -2px 2px 0 #3f2a1d, 2px 2px 0 #3f2a1d, 0 4px 0 #3f2a1d", animation: "comicPop 0.75s ease-out forwards" }}>
+        <div key={"w-" + a.id} aria-hidden style={{ position: "absolute", left: "50%", top: "30%", zIndex: 7, pointerEvents: "none", fontFamily: "'Fredoka', 'Nunito', sans-serif", fontSize: a.perfect ? 38 : a.big ? 32 : 24, fontWeight: 700, letterSpacing: 1, whiteSpace: "nowrap", color: a.perfect ? "#fde047" : a.youWon ? "#facc15" : "#f87171", textShadow: "-2px -2px 0 #3f2a1d, 2px -2px 0 #3f2a1d, -2px 2px 0 #3f2a1d, 2px 2px 0 #3f2a1d, 0 4px 0 #3f2a1d", animation: "comicPop 0.75s ease-out forwards" }}>
           {a.word}
         </div>
       )}
+      {/* light and depth over the scene: warm sun from above, a soft vignette at the edges */}
+      <div aria-hidden style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 8, background: "radial-gradient(120% 90% at 30% 0%, rgba(255,244,214,0.28) 0%, rgba(255,244,214,0) 55%)", boxShadow: "inset 0 0 28px rgba(40,25,10,0.28)" }} />
+     </div>
     </div>
   );
 }

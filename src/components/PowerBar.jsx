@@ -13,6 +13,7 @@ import { PLAYER_PALETTE, paletteFor, withKit } from "./Rider";
 import { crowdEdge } from "../engine/social";
 import { CoachBubble } from "./Coach";
 import FinalOutro from "./FinalOutro";
+import Icon from "./Icons";
 import { conditionOf, softZone } from "../engine/events"
 import { kitFx } from "../engine/gear"
 import { fatigueFx } from "../engine/fitness";
@@ -108,7 +109,7 @@ function StrikeReveal(props) {
       initial={{ opacity: 0, y: -8 }} animate={{ opacity: r.leaving ? 0 : 1, y: 0 }} transition={{ duration: 0.15 }}
       style={{ position: "absolute", top: 4, left: "50%", marginLeft: -125, width: 250, zIndex: 30, borderRadius: 12, background: "rgba(15,23,42,0.9)", boxShadow: "0 6px 18px rgba(0,0,0,0.3)", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "4px 12px", boxSizing: "border-box", pointerEvents: "none" }}>
       <motion.div animate={r.stamped ? (r.youWon ? { scale: 1.2 } : { scale: 0.85, opacity: 0.5 }) : { scale: 1 }} transition={{ type: "spring", stiffness: 500, damping: 15 }}
-        style={{ fontSize: 30, fontWeight: 900, color: "#facc15", textShadow: "0 0 14px rgba(250,204,21,0.6)", width: 52, textAlign: "left", lineHeight: 1.1 }}>
+        style={{ fontFamily: "'Fredoka', 'Nunito', sans-serif", fontSize: 34, fontWeight: 700, color: "#facc15", textShadow: "0 0 14px rgba(250,204,21,0.6)", animation: r.stamped && r.youWon && r.you >= 85 ? "scoreGlow 0.9s ease-in-out 2" : "none", width: 56, textAlign: "left", lineHeight: 1.05 }}>
         <CountUp to={r.you} duration={360} tick={true} />
       </motion.div>
       <div style={{ textAlign: "center", flex: 1, minWidth: 0 }}>
@@ -125,7 +126,7 @@ function StrikeReveal(props) {
         </div>
       </div>
       <motion.div animate={r.stamped ? (r.youWon ? { scale: 0.85, opacity: 0.5 } : { scale: 1.2 }) : { scale: 1 }} transition={{ type: "spring", stiffness: 500, damping: 15 }}
-        style={{ fontSize: 30, fontWeight: 900, color: "#f87171", textShadow: "0 0 14px rgba(239,68,68,0.5)", width: 52, textAlign: "right", lineHeight: 1.1 }}>
+        style={{ fontFamily: "'Fredoka', 'Nunito', sans-serif", fontSize: 34, fontWeight: 700, color: "#f87171", textShadow: "0 0 14px rgba(239,68,68,0.5)", width: 56, textAlign: "right", lineHeight: 1.05 }}>
         <CountUp to={r.opp} duration={360} />
       </motion.div>
       {/* Where your score came from: the landing spot, then Aim (extra points) on top */}
@@ -320,7 +321,9 @@ export default function PowerBar(props) {
     setPh("hitstop");
     setMarks(marks.concat([{ pos: pos, sc: sc, opos: oPos }]));
     setReveal({ id: id, you: sc, opp: osc, youWon: youWon, tie: tie, label: strikeLabel(sc), set: setNum, strike: nm.length, stamped: false, why: why });
-    setJoust({ id: id, phase: "charge", youWon: joustWon, big: big, word: word });
+    var perfect = !result && youWon && sc >= 96;
+    if (perfect) word = "PERFECT!";
+    setJoust({ id: id, phase: "charge", youWon: joustWon, big: big, word: word, perfect: perfect });
     playStrike(sc);
     playGallop();
     vibrate(12);
@@ -598,7 +601,7 @@ export default function PowerBar(props) {
             fontWeight: 900, textTransform: "uppercase", letterSpacing: 1.5, fontSize: 15, textShadow: "0 2px 0 rgba(0,0,0,0.35)",
             touchAction: "manipulation", WebkitTapHighlightColor: "transparent", animation: ph === "go" && !REDUCED_MOTION ? "pulse 0.5s ease infinite" : "none",
             opacity: ph === "go" ? 1 : 0.45, cursor: ph === "go" ? "pointer" : "default", fontFamily: "inherit" }}>
-          <span aria-hidden style={{ fontSize: 26, lineHeight: 1 }}>⚡</span>
+          <span aria-hidden style={{ display: "block", height: 26, lineHeight: 0 }}><Icon name="bolt" size={26} /></span>
           STRIKE
         </button>
         <div style={{ fontSize: 11, color: "#64748b", marginTop: 6 }}>Tap the arena, the button, or press Space</div>

@@ -136,6 +136,9 @@ export default function ArenaBackdrop(props) {
           animation: "camFlash " + f.p + "s ease-out " + f.d + "s infinite" }} />);
       })}
       <div style={{ position: "absolute", left: spanL, width: spanR - spanL, top: standBottom - 4, height: 4, background: tier >= 4 ? "#1e293b" : "#78350f", boxShadow: "0 2px 0 rgba(0,0,0,0.15)" }} />
+      {/* depth: the roof's shade over the top rows, and a light haze between the stands and the lane */}
+      <div style={{ position: "absolute", left: spanL, width: spanR - spanL, top: standTop, height: Math.max(8, (standBottom - standTop) * 0.45), background: "linear-gradient(180deg,rgba(20,12,4,0.32),rgba(20,12,4,0))" }} />
+      <div style={{ position: "absolute", left: 0, right: 0, top: standBottom - 2, height: Math.max(10, groundTop - standBottom - 18), background: "linear-gradient(180deg,rgba(255,250,235,0.42),rgba(255,250,235,0))" }} />
 
       {L.royal && (<>
         <div style={{ position: "absolute", left: W / 2 - 24, top: standTop - 12, width: 48, height: 14, borderRadius: "8px 8px 2px 2px", border: "1.5px solid #3f2a1d", background: "repeating-linear-gradient(90deg," + col + " 0 6px,#ffffff 6px 12px)", zIndex: L.screen ? 1 : 0, display: L.screen ? "none" : "block" }} />
