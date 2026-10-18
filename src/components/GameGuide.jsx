@@ -8,6 +8,7 @@ import { C, FONT, display, label, card } from "../ui/theme";
 import { Rider, PLAYER_PALETTE, paletteFor } from "./Rider";
 import { effectsOf, EffectList, Legend, statEffect } from "./Effect";
 import { CompareLanes } from "./Lanes";
+import Icon, { IconTile } from "./Icons";
 import FanRules from "./FanRules";
 import { CONDITIONS, FIELDS } from "../engine/events";
 import { GEAR } from "../engine/gear";
@@ -31,7 +32,7 @@ function ChipRows(props) {
 
 const { useRef } = React;
 
-function H(props) { return (<div style={{ fontSize: 15, fontWeight: 900, color: C.text, margin: "14px 0 4px" }}>{props.children}</div>); }
+function H(props) { return (<div style={{ fontFamily: "'Fredoka','Nunito',sans-serif", fontSize: 16.5, fontWeight: 600, color: C.text, margin: "16px 0 5px" }}>{props.children}</div>); }
 function P(props) { return (<p style={{ fontSize: 14, color: C.textSoft, lineHeight: 1.6, margin: "0 0 8px" }}>{props.children}</p>); }
 function B(props) { return (<b style={{ color: C.text }}>{props.children}</b>); }
 function List(props) {
@@ -41,7 +42,7 @@ function Table(props) {
   return (
     <div style={{ overflowX: "auto", margin: "4px 0 10px" }}>
       <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12.5, color: C.text }}>
-        <thead><tr>{props.head.map(function (h, i) { return (<th key={i} style={{ textAlign: "left", padding: "6px 6px", background: C.night, color: "#fff", fontWeight: 900, fontSize: 11, letterSpacing: 0.5, whiteSpace: "nowrap" }}>{h}</th>); })}</tr></thead>
+        <thead><tr>{props.head.map(function (h, i) { return (<th key={i} style={{ textAlign: "left", padding: "7px 8px", background: "#fef3c7", color: "#78350f", fontWeight: 800, fontSize: 12, whiteSpace: "nowrap", borderRadius: i === 0 ? "10px 0 0 10px" : i === props.head.length - 1 ? "0 10px 10px 0" : 0 }}>{h}</th>); })}</tr></thead>
         <tbody>{props.rows.map(function (r, ri) {
           return (<tr key={ri} style={{ background: ri % 2 ? "transparent" : C.cardWarm }}>{r.map(function (c, ci) { return (<td key={ci} style={{ padding: "6px 6px", borderBottom: "1px solid " + C.line, verticalAlign: "top", fontWeight: ci === 0 ? 800 : 500 }}>{c}</td>); })}</tr>);
         })}</tbody>
@@ -51,7 +52,7 @@ function Table(props) {
 }
 function Tip(props) {
   return (<div style={{ display: "flex", gap: 8, background: "#ecfeff", border: "1.5px solid #a5f3fc", borderRadius: 12, padding: "8px 10px", margin: "6px 0 10px", fontSize: 13.5, color: "#155e75", lineHeight: 1.5 }}>
-    <span aria-hidden>📣</span><span>{props.children}</span></div>);
+    <span aria-hidden style={{ lineHeight: 0, marginTop: 1 }}><Icon name="whistle" size={18} /></span><span>{props.children}</span></div>);
 }
 
 /* The strike bar, labelled: where you land decides the score */
@@ -76,25 +77,25 @@ function ScoreBar() {
 }
 
 var CHAPTERS = [
-  { id: "welcome", icon: "👵", title: "Welcome" },
-  { id: "tabs", icon: "🧭", title: "Getting around" },
-  { id: "season", icon: "📅", title: "The season" },
-  { id: "tourney", icon: "🏟️", title: "Tournaments" },
-  { id: "match", icon: "⚔️", title: "The match" },
-  { id: "score", icon: "🎯", title: "Scoring" },
-  { id: "difficulty", icon: "📈", title: "Difficulty" },
-  { id: "training", icon: "🏋️", title: "Stats & training" },
-  { id: "money", icon: "💰", title: "Prize money" },
-  { id: "gear", icon: "🧰", title: "Lances & saddles" },
-  { id: "fitness", icon: "💪", title: "Fitness & physio" },
-  { id: "fans", icon: "❤️", title: "Fans & the press" },
-  { id: "paper", icon: "📰", title: "The Daily Cluck" },
-  { id: "rivals", icon: "😤", title: "Rivals" },
-  { id: "ranks", icon: "🏆", title: "Rankings & profiles" },
-  { id: "ach", icon: "🏅", title: "Achievements" },
-  { id: "gala", icon: "🎩", title: "End of season" },
-  { id: "settings", icon: "⚙️", title: "Settings & saves" },
-  { id: "tips", icon: "📣", title: "Coach's tips" }
+  { id: "welcome", icon: "👵", ic: "granny", title: "Welcome" },
+  { id: "tabs", icon: "🧭", ic: "map", title: "Getting around" },
+  { id: "season", icon: "📅", ic: "calendar", title: "The season" },
+  { id: "tourney", icon: "🏟️", ic: "trophy", title: "Tournaments" },
+  { id: "match", icon: "⚔️", ic: "lances", title: "The match" },
+  { id: "score", icon: "🎯", ic: "target", title: "Scoring" },
+  { id: "difficulty", icon: "📈", ic: "chart", title: "Difficulty" },
+  { id: "training", icon: "🏋️", ic: "dumbbell", title: "Stats & training" },
+  { id: "money", icon: "💰", ic: "coin", title: "Prize money" },
+  { id: "gear", icon: "🧰", ic: "bag", title: "Lances & saddles" },
+  { id: "fitness", icon: "💪", ic: "battery", title: "Fitness & physio" },
+  { id: "fans", icon: "❤️", ic: "heart", title: "Crowd love & the press" },
+  { id: "paper", icon: "📰", ic: "paper", title: "The Daily Cluck" },
+  { id: "rivals", icon: "😤", ic: "lances", title: "Rivals" },
+  { id: "ranks", icon: "🏆", ic: "rank", title: "Rankings & profiles" },
+  { id: "ach", icon: "🏅", ic: "medal", title: "Achievements" },
+  { id: "gala", icon: "🎩", ic: "crown", title: "End of season" },
+  { id: "settings", icon: "⚙️", ic: "gear", title: "Settings & saves" },
+  { id: "tips", icon: "📣", ic: "whistle", title: "Coach's tips" }
 ];
 
 function body(id) {
@@ -285,7 +286,7 @@ function body(id) {
       <P><B>Crowd love</B> (❤️, 0–100, starting at 20) is a score of how much the crowd loves you, not a head count. Your Knitter followers are the people.</P>
       <FanRules />
       <H>🧶 Knitter</H>
-      <P>The granny social network (posts are <i>knits</i>). Everyone has followers; yours grow with wins, titles, liked interviews and viral moments, faster the more famous you are. They lift the level your fans settle at, and the paper prints the week's best knits.</P>
+      <P>The granny social network (posts are <i>knits</i>). Everyone has followers; yours grow with wins, titles, liked interviews and viral moments, faster the more famous you are. They lift the level your crowd love settles at. Read the feed on <B>Home → Knitter</B>: the newest knits show there, and a tap opens the whole feed (selfies, replies, what's trending).</P>
       <H>The press conference</H>
       <P>Before you answer you see what this outlet's readers love and dislike, and every answer is labelled: 😏 cheeky dig, 🙈 daft excuse, 😇 good sport, 💪 bold promise. No dice: the result comes from the readers' taste, the moment (a humble winner, a gracious loser, a dig at your rival) and whether you repeat last week's kind of answer. A well-liked answer can go viral and double. Afterwards you see every point and why.</P>
     </>);
@@ -369,12 +370,12 @@ export default function GameGuide(props) {
       <div style={{ position: "sticky", top: 0, zIndex: 2, background: "rgba(255,248,231,0.97)", borderBottom: "1.5px solid " + C.line, padding: "calc(env(safe-area-inset-top) + 8px) 12px 8px" }}>
         <div style={{ maxWidth: 560, margin: "0 auto" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span style={display(22)}>📖 Game Guide</span>
-            <button aria-label="Close" onClick={props.onClose} style={{ width: 34, height: 34, borderRadius: "50%", border: "2px solid " + C.ink, background: "#fff", fontSize: 18, fontWeight: 900, cursor: "pointer", color: C.ink }}>×</button>
+            <span style={Object.assign(display(22), { display: "inline-flex", alignItems: "center", gap: 8 })}><Icon name="book" size={26} />Game Guide</span>
+            <button aria-label="Close" onClick={props.onClose} style={{ width: 34, height: 34, borderRadius: "50%", border: "none", background: "#f3ead3", fontSize: 18, fontWeight: 900, cursor: "pointer", color: C.ink }}>×</button>
           </div>
           <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingTop: 8 }}>
             {CHAPTERS.map(function (c) {
-              return (<button key={c.id} onClick={function () { jump(c.id); }} style={{ flexShrink: 0, fontFamily: FONT, fontSize: 12, fontWeight: 800, padding: "5px 10px", borderRadius: 16, border: "1.5px solid " + C.line, background: "#fff", color: C.text, cursor: "pointer" }}>{c.icon} {c.title}</button>);
+              return (<button key={c.id} onClick={function () { jump(c.id); }} style={{ flexShrink: 0, fontFamily: FONT, fontSize: 12, fontWeight: 800, padding: "5px 10px", borderRadius: 16, border: "none", boxShadow: "0 1px 2px rgba(63,42,29,0.08), 0 3px 8px rgba(63,42,29,0.06)", background: "#fff", display: "inline-flex", alignItems: "center", gap: 5, color: C.text, cursor: "pointer" }}><Icon name={c.ic} size={15} />{c.title}</button>);
             })}
           </div>
         </div>
@@ -383,7 +384,7 @@ export default function GameGuide(props) {
         {CHAPTERS.map(function (c) {
           return (
             <section key={c.id} ref={function (el) { refs.current[c.id] = el; }} style={card({ marginBottom: 12, padding: "12px 14px" })}>
-              <div style={label(C.goldInk)}>{c.icon} {c.title}</div>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}><IconTile name={c.ic} size={38} /><span style={{ fontFamily: "'Fredoka','Nunito',sans-serif", fontSize: 20, fontWeight: 600, color: C.text }}>{c.title}</span></div>
               <div style={{ marginTop: 6 }}>{body(c.id)}</div>
             </section>
           );

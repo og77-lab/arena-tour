@@ -269,7 +269,7 @@ Your **crowd love** (❤️, 0–100, starting at 20) is a score of how much the
 - **Revenge:** beating your rival +3.
 - **Drift:** each week fans drift a little towards a baseline set by your fame (30 for most, up to 60 in the top 10) — **raised by your Knitter followers** (1K followers +3, 10K +6, 100K +9).
 
-**🧶 Knitter** is the granny social network, where posts are called *knits*. Everyone on tour has followers. Yours grow with wins, titles (a Slam title brings thousands), well-liked interviews and viral moments, faster the more famous you are. The paper prints the week's best knits — yours, the champion's and your rival's.
+**🧶 Knitter** is the granny social network, where posts are called *knits*. Everyone on tour has followers. Yours grow with wins, titles (a Slam title brings thousands), well-liked interviews and viral moments, faster the more famous you are. Read them on **Home → Knitter**: the newest knits show there, and a tap opens the whole feed with selfies, replies and what's trending. The paper points there each week.
 
 **The press conference.** Before you answer you see what this outlet's readers love and dislike, and every answer is labelled: 😏 cheeky dig, 🙈 daft excuse, 😇 good sport, 💪 bold promise. There's no dice: the result comes from the readers' taste, the moment (a humble winner, a gracious loser, a dig at your rival…) and whether you repeat last week's kind of answer. A well-liked answer can go viral and double. Afterwards the screen shows every point and why.
 
