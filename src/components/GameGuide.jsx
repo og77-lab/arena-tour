@@ -14,6 +14,12 @@ import { CONDITIONS, FIELDS, DROP_LIMIT, STEP_TIRED } from "../engine/events";
 import { GEAR } from "../engine/gear";
 import { fatigueFx } from "../engine/fitness";
 import { ageCap, RETIRE_FROM, HOF_RULE, PEAK_SEASONS } from "../engine/aging";
+import { TIERS, ptsLadder, champTotal } from "../models/constants";
+import { weeklyTP, trainPts } from "../models/formulas";
+/* Points you hold on reaching each round (R16 … F, Win), straight from the table; the Slam's R32 goes in its label */
+function ladderRows() { return TIERS.map(function (t, i) { var l = ptsLadder(i), tail = l.slice(-5).map(function (x) { return x.pts.toLocaleString(); }); return [i === 5 ? "Slam (R32 " + l[0].pts.toLocaleString() + ")" : t.name].concat(tail); }); }
+/* Training points for the week, by the round reached (0 = out in the first round) */
+function tpRows() { return TIERS.map(function (t, i) { var r = []; for (var k = 0; k <= t.rounds; k++) r.push(String(weeklyTP(trainPts(i, k)))); return [t.name].concat(i === 5 ? r.slice(1) : r); }); }
 
 /* One row per thing: icon + name on the left, its effect chips on the right */
 function ChipRows(props) {
@@ -136,22 +142,15 @@ function body(id) {
     case "tourney": return (<>
       <P>Tap <B>Choose tournament</B> on Home or Season. Your rank decides which tiers are open:</P>
       <Table head={["Tier", "Open to ranks", "Sets", "Champion's points", "Champion's prize"]} rows={[
-        ["Futures", "601–1000", "Best of 3", "100", "$4.6K"],
-        ["Challenger", "301–700", "Best of 3", "250", "$16K"],
-        ["Tour 250", "101–400", "Best of 3", "500", "$64K"],
-        ["Tour 500", "31–200", "Best of 3", "1,000", "$162K"],
-        ["Masters", "1–100", "Best of 5", "2,000", "$460K"],
-        ["Grand Slam", "1–64", "Best of 5", "4,000", "$1.6M"]
+        ["Futures", "601–1000", "Best of 3", champTotal(0).toLocaleString(), "$4.6K"],
+        ["Challenger", "301–700", "Best of 3", champTotal(1).toLocaleString(), "$16K"],
+        ["Tour 250", "101–400", "Best of 3", champTotal(2).toLocaleString(), "$64K"],
+        ["Tour 500", "31–200", "Best of 3", champTotal(3).toLocaleString(), "$162K"],
+        ["Masters", "1–100", "Best of 5", champTotal(4).toLocaleString(), "$460K"],
+        ["Grand Slam", "1–64", "Best of 5", champTotal(5).toLocaleString(), "$1.6M"]
       ]} />
-      <P>Each tournament is a knockout bracket (32 riders, 64 at a Slam). Every round you win adds points and prize money; the totals above are for winning the whole thing. Lose and your week is over. Each tier is worth <B>double</B> the one below, and each round is a fixed share of the title, as on the real tennis tour. Points you hold once you reach each round — reach the final and lose it, you keep the F number; win it, you get the Win number (shown on every tournament card):</P>
-      <Table head={["Tier", "R16", "QF", "SF", "F", "Win"]} rows={[
-        ["Futures", "10", "20", "35", "60", "100"],
-        ["Challenger", "20", "45", "90", "150", "250"],
-        ["Tour 250", "40", "90", "180", "300", "500"],
-        ["Tour 500", "80", "180", "360", "600", "1,000"],
-        ["Masters", "160", "360", "720", "1,200", "2,000"],
-        ["Slam (R32 160)", "320", "720", "1,440", "2,400", "4,000"]
-      ]} />
+      <P>Each tournament is a knockout bracket (32 riders, 64 at a Slam). Every round you win adds points and prize money; the totals above are for winning the whole thing. Lose and your week is over. Every step up is a real step: <B>winning a tier is worth about reaching the quarterfinal of the tier above</B>, and winning one round at a Masters is worth a quarterfinal or semifinal at a Tour 500. Points you hold once you reach each round — reach the final and lose it, you keep the F number; win it, you get the Win number (shown on every tournament card):</P>
+      <Table head={["Tier", "R16", "QF", "SF", "F", "Win"]} rows={ladderRows()} />
       <P>Beating a higher-ranked rider earns no extra ranking points (the same as in tennis) — the crowd loves an upset, though.</P>
       <H>Named events: pick your week</H>
       <P>Each week several tournaments run at once in every tier, and all 1,000 riders play one of them. Tap a tier to see its events. Each card shows:</P>
@@ -248,7 +247,9 @@ function body(id) {
       <P>Six stats, each from level 0 to 20 (lower later in a career — see <B>Age, retirement & legends</B>): three for the granny, two for the rooster, and Bounce-back for recovery. Every level builds <B>your own bar</B>; her levels build hers. Each level gives a little less than the one before (level 20 works like 11).</P>
       <ChipRows rows={[["r", "⚡ Reflexes (slower bar)"], ["f", "🎯 Aim (extra points)"], ["g", "🛡️ Stubbornness (softer misses)"], ["s", "🫀 Stamina (less speed-up)"], ["p", "🐾 Steady Stride (bigger gold)"], ["b", "🔋 Bounce-back"]].map(function (x) { return { k: x[0], name: x[1], sub: x[0] === "b" ? "counts on its own" : "each level ahead", list: statEffect(x[0]) }; })} />
       <H>Training points (TP)</H>
-      <P>Everyone on tour — you and every rival — earns TP by the same rule every week: <B>8 for turning up, plus the ranking points you won ÷ 1.8</B>. A deep run buys you a few levels on the riders who went out early; the edge fades once you move up to a tier where everyone is winning that much. You also get <B>sponsor TP</B> from your fans (one per 10 fans).</P>
+      <P>Everyone on tour — you and every rival — earns TP by the same rule every week: <B>8 for turning up, plus more for every round you win</B> — the deeper the run and the higher the tier, the more. A deep run buys you a few levels on the riders who went out early; the edge fades once you move up to a tier where everyone is winning that much.</P>
+      <Table head={["Tier", "Out in R1", "R16", "QF", "SF", "F", "Win"]} rows={tpRows()} />
+      <P>(At a Slam the first column is reaching the R32.) You also get <B>sponsor TP</B> from your fans (one per 10 fans).</P>
       <P>Each level costs more than the last: 15 TP for level 1, 30 for level 2, 45 for level 3… and from level 9 the price climbs faster still.</P>
       <H>On the Train tab</H>
       <List items={[

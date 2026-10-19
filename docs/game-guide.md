@@ -41,25 +41,25 @@ Tap **Choose tournament** on Home or Season. Your rank decides which tiers are o
 
 | Tier | Open to ranks | Sets | Champion's points | Champion's prize |
 |---|---|---|---|---|
-| Futures | 601–1000 | Best of 3 | 100 | $4.6K |
-| Challenger | 301–700 | Best of 3 | 250 | $16K |
-| Tour 250 | 101–400 | Best of 3 | 500 | $64K |
-| Tour 500 | 31–200 | Best of 3 | 1,000 | $162K |
-| Masters | 1–100 | Best of 5 | 2,000 | $460K |
-| Grand Slam | 1–64 | Best of 5 | 4,000 | $1.6M |
+| Futures | 601–1000 | Best of 3 | 20 | $4.6K |
+| Challenger | 301–700 | Best of 3 | 80 | $16K |
+| Tour 250 | 101–400 | Best of 3 | 300 | $64K |
+| Tour 500 | 31–200 | Best of 3 | 1,200 | $162K |
+| Masters | 1–100 | Best of 5 | 5,000 | $460K |
+| Grand Slam | 1–64 | Best of 5 | 10,000 | $1.6M |
 
 Each tournament is a knockout bracket (32 riders, 64 at a Slam). Every round you win adds points and prize money; the totals above are for winning the whole thing. Lose and your week is over.
 
-Each tier is worth **double** the one below, and each round is a fixed share of the title, as on the real tennis tour. Points you hold once you reach each round — reach the final and lose it, you keep the **F** number; win it, you get the **Win** number (shown on every tournament card):
+Every step up is a real step: **winning a tier is worth about reaching the quarterfinal of the tier above**, and winning one round at a Masters is worth a quarterfinal or semifinal at a Tour 500. Points you hold once you reach each round — reach the final and lose it, you keep the **F** number; win it, you get the **Win** number (shown on every tournament card):
 
 | Tier | R16 | QF | SF | F | Win |
 |---|---|---|---|---|---|
-| Futures | 10 | 20 | 35 | 60 | 100 |
-| Challenger | 20 | 45 | 90 | 150 | 250 |
-| Tour 250 | 40 | 90 | 180 | 300 | 500 |
-| Tour 500 | 80 | 180 | 360 | 600 | 1,000 |
-| Masters | 160 | 360 | 720 | 1,200 | 2,000 |
-| Slam (R32 160) | 320 | 720 | 1,440 | 2,400 | 4,000 |
+| Futures | 2 | 5 | 9 | 14 | 20 |
+| Challenger | 7 | 20 | 36 | 56 | 80 |
+| Tour 250 | 27 | 75 | 135 | 210 | 300 |
+| Tour 500 | 108 | 300 | 540 | 840 | 1,200 |
+| Masters | 450 | 1,250 | 2,250 | 3,500 | 5,000 |
+| Slam (R32 400) | 1,000 | 2,500 | 4,500 | 7,000 | 10,000 |
 
 Beating a higher-ranked rider earns no extra ranking points (the same as in tennis) — the crowd loves an upset, though.
 
@@ -197,7 +197,18 @@ Six stats, each from level 0 to 20 (lower later in a career — see *Age, retire
 | 🐾 Steady Stride (bigger gold) | A wider gold zone | +0.4% of the bar |
 | 🔋 Bounce-back | Granny and rooster win back more fitness after every tournament | about +0.5% fitness back, each level a little less (double in a rest week; not against her) |
 
-**Training points (TP).** Everyone on tour — you and every rival — earns TP by the same rule every week: **8 for turning up, plus the ranking points you won ÷ 1.8.** A deep run buys you a few levels on the riders who went out early; the edge fades once you move up to a tier where everyone is winning that much. You also get **sponsor TP** from your fans (one per 10 fans).
+**Training points (TP).** Everyone on tour — you and every rival — earns TP by the same rule every week: **8 for turning up, plus more for every round you win** — the deeper the run and the higher the tier, the more:
+
+| Tier | Out in R1 | R16 | QF | SF | F | Win |
+|---|---|---|---|---|---|---|
+| Futures | 8 | 13 | 19 | 27 | 41 | 63 |
+| Challenger | 8 | 19 | 33 | 58 | 91 | 146 |
+| Tour 250 | 8 | 30 | 58 | 108 | 174 | 285 |
+| Tour 500 | 8 | 52 | 108 | 208 | 341 | 563 |
+| Masters | 8 | 96 | 208 | 408 | 674 | 1,119 |
+| Grand Slam (R32 96) | 8 | 185 | 408 | 808 | 1,341 | 2,230 |
+
+ A deep run buys you a few levels on the riders who went out early; the edge fades once you move up to a tier where everyone is winning that much. You also get **sponsor TP** from your fans (one per 10 fans).
 
 Each level costs more than the last: 15 TP for level 1, 30 for level 2, 45 for level 3… and from level 9 the price climbs faster still.
 

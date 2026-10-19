@@ -2,7 +2,8 @@
    her title ("…the Bold"), and update every place the save mentions her: brackets, head-to-head, rival, the paper. */
 
 import { npcName } from "../models/persona";
-import { sh, spreadPts } from "../models/formulas";
+import { sh, spreadPts, getRanked } from "../models/formulas";
+import { findWeek, weekPts } from "./history";
 import { TIERS, TOTAL_EVENTS } from "../models/constants";
 
 export function needsUniqueNames(S) {
@@ -62,13 +63,13 @@ function along(tab, rank) {
 }
 /* points won at an event on the old table → the same rounds on the current one */
 function convPts(tier, roundsWon, oldPts) {
-  var o = OLD_PTS[tier], n = TIERS[tier] && TIERS[tier].pts;
+  var o = OLD_PTS[tier], n = TIERS[tier] && TIERS[tier].tp; /* the table this conversion aimed at (table 2, now kept as tp) */
   if (!oldPts || !roundsWon || !o || !n) return 0;
   return Math.round(oldPts * sumTo(n, roundsWon) / sumTo(o, roundsWon));
 }
 function roundsWonOf(tier, pRound, won) { return won ? ((TIERS[tier] && TIERS[tier].rounds) || 5) : (pRound || 0); }
 
-export function needsPts2(S) { return !!(S && S.player && S.npcs && S.pts !== 2); }
+export function needsPts2(S) { return !!(S && S.player && S.npcs && !(S.pts >= 2)); }
 
 export function toPts2(S) {
   if (!needsPts2(S)) return S;
@@ -106,6 +107,73 @@ export function toPts2(S) {
     return Object.assign({}, n, { sp: v, ap: Math.max(v, Math.round((n.ap || 0) * along(PLACE_AP, r))), w: spreadPts(v) });
   });
   /* a tournament in progress: its riders carry copies of their points */
+  var spOf = {}; out.npcs.forEach(function (n) { spOf[n.id] = n; });
+  function fix(x) { if (!x) return x; if (x.isP) return Object.assign({}, x, { sp: out.player.sp, ap: out.player.ap }); var n = spOf[x.id]; return n ? Object.assign({}, x, { sp: n.sp, ap: n.ap, w: n.w }) : x; }
+  if (S.activeT && S.activeT.bracket) out.activeT = Object.assign({}, S.activeT, { bracket: S.activeT.bracket.map(function (rd) { return rd ? rd.map(function (m) { return Object.assign({}, m, { a: fix(m.a), b: fix(m.b), w: m.w ? fix(m.w) : null }); }) : rd; }) });
+  return out;
+}
+
+/* ═══ Points table 3 (once per save: S.pts = 3) ═══
+   Winning a tier is now worth about reaching the quarterfinal of the tier above (constants TIERS). Everyone's points are
+   rebuilt on the new table:
+   1. You: every week of this season and every week you're defending, from your own result there (tier, rounds won, the
+      event's multiplier kept) — the tour's history first, then your tournament log.
+   2. Rivals: every week the tour's history recorded (engine/history) is rebuilt exactly from her round and tier;
+      older weeks are scaled by what her place in the ranking is worth on the new table (a 3-run, 4-season simulation),
+      so everyone keeps her order. */
+var V2 = TIERS.map(function (t) { return t.tp; }), V3 = TIERS.map(function (t) { return t.pts; });
+function conv3(tier, roundsWon, oldPts) { if (!oldPts || !roundsWon || !V2[tier]) return 0; var o = sumTo(V2[tier], roundsWon), n = sumTo(V3[tier], roundsWon); return o ? Math.round(oldPts * n / o) : 0; }
+/* [rank, new ÷ old points held at that rank] and [rank, points held] on the new table */
+var FACTOR3 = [[1, 2.07], [10, 2.57], [30, 2.86], [64, 1.26], [100, 1.04], [200, 0.71], [300, 0.535], [400, 0.43], [600, 0.32], [800, 0.28], [1000, 0.22]];
+var PLACE3 = [[1, 31000], [10, 17500], [30, 10300], [64, 1700], [100, 960], [200, 350], [300, 190], [400, 107], [600, 55], [800, 32], [999, 12]];
+/* What a place in the ranking holds on the current table (a new tour's starting points) */
+export function placePts(rank) { return Math.round(along(PLACE3, rank)); }
+
+export function needsPts3(S) { return !!(S && S.player && S.npcs && !(S.pts >= 3)); }
+export function toPts3(S) {
+  if (!needsPts3(S)) return S;
+  if (needsPts2(S)) S = toPts2(S);
+  var P = S.player, sNum = S.sNum || 1, ci = S.calIdx || 0, out = Object.assign({}, S, { pts: 3 });
+  var rankOf = {}, pRank = 1000; getRanked(S).forEach(function (p, i) { if (p.isP) pRank = i + 1; else rankOf[p.id] = i + 1; });
+  /* the recorded week that sits in ledger slot c: this season's before calIdx, last season's from calIdx on */
+  function weekAt(c) { return c < ci ? findWeek(S.hist, sNum, c) : findWeek(S.hist, sNum - 1, c); }
+
+  /* ── you ── */
+  var oldSum = 0, newSum = 0;
+  function hConv(h) { return conv3(h.tier, roundsWonOf(h.tier, h.pRound, h.winner && h.winner.isP), h.pPts); }
+  (S.tHist || []).forEach(function (h) { if (h.pPts) { oldSum += h.pPts; newSum += hConv(h); } });
+  var ratio = oldSum ? newSum / oldSum : along(FACTOR3, pRank);
+  var res = (P.res || []).slice(), def = (P.def || []).slice();
+  (S.cal || []).forEach(function (e, i) { if (i < ci && e && e.done && e.result) { var w = weekAt(i); res[i] = w ? weekPts(w, 1) : e.result.pPts ? conv3(e.tier, roundsWonOf(e.tier, e.result.pRound, e.result.won), e.result.pPts) : 0; } });
+  var prevH = (S.tHist || []).filter(function (h) { return h.season === sNum - 1 && h.pPts; }), j = 0;
+  def = def.map(function (v, c) {
+    if (c >= ci) { var w = weekAt(c); if (w) return weekPts(w, 1); }
+    if (!v) return 0;
+    var h = prevH[j]; if (h && h.pPts === v) { j++; return hConv(h); }
+    return Math.round(v * ratio);
+  });
+  var sp = 0; for (var i = 0; i < TOTAL_EVENTS; i++) sp += i < ci ? (res[i] || 0) : (def[i] || 0);
+  var best = Object.assign({}, P.best || {}); if (best.peakS) best.peakS = Math.round(best.peakS * ratio);
+  out.player = Object.assign({}, P, { sp: sp, ap: Math.round((P.ap || 0) * ratio), def: def, res: res, best: best });
+  out.tHist = (S.tHist || []).map(function (h) { var p = hConv(h), d = Math.round((h.defending || 0) * ratio); return Object.assign({}, h, { pPts: p, defending: d, netChange: p - d }); });
+  out.cal = (S.cal || []).map(function (e, i) {
+    if (!e || !e.result) return e;
+    var r = Object.assign({}, e.result, { pPts: res[i] || 0, defending: Math.round((e.result.defending || 0) * ratio) }); r.net = r.pPts - r.defending;
+    return Object.assign({}, e, { result: r });
+  });
+  if (P.timeline) out.player.timeline = P.timeline.map(function (t) { return t.pts ? Object.assign({}, t, { pts: t.tier != null ? conv3(t.tier, TIERS[t.tier].rounds, t.pts) : t.pRound != null ? conv3(5, t.pRound, t.pts) : Math.round(t.pts * ratio) }) : t; });
+
+  /* ── rivals ── */
+  out.npcs = S.npcs.map(function (n) {
+    var f = along(FACTOR3, rankOf[n.id] || 1000), w = (n.w || spreadPts(n.sp)).slice(), s = 0, scaled = [], oldPart = 0;
+    for (var c = 0; c < TOTAL_EVENTS; c++) { var wk = weekAt(c); if (wk) w[c] = weekPts(wk, n.id); else { scaled.push(c); oldPart += w[c] || 0; } }
+    /* the unrecorded weeks scale as one total (so riders level on points stay level), largest remainders first */
+    var target = Math.round(oldPart * f), parts = scaled.map(function (c) { var x = (w[c] || 0) * f; return { c: c, v: Math.floor(x), r: x - Math.floor(x) }; });
+    var left = target - parts.reduce(function (a, p) { return a + p.v; }, 0);
+    parts.sort(function (a, b) { return b.r - a.r; }).forEach(function (p, k) { w[p.c] = p.v + (k < left ? 1 : 0); });
+    for (c = 0; c < TOTAL_EVENTS; c++) s += w[c] || 0;
+    return Object.assign({}, n, { w: w, sp: s, ap: Math.max(s, Math.round((n.ap || 0) * f)) });
+  });
   var spOf = {}; out.npcs.forEach(function (n) { spOf[n.id] = n; });
   function fix(x) { if (!x) return x; if (x.isP) return Object.assign({}, x, { sp: out.player.sp, ap: out.player.ap }); var n = spOf[x.id]; return n ? Object.assign({}, x, { sp: n.sp, ap: n.ap, w: n.w }) : x; }
   if (S.activeT && S.activeT.bracket) out.activeT = Object.assign({}, S.activeT, { bracket: S.activeT.bracket.map(function (rd) { return rd ? rd.map(function (m) { return Object.assign({}, m, { a: fix(m.a), b: fix(m.b), w: m.w ? fix(m.w) : null }); }) : rd; }) });

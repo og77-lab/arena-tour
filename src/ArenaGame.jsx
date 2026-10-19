@@ -6,7 +6,7 @@ import { syncAchievements, saveGameToCloud, loadGameFromCloud } from "./firebase
 import { playTitle, playRankUp, isMuted, setMuted } from "./sounds";
 import { isMusicOn, setMusicOn } from "./music";
 import { W, CSS, EMO, TIERS, RN5, RN6, HN, HC, HI, TOTAL_EVENTS, FINALS_BO, STATS, STAT_GROUPS, screenAnim, ptsLadder, champTotal } from "./models/constants";
-import { sh, bs, nW, pRankOf, getRanked, getARanked, trainCost, weeklyTP, spreadPts } from "./models/formulas";
+import { sh, bs, nW, pRankOf, getRanked, getARanked, trainCost, weeklyTP, trainPts, spreadPts } from "./models/formulas";
 import { sSet, sGet, stamp, pickNewest, queueCloudSave, cancelCloudSave } from "./engine/persistence";
 import { pack, unpack } from "./engine/codec";
 import { addHands, simMatch, handsTalent, riderBar, BASE } from "./engine/joust";
@@ -39,7 +39,7 @@ import { roosterName, trait, standing } from "./models/persona";
 import { buildIssue, buildSpecialEdition, rankMap } from "./engine/news";
 import { tallyTournament, checkAchievements } from "./engine/achievements";
 import { updateRival, rivalRecord } from "./engine/rivalry";
-import { uniqueNames, needsUniqueNames, toPts2, needsPts2 } from "./engine/migrate";
+import { uniqueNames, needsUniqueNames, toPts3, needsPts3 } from "./engine/migrate";
 import { ageCap, toAge, needsAge, retirementPlan, hofReason, RETIRE_FROM, causeText } from "./engine/aging";
 import { weekEvents, lowestTierFor, stepDownTier, dropsLeft, DROP_LIMIT } from "./engine/events";
 import { ACHIEVEMENTS } from "./engine/achievements";
@@ -193,7 +193,7 @@ export default function Arena(props) {
       if (needsUniqueNames(d)) { d = uniqueNames(d); try { sSet(d); } catch (e) {} }
       if (!d.eng || d.eng < 2) { d = toEngine2(d); try { sSet(d); } catch (e) {} }
       /* Points from before the current table: converted once, and rivals' points start dropping off like yours */
-      if (needsPts2(d)) { d = toPts2(d); try { sSet(d); } catch (e) {} }
+      if (needsPts3(d)) { d = toPts3(d); try { sSet(d); } catch (e) {} } /* older tables first, then the current one (engine/migrate) */
       /* Ages: rivals spread over 1–16 seasons on tour, you counted from season 1 (engine/aging) */
       if (needsAge(d)) { d = toAge(d); try { sSet(d); } catch (e) {} }
       setS(d);
@@ -227,7 +227,7 @@ export default function Arena(props) {
     queueCloudSave(userId, snap, saveGameToCloud);
   }, [ts, fs]);
   function exportSave() { if (!S) return; var b = new Blob([JSON.stringify(pack(S))],{type:"application/json"}); var u = URL.createObjectURL(b); var a = document.createElement("a"); a.href = u; a.download = "arena-"+S.pName+"-s"+S.sNum+".json"; a.click(); URL.revokeObjectURL(u); }
-  function importSave(e) { var f = e.target.files && e.target.files[0]; if (!f) return; var r = new FileReader(); r.onload = function(ev){ try { var d = unpack(JSON.parse(ev.target.result)); if (d && d.player) { if (!d.eng || d.eng < 2) d = toEngine2(d); save(toAge(toPts2(uniqueNames(d)))); setScr("hub"); } } catch(err){} }; r.readAsText(f); }
+  function importSave(e) { var f = e.target.files && e.target.files[0]; if (!f) return; var r = new FileReader(); r.onload = function(ev){ try { var d = unpack(JSON.parse(ev.target.result)); if (d && d.player) { if (!d.eng || d.eng < 2) d = toEngine2(d); save(toAge(toPts3(uniqueNames(d)))); setScr("hub"); } } catch(err){} }; r.readAsText(f); }
   var _syncing = useState(false), syncing = _syncing[0], setSyncing = _syncing[1];
   var _syncMsg = useState(""), syncMsg = _syncMsg[0], setSyncMsg = _syncMsg[1];
   var _mutedState = useState(isMuted()), mutedState = _mutedState[0], setMutedState = _mutedState[1];
@@ -519,6 +519,7 @@ export default function Arena(props) {
     var evPts = ts.ptsMul || 1, evMoney = ts.moneyMul || 1;
     var tally = function(pid) { var p = 0; for (var ri = 0; ri < ts.bracket.length; ri++) { var rd = ts.bracket[ri]; if (rd) for (var mi = 0; mi < rd.length; mi++) { if (rd[mi].w && rd[mi].w.id === pid) p += tier.pts[ri]; } } return Math.round(p * evPts); };
     var pp = tally(1);
+    var myWins = 0; ts.bracket.forEach(function(rdx){ (rdx || []).forEach(function(m){ if (m.w && m.w.id === 1) myWins++; }); }); /* rounds you won (training points) */
     /* No points for R1 losers — you must win to earn */
     var pRound = 0; for (var ri = 0; ri < ts.bracket.length; ri++) { var rd = ts.bracket[ri]; if (rd) for (var mi = 0; mi < rd.length; mi++) { var mm = rd[mi]; if ((mm.a && mm.a.id===1)||(mm.b && mm.b.id===1)) pRound = ri; } }
     var champM = ts.bracket[tier.rounds - 1] && ts.bracket[tier.rounds - 1][0]; var champW = champM && champM.w;
@@ -584,7 +585,7 @@ export default function Arena(props) {
     var rv = updateRival(S.player, S.sNum, curEv ? (curEv.type === "gs" ? "Grand Slam " + curEv.gsNum : "Week " + wLabel) : "");
     var settledRivals = S.player.settledRivals || [];
     if (rv.settled) { newStats.rivalsSettled = (newStats.rivalsSettled || 0) + 1; settledRivals = settledRivals.concat([rv.settled.id]); }
-    var newP = Object.assign({}, S.player, { sp: newSP, ap: (S.player.ap||0)+pp, tr: Object.assign({}, S.player.tr, { tp: (S.player.tr.tp||0) + weeklyTP(pp) + sponsor }), best: pb, res: newRes, timeline: newTimeline, fans: fansNow, promise: null,
+    var newP = Object.assign({}, S.player, { sp: newSP, ap: (S.player.ap||0)+pp, tr: Object.assign({}, S.player.tr, { tp: (S.player.tr.tp||0) + weeklyTP(trainPts(ts.tierIdx, myWins, evPts)) + sponsor }), best: pb, res: newRes, timeline: newTimeline, fans: fansNow, promise: null,
       stats: newStats, rival: rv.rival, settledRivals: settledRivals });
     if (!rv.rival) delete newP.rival;
     /* Update NPC peak ranks */
@@ -725,9 +726,9 @@ export default function Arena(props) {
     /* ── TRAINING: every rider earns and spends training points by the player's rules ── */
     var trainLog = {};
     newNpcs.forEach(function(n){
-      var earned = (n.w && n.w[S.calIdx]) || 0; /* what she won this week, not her net after the drop-off */
-      /* Every rival earns training points by your rule: results buy training */
-      var bought = npcTrainWeek(n, weeklyTP(earned));
+      /* Every rival earns training points by your rule: the round she reached this week, on the training scale */
+      var hr = histRiders[n.id], hev = hr ? histEv[hr[0]] : null;
+      var bought = npcTrainWeek(n, weeklyTP(hev ? trainPts(hev.tier, hr[2], hev.mul) : 0));
       if (bought) trainLog[n.id] = bought;
     });
     /* Calculate money earned */

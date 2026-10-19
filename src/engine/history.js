@@ -66,6 +66,8 @@ function codeOf(w, id) { var c = idxOf(w.r, id, 4); return c && c !== NONE && c.
 export function roundNamesOf(tier) { return TIERS[tier].rounds === 6 ? RN6 : RN5; }
 /* What she won: rounds won × the tier's table × the event's multiplier (same as the week's own scoring) */
 export function ptsFor(tier, won, mul) { var p = 0, T = TIERS[tier]; for (var i = 0; i < won && i < T.pts.length; i++) p += T.pts[i]; return Math.round(p * (mul || 1)); }
+/* One rider's points in a recorded week on the current table (0 if she didn't ride) */
+export function weekPts(w, id) { var x = codeOf(w, id); if (!x) return 0; var e = w.e[x.ev]; return e ? ptsFor(e[0], x.won, e[4]) : 0; }
 export function reachedName(tier, won) { var T = TIERS[tier]; return won >= T.rounds ? "Champion" : roundNamesOf(tier)[won] || ""; }
 
 export function findWeek(H, s, c) { return H && H.wk ? H.wk.filter(function (w) { return w.s === s && w.c === c; })[0] || null : null; }

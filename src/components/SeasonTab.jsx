@@ -99,7 +99,7 @@ export default function SeasonTab(props) {
           <div style={Object.assign(display(24), { marginTop: 8 })}>{isGS ? (<span><Icon name="crown" size={24} style={{ verticalAlign: "-3px", marginRight: 4 }} />{"Grand Slam " + ev.gsNum}</span>) : "Week " + ev.block + "." + ev.week}</div>
           <div style={{ fontSize: 13, color: C.textSoft, marginTop: 3, lineHeight: 1.4 }}>
             {isGS
-              ? (props.gsOk ? "64 riders, best of 5 sets, 4,000 points to the champion." : "Only the top 64 ride in a Slam — you're #" + pRank + ". This week you sit it out.")
+              ? (props.gsOk ? "64 riders, best of 5 sets, " + champTotal(5).toLocaleString() + " points to the champion." : "Only the top 64 ride in a Slam — you're #" + pRank + ". This week you sit it out.")
               : "Every rider plays one tournament this week. Pick the tier that fits your rank:"}
           </div>
           {!isGS && (

@@ -1,7 +1,7 @@
 /* ═══ HomeTab ═══ Hub home: who you are, the one thing to do next, how the season is going */
 
 import { motion } from "framer-motion";
-import { TIERS, TOTAL_EVENTS } from "../models/constants";
+import { TIERS, TOTAL_EVENTS, champTotal } from "../models/constants";
 import { sh } from "../models/formulas";
 import { C, FONT, display, label, card, button, pill, money, BODY, HEAD, card2, title2, cap2, button2 } from "../ui/theme";
 import Icon, { IconTile } from "./Icons";
@@ -83,7 +83,7 @@ export default function HomeTab(props) {
       : { kicker: "Season " + S.sNum + " complete", title: "Finished #" + pRank, sub: "Top 16 qualify for the Finals. Train up and go again.", cta: "To the Season Gala →", act: props.onNextSeason, kind: "gold" };
   } else if (isGS) {
     hero = gsOk
-      ? { kicker: "Next event · Grand Slam " + ev.gsNum, title: "Grand Slam", sub: gsWild ? "Your crowd got you a wildcard! 64 riders · best of 5 · 4,000 pts to the champion" : "64 riders · best of 5 sets · 4,000 pts to the champion", cta: "Enter the Grand Slam", act: props.onPlay, kind: "gold" }
+      ? { kicker: "Next event · Grand Slam " + ev.gsNum, title: "Grand Slam", sub: gsWild ? "Your crowd got you a wildcard! 64 riders · best of 5 · " + champTotal(5).toLocaleString() + " pts to the champion" : "64 riders · best of 5 sets · " + champTotal(5).toLocaleString() + " pts to the champion", cta: "Enter the Grand Slam", act: props.onPlay, kind: "gold" }
       : { kicker: "Next event · Grand Slam " + ev.gsNum, title: "Not qualified", sub: "Only the top 64 ride in a Slam — you're #" + pRank + ". The tour moves on.", cta: "Skip this week →", act: props.onPlay, kind: "ghost" };
   } else {
     hero = { kicker: "Next event · Week " + ev.block + "." + ev.week, title: "Weekly Tournament", sub: "Pick a tier that fits your rank. Win rounds to earn points & prize money.", cta: "Choose tournament →", act: props.onPlay, kind: "gold" };

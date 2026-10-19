@@ -21,15 +21,17 @@ export const screenAnim = {
 export const EMO = ["⚔️","🛡️","🗡️","🏹","🔱","⚡","🔥","💀","👑","🐉","🦅","🐺","🦁","🐍","🦊","🎭","🐻","🦈","🦂","🐲","🏴","🎪","🔮","🌀","☠️","🦇","🐗","🐅","🦏","🐊"];
 
 /* Tournament tiers: Futures, Challenger, Tour250, Tour500, Masters, GrandSlam.
-   pts and money are what each round WON adds; they add up. Champions: 100 · 250 · 500 · 1,000 · 2,000 · 4,000 —
-   each tier doubles the one below, and reaching a round is a fixed share of the title, as on the ATP tour. */
+   pts and money are what each round WON adds; they add up. Champions: 20 · 80 · 300 · 1,200 · 5,000 · 10,000 —
+   winning a tier is worth about reaching the quarterfinal of the tier above, so every step up is a real step
+   (reach R16 / QF / SF / F / win = 9% / 25% / 45% / 70% / 100% of the title).
+   tp = the previous table, kept only to pay training points exactly as before (formulas.trainPts). */
 export const TIERS = [
-  { name: "Futures", short: "FUT", col: "#6b7280", size: 32, rounds: 5, bo: 3, pts: [10,10,15,25,40], money: [50,150,400,1000,3000], rankRange: [601,1001] },
-  { name: "Challenger", short: "CHL", col: "#22c55e", size: 32, rounds: 5, bo: 3, pts: [20,25,45,60,100], money: [200,500,1500,4000,10000], rankRange: [301,700] },
-  { name: "Tour 250", short: "250", col: "#0ea5e9", size: 32, rounds: 5, bo: 3, pts: [40,50,90,120,200], money: [800,2000,6000,15000,40000], rankRange: [101,400] },
-  { name: "Tour 500", short: "500", col: "#8b5cf6", size: 32, rounds: 5, bo: 3, pts: [80,100,180,240,400], money: [2000,5000,15000,40000,100000], rankRange: [31,200] },
-  { name: "Masters", short: "MST", col: "#ec4899", size: 32, rounds: 5, bo: 5, pts: [160,200,360,480,800], money: [5000,15000,40000,100000,300000], rankRange: [1,100] },
-  { name: "Grand Slam", short: "GS", col: "#f59e0b", size: 64, rounds: 6, bo: 5, pts: [160,160,400,720,960,1600], money: [10000,25000,60000,150000,400000,1000000], rankRange: [1,64] }
+  { name: "Futures", short: "FUT", col: "#6b7280", size: 32, rounds: 5, bo: 3, pts: [2,3,4,5,6], tp: [10,10,15,25,40], money: [50,150,400,1000,3000], rankRange: [601,1001] },
+  { name: "Challenger", short: "CHL", col: "#22c55e", size: 32, rounds: 5, bo: 3, pts: [7,13,16,20,24], tp: [20,25,45,60,100], money: [200,500,1500,4000,10000], rankRange: [301,700] },
+  { name: "Tour 250", short: "250", col: "#0ea5e9", size: 32, rounds: 5, bo: 3, pts: [27,48,60,75,90], tp: [40,50,90,120,200], money: [800,2000,6000,15000,40000], rankRange: [101,400] },
+  { name: "Tour 500", short: "500", col: "#8b5cf6", size: 32, rounds: 5, bo: 3, pts: [108,192,240,300,360], tp: [80,100,180,240,400], money: [2000,5000,15000,40000,100000], rankRange: [31,200] },
+  { name: "Masters", short: "MST", col: "#ec4899", size: 32, rounds: 5, bo: 5, pts: [450,800,1000,1250,1500], tp: [160,200,360,480,800], money: [5000,15000,40000,100000,300000], rankRange: [1,100] },
+  { name: "Grand Slam", short: "GS", col: "#f59e0b", size: 64, rounds: 6, bo: 5, pts: [400,600,1500,2000,2500,3000], tp: [160,160,400,720,960,1600], money: [10000,25000,60000,150000,400000,1000000], rankRange: [1,64] }
 ];
 
 /* Training stats. Save keys (k) are unchanged; each stat belongs to the granny (rider) or the rooster (mount).

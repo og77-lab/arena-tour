@@ -45,6 +45,7 @@ export function pRankOf(S) {
    abilities, her talent's hands, her kit for these lanes, her tiredness, the stands and nerves.
    ctx: { tier, round, diff (else from tier + round), cond, bo, kit(n) → kit, rank(n) → rank } */
 import { effTr, fitOf } from "../engine/fitness";
+import { TIERS } from "./constants";
 import { simMatch } from "../engine/joust";
 import { crowdEdge, crowdLove } from "../engine/social";
 
@@ -61,6 +62,9 @@ export function nW(a, b, ctx) {
    the edge fades once you move up to a tier where everyone is winning that much */
 export var TP_BASE = 8;
 export function weeklyTP(pts) { return TP_BASE + Math.floor((pts || 0) / 1.8); }
+/* The points that count for training: the round reached on the training scale (TIERS[].tp — the table before the
+   current points table, so training pays exactly what it did), times the event's multiplier */
+export function trainPts(tier, roundsWon, mul) { var T = TIERS[tier]; if (!T) return 0; var p = 0; for (var i = 0; i < (roundsWon || 0) && i < T.tp.length; i++) p += T.tp[i]; return Math.round(p * (mul || 1)); }
 
 /* Training point cost for next level of a stat */
 export function trainCost(lv) {

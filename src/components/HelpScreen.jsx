@@ -1,7 +1,7 @@
 /* ═══ HelpScreen ═══ "How to Play": the strike, sets, how a rival scores, what gets harder, training, the crowd and
    points — short, in the game's own look. Every number matches the engine (engine/joust); the Game Guide has the rest. */
 
-import { STATS } from "../models/constants";
+import { STATS, TIERS, champTotal } from "../models/constants";
 import FanRules from "./FanRules";
 import Icon, { IconTile, StatIcon } from "./Icons";
 import { C, FONT } from "../ui/theme";
@@ -88,8 +88,8 @@ export default function HelpScreen(props) {
         </Section>
 
         <Section icon="trophy" tint="#fef3c7" title="Points & rankings">
-          <Text>Win matches to earn points — <B>a first-round loss earns nothing</B>. Each tier pays double the one below; the cards and the match header show what each round is worth.</Text>
-          <Rows rows={[["Futures champion", "100"], ["Challenger", "250"], ["Tour 250", "500"], ["Tour 500", "1,000"], ["Masters", "2,000"], ["Grand Slam", "4,000"], ["Beating a higher rank", "no extra points"]]} />
+          <Text>Win matches to earn points — <B>a first-round loss earns nothing</B>. Winning a tier is worth about reaching the quarterfinal of the tier above; the cards and the match header show what each round is worth.</Text>
+          <Rows rows={TIERS.map(function (t, i) { return [i ? t.name : t.name + " champion", champTotal(i).toLocaleString()]; }).concat([["Beating a higher rank", "no extra points"]])} />
           <Text>Your rank is your season points; from season 2 you <B>defend</B> last season's points at each week of the calendar.</Text>
           <Text>For every rule and number, open the <B>Game Guide</B> in the More tab.</Text>
         </Section>
