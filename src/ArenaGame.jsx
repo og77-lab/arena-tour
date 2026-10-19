@@ -6,7 +6,7 @@ import { syncAchievements, saveGameToCloud, loadGameFromCloud } from "./firebase
 import { playTitle, playRankUp, isMuted, setMuted } from "./sounds";
 import { isMusicOn, setMusicOn } from "./music";
 import { W, CSS, EMO, TIERS, RN5, RN6, HN, HC, HI, TOTAL_EVENTS, FINALS_BO, STATS, STAT_GROUPS, screenAnim, ptsLadder, champTotal } from "./models/constants";
-import { sh, bs, nW, pRankOf, getRanked, getARanked, trainCost, weeklyTP } from "./models/formulas";
+import { sh, bs, nW, pRankOf, getRanked, getARanked, trainCost, weeklyTP, spreadPts } from "./models/formulas";
 import { sSet, sGet, stamp, pickNewest, queueCloudSave, cancelCloudSave } from "./engine/persistence";
 import { pack, unpack } from "./engine/codec";
 import { addHands, simMatch, handsTalent, riderBar, BASE } from "./engine/joust";
@@ -39,7 +39,7 @@ import { roosterName, trait, standing } from "./models/persona";
 import { buildIssue, buildSpecialEdition, rankMap } from "./engine/news";
 import { tallyTournament, checkAchievements } from "./engine/achievements";
 import { updateRival, rivalRecord } from "./engine/rivalry";
-import { uniqueNames, needsUniqueNames } from "./engine/migrate";
+import { uniqueNames, needsUniqueNames, toPts2, needsPts2 } from "./engine/migrate";
 import { weekEvents } from "./engine/events";
 import { ACHIEVEMENTS } from "./engine/achievements";
 import AchievementsSheet, { AchToast, achCount } from "./components/Achievements";
@@ -187,6 +187,8 @@ export default function Arena(props) {
       /* Older tours reused first names: give every rider her own (once, then save) */
       if (needsUniqueNames(d)) { d = uniqueNames(d); try { sSet(d); } catch (e) {} }
       if (!d.eng || d.eng < 2) { d = toEngine2(d); try { sSet(d); } catch (e) {} }
+      /* Points from before the current table: converted once, and rivals' points start dropping off like yours */
+      if (needsPts2(d)) { d = toPts2(d); try { sSet(d); } catch (e) {} }
       setS(d);
       if (d.activeT) { setTS(d.activeT); setScr("tourney"); }
       else if (d.activeF) { setFS(d.activeF); setScr("finals"); }
@@ -218,7 +220,7 @@ export default function Arena(props) {
     queueCloudSave(userId, snap, saveGameToCloud);
   }, [ts, fs]);
   function exportSave() { if (!S) return; var b = new Blob([JSON.stringify(pack(S))],{type:"application/json"}); var u = URL.createObjectURL(b); var a = document.createElement("a"); a.href = u; a.download = "arena-"+S.pName+"-s"+S.sNum+".json"; a.click(); URL.revokeObjectURL(u); }
-  function importSave(e) { var f = e.target.files && e.target.files[0]; if (!f) return; var r = new FileReader(); r.onload = function(ev){ try { var d = unpack(JSON.parse(ev.target.result)); if (d && d.player) { if (!d.eng || d.eng < 2) d = toEngine2(d); save(uniqueNames(d)); setScr("hub"); } } catch(err){} }; r.readAsText(f); }
+  function importSave(e) { var f = e.target.files && e.target.files[0]; if (!f) return; var r = new FileReader(); r.onload = function(ev){ try { var d = unpack(JSON.parse(ev.target.result)); if (d && d.player) { if (!d.eng || d.eng < 2) d = toEngine2(d); save(toPts2(uniqueNames(d))); setScr("hub"); } } catch(err){} }; r.readAsText(f); }
   var _syncing = useState(false), syncing = _syncing[0], setSyncing = _syncing[1];
   var _syncMsg = useState(""), syncMsg = _syncMsg[0], setSyncMsg = _syncMsg[1];
   var _mutedState = useState(isMuted()), mutedState = _mutedState[0], setMutedState = _mutedState[1];
@@ -514,14 +516,15 @@ export default function Arena(props) {
     var pRound = 0; for (var ri = 0; ri < ts.bracket.length; ri++) { var rd = ts.bracket[ri]; if (rd) for (var mi = 0; mi < rd.length; mi++) { var mm = rd[mi]; if ((mm.a && mm.a.id===1)||(mm.b && mm.b.id===1)) pRound = ri; } }
     var champM = ts.bracket[tier.rounds - 1] && ts.bracket[tier.rounds - 1][0]; var champW = champM && champM.w;
     var wonTitle = champW && champW.id === 1;
-    var spBefore = {}; S.npcs.forEach(function(n){ spBefore[n.id] = n.sp || 0; });
     var newNpcs = S.npcs.map(function(n){
       var e = tally(n.id);
       var tr = Object.assign({s:0,g:0}, n.tr||{});
       var nb = Object.assign({}, n.best||{});
       if (champW && champW.id === n.id) { nb.titles = (nb.titles||0) + 1; nb.tt = addTitle(nb.tt, ts.tierIdx); if (isGS) nb.gsTitles = (nb.gsTitles||0) + 1; }
       var nb2 = Object.assign({}, nb, { careerMoney: (nb.careerMoney||0) + Math.round(e * 3) });
-      return Object.assign({}, n, { sp: (n.sp||0)+e, ap: (n.ap||0)+e, skill: Math.min(n.pot||92, (n.skill||30)+(Math.random()*0.3-0.05)), tr: tr, best: nb2 });
+      /* Rolling points, as for you: what she won at this week last season drops off, this week's result takes its place */
+      var w = n.w ? n.w.slice() : spreadPts(n.sp), drop = w[S.calIdx] || 0; w[S.calIdx] = e;
+      return Object.assign({}, n, { sp: Math.max(0, (n.sp||0) - drop + e), ap: (n.ap||0)+e, w: w, skill: Math.min(n.pot||92, (n.skill||30)+(Math.random()*0.3-0.05)), tr: tr, best: nb2 });
     });
     /* Update player with DEFENDING POINTS system */
     var pb = Object.assign({}, S.player.best||{});
@@ -604,6 +607,7 @@ export default function Arena(props) {
     /* Run multiple tournaments at each tier for remaining NPCs */
     /* The week's other named events (same fields the player saw in the list), each simulated with its own point multiplier */
     var weekEv = weekEvents(S), byId = {}, weekRidden = {};
+    var addWeek = function(n, x){ n.sp = (n.sp||0)+x; n.ap = (n.ap||0)+x; n.w[S.calIdx] = (n.w[S.calIdx]||0)+x; }; /* points won in the other events count for this week too */
     tempRanked.forEach(function(p){ if (!p.isP) byId[p.id] = p; });
     for (var pti = 0; pti < 6; pti++) {
       var tierEv = weekEv.filter(function(x){ return x.tier === pti && x.id !== ts.eventId; });
@@ -637,7 +641,7 @@ export default function Arena(props) {
               if (gap > 0 && (!shock || gap * (1 + pti * 0.6) > shock.gap * (1 + shock.tier * 0.6))) shock = { tier: pti, event: tierEv[ev].name, round: (pt.rounds === 6 ? RN6 : RN5)[rd2], w: brief(w2), l: brief(l2), wRank: rkOf[w2.id], lRank: rkOf[l2.id], gap: gap };
               /* Loser gets points for round reached */
               var loserNpc = newNpcs.find(function(n){return n.id===l2.id;});
-              if (loserNpc && rd2 > 0) { var lPts = 0; for (var lp = 0; lp < rd2; lp++) lPts += pt.pts[lp]; lPts = Math.round(lPts * evMul); loserNpc.sp = (loserNpc.sp||0)+lPts; loserNpc.ap = (loserNpc.ap||0)+lPts; }
+              if (loserNpc && rd2 > 0) { var lPts = 0; for (var lp = 0; lp < rd2; lp++) lPts += pt.pts[lp]; lPts = Math.round(lPts * evMul); addWeek(loserNpc, lPts); }
               nxt.push(w2);
             } else { nxt.push(cur[mi2]); }
           }
@@ -651,7 +655,7 @@ export default function Arena(props) {
           var wNpc = newNpcs.find(function(n){return n.id===winner.id;});
           if (wNpc) {
             var totalWin = 0; for (var wp = 0; wp < pt.pts.length; wp++) totalWin += pt.pts[wp]; totalWin = Math.round(totalWin * evMul);
-            wNpc.sp = (wNpc.sp||0)+totalWin; wNpc.ap = (wNpc.ap||0)+totalWin;
+            addWeek(wNpc, totalWin);
             wNpc.best = Object.assign({},wNpc.best||{}); wNpc.best.titles = (wNpc.best.titles||0)+1; wNpc.best.tt = addTitle(wNpc.best.tt, pti);
             if (pti === 5) wNpc.best.gsTitles = (wNpc.best.gsTitles||0)+1;
             if (!topWinner || totalWin > (topWinner.pts||0)) topWinner = { name: winner.name, emoji: winner.emoji, id: winner.id, pts: totalWin, event: tierEv[ev].name };
@@ -698,7 +702,7 @@ export default function Arena(props) {
     /* ── TRAINING: every rider earns and spends training points by the player's rules ── */
     var trainLog = {};
     newNpcs.forEach(function(n){
-      var earned = Math.max(0, (n.sp || 0) - (spBefore[n.id] || 0));
+      var earned = (n.w && n.w[S.calIdx]) || 0; /* what she won this week, not her net after the drop-off */
       /* Every rival earns training points by your rule: results buy training */
       var bought = npcTrainWeek(n, weeklyTP(earned));
       if (bought) trainLog[n.id] = bought;

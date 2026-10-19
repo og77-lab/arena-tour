@@ -16,6 +16,17 @@ export function getRanked(S) {
   return all;
 }
 
+/* Rolling points, the same for you and every rival: a rider holds only what she won over the last 20 weeks. Each
+   rival keeps one number per calendar week (n.w): weeks already played this season hold this season's result,
+   weeks still ahead hold last season's, which drop off when that week comes round. Her points are always their sum.
+   spreadPts(total) shares points with no week of their own (a new tour's starting points) evenly over the 20 weeks. */
+export function spreadPts(total, n) {
+  n = n || 20; total = Math.max(0, Math.round(total || 0));
+  var base = Math.floor(total / n), rem = total - base * n, w = [];
+  for (var i = 0; i < n; i++) w.push(base + (i < rem ? 1 : 0));
+  return w;
+}
+
 /* Player+all NPCs sorted by all-time points (AP) */
 export function getARanked(S) {
   var all = [Object.assign({}, S.player, { name: S.pName })].concat(S.npcs);

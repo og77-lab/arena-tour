@@ -124,7 +124,7 @@ function body(id) {
     case "season": return (<>
       <P>A season is <B>20 events</B> in four blocks. Each block is four weekly tournaments followed by a <B>Grand Slam</B>. After the 20th event, the top 16 ride in the <B>Season Finals</B>, then the season ends with a gala.</P>
       <H>Ranking points and defending</H>
-      <P>Your world rank is your <B>season points</B>. Points carry over into the next season, but the points you won at a given week last season <B>drop off</B> when that week comes round again. You "defend" them: win more than last time and you climb, less and you slip. The Season tab shows what you're defending, in red.</P>
+      <P>Your world rank is your <B>season points</B>. Points carry over into the next season, but the points you won at a given week last season <B>drop off</B> when that week comes round again. You "defend" them: win more than last time and you climb, less and you slip. The Season tab shows what you're defending, in red. Every rival plays by the same rule, so a rank always means the points won over the last 20 weeks.</P>
       <H>Grand Slams</H>
       <P>Only the <B>top 64</B> may enter a Slam. A rider ranked 65–74 with <B>80+ fans</B> gets a fan wildcard. If you can't enter, you sit the week out. Slams are 64 riders, best of 5 sets, and worth enormous points.</P>
       <H>Season Finals</H>
