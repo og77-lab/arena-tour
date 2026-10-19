@@ -56,7 +56,7 @@ export default function HelpScreen(props) {
         </Section>
 
         <Section icon="lances" tint="#e0f2fe" title="Your rival">
-          <Text>She rides on <B>her own bar</B>, built from her own levels, kit and tiredness, by the same rules as yours. Where she stops comes from her <B>talent</B> (her hands), with a form for the day. Typical set averages in round 1 of each tier:</Text>
+          <Text>She rides on <B>her own bar</B>, built from her own levels, kit and tiredness, by the same rules as yours. Where she stops comes from her <B>accuracy</B> (her talent), with a form for the day. Typical set averages in round 1 of each tier:</Text>
           <Rows rows={[["Futures", "about 75"], ["Challenger", "about 76"], ["Tour 250", "about 81"], ["Tour 500", "about 80"], ["Masters", "about 83"], ["The world's very best", "93+"]]} />
         </Section>
 

@@ -3,6 +3,7 @@
 
 import { getRanked } from "../models/formulas";
 import { seasonSnapshot, trTotal } from "./seasonManager";
+import { titleMix, titleValue, titleCount, diffTitles, seasonTitles } from "./titles";
 
 function who(p, S) { return p.isP ? { id: 1, name: S.pName, emoji: "👵", isP: true } : { id: p.id, name: p.name, emoji: p.emoji || "" }; }
 function best(list, f) { var b = null, bv = -Infinity; list.forEach(function (x) { var v = f(x); if (v > bv) { bv = v; b = x; } }); return b ? { p: b, v: bv } : null; }
@@ -14,11 +15,17 @@ export function seasonAwards(S) {
   var start = startOf(S), ranked = getRanked(S), out = [];
   var rankNow = {}; ranked.forEach(function (p, i) { rankNow[p.isP ? 1 : p.id] = i + 1; });
   var idOf = function (p) { return p.isP ? 1 : p.id; };
-  var myTitles = S.cal.filter(function (e) { return e.result && e.result.won; }).length;
-
-  /* 🏆 Most titles this season */
-  var lance = best(ranked, function (p) { return p.isP ? myTitles : ((p.best && p.best.titles) || 0) - (start.titles[p.id] || 0); });
-  if (lance && lance.v > 0) out.push({ key: "lance", icon: "🏆", title: "The Golden Lance", sub: "Most titles this season", who: who(lance.p, S), stat: lance.v + (lance.v === 1 ? " title" : " titles"),
+  /* 🏆 The season's best haul of titles, weighed by the tournaments' champion points (a Masters beats four Challengers) */
+  var mySeason = seasonTitles(S);
+  function seasonOf(p) {
+    if (p.isP) return mySeason;
+    var now = (p.best && p.best.tt) || {}, before = (start.tt && start.tt[p.id]) || {};
+    var d = diffTitles(now, before), n = ((p.best && p.best.titles) || 0) - (start.titles[p.id] || 0);
+    if (titleCount(d) < n) d[0] = (d[0] || 0) + (n - titleCount(d));   /* titles from before types were kept count as Futures */
+    return d;
+  }
+  var lance = best(ranked, function (p) { return titleValue(seasonOf(p)); });
+  if (lance && lance.v > 0) out.push({ key: "lance", icon: "🏆", title: "The Golden Lance", sub: "The season's best haul of titles", who: who(lance.p, S), stat: titleMix(seasonOf(lance.p)),
     blurb: ["Her mantelpiece has filed for structural support.", "She's run out of shelf and started using the bath.", "Trophy polish sales are up 400% in her village."] });
 
   /* 🚀 Biggest climb */
@@ -57,11 +64,11 @@ export function yourSeason(S) {
   var start = startOf(S), ranked = getRanked(S), me = 0;
   ranked.forEach(function (p, i) { if (p.isP) me = i + 1; });
   var played = S.cal.filter(function (e) { return e.done && e.result && (e.result.pPts || (e.result.parallel || []).length); });
-  var titles = played.filter(function (e) { return e.result.won; });
+  var titles = played.filter(function (e) { return e.result.won; }), tmix = titleMix(seasonTitles(S));
   var pts = played.reduce(function (a, e) { return a + (e.result.pPts || 0); }, 0);
   var scalp = null;
   (S.news || []).forEach(function (n) { if (n.s === S.sNum && n.you && n.you.bestWin && n.you.bestWin.foeRank && (!scalp || n.you.bestWin.foeRank < scalp.foeRank)) scalp = n.you.bestWin; });
-  return { rankStart: start.ranks[1] || me, rankEnd: me, played: played.length, titles: titles.length, slamTitles: titles.filter(function (e) { return e.tier === 5; }).length,
+  return { rankStart: start.ranks[1] || me, rankEnd: me, played: played.length, titles: titles.length, titlesMix: tmix, slamTitles: titles.filter(function (e) { return e.tier === 5; }).length,
     pts: pts, money: S.player.seasonMoney || 0, fans: S.player.fans != null ? S.player.fans : 20, scalp: scalp };
 }
 

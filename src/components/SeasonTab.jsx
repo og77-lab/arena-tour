@@ -6,6 +6,8 @@ import { TIERS, RN5, RN6, TOTAL_EVENTS } from "../models/constants";
 import { getRanked, sh } from "../models/formulas";
 import { C, FONT, display, label, card, button, pill } from "../ui/theme";
 import Icon from "./Icons";
+import { titleMix as seasonMixOf, seasonTitles } from "../engine/titles";
+function seasonMix(S) { return seasonMixOf(seasonTitles(S)); }
 
 var GS_CUT = 64, FINALS_CUT = 16;
 
@@ -81,7 +83,7 @@ export default function SeasonTab(props) {
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: C.textSoft, marginTop: 8, fontWeight: 700 }}>
           <span>{seasonPts.toLocaleString()} pts earned this season</span>
-          <span>{wins > 0 ? (<span><Icon name="trophy" size={16} style={{ verticalAlign: "-3px", marginRight: 4 }} />{wins + (wins === 1 ? " title" : " titles")}</span>) : "No titles yet"}</span>
+          <span>{wins > 0 ? (<span><Icon name="trophy" size={16} style={{ verticalAlign: "-3px", marginRight: 4 }} />{seasonMix(props.S) || (wins + (wins === 1 ? " title" : " titles"))}</span>) : "No titles yet"}</span>
         </div>
       </div>
 

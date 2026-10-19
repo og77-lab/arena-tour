@@ -49,7 +49,7 @@ function mapBracket(bk, f) { return (bk || []).map(function (rd) { return rd ? r
 /* Season-start snapshot { ranks, titles, tr } keyed by id → dense arrays indexed by id */
 function packMap(m) { if (!m || Array.isArray(m)) return m; var a = []; Object.keys(m).forEach(function (k) { a[+k] = m[k]; }); for (var i = 0; i < a.length; i++) if (a[i] === undefined) a[i] = null; return a; }
 function unpackMap(a) { if (!Array.isArray(a)) return a; var m = {}; a.forEach(function (v, i) { if (v != null) m[i] = v; }); return m; }
-function mapStart(st, f) { if (!st) return st; var o = Object.assign({}, st); ["ranks", "titles", "tr"].forEach(function (k) { if (st[k]) o[k] = f(st[k]); }); return o; }
+function mapStart(st, f) { if (!st) return st; var o = Object.assign({}, st); ["ranks", "titles", "tr", "tt"].forEach(function (k) { if (st[k]) o[k] = f(st[k]); }); return o; }
 
 export function pack(S) {
   if (!S || S.v === VERSION || !S.npcs) return S;

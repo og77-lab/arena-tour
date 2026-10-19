@@ -66,11 +66,12 @@ function trTotal(tr) { tr = tr || {}; return (tr.r || 0) + (tr.p || 0) + (tr.f |
 
 /* Where everyone stood on day one — the season awards measure from here */
 export function seasonSnapshot(S) {
-  var ranks = {}, titles = {}, tr = {};
+  var ranks = {}, titles = {}, tr = {}, tt = {};
   getRanked(S).forEach(function (p, i) {
     var id = p.isP ? 1 : p.id;
     ranks[id] = i + 1; titles[id] = p.isP ? 0 : (p.best && p.best.titles) || 0; tr[id] = trTotal(p.tr);
+    if (!p.isP && p.best && p.best.tt) tt[id] = p.best.tt;
   });
-  return { ranks: ranks, titles: titles, tr: tr };
+  return { ranks: ranks, titles: titles, tr: tr, tt: tt };
 }
 export { trTotal };

@@ -171,6 +171,7 @@ export default function SeasonGala(props) {
                   <Num k="Fans" c="#f9a8d4">❤️ {ys.fans}</Num>
                   <Num k="Best scalp">{ys.scalp && ys.scalp.foeRank ? "#" + ys.scalp.foeRank : "—"}</Num>
                 </div>
+                {ys.titlesMix && (<div style={{ fontSize: 13, color: GOLD, fontWeight: 800, marginTop: 8 }}>Titles: {ys.titlesMix}</div>)}
                 {ys.scalp && (<div style={{ fontSize: 12.5, color: SOFT, marginTop: 8 }}>Biggest win: {ys.scalp.foe.emoji} {sh(ys.scalp.foe.name)} in the {ys.scalp.round}.</div>)}
               </Stage>
             )}

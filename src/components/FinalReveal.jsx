@@ -32,13 +32,13 @@ export default function FinalReveal(props) {
     var t = 0;
     playWhoosh(); later(playHeartbeat, 300); later(playHeartbeat, 1200); later(function () { playClang(); }, 1700);
     t = 3500;
-    if (road.length) { later(function () { setSt("road"); playWhoosh(); }, t); t += 1000 + road.length * 420; }
+    if (road.length) { later(function () { setSt("road"); playWhoosh(); }, t); t += 1800 + road.length * 650; }
     later(function () { setSt("shadow"); playHeartbeat(); }, t);
     later(playHeartbeat, t + 900);
     later(playHeartbeat, t + 1600);
     later(function () { setSt("reveal"); playImpact(true); playClang(); vibrate([40, 60, 80]); }, t + 2300);
     later(playTitle, t + 2700);
-    later(function () { doneRef.current(); }, t + 5600);
+    later(function () { doneRef.current(); }, t + 6800);
     return function () { timers.current.forEach(clearTimeout); };
   }, []);
 
@@ -75,7 +75,7 @@ export default function FinalReveal(props) {
                   <motion.div key={i} initial={{ x: i % 2 ? 80 : -80, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.35 + i * 0.4, type: "spring", stiffness: 300, damping: 22 }}
                     style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, padding: "8px 12px", borderRadius: 10, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(251,191,36,0.3)" }}>
                     <span style={{ fontSize: 11, fontWeight: 800, color: "#a8a29e", textTransform: "uppercase", letterSpacing: 1 }}>{r.round}</span>
-                    <span style={{ fontSize: 15, fontWeight: 900 }}>{r.name} <span style={{ color: "#4ade80" }}>✓</span></span>
+                    <span style={{ textAlign: "right" }}><span style={{ fontSize: 15, fontWeight: 900 }}>{r.name}</span>{r.rank ? (<span style={{ fontSize: 12, fontWeight: 800, color: "#a8a29e" }}> #{r.rank}</span>) : null}<span style={{ display: "block", fontSize: 12, fontWeight: 900, color: "#4ade80" }}>won {r.sc ? String(r.sc).replace("-", "–") : "✓"}</span></span>
                   </motion.div>
                 );
               })}

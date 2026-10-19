@@ -8,6 +8,7 @@ import { crowdLove, followersOf, crowdEdge, fmtFollowers, fanChain } from "../en
 import { fansOf } from "../engine/fans";
 import FanRules from "./FanRules";
 import { handsTalent } from "../engine/joust";
+import { titleMix, npcTitles } from "../engine/titles";
 import Icon, { StatIcon } from "./Icons";
 
 /* Fans and followers, and what they mean when you meet: the stands back whoever the crowd loves more */
@@ -106,15 +107,15 @@ export default function Profile(props) {
         {p.isP && (function () { var me = props.me || p, ht = handsTalent(me.hm), n = (me.hm && me.hm.n) || 0; return (
           <div style={{ marginBottom: 10, padding: 8, background: "#ffffff", borderRadius: 6 }}>
             <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14 }}>
-              <span style={{ color: "#475569", fontWeight: 700 }}>🖐 Your hands</span>
+              <span style={{ color: "#475569", fontWeight: 700 }}>🎯 Your accuracy</span>
               <span style={{ color: "#0f172a", fontWeight: 800 }}>{ht != null ? "≈ " + ht : "—"}</span>
             </div>
-            <div style={{ fontSize: 12, color: "#64748b", marginTop: 2, lineHeight: 1.35 }}>{ht != null ? "Measured from your last " + n + " strikes, on the same scale as a rival's talent." : "Measured from your strikes — ready after 30 (" + n + " so far)."}</div>
+            <div style={{ fontSize: 12, color: "#64748b", marginTop: 2, lineHeight: 1.35 }}>{ht != null ? "How close to the centre you usually stop, from your last " + n + " strikes: 20 a beginner · 50 an average practised player · 90 elite. Rivals' talent uses the same scale." : "Measured from your strikes — ready after 30 (" + n + " so far)."}</div>
           </div>); })()}
         {!p.isP && (
           <div style={{ marginBottom: 10, padding: 8, background: "#ffffff", borderRadius: 6 }}>
             <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14, marginBottom: 4 }}>
-              <span style={{ color: "#475569", fontWeight: 700 }}>🖐 Natural Talent <span style={{ fontWeight: 600, fontSize: 12 }}>(her hands)</span></span>
+              <span style={{ color: "#475569", fontWeight: 700 }}>🎯 Accuracy <span style={{ fontWeight: 600, fontSize: 12 }}>(her natural talent)</span></span>
               <span style={{ fontSize: 14 }}>
                 <span style={{ color: "#0f172a", fontWeight: 800 }}>{Math.round(p.skill||0)}</span>
                 <span style={{ color: "#94a3b8" }}> / </span>
@@ -157,6 +158,7 @@ export default function Profile(props) {
             return (<div key={i} style={{ background: "#ffffff", borderRadius: 14, padding: "8px 10px", boxShadow: "0 1px 2px rgba(63,42,29,0.06), 0 3px 10px rgba(63,42,29,0.06)", textAlign: "center" }}><Icon name={s.ic} size={22} /><div style={{ fontFamily: "'Fredoka', 'Nunito', sans-serif", fontSize: 20, fontWeight: 600, color: "#b45309", lineHeight: 1.1 }}>{s.v}</div><div style={{ fontSize: 12, fontWeight: 800, color: "#78716c" }}>{s.l}</div></div>);
           })}
         </div>
+        {(function () { var mix = titleMix(p.isP ? (props.myTitles || {}) : npcTitles(p)); return mix ? (<div style={{ fontSize: 12.5, fontWeight: 800, color: "#92400e", textAlign: "center", marginTop: 6 }}>{mix}</div>) : null; })()}
         {/* Head-to-Head */}
         {!p.isP && props.h2h && props.h2h.length > 0 && (function(){
           var wins = 0, losses = 0;

@@ -37,6 +37,7 @@ function FighterBlock(props) {
 
 /* Side-by-side comparison of the two riders: what each brings into this match */
 function TaleOfTape(props) {
+  var _acc = useState(false), accInfo = _acc[0], setAccInfo = _acc[1];
   var sc = props.scout, y = sc.you || {};
   var h = sc.h2h || { w: 0, l: 0 };
   var GOOD = "#4ade80", BAD = "#f87171", MID = "rgba(255,255,255,0.85)";
@@ -77,7 +78,8 @@ function TaleOfTape(props) {
         </div>
       </div>
       {row("World rank", y.rank ? "#" + y.rank : "—", "#" + sc.rank, y.rank && sc.rank ? sc.rank - y.rank : 0)}
-      {row("🖐 Hands", y.hands != null ? y.hands : "—", sc.hands != null ? sc.hands : sc.talent, y.hands != null && sc.hands != null ? y.hands - sc.hands : 0)}
+      <div onClick={function (e) { e.stopPropagation(); setAccInfo(!accInfo); }} style={{ cursor: "pointer" }}>{row("Accuracy ⓘ", y.hands != null ? y.hands : "—", sc.hands != null ? sc.hands : sc.talent, y.hands != null && sc.hands != null ? y.hands - sc.hands : 0)}</div>
+      {accInfo && (<div style={{ fontSize: 11.5, color: "rgba(255,255,255,0.85)", textAlign: "center", padding: "3px 6px 5px", lineHeight: 1.35 }}>How close to the centre a rider usually stops: 20 a beginner · 50 an average practised player · 90 elite. Yours is measured from your last 200 strikes; hers is her talent.</div>)}
       {sc.bars && row("Gold zone today", sc.bars.you.zone.toFixed(1) + "%", sc.bars.foe.zone.toFixed(1) + "%", Math.round((sc.bars.you.zone - sc.bars.foe.zone) * 10))}
       {sc.bars && row("Bar speed today", Math.round(sc.bars.you.speed) + "%", Math.round(sc.bars.foe.speed) + "%", Math.round(sc.bars.foe.speed - sc.bars.you.speed))}
       {sc.stats.map(function (s) {
@@ -115,11 +117,11 @@ export default function MatchIntro(props) {
   function startCount() {
     clearAll();
     setStage("count"); setN(3); playBeep();
-    later(function () { setN(2); playBeep(); }, 520);
-    later(function () { setN(1); playBeep(); }, 1040);
-    later(function () { setN(0); playFight(); playFightVoice(); vibrate([30, 40, 60]); }, 1560);
-    later(function () { setStage("out"); }, 2080);
-    later(function () { doneRef.current(); }, 2330);
+    later(function () { setN(2); playBeep(); }, 800);
+    later(function () { setN(1); playBeep(); }, 1600);
+    later(function () { setN(0); playFight(); playFightVoice(); vibrate([30, 40, 60]); }, 2400);
+    later(function () { setStage("out"); }, 3050);
+    later(function () { doneRef.current(); }, 3300);
   }
 
   /* The cinematic: riders charge in, the VS slams, and the countdown follows straight on — nothing to tap, nothing in the way */
@@ -127,7 +129,7 @@ export default function MatchIntro(props) {
     clearAll();
     setStage("slam"); playWhoosh(); preloadFightVoice();
     later(function () { playImpact(true); vibrate(35); }, 420);
-    later(startCount, 1500);
+    later(startCount, 2700);   /* time to read who she is and what she says */
   }
   useEffect(function () {
     if (!props.scout) startShow();
