@@ -6,21 +6,24 @@
    A tired granny: a narrower gold zone, and her misses score less.
    A tired rooster: the bar starts faster and speeds up more after every strike.
 
-   Recovery after each tournament = 40% of what's missing + 0.7 × Bounce-back (the sixth stat, 0–20 — it counts
-   on its own, not against the opponent). So tiredness builds up week after week unless you manage it. A week of rest
-   (skip a tournament, or a Grand Slam you don't play) brings back 80% of what's missing. Ride on under 35% and every match risks an injury.
+   Recovery after each tournament = 36% of what's missing + 0.5 × Bounce-back (the sixth stat — each level gives a
+   little less than the one before, like every stat; it counts on its own, not against the opponent). So tiredness
+   builds up week after week: a rider who goes deep every week ends up around half, and has to choose between resting,
+   the physio and riding on tired. A week of rest (skip a tournament, or a Slam you don't play) brings back 75%. Ride on under 35% and every match risks an injury.
    The physio staff (one booking per week, as the weekly investment) adds more on top. */
 
 import { TIERS } from "../models/constants";
 
-export var COST = { g: 2.8, r: 3.4 }; /* per set ridden */
-export var BASE_RECOVERY = 0, MISSING_SHARE = 0.4, REST_SHARE = 0.8, PER_BOUNCE = 0.7;
+export var COST = { g: 3.4, r: 4.0 }; /* per set ridden */
+export var BASE_RECOVERY = 0, MISSING_SHARE = 0.36, REST_SHARE = 0.75, PER_BOUNCE = 0.5;
+/* Bounce-back's levels count like every stat's: each a little less than the one before (same curve as engine/joust) */
+function bounceLv(b) { b = b || 0; return b > 0 ? 16 * (1 - Math.exp(-b / 16)) : b; }
 
 /* Physio staff: booked as this week's investment, effect is immediate */
 export var STAFF = [
-  { id: "nurse", icon: "👩‍⚕️", name: "Nurse Nellie", sub: "Liniment, lavender and a very firm 'sit DOWN, dear'.", g: 35, r: 0, priceMul: 0.12 },
-  { id: "doctor", icon: "🩺", name: "Dr. Featherby, rooster chiropractor", sub: "One crack of the wishbone and he's strutting again.", g: 0, r: 35, priceMul: 0.12 },
-  { id: "spa", icon: "🛁", name: "Spa weekend at Bingo-on-Sea", sub: "Mud baths for her, a dust bath for him, bingo for both.", g: 20, r: 20, priceMul: 0.18 }
+  { id: "nurse", icon: "👩‍⚕️", name: "Nurse Nellie", sub: "Liniment, lavender and a very firm 'sit DOWN, dear'.", g: 25, r: 0, priceMul: 0.12 },
+  { id: "doctor", icon: "🩺", name: "Dr. Featherby, rooster chiropractor", sub: "One crack of the wishbone and he's strutting again.", g: 0, r: 25, priceMul: 0.12 },
+  { id: "spa", icon: "🛁", name: "Spa weekend at Bingo-on-Sea", sub: "Mud baths for her, a dust bath for him, bingo for both.", g: 14, r: 14, priceMul: 0.18 }
 ];
 
 function clamp(x) { return Math.max(0, Math.min(100, Math.round(x))); }
@@ -44,14 +47,14 @@ export function tierBo(ti) { return (TIERS[ti] && TIERS[ti].bo) || 3; }
 export function afterMatches(f, n, bo) { var c = matchCost(bo); return { g: clamp(f.g - c.g * n), r: clamp(f.r - c.r * n) }; }
 
 /* Between tournaments: partial recovery, double on a week off */
-export function recoveryOf(bounce, rested, v) { return BASE_RECOVERY + (rested ? REST_SHARE : MISSING_SHARE) * (100 - (v == null ? 100 : v)) + PER_BOUNCE * (bounce || 0) * (rested ? 2 : 1); }
+export function recoveryOf(bounce, rested, v) { return BASE_RECOVERY + (rested ? REST_SHARE : MISSING_SHARE) * (100 - (v == null ? 100 : v)) + PER_BOUNCE * bounceLv(bounce) * (rested ? 2 : 1); }
 /* A rival this worn out sits the week out to recover (same rule the player can choose) */
 export function resting(p) { var f = fitOf(p); return Math.min(f.g, f.r) < INJURY_LINE; }
 export function recover(f, bounce, rested) { return { g: clamp(f.g + recoveryOf(bounce, rested, f.g)), r: clamp(f.r + recoveryOf(bounce, rested, f.r)) }; }
 
-/* ── Injuries ── Under 35% a match can injure you: the lower the meter, the likelier (up to 25% a match at 0).
+/* ── Injuries ── Under 35% a match can injure you: the lower the meter, the likelier (up to 10% a match at 0).
    An injury knocks a few levels off one or two stats for a few tournaments. */
-export var INJURY_LINE = 35;
+export var INJURY_LINE = 35, INJURY_MAX = 0.1;   /* a match at 0% risks an injury 1 time in 10 */
 export var INJURIES = [
   { id: "hamstring", side: "g", icon: "🦵", name: "Pulled hamstring", mods: { r: -3 }, len: 2 },
   { id: "elbow", side: "g", icon: "💪", name: "Jouster's elbow", mods: { f: -3 }, len: 3 },
@@ -67,7 +70,7 @@ export function rollInjury(f, rand) {
   if (f.g < INJURY_LINE) sides.push("g"); if (f.r < INJURY_LINE) sides.push("r");
   for (var i = 0; i < sides.length; i++) {
     var v = sides[i] === "g" ? f.g : f.r;
-    if (r() < (INJURY_LINE - v) / INJURY_LINE * 0.25) { var pool = INJURIES.filter(function (x) { return x.side === sides[i]; }); var pick = pool[Math.floor(r() * pool.length)]; return { id: pick.id, left: pick.len }; }
+    if (r() < (INJURY_LINE - v) / INJURY_LINE * INJURY_MAX) { var pool = INJURIES.filter(function (x) { return x.side === sides[i]; }); var pick = pool[Math.floor(r() * pool.length)]; return { id: pick.id, left: pick.len }; }
   }
   return null;
 }

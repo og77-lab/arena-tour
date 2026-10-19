@@ -2,7 +2,7 @@
    week-by-week timeline of the whole season — results behind you, points you're defending ahead. */
 
 import { motion } from "framer-motion";
-import { TIERS, RN5, RN6, TOTAL_EVENTS } from "../models/constants";
+import { TIERS, RN5, RN6, TOTAL_EVENTS, champTotal } from "../models/constants";
 import { getRanked, sh } from "../models/formulas";
 import { C, FONT, display, label, card, button, pill } from "../ui/theme";
 import Icon from "./Icons";
@@ -98,7 +98,7 @@ export default function SeasonTab(props) {
           <div style={Object.assign(display(24), { marginTop: 8 })}>{isGS ? (<span><Icon name="crown" size={24} style={{ verticalAlign: "-3px", marginRight: 4 }} />{"Grand Slam " + ev.gsNum}</span>) : "Week " + ev.block + "." + ev.week}</div>
           <div style={{ fontSize: 13, color: C.textSoft, marginTop: 3, lineHeight: 1.4 }}>
             {isGS
-              ? (props.gsOk ? "64 riders, best of 5 sets, 8,000 points to the champion." : "Only the top 64 ride in a Slam — you're #" + pRank + ". This week you sit it out.")
+              ? (props.gsOk ? "64 riders, best of 5 sets, 4,000 points to the champion." : "Only the top 64 ride in a Slam — you're #" + pRank + ". This week you sit it out.")
               : "Every rider plays one tournament this week. Pick the tier that fits your rank:"}
           </div>
           {!isGS && (
@@ -108,7 +108,7 @@ export default function SeasonTab(props) {
                 return (
                   <span key={ti} style={{ display: "inline-flex", alignItems: "center", gap: 6, background: C.cardWarm, border: "1.5px solid " + C.line, borderRadius: 10, padding: "5px 9px", fontSize: 13, fontWeight: 900, color: C.text }}>
                     <span aria-hidden style={{ width: 9, height: 9, borderRadius: "50%", background: t.col }} />{t.name}
-                    <span style={{ fontSize: 11, color: C.textSoft, fontWeight: 700 }}>· {t.pts[t.pts.length - 1].toLocaleString()} pts</span>
+                    <span style={{ fontSize: 11, color: C.textSoft, fontWeight: 700 }}>· {champTotal(ti).toLocaleString()} pts</span>
                     {w && (<span style={{ fontSize: 10, fontWeight: 900, color: "#be123c" }}>WILDCARD</span>)}
                   </span>
                 );

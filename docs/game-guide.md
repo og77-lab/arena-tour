@@ -41,14 +41,27 @@ Tap **Choose tournament** on Home or Season. Your rank decides which tiers are o
 
 | Tier | Open to ranks | Sets | Champion's points | Champion's prize |
 |---|---|---|---|---|
-| Futures | 601–1000 | Best of 3 | 192 | $4.6K |
-| Challenger | 301–700 | Best of 3 | 477 | $16K |
-| Tour 250 | 101–400 | Best of 3 | 1,200 | $64K |
-| Tour 500 | 31–200 | Best of 3 | 2,360 | $162K |
-| Masters | 1–100 | Best of 5 | 4,750 | $460K |
-| Grand Slam | 1–64 | Best of 5 | 15,750 | $1.6M |
+| Futures | 601–1000 | Best of 3 | 100 | $4.6K |
+| Challenger | 301–700 | Best of 3 | 250 | $16K |
+| Tour 250 | 101–400 | Best of 3 | 500 | $64K |
+| Tour 500 | 31–200 | Best of 3 | 1,000 | $162K |
+| Masters | 1–100 | Best of 5 | 2,000 | $460K |
+| Grand Slam | 1–64 | Best of 5 | 4,000 | $1.6M |
 
 Each tournament is a knockout bracket (32 riders, 64 at a Slam). Every round you win adds points and prize money; the totals above are for winning the whole thing. Lose and your week is over.
+
+Each tier is worth **double** the one below, and each round is a fixed share of the title, as on the real tennis tour. Points you hold after winning each round (shown on every tournament card and in the match header):
+
+| Tier | R32 | R16 | QF | SF | F |
+|---|---|---|---|---|---|
+| Futures | 10 | 20 | 35 | 60 | 100 |
+| Challenger | 20 | 45 | 90 | 150 | 250 |
+| Tour 250 | 40 | 90 | 180 | 300 | 500 |
+| Tour 500 | 80 | 180 | 360 | 600 | 1,000 |
+| Masters | 160 | 360 | 720 | 1,200 | 2,000 |
+| Slam (R64 160) | 320 | 720 | 1,440 | 2,400 | 4,000 |
+
+Beating a higher-ranked rider earns no extra ranking points (the same as in tennis) — the crowd loves an upset, though.
 
 **Named events: pick your week**
 
@@ -177,9 +190,9 @@ Six stats, each from level 0 to 20 — each one moves one element of the match, 
 | 🛡️ Stubbornness (softer misses) | Your bad strikes aren't as bad | Misses lose 5% fewer points, floor +1.5 |
 | 🫀 Stamina (less speed-up) | The bar speeds up less as the match goes on | 7% less speed-up |
 | 🐾 Steady Stride (bigger gold) | A wider gold zone | +0.4% of the bar |
-| 🔋 Bounce-back | Granny and rooster win back more fitness after every tournament | +0.7% fitness back (double in a rest week; not against her) |
+| 🔋 Bounce-back | Granny and rooster win back more fitness after every tournament | about +0.5% fitness back, each level a little less (double in a rest week; not against her) |
 
-**Training points (TP).** Everyone on tour — you and every rival — earns TP by the same rule every week: **8 for turning up, plus a third of the ranking points you won.** A deep run buys you a few levels on the riders who went out early; the edge fades once you move up to a tier where everyone is winning that much. You also get **sponsor TP** from your fans (one per 10 fans).
+**Training points (TP).** Everyone on tour — you and every rival — earns TP by the same rule every week: **8 for turning up, plus the ranking points you won ÷ 1.8.** A deep run buys you a few levels on the riders who went out early; the edge fades once you move up to a tier where everyone is winning that much. You also get **sponsor TP** from your fans (one per 10 fans).
 
 Each level costs more than the last: 15 TP for level 1, 30 for level 2, 45 for level 3… and from level 9 the price climbs faster still.
 
@@ -217,15 +230,15 @@ After you pick a tournament you land on **Get ready**. Choose a lance and a sadd
 
 You have **two fitness meters**, 0–100%: 👵 the granny's and 🐓 the rooster's. They're on Home, in the Get ready screen, in the match header and in the tale of the tape (hers too).
 
-- **Every match tires both of you:** −2.8% granny and −3.4% rooster for every set you ride, so a three-set match tires you more than a two-set one, and a long tournament more than a short one. A deep run leaves you tired in the later rounds — and so is the rider who got there with you.
+- **Every match tires both of you:** −3.4% granny and −4% rooster for every set you ride, so a three-set match tires you more than a two-set one, and a long tournament more than a short one. A deep run leaves you tired in the later rounds — and so is the rider who got there with you.
 - **A tired granny:** the gold zone gets narrower (up to −4% at 0) and misses score less (up to −10). The strike breakdown shows it as **Tired**.
 - **A tired rooster:** the bar starts faster (up to +18%) and speeds up more after every strike (up to +60%).
-- **How it adds up:** tiredness carries from week to week. A rider who loses early stays fairly fresh (a typical rival starts her week at about 80%); One who keeps reaching the final week after week slides lower and lower — unless she trains Bounce-back, books the physio or rests.
-- **Fitness only comes back between tournaments:** 40% of whatever is missing comes back after every tournament, plus 0.7% per level of 🔋 **Bounce-back**. A **rest week** brings back 80% of what's missing (and double the Bounce-back): tap **😴 Rest this week** at the bottom of the tournament list, or skip a Grand Slam you can't enter. You score no points that week and last season's points for it drop off. Only part comes back, so tiredness builds up for anyone who keeps going deep.
+- **How it adds up:** tiredness carries from week to week. A rider who loses early stays fairly fresh (a typical rival starts her week at about 80%); one who keeps going deep week after week sits around half — unless she trains Bounce-back, books the physio or rests.
+- **Fitness only comes back between tournaments:** 36% of whatever is missing comes back after every tournament, plus about 0.5% per level of 🔋 **Bounce-back** (each level a little less). A **rest week** brings back 75% of what's missing (and double the Bounce-back): tap **😴 Rest this week** at the bottom of the tournament list, or skip a Grand Slam you can't enter. You score no points that week and last season's points for it drop off. Only part comes back, so tiredness builds up for anyone who keeps going deep.
 - **🔋 Bounce-back** is the sixth stat (0–20). Unlike the others it counts on its own, not against your opponent.
-- **Physio staff** (Train tab, as the week's one investment): 👩‍⚕️ Nurse Nellie +35% granny, 🩺 Dr. Featherby the rooster chiropractor +35% rooster, 🛁 a spa weekend at Bingo-on-Sea +20% both — straight away, and it heals injuries on that side a tournament sooner.
+- **Physio staff** (Train tab, as the week's one investment): 👩‍⚕️ Nurse Nellie +25% granny, 🩺 Dr. Featherby the rooster chiropractor +25% rooster, 🛁 a spa weekend at Bingo-on-Sea +14% both — straight away, and it heals injuries on that side a tournament sooner.
 - **On Home** the fitness card shows both meters, chips for what tiredness is doing right now, how tired you finished your last tournament, how much comes back next time, your injuries, and a warning under 35%.
-- **Injuries:** ride on under 35% and every match risks one (up to 25% a match at 0). An injury knocks 2–3 levels off one or two stats for 2–3 tournaments:
+- **Injuries:** ride on under 35% and every match risks one (up to 10% a match at 0). An injury knocks 2–3 levels off one or two stats for 2–3 tournaments:
 
 | Injury | Side | Effect | Lasts |
 |---|---|---|---|

@@ -4,7 +4,7 @@ import { createPortal } from "react-dom";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { CONDITIONS, FIELDS } from "../engine/events";
-import { TIERS } from "../models/constants";
+import { TIERS, ptsLadder, champTotal } from "../models/constants";
 import { C, FONT, display, label, card, money, button } from "../ui/theme";
 import { effectsOf, EffectList, Legend } from "./Effect";
 import { LaneTile, CompareLanes } from "./Lanes";
@@ -40,7 +40,7 @@ export default function TierSheet(props) {
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {[4, 3, 2, 1, 0].filter(function (ti) { return avail.indexOf(ti) >= 0; }).concat([4, 3, 2, 1, 0].filter(function (ti) { return avail.indexOf(ti) < 0; })).map(function (ti) {
             var t = TIERS[ti], ok = avail.indexOf(ti) >= 0;
-            var top = t.pts[t.pts.length - 1], prize = t.money[t.money.length - 1];
+            var top = champTotal(ti), prize = champTotal(ti, "money");
             return (
               <div key={ti}>
               <button disabled={!ok} onClick={function () { if (!ok) return; if (evOf(ti).length && props.onPickEvent) setOpen(open === ti ? -1 : ti); else props.onPick(ti); }}
@@ -56,6 +56,7 @@ export default function TierSheet(props) {
                   <div style={{ fontSize: 12, color: C.textSoft, marginTop: 2 }}>
                     Best of {t.bo || 3} sets · {t.size} riders · ranks {t.rankRange[0]}–{t.rankRange[1] > 1000 ? "1000" : t.rankRange[1]}
                   </div>
+                  <Ladder steps={ptsLadder(ti)} col={t.col} />
                   {!ok && (<div style={{ fontSize: 11, fontWeight: 800, color: C.redInk, marginTop: 2 }}><Icon name="lock" size={13} style={{ verticalAlign: "-2px", marginRight: 4 }} />Not open at #{props.rank}</div>)}
                 </div>
                 <div style={{ textAlign: "right", flexShrink: 0 }}>
@@ -120,6 +121,21 @@ export default function TierSheet(props) {
 }
 
 /* One named event: the lanes as a picture and one line, the payout, and whether it suits you */
+/* Points you hold after winning each round: R32 40 · R16 90 · … · F 500 */
+export function Ladder(props) {
+  return (
+    <div style={{ display: "flex", gap: 3, marginTop: 5 }}>
+      {props.steps.map(function (s, i) {
+        var last = i === props.steps.length - 1;
+        return (<span key={i} style={{ flex: 1, minWidth: 0, textAlign: "center", borderRadius: 6, padding: "2px 0", background: last ? "#fef3c7" : "#f6f1e4", lineHeight: 1.1 }}>
+          <span style={{ display: "block", fontSize: 9, fontWeight: 800, color: C.textMuted }}>{s.r}</span>
+          <span style={{ display: "block", fontSize: 11, fontWeight: 900, color: last ? C.goldInk : C.text }}>{s.pts.toLocaleString()}</span>
+        </span>);
+      })}
+    </div>
+  );
+}
+
 function EventCard(props) {
   var ev = props.ev, cd = CONDITIONS[ev.cond] || CONDITIONS.classic, fd = FIELDS[ev.field] || FIELDS.mixed;
   return (
@@ -135,6 +151,7 @@ function EventCard(props) {
           <div style={{ fontSize: 12, fontWeight: 800, color: C.greenInk }}>{money(ev.champMoney)}</div>
         </div>
       </div>
+      <Ladder steps={ptsLadder(ev.tier, ev.ptsMul)} col={props.col} />
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 6 }}>
         <span style={{ fontSize: 11.5, fontWeight: 900, color: C.text, whiteSpace: "nowrap" }}>Field avg #{ev.avgRank}<span style={{ color: C.textMuted, fontWeight: 800 }}> · you #{props.rank}</span></span>
         <span style={{ flex: 1, minWidth: 0, fontSize: 11.5, color: C.textSoft, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>

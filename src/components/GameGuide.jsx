@@ -134,14 +134,23 @@ function body(id) {
     case "tourney": return (<>
       <P>Tap <B>Choose tournament</B> on Home or Season. Your rank decides which tiers are open:</P>
       <Table head={["Tier", "Open to ranks", "Sets", "Champion's points", "Champion's prize"]} rows={[
-        ["Futures", "601–1000", "Best of 3", "192", "$4.6K"],
-        ["Challenger", "301–700", "Best of 3", "477", "$16K"],
-        ["Tour 250", "101–400", "Best of 3", "1,200", "$64K"],
-        ["Tour 500", "31–200", "Best of 3", "2,360", "$162K"],
-        ["Masters", "1–100", "Best of 5", "4,750", "$460K"],
-        ["Grand Slam", "1–64", "Best of 5", "15,750", "$1.6M"]
+        ["Futures", "601–1000", "Best of 3", "100", "$4.6K"],
+        ["Challenger", "301–700", "Best of 3", "250", "$16K"],
+        ["Tour 250", "101–400", "Best of 3", "500", "$64K"],
+        ["Tour 500", "31–200", "Best of 3", "1,000", "$162K"],
+        ["Masters", "1–100", "Best of 5", "2,000", "$460K"],
+        ["Grand Slam", "1–64", "Best of 5", "4,000", "$1.6M"]
       ]} />
-      <P>Each tournament is a knockout bracket (32 riders, 64 at a Slam). Every round you win adds points and prize money; the totals above are for winning the whole thing. Lose and your week is over.</P>
+      <P>Each tournament is a knockout bracket (32 riders, 64 at a Slam). Every round you win adds points and prize money; the totals above are for winning the whole thing. Lose and your week is over. Each tier is worth <B>double</B> the one below, and each round is a fixed share of the title, as on the real tennis tour. Points you hold after winning each round (shown on every tournament card and in the match header):</P>
+      <Table head={["Tier", "R32", "R16", "QF", "SF", "F"]} rows={[
+        ["Futures", "10", "20", "35", "60", "100"],
+        ["Challenger", "20", "45", "90", "150", "250"],
+        ["Tour 250", "40", "90", "180", "300", "500"],
+        ["Tour 500", "80", "180", "360", "600", "1,000"],
+        ["Masters", "160", "360", "720", "1,200", "2,000"],
+        ["Slam (R64 160)", "320", "720", "1,440", "2,400", "4,000"]
+      ]} />
+      <P>Beating a higher-ranked rider earns no extra ranking points (the same as in tennis) — the crowd loves an upset, though.</P>
       <H>Named events: pick your week</H>
       <P>Each week several tournaments run at once in every tier, and all 1,000 riders play one of them. Tap a tier to see its events. Each card shows:</P>
       <List items={[
@@ -232,7 +241,7 @@ function body(id) {
       <P>Six stats, each from level 0 to 20: three for the granny, two for the rooster, and Bounce-back for recovery. Every level builds <B>your own bar</B>; her levels build hers. Each level gives a little less than the one before (level 20 works like 11).</P>
       <ChipRows rows={[["r", "⚡ Reflexes (slower bar)"], ["f", "🎯 Aim (extra points)"], ["g", "🛡️ Stubbornness (softer misses)"], ["s", "🫀 Stamina (less speed-up)"], ["p", "🐾 Steady Stride (bigger gold)"], ["b", "🔋 Bounce-back"]].map(function (x) { return { k: x[0], name: x[1], sub: x[0] === "b" ? "counts on its own" : "each level ahead", list: statEffect(x[0]) }; })} />
       <H>Training points (TP)</H>
-      <P>Everyone on tour — you and every rival — earns TP by the same rule every week: <B>8 for turning up, plus a third of the ranking points you won</B>. A deep run buys you a few levels on the riders who went out early; the edge fades once you move up to a tier where everyone is winning that much. You also get <B>sponsor TP</B> from your fans (one per 10 fans).</P>
+      <P>Everyone on tour — you and every rival — earns TP by the same rule every week: <B>8 for turning up, plus the ranking points you won ÷ 1.8</B>. A deep run buys you a few levels on the riders who went out early; the edge fades once you move up to a tier where everyone is winning that much. You also get <B>sponsor TP</B> from your fans (one per 10 fans).</P>
       <P>Each level costs more than the last: 15 TP for level 1, 30 for level 2, 45 for level 3… and from level 9 the price climbs faster still.</P>
       <H>On the Train tab</H>
       <List items={[
@@ -258,13 +267,13 @@ function body(id) {
     case "fitness": return (<>
       <P>You have <B>two fitness meters</B>, 0–100%: 👵 the granny's and 🐓 the rooster's. They're on Home, in the Get ready screen, in the match header and in the tale of the tape (hers too).</P>
       <List items={[
-        <span key="a"><B>Every match tires both of you:</B> −2.8% granny and −3.4% rooster for every set you ride, so a three-set match tires you more than a two-set one, and a long tournament more than a short one. A deep run leaves you tired in the later rounds — and so is the rider who got there with you.</span>,
+        <span key="a"><B>Every match tires both of you:</B> −3.4% granny and −4% rooster for every set you ride, so a three-set match tires you more than a two-set one, and a long tournament more than a short one. A deep run leaves you tired in the later rounds — and so is the rider who got there with you.</span>,
         <span key="b"><B>A tired granny:</B> the gold zone gets narrower (up to −4% at 0) and misses score less (up to −10). The strike breakdown shows it as <B>Tired</B>.</span>,
         <span key="c"><B>A tired rooster:</B> the bar starts faster (up to +18%) and speeds up more after every strike (up to +60%).</span>,
-        <span key="d"><B>Fitness only comes back between tournaments:</B> 40% of whatever is missing comes back after every tournament, plus 0.7% per level of 🔋 <B>Bounce-back</B>. A **rest week** brings back 80% of what's missing (and double the Bounce-back): tap **😴 Rest this week** at the bottom of the tournament list, or skip a Grand Slam you can't enter. You score no points that week and last season's points for it drop off. Only part comes back, so tiredness builds up for anyone who keeps going deep.</span>,
+        <span key="d"><B>Fitness only comes back between tournaments:</B> 36% of whatever is missing comes back after every tournament, plus about 0.5% per level of 🔋 <B>Bounce-back</B> (each level a little less than the one before). A **rest week** brings back 75% of what's missing (and double the Bounce-back): tap **😴 Rest this week** at the bottom of the tournament list, or skip a Grand Slam you can't enter. You score no points that week and last season's points for it drop off. Only part comes back, so tiredness builds up: a rider who goes deep every week without a break sits around half, and someone on tour is nearly always tired.</span>,
         <span key="e"><B>🔋 Bounce-back</B> is the sixth stat (0–20). Unlike the others it counts on its own, not against your opponent.</span>,
-        <span key="f"><B>Physio staff</B> (Train tab, as the week's one investment): 👩‍⚕️ Nurse Nellie +35% granny, 🩺 Dr. Featherby the rooster chiropractor +35% rooster, 🛁 a spa weekend at Bingo-on-Sea +20% both — straight away.</span>,
-        <span key="i"><B>Injuries:</B> ride on under 35% and every match risks one (up to 25% a match at 0). An injury knocks 2–3 levels off one or two stats for 2–3 tournaments: 🦵 pulled hamstring (Reflexes), 💪 jouster's elbow (Aim), 🪑 creaky back (Stubbornness), 🐾 sprained claw (Steady Stride), 🪽 pulled wing (Stamina), 🦴 bruised wishbone (both rooster stats). Physio on that side shortens it by a tournament.</span>,
+        <span key="f"><B>Physio staff</B> (Train tab, as the week's one investment): 👩‍⚕️ Nurse Nellie +25% granny, 🩺 Dr. Featherby the rooster chiropractor +25% rooster, 🛁 a spa weekend at Bingo-on-Sea +14% both — straight away.</span>,
+        <span key="i"><B>Injuries:</B> ride on under 35% and every match risks one (up to 10% a match at 0). An injury knocks 2–3 levels off one or two stats for 2–3 tournaments: 🦵 pulled hamstring (Reflexes), 💪 jouster's elbow (Aim), 🪑 creaky back (Stubbornness), 🐾 sprained claw (Steady Stride), 🪽 pulled wing (Stamina), 🦴 bruised wishbone (both rooster stats). Physio on that side shortens it by a tournament.</span>,
         <span key="sf">The Season Finals tire you too.</span>,
         <span key="g">Every rider on tour plays by the same fitness rules.</span>
       ]} />

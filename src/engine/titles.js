@@ -1,11 +1,11 @@
 /* ═══ Engine / Titles ═══ A title is not just a title: four Challenger wins are not one Masters. Everywhere a rider's
    titles are shown they come split by tournament type, and where titles are compared they are weighed by the
-   tournament's champion points (Futures 100 … Masters 2,500, a Slam 8,000). tt = { tierIndex: count } (5 = Slam). */
+   tournament's champion points (Futures 100 … Masters 2,000, a Slam 4,000). tt = { tierIndex: count } (5 = Slam). */
 
 import { TIERS } from "../models/constants";
 
 export var TIER_SHORT = ["Futures", "Challenger", "Tour 250", "Tour 500", "Masters", "Slam"];
-export function champPts(t) { var T = TIERS[t]; return T ? T.pts[T.pts.length - 1] : 0; }
+export function champPts(t) { var T = TIERS[t]; return T ? T.pts.reduce(function (a, b) { return a + b; }, 0) : 0; }
 
 /* "1 Masters · 3 Challenger" — biggest first */
 export function titleMix(tt) {

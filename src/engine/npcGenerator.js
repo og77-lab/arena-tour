@@ -52,7 +52,7 @@ export function mkNPCs() {
   npcs.sort(function (a, b) { return (b.skill || 0) - (a.skill || 0); });
   for (var si = 0; si < npcs.length; si++) {
     var rank = si + 1;
-    var seed = Math.round(5000 * Math.pow(Math.max(0, (1000 - rank) / 999), 2.5) + Math.random() * 10);
+    var seed = Math.round(3000 * Math.pow(Math.max(0, (1000 - rank) / 999), 2.5) + Math.random() * 10);
     npcs[si].sp = seed;
     npcs[si].ap = seed;
   }

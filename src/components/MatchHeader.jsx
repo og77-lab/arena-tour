@@ -47,6 +47,7 @@ export default function MatchHeader(props) {
                 border: (cur ? "2px solid " + props.tierColor : "1.5px solid " + C.line),
                 boxShadow: cur ? "0 0 0 2px " + C.card + ", 0 0 10px " + props.tierColor : "none" }}>
                 {done ? "✓ " : ""}{SHORT[r] || r}
+                {props.ladder && props.ladder[i] && (<span style={{ display: "block", fontSize: 10.5, letterSpacing: 0, color: cur ? "#fde68a" : done ? C.textSoft : C.goldInk }}>{props.ladder[i].pts.toLocaleString()}</span>)}
               </div>
             );
           })}

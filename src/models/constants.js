@@ -20,14 +20,16 @@ export const screenAnim = {
 /* NPC/player emojis */
 export const EMO = ["⚔️","🛡️","🗡️","🏹","🔱","⚡","🔥","💀","👑","🐉","🦅","🐺","🦁","🐍","🦊","🎭","🐻","🦈","🦂","🐲","🏴","🎪","🔮","🌀","☠️","🦇","🐗","🐅","🦏","🐊"];
 
-/* Tournament tiers: Futures, Challenger, Tour250, Tour500, Masters, GrandSlam */
+/* Tournament tiers: Futures, Challenger, Tour250, Tour500, Masters, GrandSlam.
+   pts and money are what each round WON adds; they add up. Champions: 100 · 250 · 500 · 1,000 · 2,000 · 4,000 —
+   each tier doubles the one below, and reaching a round is a fixed share of the title, as on the ATP tour. */
 export const TIERS = [
-  { name: "Futures", short: "FUT", col: "#6b7280", size: 32, rounds: 5, bo: 3, pts: [5,12,25,50,100], money: [50,150,400,1000,3000], rankRange: [601,1001] },
-  { name: "Challenger", short: "CHL", col: "#22c55e", size: 32, rounds: 5, bo: 3, pts: [12,30,60,125,250], money: [200,500,1500,4000,10000], rankRange: [301,700] },
-  { name: "Tour 250", short: "250", col: "#0ea5e9", size: 32, rounds: 5, bo: 3, pts: [40,80,160,320,600], money: [800,2000,6000,15000,40000], rankRange: [101,400] },
-  { name: "Tour 500", short: "500", col: "#8b5cf6", size: 32, rounds: 5, bo: 3, pts: [80,160,320,600,1200], money: [2000,5000,15000,40000,100000], rankRange: [31,200] },
-  { name: "Masters", short: "MST", col: "#ec4899", size: 32, rounds: 5, bo: 5, pts: [150,300,600,1200,2500], money: [5000,15000,40000,100000,300000], rankRange: [1,100] },
-  { name: "Grand Slam", short: "GS", col: "#f59e0b", size: 64, rounds: 6, bo: 5, pts: [250,500,1000,2000,4000,8000], money: [10000,25000,60000,150000,400000,1000000], rankRange: [1,64] }
+  { name: "Futures", short: "FUT", col: "#6b7280", size: 32, rounds: 5, bo: 3, pts: [10,10,15,25,40], money: [50,150,400,1000,3000], rankRange: [601,1001] },
+  { name: "Challenger", short: "CHL", col: "#22c55e", size: 32, rounds: 5, bo: 3, pts: [20,25,45,60,100], money: [200,500,1500,4000,10000], rankRange: [301,700] },
+  { name: "Tour 250", short: "250", col: "#0ea5e9", size: 32, rounds: 5, bo: 3, pts: [40,50,90,120,200], money: [800,2000,6000,15000,40000], rankRange: [101,400] },
+  { name: "Tour 500", short: "500", col: "#8b5cf6", size: 32, rounds: 5, bo: 3, pts: [80,100,180,240,400], money: [2000,5000,15000,40000,100000], rankRange: [31,200] },
+  { name: "Masters", short: "MST", col: "#ec4899", size: 32, rounds: 5, bo: 5, pts: [160,200,360,480,800], money: [5000,15000,40000,100000,300000], rankRange: [1,100] },
+  { name: "Grand Slam", short: "GS", col: "#f59e0b", size: 64, rounds: 6, bo: 5, pts: [160,160,400,720,960,1600], money: [10000,25000,60000,150000,400000,1000000], rankRange: [1,64] }
 ];
 
 /* Training stats. Save keys (k) are unchanged; each stat belongs to the granny (rider) or the rooster (mount).
@@ -46,7 +48,7 @@ export const STATS = [
   { k: "p", icon: "🐾", label: "Steady Stride", el: "bigger gold", who: "rooster", col: "#db2777", what: "A wider gold zone — a steady mount is easier to aim from",
     per: "gold zone +0.4% of the bar wider", best: "You often stop just next to the gold" },
   { k: "b", icon: "🔋", label: "Bounce-back", el: "recovery", who: "recovery", col: "#0d9488", what: "Granny and rooster win back more fitness between tournaments. It counts on its own, not against your opponent",
-    per: "+0.7% fitness back after every tournament", best: "Deep runs leave you running on empty the week after" }
+    per: "+0.5% fitness back after every tournament", best: "Deep runs leave you running on empty the week after" }
 ];
 export const STAT_GROUPS = [
   { who: "granny", icon: "👵", title: "Granny", sub: "Rider skills" },
@@ -63,6 +65,13 @@ export const STRIKES_PER_SET = 3;
 /* Round-name labels for 5-round and 6-round tournaments */
 export const RN5 = ["Round of 32","Round of 16","Quarterfinals","Semifinals","Final"];
 export const RN6 = ["Round of 64","Round of 32","Round of 16","Quarterfinals","Semifinals","Final"];
+/* What you hold after winning each round (× the event's points multiplier): [{ r: "R32", pts: 40 }, … { r: "F", pts: 500 }] */
+var RSHORT = { "Round of 64": "R64", "Round of 32": "R32", "Round of 16": "R16", "Quarterfinals": "QF", "Semifinals": "SF", "Final": "F" };
+export function ptsLadder(ti, mul) {
+  var T = TIERS[ti], names = T.rounds === 6 ? RN6 : RN5, sum = 0;
+  return T.pts.map(function (p, i) { sum += p; return { r: RSHORT[names[i]], pts: Math.round(sum * (mul || 1)) }; });
+}
+export function champTotal(ti, key) { return (TIERS[ti][key || "pts"] || []).reduce(function (a, b) { return a + b; }, 0); }
 
 /* Finals: four "houses" each running a group stage */
 export const HN = ["Phoenix","Kraken","Wyvern","Chimera"];

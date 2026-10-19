@@ -87,7 +87,9 @@ export default function HelpScreen(props) {
         </Section>
 
         <Section icon="trophy" tint="#fef3c7" title="Points & rankings">
-          <Text>Win matches to earn points — <B>a first-round loss earns nothing</B>. Higher tiers pay more. Your rank is your season points; from season 2 you <B>defend</B> last season's points at each week of the calendar.</Text>
+          <Text>Win matches to earn points — <B>a first-round loss earns nothing</B>. Each tier pays double the one below; the cards and the match header show what each round is worth.</Text>
+          <Rows rows={[["Futures champion", "100"], ["Challenger", "250"], ["Tour 250", "500"], ["Tour 500", "1,000"], ["Masters", "2,000"], ["Grand Slam", "4,000"], ["Beating a higher rank", "no extra points"]]} />
+          <Text>Your rank is your season points; from season 2 you <B>defend</B> last season's points at each week of the calendar.</Text>
           <Text>For every rule and number, open the <B>Game Guide</B> in the More tab.</Text>
         </Section>
 
