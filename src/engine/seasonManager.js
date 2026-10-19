@@ -54,6 +54,7 @@ export function mkSeason(name, num, prev) {
   if (prev) {
     ["fans", "ivSeen", "lastTones", "goal", "ach", "stats", "rival", "settledRivals", "tips", "tutorial", "earned", "pedigree", "locker", "kit", "gearSpent", "followers", "hm", "startPts"].forEach(function (k) { if (prev.player[k] != null) S.player[k] = prev.player[k]; });
     if (prev.news) S.news = prev.news;
+    if (prev.hist) S.hist = prev.hist; /* the tour's history (engine/history) */
     if (prev.newsSeenAt != null) S.newsSeenAt = prev.newsSeenAt;
   }
   S.pts = 2;                       /* points on the current table, rivals' points rolling (engine/migrate toPts2) */

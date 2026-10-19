@@ -222,7 +222,7 @@ export default function DailyCluck(props) {
   return createPortal(
     <motion.div onClick={fold} animate={{ opacity: folding ? 0 : 1 }} transition={{ duration: 0.35, delay: folding ? 0.85 : 0 }}
       style={{ position: "fixed", inset: 0, zIndex: 960, background: "rgba(28,25,23,0.6)", overflowY: folding ? "hidden" : "auto", overflowX: "hidden", padding: "14px 10px 30px", boxSizing: "border-box" }}>
-      <CluckPaper issue={props.issue} onClose={fold} folding={folding} onFolded={close} />
+      <CluckPaper issue={props.issue} onClose={fold} folding={folding} onFolded={close} onDraws={props.onDraws} />
     </motion.div>,
     document.body
   );
@@ -502,6 +502,13 @@ export function CluckPaper(props) {
         )}
 
         <footer style={{ marginTop: 14, borderTop: "3px double " + RULE, paddingTop: 10, textAlign: "center" }}>
+          {props.onDraws && is.hw && (
+            <div style={{ marginBottom: 10 }}>
+              <button onClick={function () { props.onDraws(is.hw); }} style={{ fontFamily: SERIF, fontWeight: 900, fontSize: 13.5, background: PAPER, color: INK, border: "2px solid " + INK, padding: "8px 16px", cursor: "pointer", boxShadow: "2px 2px 0 " + INK }}>
+                📋 Every draw of the week →
+              </button>
+            </div>
+          )}
           {props.onClose ? (
             <button onClick={props.onClose} style={{ fontFamily: SERIF, fontWeight: 900, fontSize: 15, letterSpacing: 1, textTransform: "uppercase", background: INK, color: PAPER, border: "none", padding: "11px 22px", cursor: "pointer", boxShadow: "3px 3px 0 #9a3412" }}>
               Fold the paper →

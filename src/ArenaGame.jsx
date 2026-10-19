@@ -54,6 +54,8 @@ import Interview from "./components/Interview";
 import DailyCluck, { CluckPaper } from "./components/DailyCluck";
 import { C, FONT, display, label, card, button, money } from "./ui/theme";
 import { addTitle, titleMix, playerTitles, npcTitles, seasonTitles } from "./engine/titles";
+import { recordWeek, findWeek, treeOf, riderWeeks, riderPast } from "./engine/history";
+import WeekEvents from "./components/WeekEvents";
 
 const { useState, useEffect, useRef } = React;
 
@@ -229,6 +231,8 @@ export default function Arena(props) {
   function toggleMusic() { var n = !musicOn; setMusicOn(n); setMusicOnState(n); }
   var _confetti = useState(false), confetti = _confetti[0], setConfetti = _confetti[1];
   var _showBracket = useState(false), showBracket = _showBracket[0], setShowBracket = _showBracket[1];
+  var _weekView = useState(null), weekView = _weekView[0], setWeekView = _weekView[1]; /* { s, c }: every event of a past week */
+  var _treeView = useState(null), treeView = _treeView[0], setTreeView = _treeView[1]; /* { s, c, idx, focus }: one past draw */
   var _showScout = useState(false), showScout = _showScout[0], setShowScout = _showScout[1];
   var _paper = useState(null), paper = _paper[0], setPaper = _paper[1];
   var _interview = useState(null), interview = _interview[0], setInterview = _interview[1];
@@ -609,9 +613,18 @@ export default function Arena(props) {
     var weekEv = weekEvents(S), byId = {}, weekRidden = {};
     var addWeek = function(n, x){ n.sp = (n.sp||0)+x; n.ap = (n.ap||0)+x; n.w[S.calIdx] = (n.w[S.calIdx]||0)+x; }; /* points won in the other events count for this week too */
     tempRanked.forEach(function(p){ if (!p.isP) byId[p.id] = p; });
+    /* The week's record for the tour history (engine/history): every event, and each rider's draw slot and rounds won — yours too */
+    var histEv = [], histRiders = {};
+    var histAdd = function(e, draw, deep){ var k = histEv.length; histEv.push(e); draw.forEach(function(p, slot){ if (p) histRiders[p.isP ? 1 : p.id] = [k, slot, deep[p.isP ? 1 : p.id] || 0]; }); };
     for (var pti = 0; pti < 6; pti++) {
       var tierEv = weekEv.filter(function(x){ return x.tier === pti && x.id !== ts.eventId; });
-      if (pti === ts.tierIdx) parallelResults.push({ tier: pti, playerEvent: true, count: 1, name: ts.eventName || null });
+      if (pti === ts.tierIdx) {
+        parallelResults.push({ tier: pti, playerEvent: true, count: 1, name: ts.eventName || null });
+        var myDraw = [], myDeep = {};
+        (ts.bracket[0] || []).forEach(function(m){ myDraw.push(m.a, m.b); });
+        ts.bracket.forEach(function(rdx, rix){ (rdx || []).forEach(function(m){ if (m.w) myDeep[m.w.isP ? 1 : m.w.id] = rix + 1; }); });
+        histAdd({ tier: pti, name: ts.eventName || tier.name, cond: ts.cond || "classic", field: ts.field || "mixed", mul: ts.ptsMul || 1 }, myDraw, myDeep);
+      }
       var numEvents = tierEv.length;
       if (numEvents <= 0) continue;
       var pt = TIERS[pti];
@@ -647,6 +660,7 @@ export default function Arena(props) {
           }
           brackets.push(nxt);
         }
+        histAdd({ tier: pti, name: tierEv[ev].name, cond: tierEv[ev].cond, field: tierEv[ev].field, mul: evMul }, pool, deepRound);
         /* Matches each rider rode in this event (for fitness) */
         for (var dpi = 0; dpi < pool.length; dpi++) weekRidden[pool[dpi].id] = { n: Math.min(brackets.length - 1, deepRound[pool[dpi].id] + 1), bo: pt.bo || 3, tier: pti, cond: tierEv[ev].cond, mul: tierEv[ev].moneyMul || 1 };
         /* Winner gets full points + titles */
@@ -721,13 +735,17 @@ export default function Arena(props) {
     var newRank = pRankOf(Object.assign({}, S, { player: newP, npcs: newNpcs }));
     newP.rankHist = (newP.rankHist || []).concat([newRank]).slice(-40);
     cal[S.calIdx].result.rankAfter = newRank;
+    var tourHist = S.hist;
+    try { tourHist = recordWeek(S.hist, { s: S.sNum, c: S.calIdx, label: curEv && curEv.type === "gs" ? "Grand Slam " + curEv.gsNum : "Week " + wLabel, events: histEv, riders: histRiders, rest: !!ts.rest }); } catch (e) { console.error("history", e); }
     var afterS = Object.assign({}, S, { player: newP, npcs: newNpcs, tHist: hist, cal: cal, calIdx: S.calIdx + 1, activeT: null, activeF: null });
+    if (tourHist) afterS.hist = tourHist;
     var issue = null;
     try {
       issue = buildIssue({ before: S, after: afterS, bracket: ts.bracket, roundNames: rNames, tierIdx: ts.tierIdx, tierName: ts.eventName || tier.name, pRound: pRound, wonTitle: wonTitle,
         pts: pp, net: netChange, money: moneyEarned, champ: champW, parallel: parallelResults, shock: shock, trainLog: trainLog, weekLabel: curEv && curEv.type === "gs" ? "Grand Slam " + curEv.gsNum : "Week " + wLabel });
     } catch (e) { console.error("News issue failed:", e); }
     if (issue) {
+      issue.hw = { s: S.sNum, c: S.calIdx }; /* opens this week's draws from the paper */
       issue.fans = { before: fansBefore, perf: perf.d, notes: perf.notes, promise: prom, sponsor: sponsor, after: fansNow };
       try {
         var rkA = rankMap(afterS), champP = champW && !champW.isP ? Object.assign({}, champW, { rank: rkA[champW.id] }) : null;
@@ -909,6 +927,31 @@ export default function Arena(props) {
   var curEvent = !seasonDone ? S.cal[S.calIdx] : null;
   var avTiers = availableTiers(S);
 
+  /* The profile, plus the tour history's windows: a week's events and any past draw (engine/history) */
+  function riderRef(id) {
+    if (id === 1) return { id: 1, isP: true, name: S.pName, short: sh(S.pName), emoji: "👵" };
+    var n = S.npcs.filter(function(x){ return x.id === id; })[0];
+    return n ? { id: id, name: n.name, short: sh(n.name), emoji: n.emoji || "" } : { id: id, name: "Rider " + id, short: "Rider " + id, emoji: "" };
+  }
+  function openProfileOf(id) {
+    if (id === 1) { setProf({ p: Object.assign({}, S.player, { name: S.pName, emoji: "👵" }), rank: pRank }); return; }
+    var n = S.npcs.filter(function(x){ return x.id === id; })[0]; if (n) setProf({ p: n, rank: rankMap(S)[id] });
+  }
+  function histLayer() {
+    var wkV = weekView ? findWeek(S.hist, weekView.s, weekView.c) : null;
+    var trW = treeView ? findWeek(S.hist, treeView.s, treeView.c) : null, tree = trW ? treeOf(trW, treeView.idx, riderRef) : null;
+    var pid = prof ? (prof.p.isP ? 1 : prof.p.id) : null;
+    return (
+      <>
+        {prof && (<Profile player={prof.p} rank={prof.rank} me={S.player} myRank={pRank} myTitles={playerTitles(S)} roosterName={S.player.roosterName} onRenameRooster={renameRooster} onRenamePlayer={renamePlayer} isRival={!!(S.player.rival && prof.p.id === S.player.rival.id)} playerName={S.pName} h2h={!prof.p.isP && S.player.h2h ? (S.player.h2h[prof.p.id] || []) : null} timeline={prof.p.isP ? (S.player.timeline || []) : null}
+          weeks={riderWeeks(S.hist, pid)} past={riderPast(S.hist, pid)} onTree={function(w){ setTreeView({ s: w.s, c: w.c, idx: w.idx, focus: pid }); }} onClose={function(){setProf(null)}} />)}
+        {wkV && (<WeekEvents week={wkV} nameOf={riderRef} onOpen={function(idx){ setTreeView({ s: wkV.s, c: wkV.c, idx: idx, focus: 1 }); }} onClose={function(){ setWeekView(null); }} />)}
+        {tree && (<BracketView ts={tree} playerName={S.pName} title={tree.eventName} sub={"Season " + trW.s + " · " + trW.l} focusId={treeView.focus}
+          onPick={function(p){ setTreeView(null); setWeekView(null); openProfileOf(p.id); }} onClose={function(){ setTreeView(null); }} />)}
+      </>
+    );
+  }
+
   /* ─── HUB ─── (tabs: home · train · season · rankings · more, with a bottom nav) */
   if (scr === "hub" || scr === "training") {
     var hubTab = scr === "training" ? "train" : tab;
@@ -936,7 +979,7 @@ export default function Arena(props) {
       <motion.div key="hub" {...screenAnim} style={Object.assign({}, W, { background: C.page, padding: "10px 10px " + (NAV_HEIGHT + 28) + "px" })}>
         <style dangerouslySetInnerHTML={{__html:CSS}} />
         {confetti && (<Confetti />)}
-        {prof && (<Profile player={prof.p} rank={prof.rank} me={S.player} myRank={pRank} myTitles={playerTitles(S)} roosterName={S.player.roosterName} onRenameRooster={renameRooster} onRenamePlayer={renamePlayer} isRival={!!(S.player.rival && prof.p.id === S.player.rival.id)} playerName={S.pName} h2h={!prof.p.isP && S.player.h2h ? (S.player.h2h[prof.p.id] || []) : null} timeline={prof.p.isP ? (S.player.timeline || []) : null} onClose={function(){setProf(null)}} />)}
+        {histLayer()}
         {showKnitter && (<KnitterSheet issues={S.news || []} kit={S.player.kit} onClose={function(){ setShowKnitter(false); }} />)}
         {S.player.startPts > 0 && (<StartTalent points={S.player.startPts} tr={S.player.tr} onDone={function(add){ var t = Object.assign({}, S.player.tr || {}); Object.keys(add).forEach(function(k){ t[k] = (t[k] || 0) + add[k]; }); var np = Object.assign({}, S.player, { tr: t }); delete np.startPts; save(Object.assign({}, S, { player: np })); }} />)}
         {showHelp && (<HelpScreen onClose={function(){setHelp(false)}} />)}
@@ -957,7 +1000,7 @@ export default function Arena(props) {
             </div>
             <Leaderboard />
           </div>, document.body)}
-        {paper && (<DailyCluck issue={paper} onClose={function(){ setPaper(null); markNewsSeen(); }} />)}
+        {paper && (<DailyCluck issue={paper} onDraws={function(wk){ setWeekView(wk); }} onClose={function(){ setPaper(null); markNewsSeen(); }} />)}
         {interview && (<Interview coach={tipOn("interview")} iv={interview.iv} recentTones={S.player.lastTones || []} fans={fansOf(S.player)}
           onAnswer={onInterviewAnswer} onDone={function(issue){ setInterview(null); setPaper(issue || interview.issue); }} />)}
         <input ref={fileRef} type="file" accept=".json" onChange={importSave} style={{display:"none"}} />
@@ -1074,7 +1117,7 @@ export default function Arena(props) {
 
           {hubTab === "season" && (
             <div>
-              <SeasonTab S={S} pRank={pRank} curEvent={curEvent} seasonDone={seasonDone} avail={seasonDone ? [] : availableTiers(S)} wildcard={wildcardTier(S)}
+              <SeasonTab S={S} pRank={pRank} onWeek={function(i){ if (findWeek(S.hist, S.sNum, i)) setWeekView({ s: S.sNum, c: i }); }} curEvent={curEvent} seasonDone={seasonDone} avail={seasonDone ? [] : availableTiers(S)} wildcard={wildcardTier(S)}
                 gsOk={pRank <= 64 || hasSlamWildcard(fansOf(S.player), pRank)} onPlay={playCurrent} onFinals={startFinals} onNextSeason={openGala} />
               <div style={Object.assign(label(C.textSoft), {margin:"14px 2px 6px"})}>Career results</div>
               <div style={card({padding:6})}>
@@ -1123,7 +1166,7 @@ export default function Arena(props) {
                     })}
                   </div>
                 )}
-                <CluckPaper issue={issue} inline={true} onKnitter={function(){ setShowKnitter(true); }} />
+                <CluckPaper issue={issue} inline={true} onDraws={function(wk){ setWeekView(wk); }} onKnitter={function(){ setShowKnitter(true); }} />
               </div>
             );
           })()}
@@ -1269,7 +1312,7 @@ export default function Arena(props) {
       <motion.div key="tourney" {...screenAnim} style={Object.assign({}, W, { background: C.page })}>
         <style dangerouslySetInnerHTML={{__html:CSS}} />
         {confetti && (<Confetti />)}
-        {prof && (<Profile player={prof.p} rank={prof.rank} me={S.player} myRank={pRank} myTitles={playerTitles(S)} roosterName={S.player.roosterName} onRenameRooster={renameRooster} onRenamePlayer={renamePlayer} isRival={!!(S.player.rival && prof.p.id === S.player.rival.id)} playerName={S.pName} h2h={!prof.p.isP && S.player.h2h ? (S.player.h2h[prof.p.id] || []) : null} timeline={prof.p.isP ? (S.player.timeline || []) : null} onClose={function(){setProf(null)}} />)}
+        {histLayer()}
         {showHelp && (<HelpScreen onClose={function(){setHelp(false)}} />)}
         {showBracket && (<BracketView ts={ts} playerName={S.pName} onClose={function(){setShowBracket(false)}} />)}
         {showScout && scoutT && pm && ts.alive && (<ScoutSheet scout={scoutT} onClose={function(){setShowScout(false)}} />)}

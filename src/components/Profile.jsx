@@ -10,6 +10,7 @@ import FanRules from "./FanRules";
 import { handsTalent } from "../engine/joust";
 import { titleMix, npcTitles } from "../engine/titles";
 import Icon, { StatIcon } from "./Icons";
+import { reachedName } from "../engine/history";
 
 /* Fans and followers, and what they mean when you meet: the stands back whoever the crowd loves more */
 function FanBox(props) {
@@ -29,6 +30,47 @@ function FanBox(props) {
       </div>
       <div style={{ fontSize: 12.5, color: "#44403c", marginTop: 3, lineHeight: 1.35 }}>{line} <button onClick={function () { rs[1](!rs[0]); }} style={{ border: "none", background: "none", padding: 0, color: "#be123c", fontWeight: 900, fontSize: 12.5, cursor: "pointer", textDecoration: "underline" }}>{rs[0] ? "hide rules" : "📜 rules"}</button></div>
       {rs[0] && (<div style={{ marginTop: 6, background: "#fff", borderRadius: 6, padding: "6px 8px" }}><FanRules /></div>)}
+    </div>
+  );
+}
+
+/* Her weeks this season and last (newest first), then a line per older season: best round and titles in each tier */
+function WeekByWeek(props) {
+  var st = useState(false), all = st[0];
+  var weeks = props.weeks, past = props.past;
+  if (!weeks.length && !past.length) return null;
+  var shown = all ? weeks : weeks.slice(0, 8);
+  var box = { marginTop: 10, background: "#ffffff", borderRadius: 14, padding: "8px 10px", boxShadow: "0 1px 2px rgba(63,42,29,0.06), 0 3px 10px rgba(63,42,29,0.06)" };
+  return (
+    <div style={box}>
+      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}><Icon name="calendar" size={18} /><span style={{ fontFamily: "'Fredoka', 'Nunito', sans-serif", fontSize: 16, fontWeight: 600, color: "#1c1917" }}>Week by week</span></div>
+      {shown.map(function (w, i) {
+        var t = w.none ? null : TIERS[w.tier], champ = !w.none && w.won >= t.rounds;
+        return (
+          <div key={w.s + "-" + w.c} onClick={!w.none && props.onTree ? function () { props.onTree(w); } : undefined}
+            style={{ display: "flex", alignItems: "center", gap: 6, padding: "5px 6px", borderRadius: 6, background: i % 2 === 0 ? "#f8fafc" : "transparent", cursor: w.none ? "default" : "pointer" }}>
+            <span style={{ width: 62, flexShrink: 0, fontSize: 11, color: "#64748b", fontWeight: 700, lineHeight: 1.15 }}>S{w.s}<br />{(w.label || "").replace("Grand Slam", "Slam").replace("Week ", "Wk ")}</span>
+            {w.none ? (<span style={{ flex: 1, fontSize: 12.5, color: "#94a3b8", fontStyle: "italic" }}>Didn't ride</span>) : (
+              <span style={{ flex: 1, minWidth: 0, lineHeight: 1.2 }}>
+                <span style={{ display: "block", fontSize: 12.5, fontWeight: 800, color: "#1c1917", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}><span style={{ color: t.col }}>{t.short}</span> {w.name}</span>
+                <span style={{ display: "block", fontSize: 11.5, color: champ ? "#b45309" : "#475569", fontWeight: champ ? 900 : 600 }}>{w.rest ? "Rested (withdrew)" : champ ? "🏆 Champion" : w.won === 0 ? "Lost in the " + w.reached : "Reached the " + w.reached}</span>
+              </span>
+            )}
+            {!w.none && (<span style={{ flexShrink: 0, fontSize: 12.5, fontWeight: 900, color: w.pts ? "#0891b2" : "#94a3b8" }}>{w.pts ? "+" + w.pts.toLocaleString() : "0"}</span>)}
+            {!w.none && (<span aria-hidden style={{ flexShrink: 0, color: "#94a3b8", fontWeight: 900 }}>›</span>)}
+          </div>
+        );
+      })}
+      {weeks.length > 8 && (<button onClick={function () { st[1](!all); }} style={{ display: "block", margin: "4px auto 0", border: "none", background: "none", color: "#4f46e5", fontWeight: 800, fontSize: 12, cursor: "pointer" }}>{all ? "Show fewer" : "Show all " + weeks.length + " weeks"}</button>)}
+      {past.map(function (o) {
+        var lbl = Array.isArray(o.s) ? "Seasons " + o.s[0] + "–" + o.s[1] : "Season " + o.s;
+        return (
+          <div key={lbl} style={{ fontSize: 12, color: "#475569", padding: "5px 6px", borderTop: "1px dashed #e5e7eb", lineHeight: 1.35 }}>
+            <b style={{ color: "#1c1917" }}>{lbl}</b> · {o.tiers.slice().reverse().map(function (x) { var T = TIERS[x.tier]; return T.short + ": " + (x.titles ? x.titles + (x.titles === 1 ? " title" : " titles") : "best " + reachedName(x.tier, x.best)); }).join(" · ")}
+          </div>
+        );
+      })}
+      {!props.isMe && weeks.length > 0 && (<div style={{ fontSize: 11, color: "#94a3b8", textAlign: "center", marginTop: 4 }}>Tap a week to see that tournament's whole draw</div>)}
     </div>
   );
 }
@@ -159,6 +201,8 @@ export default function Profile(props) {
           })}
         </div>
         {(function () { var mix = titleMix(p.isP ? (props.myTitles || {}) : npcTitles(p)); return mix ? (<div style={{ fontSize: 12.5, fontWeight: 800, color: "#92400e", textAlign: "center", marginTop: 6 }}>{mix}</div>) : null; })()}
+        {/* Week by week: every tournament she rode (tour history), tap one for its draw */}
+        <WeekByWeek weeks={props.weeks || []} past={props.past || []} onTree={props.onTree} isMe={p.isP} />
         {/* Head-to-Head */}
         {!p.isP && props.h2h && props.h2h.length > 0 && (function(){
           var wins = 0, losses = 0;

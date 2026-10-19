@@ -1,7 +1,8 @@
 /* ═══ Engine / Codec ═══ A compact save. 999 rivals stored as objects repeat every field name a thousand times, so on
    disk (and in the cloud) each rival becomes a short array of numbers instead; the live tournament bracket keeps
    only ids. pack() is used on every save, unpack() on every load; saves written before this (plain objects) load
-   as they are. Anything unknown on a rival is kept in a trailing "extras" object, so nothing is ever lost. */
+   as they are. Anything unknown on a rival is kept in a trailing "extras" object, so nothing is ever lost.
+   The tour history (S.hist, engine/history) is already packed as short strings, one per week, and passes through as is. */
 
 var VERSION = 2;
 var TR = ["r", "p", "f", "s", "g", "b", "tp"];

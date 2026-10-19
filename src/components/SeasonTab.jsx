@@ -6,6 +6,7 @@ import { TIERS, RN5, RN6, TOTAL_EVENTS, champTotal } from "../models/constants";
 import { getRanked, sh } from "../models/formulas";
 import { C, FONT, display, label, card, button, pill } from "../ui/theme";
 import Icon from "./Icons";
+import { findWeek } from "../engine/history";
 import { titleMix as seasonMixOf, seasonTitles } from "../engine/titles";
 function seasonMix(S) { return seasonMixOf(seasonTitles(S)); }
 
@@ -157,10 +158,10 @@ export default function SeasonTab(props) {
               <div style={{ fontSize: 11, fontWeight: 900, letterSpacing: 1.4, color: C.textMuted, textTransform: "uppercase", padding: "4px 4px 2px" }}>Block {b + 1}</div>
               {S.cal.slice(b * 5, b * 5 + 5).map(function (e, j) {
                 var i = b * 5 + j, cur = i === S.calIdx && !done, gs = e.type === "gs", t = e.done && e.tier != null ? TIERS[e.tier] : null;
-                var d = S.player.def ? S.player.def[i] || 0 : 0, r = e.result;
+                var d = S.player.def ? S.player.def[i] || 0 : 0, r = e.result, past = e.done && props.onWeek && !!findWeek(S.hist, S.sNum, i); /* tap a played week for all its draws */
                 return (
-                  <div key={i} onClick={cur ? props.onPlay : undefined}
-                    style={{ display: "flex", alignItems: "center", gap: 8, padding: "7px 8px", borderRadius: 10, cursor: cur ? "pointer" : "default",
+                  <div key={i} onClick={cur ? props.onPlay : past ? function () { props.onWeek(i); } : undefined}
+                    style={{ display: "flex", alignItems: "center", gap: 8, padding: "7px 8px", borderRadius: 10, cursor: cur || past ? "pointer" : "default",
                       background: cur ? C.goldSoft : gs ? "#fffbeb" : "transparent", border: cur ? "2px solid " + C.ink : "2px solid transparent", boxShadow: cur ? "0 3px 0 " + C.ink : "none" }}>
                     <span aria-hidden style={{ width: 22, height: 22, borderRadius: "50%", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 900,
                       background: e.done ? (r && r.won ? C.gold : skipped(e) ? "#d6d3d1" : "#4ade80") : cur ? C.night : "#efe3c4", color: cur ? "#fff" : C.ink }}>
@@ -177,6 +178,7 @@ export default function SeasonTab(props) {
                         ? (<span>{(r.pPts || 0).toLocaleString()}<span style={{ display: "block", fontSize: 11, color: r.net > 0 ? C.greenInk : r.net < 0 ? C.redInk : C.textMuted }}>{r.net > 0 ? "+" + r.net : r.net === 0 ? "±0" : r.net}</span></span>)
                         : !e.done && d > 0 ? (<span style={{ color: C.redInk, fontSize: 11.5 }} title="Points from last season that drop off when this event is played">−{d} def.</span>) : null}
                     </span>
+                    {past && (<span aria-label="All draws of this week" style={{ flexShrink: 0, fontSize: 15, fontWeight: 900, color: C.textMuted }}>›</span>)}
                   </div>
                 );
               })}
@@ -188,7 +190,7 @@ export default function SeasonTab(props) {
           <span style={{ flex: 1, fontSize: 13, fontWeight: 900, color: C.text }}>Season Finals <span style={{ fontWeight: 700, color: C.textSoft }}>· top 16 · four houses, then semis and a final</span></span>
         </div>
         <div style={{ fontSize: 11.5, color: C.textMuted, marginTop: 8, lineHeight: 1.4, padding: "0 4px" }}>
-          Red numbers are points you're <b style={{ color: C.text }}>defending</b> from last season — they drop off when that week is played, so beat them to climb.
+          Red numbers are points you're <b style={{ color: C.text }}>defending</b> from last season — they drop off when that week is played, so beat them to climb. Tap a played week (›) to see every tournament of that week and its full draw.
         </div>
       </div>
     </div>

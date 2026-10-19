@@ -6,6 +6,9 @@ export default function BracketView(props) {
   var ts = props.ts;
   var playerName = props.playerName || "You";
   if (!ts || !ts.bracket) return null;
+  /* Whose path is lit: yours by default, or the rider whose history opened this draw */
+  var past = ts.done && ts.round < 0; /* a draw from the history, not the one being played */
+  var focus = props.focusId || 1, isF = function(p){ return p && (p.isP ? 1 : p.id) === focus; };
   var tier = TIERS[ts.tierIdx] || TIERS[0];
   var rNames = tier.rounds === 6 ? RN6 : RN5;
   var shortName = function(n){ return (n || "?").split(" the ")[0]; };
@@ -16,7 +19,7 @@ export default function BracketView(props) {
     var rd = ts.bracket[rr]; if (!rd) continue;
     for (var mi = 0; mi < rd.length; mi++) {
       var m = rd[mi];
-      if ((m.a && m.a.isP) || (m.b && m.b.isP) || (m.w && m.w.isP)) {
+      if (isF(m.a) || isF(m.b) || isF(m.w)) {
         pathMatchIds[rr + "-" + mi] = true;
       }
     }
@@ -38,16 +41,17 @@ export default function BracketView(props) {
       }}>
         {[a, b].map(function(p, pi){
           if (!p) return (<div key={pi} style={{ color: "#94a3b8", fontSize: 10 }}>—</div>);
-          var thisWon = w && w.id === p.id;
+          var thisWon = w && w.id === p.id, lit = isF(p);
           var label = p.isP ? playerName : shortName(p.name);
           return (
-            <div key={pi} style={{
+            <div key={pi} onClick={props.onPick && !p.isP ? function(){ props.onPick(p); } : undefined} style={{
+              cursor: props.onPick && !p.isP ? "pointer" : "default",
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
               padding: "2px 0",
-              color: p.isP ? "#b45309" : thisWon ? "#0f172a" : (w ? "#64748b" : "#334155"),
-              fontWeight: p.isP ? 800 : thisWon ? 700 : 500,
+              color: lit ? "#b45309" : thisWon ? "#0f172a" : (w ? "#64748b" : "#334155"),
+              fontWeight: lit ? 800 : thisWon ? 700 : 500,
               borderBottom: pi === 0 ? "1px dashed #f1f5f9" : "none"
             }}>
               <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 85 }}>
@@ -66,15 +70,18 @@ export default function BracketView(props) {
       <div style={{ background: "#ffffff", borderRadius: 14, padding: 14, maxWidth: "95vw", width: "100%", border: "1px solid #e5e7eb", maxHeight: "90vh", display: "flex", flexDirection: "column" }} onClick={function(e){e.stopPropagation();}}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
           <div>
+            {props.title && (<div style={{ fontSize: 16, fontWeight: 900, color: "#1c1917" }}>{props.title}</div>)}
             <span style={{ fontSize: 15, color: tier.col, fontWeight: 800 }}>{tier.name}</span>
             <span style={{ color: "#94a3b8", margin: "0 6px" }}>•</span>
-            <span style={{ fontSize: 13, color: "#475569" }}>Draw of {tier.size}</span>
+            <span style={{ fontSize: 13, color: "#475569" }}>Draw of {(ts.bracket[0] || []).length * 2 || tier.size}</span>
+            {props.sub && (<div style={{ fontSize: 12, color: "#64748b", marginTop: 2 }}>{props.sub}</div>)}
           </div>
           <button onClick={props.onClose} style={{ background: "none", border: "none", color: "#64748b", fontSize: 20, cursor: "pointer" }}>✕</button>
         </div>
         <div style={{ display: "flex", gap: 3, fontSize: 11, color: "#64748b", marginBottom: 8 }}>
-          <span style={{ padding: "2px 6px", borderRadius: 3, background: "rgba(129,140,248,0.1)", color: "#4f46e5" }}>Your path</span>
-          <span style={{ padding: "2px 6px", borderRadius: 3, background: "rgba(250,204,21,0.12)", color: "#b45309" }}>Current match</span>
+          <span style={{ padding: "2px 6px", borderRadius: 3, background: "rgba(129,140,248,0.1)", color: "#4f46e5" }}>{focus === 1 ? "Your path" : "Her path"}</span>
+          {!past && (<span style={{ padding: "2px 6px", borderRadius: 3, background: "rgba(250,204,21,0.12)", color: "#b45309" }}>Current match</span>)}
+          {past && (<span style={{ padding: "2px 6px", color: "#64748b" }}>✓ = won the match · tap a name for her profile</span>)}
         </div>
         <div style={{ overflowX: "auto", overflowY: "auto", flex: 1, paddingBottom: 6 }}>
           <div style={{ display: "flex", gap: 6, alignItems: "stretch", minHeight: "100%" }}>
