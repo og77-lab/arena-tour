@@ -3,6 +3,7 @@
    the grind. Prices follow the prizes at your level, so they stay meaningful as you climb. */
 
 import { TIERS } from "../models/constants";
+import { ageCap } from "./aging";
 
 export var COACH_TP = 10;
 export var BASE_CAP = 20;
@@ -19,8 +20,8 @@ export function entryFee(ti) { return nice(champPrize(ti) * 0.35); }
 
 export function pedigreeLevel(player) { return (player && player.pedigree) || 0; }
 export function nextPedigree(player) { return PEDIGREE[pedigreeLevel(player)] || null; }
-/* Highest level a stat can be trained to */
-export function statCap(player, k) { return ROOSTER_STATS[k] ? (pedigreeLevel(player) ? PEDIGREE[pedigreeLevel(player) - 1].cap : BASE_CAP) : BASE_CAP; }
+/* Highest level a stat can be trained to: the age cap (engine/aging: 20 for ten seasons, then lower), plus the pedigree's lift on the rooster's stats */
+export function statCap(player, k) { var age = ageCap(player && player.y); return ROOSTER_STATS[k] && pedigreeLevel(player) ? age + PEDIGREE[pedigreeLevel(player) - 1].cap - BASE_CAP : age; }
 
 /* This week's investment, if one has been made already */
 export function weekInvestment(S) {

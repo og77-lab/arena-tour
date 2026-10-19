@@ -11,6 +11,7 @@ import { handsTalent } from "../engine/joust";
 import { titleMix, npcTitles } from "../engine/titles";
 import Icon, { StatIcon } from "./Icons";
 import { reachedName } from "../engine/history";
+import { ageCap } from "../engine/aging";
 
 /* Fans and followers, and what they mean when you meet: the stands back whoever the crowd loves more */
 function FanBox(props) {
@@ -126,6 +127,7 @@ export default function Profile(props) {
               </div>
             ))}
             {!p.isP && (<div style={{ fontSize: 13, color: "#57534e", fontStyle: "italic", marginTop: 2 }}>{trait(p.id)}</div>)}
+            {p.y != null && (<div style={{ fontSize: 12, color: "#57534e", fontWeight: 800, marginTop: 3 }}>{p.y === 1 ? "First season on tour" : "Season " + p.y + " on tour"} · stats up to {ageCap(p.y)}</div>)}
           </div>
           {!p.isP && (
             <div style={{ position: "relative", margin: "8px 6px 2px", background: "#fff", border: "2px solid #3f2a1d", borderRadius: 14, padding: "6px 10px", fontFamily: "Georgia, serif", fontStyle: "italic", fontSize: 13, color: "#1c1917", boxShadow: "2px 2px 0 #3f2a1d", textAlign: "center" }}>

@@ -17,7 +17,7 @@ export function shapePotentials(npcs) {
 }
 /* Starting levels for a new tour: a bank of training points from talent (talent × 1.5), spent level by level on
    her favourite stat first and then evenly — so talent 31 starts a little ahead of talent 30, not a whole level */
-function startLevels(n) {
+export function startLevels(n) {
   var tp = (n.skill || 30) * 1.5, tr = { r: 0, p: 0, f: 0, s: 0, g: 0 }, keys = ["r", "p", "f", "s", "g"], fav = keys[n.id % 5];
   for (var guard = 0; guard < 40; guard++) {
     var best = null; keys.forEach(function (k) { if (best == null || tr[k] - (k === fav ? 1 : 0) < tr[best] - (best === fav ? 1 : 0)) best = k; });

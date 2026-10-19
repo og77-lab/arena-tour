@@ -7,7 +7,7 @@
 var VERSION = 2;
 var TR = ["r", "p", "f", "s", "g", "b", "tp"];
 var BEST = ["rank", "peakS", "titles", "gsTitles", "finals", "careerMoney"];
-var KNOWN = { id: 1, name: 1, emoji: 1, isP: 1, skill: 1, pot: 1, sp: 1, ap: 1, tr: 1, best: 1, money: 1, fg: 1, fr: 1, inj: 1 };
+var KNOWN = { id: 1, name: 1, emoji: 1, isP: 1, skill: 1, pot: 1, sp: 1, ap: 1, tr: 1, best: 1, money: 1, fg: 1, fr: 1, inj: 1, y: 1 };
 
 function num(v) { return typeof v === "number" ? v : 0; }
 function trimNulls(a) { while (a.length && (a[a.length - 1] === null || a[a.length - 1] === 0)) a.pop(); return a; }
@@ -23,7 +23,7 @@ function packNpc(n) {
     trimNulls(TR.map(function (k) { return num(tr[k]); })), trimNulls(bestArr),
     Math.round(num(n.money)), n.fg == null ? null : n.fg, n.fr == null ? null : n.fr,
     n.inj && n.inj.length ? n.inj.map(function (x) { return [x.id, x.left]; }) : null,
-    extra
+    extra, n.y == null ? null : n.y /* seasons on the tour (engine/aging) */
   ]);
 }
 function unpackNpc(a) {
@@ -34,6 +34,7 @@ function unpackNpc(a) {
   if (a[10] != null) n.fg = a[10];
   if (a[11] != null) n.fr = a[11];
   if (a[12]) n.inj = a[12].map(function (x) { return { id: x[0], left: x[1] }; });
+  if (a[14] != null) n.y = a[14];
   if (a[13]) { var ex = a[13]; Object.keys(ex).forEach(function (k) { if (k === "_best") Object.assign(n.best, ex._best); else n[k] = ex[k]; }); }
   return n;
 }

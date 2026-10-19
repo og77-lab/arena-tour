@@ -2,6 +2,8 @@
 
 import { TOTAL_EVENTS } from "../models/constants";
 import { mkNPCs } from "./npcGenerator";
+import { turnOver, toAge, ageCap } from "./aging";
+import { statCap } from "./investments";
 import { getRanked } from "../models/formulas";
 
 /* Season calendar: 4 blocks × (4 swing weeks + 1 Grand Slam) = 20 events */
@@ -19,14 +21,18 @@ export function mkCalendar() {
 /* Build a fresh season. If `prev` is passed, carries over NPCs, player career data, defending slots, etc. */
 export function mkSeason(name, num, prev) {
   var emptyRes = []; for (var zi = 0; zi < TOTAL_EVENTS; zi++) emptyRes.push(0);
-  var npcs, def = emptyRes.slice();
+  var npcs, def = emptyRes.slice(), turn = null;
   if (prev) {
-    npcs = prev.npcs.map(function (n) { var c = Object.assign({}, n); if (n.w) c.w = n.w.slice(); delete c.dr; return c; }); /* step-downs (engine/events) start again each season */ /* last season's weeks become the ones to defend */
+    /* The off-season: some rivals retire, newcomers take their places, everyone is a season older (engine/aging) */
+    turn = turnOver(prev.npcs[0] && prev.npcs[0].y == null ? toAge(prev) : prev);
+    npcs = turn.npcs.map(function (n) { var c = Object.assign({}, n); delete c.dr; return c; }); /* step-downs (engine/events) start again each season */ /* last season's weeks become the ones to defend */
     def = prev.player.res || def;
   } else {
     npcs = mkNPCs();
   }
   var ptr = prev ? Object.assign({ s: 0, g: 0 }, prev.player.tr) : { r: 0, p: 0, f: 0, s: 0, g: 0, tp: 0 };
+  var pAge = prev ? (prev.player.y || prev.sNum || 1) + 1 : 1, pLost = 0;
+  if (prev) { var pped = { y: pAge, pedigree: prev.player.pedigree }; ["r", "p", "f", "s", "g", "b"].forEach(function (k) { var c = statCap(pped, k); if ((ptr[k] || 0) > c) { pLost += ptr[k] - c; ptr[k] = c; } }); }
   var pBest = prev ? prev.player.best : { rank: 1001, peakS: 0, titles: 0, gsTitles: 0, finals: 0 };
   var pSP = 0; for (var di = 0; di < TOTAL_EVENTS; di++) pSP += (def[di] || 0);
   var res = []; for (var ri = 0; ri < TOTAL_EVENTS; ri++) res.push(0);
@@ -39,7 +45,7 @@ export function mkSeason(name, num, prev) {
   var S = {
     pName: name || "Champion", sNum: num || 1, npcs: npcs, cal: mkCalendar(), calIdx: 0,
     player: {
-      id: 1, isP: true,
+      id: 1, isP: true, y: pAge,
       sp: pSP, ap: prev ? prev.player.ap : 0,
       tr: ptr, best: pBest,
       def: def, res: res,
@@ -54,12 +60,21 @@ export function mkSeason(name, num, prev) {
   if (prev) {
     ["fans", "ivSeen", "lastTones", "goal", "ach", "stats", "rival", "settledRivals", "tips", "tutorial", "earned", "pedigree", "locker", "kit", "gearSpent", "followers", "hm", "startPts"].forEach(function (k) { if (prev.player[k] != null) S.player[k] = prev.player[k]; });
     if (prev.news) S.news = prev.news;
+    /* Who left the tour (kept two seasons, so past draws still show their names), and the off-season's news */
+    S.gone = (prev.gone || []).filter(function (g) { return g.s >= (num || 1) - 2; }).concat(turn.gone);
+    S.nextId = turn.nextId;
+    var top = turn.gone.slice().sort(function (a, b) { return a.rank - b.rank; }).slice(0, 6);
+    S.farewell = { s: prev.sNum || 1, n: turn.gone.length, top: top.map(function (g) { return g.id; }), cap: ageCap(pAge), lost: pLost };
+    if (turn.rivalGone) { S.farewell.rival = turn.rivalGone.id; delete S.player.rival; }
+    /* a retired granny can't become your next rival: her head-to-head book closes */
+    if (turn.gone.length && S.player.h2h) { var h2 = Object.assign({}, S.player.h2h); turn.gone.forEach(function (g) { delete h2[g.id]; }); S.player.h2h = h2; }
     if (prev.hist) S.hist = prev.hist; /* the tour's history (engine/history) */
     if (prev.newsSeenAt != null) S.newsSeenAt = prev.newsSeenAt;
   }
   S.pts = 2;                       /* points on the current table, rivals' points rolling (engine/migrate toPts2) */
   S.eng = 2;                       /* the match engine version: each rider on her own bar (engine/joust) */
   if (!prev) S.player.startPts = 10;  /* starting talent: 10 points to spread over the stats before the first event */
+  S = toAge(S);                    /* a new tour: rivals of every age, you in your first season (engine/aging) */
   S.start = seasonSnapshot(S);
   return S;
 }

@@ -40,6 +40,7 @@ import { buildIssue, buildSpecialEdition, rankMap } from "./engine/news";
 import { tallyTournament, checkAchievements } from "./engine/achievements";
 import { updateRival, rivalRecord } from "./engine/rivalry";
 import { uniqueNames, needsUniqueNames, toPts2, needsPts2 } from "./engine/migrate";
+import { ageCap, toAge, needsAge } from "./engine/aging";
 import { weekEvents, lowestTierFor, stepDownTier, dropsLeft, DROP_LIMIT } from "./engine/events";
 import { ACHIEVEMENTS } from "./engine/achievements";
 import AchievementsSheet, { AchToast, achCount } from "./components/Achievements";
@@ -73,7 +74,8 @@ function npcTrainWeek(n, tp) {
   var fav = focusStat(n.id), bought = 0;
   for (var guard = 0; guard < 20; guard++) {
     var best = null, bestScore = 1e9;
-    STAT_KEYS.forEach(function (k) { var lv = tr[k] || 0; if (lv >= 20) return; var sc = (k === "b" ? lv * 2 : lv) - (k === fav ? 2 : 0); /* Bounce-back kept at about half the others */ if (sc < bestScore) { bestScore = sc; best = k; } });
+    var cap = ageCap(n.y); /* the same age cap as yours (engine/aging) */
+    STAT_KEYS.forEach(function (k) { var lv = tr[k] || 0; if (lv >= cap) return; var sc = (k === "b" ? lv * 2 : lv) - (k === fav ? 2 : 0); /* Bounce-back kept at about half the others */ if (sc < bestScore) { bestScore = sc; best = k; } });
     if (!best) break;
     var cost = trainCost(tr[best] || 0);
     if (tr.tp < cost) break;
@@ -191,6 +193,8 @@ export default function Arena(props) {
       if (!d.eng || d.eng < 2) { d = toEngine2(d); try { sSet(d); } catch (e) {} }
       /* Points from before the current table: converted once, and rivals' points start dropping off like yours */
       if (needsPts2(d)) { d = toPts2(d); try { sSet(d); } catch (e) {} }
+      /* Ages: rivals spread over 1–16 seasons on tour, you counted from season 1 (engine/aging) */
+      if (needsAge(d)) { d = toAge(d); try { sSet(d); } catch (e) {} }
       setS(d);
       if (d.activeT) { setTS(d.activeT); setScr("tourney"); }
       else if (d.activeF) { setFS(d.activeF); setScr("finals"); }
@@ -222,7 +226,7 @@ export default function Arena(props) {
     queueCloudSave(userId, snap, saveGameToCloud);
   }, [ts, fs]);
   function exportSave() { if (!S) return; var b = new Blob([JSON.stringify(pack(S))],{type:"application/json"}); var u = URL.createObjectURL(b); var a = document.createElement("a"); a.href = u; a.download = "arena-"+S.pName+"-s"+S.sNum+".json"; a.click(); URL.revokeObjectURL(u); }
-  function importSave(e) { var f = e.target.files && e.target.files[0]; if (!f) return; var r = new FileReader(); r.onload = function(ev){ try { var d = unpack(JSON.parse(ev.target.result)); if (d && d.player) { if (!d.eng || d.eng < 2) d = toEngine2(d); save(toPts2(uniqueNames(d))); setScr("hub"); } } catch(err){} }; r.readAsText(f); }
+  function importSave(e) { var f = e.target.files && e.target.files[0]; if (!f) return; var r = new FileReader(); r.onload = function(ev){ try { var d = unpack(JSON.parse(ev.target.result)); if (d && d.player) { if (!d.eng || d.eng < 2) d = toEngine2(d); save(toAge(toPts2(uniqueNames(d)))); setScr("hub"); } } catch(err){} }; r.readAsText(f); }
   var _syncing = useState(false), syncing = _syncing[0], setSyncing = _syncing[1];
   var _syncMsg = useState(""), syncMsg = _syncMsg[0], setSyncMsg = _syncMsg[1];
   var _mutedState = useState(isMuted()), mutedState = _mutedState[0], setMutedState = _mutedState[1];
@@ -938,7 +942,7 @@ export default function Arena(props) {
   /* The profile, plus the tour history's windows: a week's events and any past draw (engine/history) */
   function riderRef(id) {
     if (id === 1) return { id: 1, isP: true, name: S.pName, short: sh(S.pName), emoji: "👵" };
-    var n = S.npcs.filter(function(x){ return x.id === id; })[0];
+    var n = S.npcs.filter(function(x){ return x.id === id; })[0] || (S.gone || []).filter(function(g){ return g.id === id; })[0]; /* retired riders keep their names in old draws */
     return n ? { id: id, name: n.name, short: sh(n.name), emoji: n.emoji || "" } : { id: id, name: "Rider " + id, short: "Rider " + id, emoji: "" };
   }
   function openProfileOf(id) {
@@ -1037,6 +1041,8 @@ export default function Arena(props) {
           {hubTab === "train" && (
             <div>
               {sectionTitle("Training Camp", "Spend training points between tournaments. Every level makes your own bar easier.")}
+              {(function(){ var y = S.player.y || S.sNum || 1, c = ageCap(y), nx = ageCap(y + 1), drop = y; while (ageCap(drop) >= 20 && drop < 40) drop++; /* the age cap, same for every rider (engine/aging) */
+                return (<div style={card({ padding: "8px 12px", marginBottom: 10, fontSize: 13, color: C.textSoft, lineHeight: 1.4 })}><b style={{ color: C.text }}>Season {y} on tour</b> · every stat can be trained to <b style={{ color: C.text }}>{c}</b>{nx < c ? (<span> · next season <b style={{ color: C.redInk }}>{nx}</b> — levels above it are lost</span>) : c >= 20 ? (<span> until season {drop - 1}, then a little lower each season</span>) : null}. Every granny ages by the same rule.</div>); })()}
               <div style={card({textAlign:"center",marginBottom:10,padding:"10px 12px"})}>
                 <div style={label()}>Training points</div>
                 <div style={display(30, C.goldInk)}>{tpNow} TP</div>
@@ -1069,7 +1075,8 @@ export default function Arena(props) {
                     </div>
                     {row("whistle", "Private session with Coach Hettie", "+" + COACH_TP + " training points. Priced to the prizes at your level.", cp, bookCoach, "+" + COACH_TP + " TP", "coach")}
                     {STAFF.map(function(st){ var f = fitOf(S.player); return row(st.id === "nurse" ? "cross" : st.id === "doctor" ? "bone" : "tub", st.name, st.sub + " " + [st.g ? "granny +" + st.g + "%" : "", st.r ? "rooster +" + st.r + "%" : ""].filter(Boolean).join(", ") + " fitness now (you're at " + f.g + "% / " + f.r + "%).", staffPrice(st), function(){ bookStaff(st.id); }, "Book", st.id); })}
-                    {ped && row("scroll", "Rooster pedigree certificate", "Lifts Stamina (less speed-up) and Steady Stride (bigger gold)'s cap to level " + ped.cap + ". Everything you've trained stays.", ped.price, buyPedigree, "Lv " + ped.cap, "ped")}
+                    {ped && (function(){ var pc = statCap(Object.assign({}, S.player, { pedigree: (S.player.pedigree || 0) + 1 }), "s"); /* the age cap applies under the pedigree too */
+                      return row("scroll", "Rooster pedigree certificate", "Lifts Stamina (less speed-up) and Steady Stride (bigger gold)'s cap to level " + pc + " (+" + (ped.cap - 20) + " over your age cap). Everything you've trained stays.", ped.price, buyPedigree, "Lv " + pc, "ped"); })()}
                   </div>
                 );
               })()}
@@ -1088,14 +1095,14 @@ export default function Arena(props) {
                       return (
                         <div key={st.k} style={{padding:"9px 0",borderTop:"1px dashed "+C.line}}>
                           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6,gap:8}}>
-                            <div><span style={{color:C.text,fontWeight:900,fontSize:15}}><StatIcon k={st.k} size={19} style={{ marginRight: 4, verticalAlign: "-4px" }} />{st.label}</span>{st.el && (<span style={{color:C.goldInk,fontSize:12,fontWeight:900,marginLeft:5}}>({st.el})</span>)}<span style={{color:C.textSoft,fontSize:13,marginLeft:6,fontWeight:700}}>Lv {lv}/{cap}{cap > 20 ? " 🧬" : ""}</span></div>
+                            <div><span style={{color:C.text,fontWeight:900,fontSize:15}}><StatIcon k={st.k} size={19} style={{ marginRight: 4, verticalAlign: "-4px" }} />{st.label}</span>{st.el && (<span style={{color:C.goldInk,fontSize:12,fontWeight:900,marginLeft:5}}>({st.el})</span>)}<span style={{color:C.textSoft,fontSize:13,marginLeft:6,fontWeight:700}}>Lv {lv}/{cap}{cap > ageCap(S.player.y) ? " 🧬" : ""}</span></div>
                             <button onClick={function(){doTrain(st.k)}} disabled={!can} style={button(can?"gold":"ghost",{padding:"6px 12px",fontSize:13,opacity:can?1:0.6,cursor:can?"pointer":"default"})}>{lv>=cap?"MAX":cost+" TP"}</button>
                           </div>
                           {(function(){
                             var rv = rivalTr[st.k] || 0;
                             return (
                               <div style={{position:"relative",display:"flex",gap:2,marginBottom:5}}>
-                                {Array.from({length:cap}).map(function(_,i){return(<div key={i} style={{flex:1,height:7,borderRadius:2,background:i<lv?st.col:i>=20?"#e9d5ff":"#efe3c4"}}/>);})}
+                                {Array.from({length:cap}).map(function(_,i){return(<div key={i} style={{flex:1,height:7,borderRadius:2,background:i<lv?st.col:i>=ageCap(S.player.y)?"#e9d5ff":"#efe3c4"}}/>);})}
                                 <div title="Average of riders ranked near you" style={{position:"absolute",top:-3,height:13,width:3,borderRadius:2,background:C.ink,left:"calc("+Math.min(100,rv/cap*100)+"% - 1.5px)"}} />
                               </div>
                             );
