@@ -13,7 +13,7 @@ import Icon from "./Icons";
 export default function TierSheet(props) {
   var avail = props.available || [];
   var best = avail.length ? Math.max.apply(null, avail) : -1;
-  var events = props.events || [];
+  var events = props.events || [], sd = props.stepDown || { tier: -1, left: 0, limit: 0 };
   var [open, setOpen] = useState(props.paid >= 0 ? props.paid : best);
   var [legend, setLegend] = useState(false);
   var [lanes, setLanes] = useState(false);
@@ -51,13 +51,15 @@ export default function TierSheet(props) {
                     <span style={{ fontSize: 16, fontWeight: 900, color: C.text }}>{t.name}</span>
                     {ok && ti === props.paid && (<span style={{ fontSize: 9, fontWeight: 900, letterSpacing: 1, color: "#fff", background: "#7c3aed", padding: "2px 6px", borderRadius: 10 }}>PAID ENTRY</span>)}
                     {ok && ti === props.wildcard && ti !== props.paid && (<span style={{ fontSize: 9, fontWeight: 900, letterSpacing: 1, color: "#fff", background: "#be123c", padding: "2px 6px", borderRadius: 10 }}>FAN WILDCARD</span>)}
+                    {ok && ti === sd.tier && ti !== props.paid && (<span style={{ fontSize: 9, fontWeight: 900, letterSpacing: 1, color: "#fff", background: "#0f766e", padding: "2px 6px", borderRadius: 10 }}>STEP DOWN · {sd.left} OF {sd.limit} LEFT</span>)}
                     {ok && ti === best && ti !== props.wildcard && ti !== props.paid && (<span style={{ fontSize: 9, fontWeight: 900, letterSpacing: 1, color: "#fff", background: C.greenInk, padding: "2px 6px", borderRadius: 10 }}>TOP TIER OPEN</span>)}
                   </div>
                   <div style={{ fontSize: 12, color: C.textSoft, marginTop: 2 }}>
                     Best of {t.bo || 3} sets · {t.size} riders · ranks {t.rankRange[0]}–{t.rankRange[1] > 1000 ? "1000" : t.rankRange[1]}
                   </div>
                   <Ladder steps={ptsLadder(ti)} col={t.col} />
-                  {!ok && (<div style={{ fontSize: 11, fontWeight: 800, color: C.redInk, marginTop: 2 }}><Icon name="lock" size={13} style={{ verticalAlign: "-2px", marginRight: 4 }} />Not open at #{props.rank}</div>)}
+                  {ok && ti === sd.tier && ti !== props.paid && (<div style={{ fontSize: 11, fontWeight: 800, color: "#0f766e", marginTop: 2 }}>Below your range: riding here uses 1 of your {sd.limit} step-downs this season</div>)}
+                  {!ok && (<div style={{ fontSize: 11, fontWeight: 800, color: C.redInk, marginTop: 2 }}><Icon name="lock" size={13} style={{ verticalAlign: "-2px", marginRight: 4 }} />{ti === sd.tier ? "No step-downs left this season (" + sd.limit + " of " + sd.limit + " used)" : "Not open at #" + props.rank}</div>)}
                 </div>
                 <div style={{ textAlign: "right", flexShrink: 0 }}>
                   {ok && evOf(ti).length > 0 ? (<span style={{ fontSize: 12, fontWeight: 900, color: t.col }}>{evOf(ti).length} event{evOf(ti).length > 1 ? "s" : ""} {open === ti ? "▲" : "▼"}</span>) : (<span>

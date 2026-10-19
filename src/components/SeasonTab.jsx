@@ -111,6 +111,7 @@ export default function SeasonTab(props) {
                     <span aria-hidden style={{ width: 9, height: 9, borderRadius: "50%", background: t.col }} />{t.name}
                     <span style={{ fontSize: 11, color: C.textSoft, fontWeight: 700 }}>· {champTotal(ti).toLocaleString()} pts</span>
                     {w && (<span style={{ fontSize: 10, fontWeight: 900, color: "#be123c" }}>WILDCARD</span>)}
+                    {ti === props.stepDown && (<span style={{ fontSize: 10, fontWeight: 900, color: "#0f766e" }}>STEP DOWN</span>)}
                   </span>
                 );
               })}

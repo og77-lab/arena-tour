@@ -5,7 +5,7 @@
 
 import { TIERS } from "../models/constants";
 import { getRanked } from "../models/formulas";
-import { resting } from "./fitness";
+import { resting, fitOf } from "./fitness";
 
 /* Lane conditions: what they do to the match (for both riders), what they pay, and how the arena looks */
 export var CONDITIONS = {
@@ -39,6 +39,20 @@ function rng(seed) { var x = seed >>> 0 || 1; return function () { x ^= x << 13;
 
 var PER_TIER = [10, 5, 3, 2, 1];
 
+/* Stepping down: any rider may enter the tier just below her rank range, at most DROP_LIMIT times a season (counted
+   on the rider as dr, cleared each new season). A rival steps down only when she's worn (under STEP_TIRED on either
+   meter) or carrying an injury; the player may choose it any week. */
+export var DROP_LIMIT = 4, STEP_TIRED = 45;
+/* Lowest tier whose rank range holds this rank (the game's own fallback when none does) */
+export function lowestTierFor(rank) {
+  for (var i = 0; i <= 4; i++) if (rank >= TIERS[i].rankRange[0] && rank <= TIERS[i].rankRange[1]) return i;
+  return rank > 700 ? 0 : rank > 400 ? 1 : rank > 200 ? 2 : rank > 100 ? 3 : 4;
+}
+/* The tier just below her range, or -1 at the bottom */
+export function stepDownTier(rank) { return lowestTierFor(rank) - 1; }
+export function dropsLeft(p) { return Math.max(0, DROP_LIMIT - ((p && p.dr) || 0)); }
+function wantsEasier(p) { var f = fitOf(p); return Math.min(f.g, f.r) < STEP_TIRED || !!(p.inj && p.inj.length); }
+
 /* The week's events, by tier. Grand Slam weeks have a single named Slam. */
 export function weekEvents(S) {
   var ev = S.cal && S.cal[S.calIdx];
@@ -50,10 +64,12 @@ export function weekEvents(S) {
     var field = ranked.filter(function (p) { return !p.isP && !resting(p); }).slice(0, t5.size).map(function (p) { return p.id; });
     return [mk(S, 5, 0, sl.name, sl.cond, "strong", field, rankOf, ranked)];
   }
-  var out = [], used = {};
+  var out = [], used = {}, down = {};
+  /* Worn or hurt rivals with step-downs left enter the tier below their range instead */
+  ranked.forEach(function (p, i) { if (!p.isP && !resting(p) && dropsLeft(p) > 0 && wantsEasier(p)) { var sd = stepDownTier(i + 1); if (sd >= 0) down[p.id] = sd; } });
   for (var ti = 4; ti >= 0; ti--) { /* top tiers first, so riders who could play two tiers play the higher one */
     var T = TIERS[ti], n = PER_TIER[ti], r = rng(S.sNum * 100003 + S.calIdx * 1009 + ti * 97 + 7);
-    var elig = ranked.filter(function (p, i) { return !p.isP && !used[p.id] && !resting(p) && i + 1 >= T.rankRange[0] && i + 1 <= T.rankRange[1]; });
+    var elig = ranked.filter(function (p, i) { return !p.isP && !used[p.id] && !resting(p) && (down[p.id] != null ? down[p.id] === ti : i + 1 >= T.rankRange[0] && i + 1 <= T.rankRange[1]); });
     /* Each event centres on a slice of the tier's ranks: strong events on the top, soft ones lower down */
     var centres = []; for (var e = 0; e < n; e++) centres.push(n === 1 ? 0.2 : e / (n - 1));
     var pool = elig.slice();
@@ -67,6 +83,8 @@ export function weekEvents(S) {
       var cond = COND_KEYS[Math.floor(r() * COND_KEYS.length)];
       var name = PLACES[Math.floor(r() * PLACES.length)] + " " + SUFFIX[ti][Math.floor(r() * SUFFIX[ti].length)];
       out.push(mk(S, ti, e, name, cond, fieldKey, pick.map(function (p) { return p.id; }), rankOf, ranked));
+      var steps = pick.filter(function (p) { return down[p.id] === ti; }).map(function (p) { return p.id; });
+      if (steps.length) out[out.length - 1].down = steps; /* who stepped down into it: each uses one of her season's step-downs */
     }
   }
   /* Names stay unique within a week */

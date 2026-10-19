@@ -10,7 +10,7 @@ import { effectsOf, EffectList, Legend, statEffect } from "./Effect";
 import { CompareLanes } from "./Lanes";
 import Icon, { IconTile } from "./Icons";
 import FanRules from "./FanRules";
-import { CONDITIONS, FIELDS } from "../engine/events";
+import { CONDITIONS, FIELDS, DROP_LIMIT, STEP_TIRED } from "../engine/events";
 import { GEAR } from "../engine/gear";
 import { fatigueFx } from "../engine/fitness";
 
@@ -166,6 +166,12 @@ function body(id) {
       <List items={[
         <span key="a"><B>Fan wildcard:</B> if you're ranked just outside the tier above (within 15% of its cut) and have 70+ fans, it opens for free.</span>,
         <span key="b"><B>Paid entry:</B> at the bottom of the tournament list you can buy your way into the tier above for this week only (it uses this week's investment).</span>
+      ]} />
+      <H>Stepping down a tier</H>
+      <List items={[
+        <span key="a">Any rider may enter the tier just <B>below</B> her rank range — at most <B>{DROP_LIMIT} times a season</B>. The count starts again each season.</span>,
+        <span key="b">You choose when. It's marked <B>STEP DOWN</B> in the tournament list, with how many you have left.</span>,
+        <span key="c">Rivals follow the same limit. A rival steps down only when she's worn (under {STEP_TIRED}% on either meter) or carrying an injury.</span>
       ]} />
       <P>During a tournament, the header shows the tier, the round, best-of and the bracket path. <B>Scout</B> opens the opponent's full report; 🌐 opens the bracket.</P>
     </>);

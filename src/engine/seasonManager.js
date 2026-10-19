@@ -21,7 +21,7 @@ export function mkSeason(name, num, prev) {
   var emptyRes = []; for (var zi = 0; zi < TOTAL_EVENTS; zi++) emptyRes.push(0);
   var npcs, def = emptyRes.slice();
   if (prev) {
-    npcs = prev.npcs.map(function (n) { var c = Object.assign({}, n); if (n.w) c.w = n.w.slice(); return c; }); /* last season's weeks become the ones to defend */
+    npcs = prev.npcs.map(function (n) { var c = Object.assign({}, n); if (n.w) c.w = n.w.slice(); delete c.dr; return c; }); /* step-downs (engine/events) start again each season */ /* last season's weeks become the ones to defend */
     def = prev.player.res || def;
   } else {
     npcs = mkNPCs();

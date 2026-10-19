@@ -40,7 +40,7 @@ import { buildIssue, buildSpecialEdition, rankMap } from "./engine/news";
 import { tallyTournament, checkAchievements } from "./engine/achievements";
 import { updateRival, rivalRecord } from "./engine/rivalry";
 import { uniqueNames, needsUniqueNames, toPts2, needsPts2 } from "./engine/migrate";
-import { weekEvents } from "./engine/events";
+import { weekEvents, lowestTierFor, stepDownTier, dropsLeft, DROP_LIMIT } from "./engine/events";
 import { ACHIEVEMENTS } from "./engine/achievements";
 import AchievementsSheet, { AchToast, achCount } from "./components/Achievements";
 import { CoachCard } from "./components/Coach";
@@ -380,6 +380,9 @@ export default function Arena(props) {
     /* …or a paid entry bought with this week's investment */
     var paid = paidEntryTier(S);
     if (paid >= 0 && avail.indexOf(paid) < 0) avail.push(paid);
+    /* …or a step down to the tier below your range, while you have step-downs left this season */
+    var sd = stepDownTier(rank);
+    if (sd >= 0 && dropsLeft(S.player) > 0 && avail.indexOf(sd) < 0) avail.push(sd);
     return avail;
   }
   function wildcardTier(S) {
@@ -687,6 +690,9 @@ export default function Arena(props) {
     var ridden = {};
     for (var fbi = 0; fbi < ts.bracket.length; fbi++) { var fbr = ts.bracket[fbi]; if (!fbr) continue; for (var fmi = 0; fmi < fbr.length; fmi++) { [fbr[fmi].a, fbr[fmi].b].forEach(function(x){ if (x && !x.isP) ridden[x.id] = { n: ((ridden[x.id] || {}).n || 0) + 1, bo: tier.bo, tier: ts.tierIdx, cond: ts.cond || "classic", mul: ts.moneyMul || 1 }; }); } }
     Object.keys(weekRidden).forEach(function(id){ ridden[id] = weekRidden[id]; });
+    /* Rivals who stepped down a tier and rode use one of their season's step-downs */
+    var npcById = {}; newNpcs.forEach(function(n){ npcById[n.id] = n; });
+    weekEv.forEach(function(e){ (e.down || []).forEach(function(id){ if (ridden[id] && npcById[id]) npcById[id].dr = (npcById[id].dr || 0) + 1; }); });
     newNpcs.forEach(function(n){
       var rd = ridden[n.id], f = fitOf(n), inj = tickInjuries(n.inj);
       if (rd) for (var mk = 0; mk < rd.n; mk++) { f = afterMatches(f, 1, rd.bo); inj = addInjury(inj, rollInjury(f)); }
@@ -706,6 +712,8 @@ export default function Arena(props) {
       if (ph) { var f2 = fitOf(n); putFit(n, { g: f2.g + ph.staff.g, r: f2.r + ph.staff.r }); cash -= ph.price; npcSpend.staff += ph.price; }
       n.money = Math.max(0, Math.round(cash));
     });
+    /* A tournament below your rank range uses one of your season's step-downs */
+    if (!ts.rest && ts.tierIdx < 5 && ts.tierIdx < lowestTierFor(curRank)) newP.dr = (S.player.dr || 0) + 1;
     newP.fitEnd = fitOf(S.player); /* how tired you finished, shown on Home */
     /* Knitter: this week's new followers, and the story of your fans (the interview adds its line later) */
     var folBefore = followersOf(S.player), folGain = followersGain({ rank: curRank, fanDelta: fansNow - fansBefore, wins: ts.log.filter(function(m){ return m.won; }).length, title: !!wonTitle, slam: isGS });
@@ -991,7 +999,7 @@ export default function Arena(props) {
         {S.player.startPts > 0 && (<StartTalent points={S.player.startPts} tr={S.player.tr} onDone={function(add){ var t = Object.assign({}, S.player.tr || {}); Object.keys(add).forEach(function(k){ t[k] = (t[k] || 0) + add[k]; }); var np = Object.assign({}, S.player, { tr: t }); delete np.startPts; save(Object.assign({}, S, { player: np })); }} />)}
         {showHelp && (<HelpScreen onClose={function(){setHelp(false)}} />)}
         {hubTip && (<CoachCard key={hubTip} id={hubTip} vars={{ name: S.pName, rival: S.player.rival ? S.player.rival.name : null }} onDone={function(all){ markTip(hubTip, all); }} />)}
-        {picking && !seasonDone && (<TierSheet available={avTiers} wildcard={wildcardTier(S)} rank={pRank} paid={paidEntryTier(S)}
+        {picking && !seasonDone && (<TierSheet available={avTiers} wildcard={wildcardTier(S)} rank={pRank} paid={paidEntryTier(S)} stepDown={{ tier: stepDownTier(pRank), left: dropsLeft(S.player), limit: DROP_LIMIT }}
           entry={(function(){ var top = Math.max.apply(null, availableTiers(S, true)), ti = top + 1; if (ti > 4 || paidEntryTier(S) >= 0) return null; var fee = entryFee(ti); return { tier: ti, fee: fee, used: !!weekInvestment(S), can: !weekInvestment(S) && (S.player.money || 0) >= fee, cash: S.player.money || 0 }; })()}
           onBuyEntry={buyEntry} onRest={restWeek} rest={(function(){ var f = fitOf(S.player), b = (S.player.tr || {}).b || 0; return { g: Math.round(recoveryOf(b, true, f.g)), r: Math.round(recoveryOf(b, true, f.r)), ng: Math.round(recoveryOf(b, false, f.g)), nr: Math.round(recoveryOf(b, false, f.r)), fit: f, def: (S.player.def && S.player.def[S.calIdx]) || 0 }; })()} onClose={function(){setPicking(false)}} events={weekEvents(S)} nearGaps={(function(){ var o = {}, me = effTr(S.player); GAP_KEYS.forEach(function(k){ o[k] = (me[k] || 0) - (rivalTr[k] || 0); }); return o; })()} onPickEvent={function(ev){ setPicking(false); setPrep({ tier: ev.tier, ev: ev }); }}
           onPick={function(ti){ setPicking(false); setPrep({ tier: ti, ev: null }); }} />)}
@@ -1124,7 +1132,7 @@ export default function Arena(props) {
 
           {hubTab === "season" && (
             <div>
-              <SeasonTab S={S} pRank={pRank} onWeek={function(i){ if (findWeek(S.hist, S.sNum, i)) setWeekView({ s: S.sNum, c: i }); }} curEvent={curEvent} seasonDone={seasonDone} avail={seasonDone ? [] : availableTiers(S)} wildcard={wildcardTier(S)}
+              <SeasonTab S={S} pRank={pRank} onWeek={function(i){ if (findWeek(S.hist, S.sNum, i)) setWeekView({ s: S.sNum, c: i }); }} curEvent={curEvent} seasonDone={seasonDone} avail={seasonDone ? [] : availableTiers(S)} wildcard={wildcardTier(S)} stepDown={stepDownTier(pRank)}
                 gsOk={pRank <= 64 || hasSlamWildcard(fansOf(S.player), pRank)} onPlay={playCurrent} onFinals={startFinals} onNextSeason={openGala} />
               <div style={Object.assign(label(C.textSoft), {margin:"14px 2px 6px"})}>Career results</div>
               <div style={card({padding:6})}>
