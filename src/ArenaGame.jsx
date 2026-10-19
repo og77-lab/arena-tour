@@ -347,17 +347,11 @@ export default function Arena(props) {
       if (pRankOf(S) <= 64 || hasSlamWildcard(fansOf(S.player), pRankOf(S))) {
         setPrep({ tier: 5, ev: weekEvents(S).filter(function(x){ return x.tier === 5; })[0] || null });
       } else {
-        var cal = S.cal.slice();
-        cal[S.calIdx].done = true;
-        cal[S.calIdx].result = { pPts: 0, defending: 0, net: 0, pRound: 0, parallel: [] };
-        /* Record rank for sparkline (skipped GS — rank stays same) */
-        var skipRank = pRankOf(S);
-        var skipPlayer = Object.assign({}, S.player, { rankHist: (S.player.rankHist || []).concat([skipRank]).slice(-40) });
-        /* A Slam you don't play is a week off: double recovery (the riders who aren't in it rest too) */
-        putFit(skipPlayer, recover(fitOf(skipPlayer), (skipPlayer.tr || {}).b, true));
-        var sInj = tickInjuries(skipPlayer.inj); if (sInj.length) skipPlayer.inj = sInj; else delete skipPlayer.inj;
-        var restNpcs = S.npcs.map(function(n){ var c = Object.assign({}, n); putFit(c, recover(fitOf(c), (c.tr || {}).b, true)); var ci = tickInjuries(c.inj); if (ci.length) c.inj = ci; else delete c.inj; return c; });
-        save(Object.assign({}, S, { cal: cal, calIdx: S.calIdx + 1, player: skipPlayer, npcs: restNpcs }));
+        /* Not in the Slam: it is still played — by the 64 rivals who made it — and you get the week off (double recovery,
+           no points; last season's points for this week drop off, as they do for everyone) */
+        var slamEv = weekEvents(S).filter(function(x){ return x.tier === 5; })[0] || null;
+        finishT({ bracket: [], tierIdx: 5, round: 0, pending: null, done: true, alive: false, log: [], rest: true, skipGS: true, eventId: "none",
+          eventName: slamEv ? slamEv.name : null, cond: slamEv ? slamEv.cond : "classic" });
       }
     } else {
       setPicking(true);
@@ -521,7 +515,7 @@ export default function Arena(props) {
   }
   function finishTIn() {
     if (!S || !ts) return;
-    var tier = TIERS[ts.tierIdx]; var isGS = ts.tierIdx === 5;
+    var tier = TIERS[ts.tierIdx]; var isGS = ts.tierIdx === 5 && !ts.skipGS; /* skipGS: a Slam you weren't in (it's played without you) */
     var evPts = ts.ptsMul || 1, evMoney = ts.moneyMul || 1;
     var tally = function(pid) { var p = 0; for (var ri = 0; ri < ts.bracket.length; ri++) { var rd = ts.bracket[ri]; if (rd) for (var mi = 0; mi < rd.length; mi++) { if (rd[mi].w && rd[mi].w.id === pid) p += tier.pts[ri]; } } return Math.round(p * evPts); };
     var pp = tally(1);
@@ -586,7 +580,7 @@ export default function Arena(props) {
     var fansNow = clampFans(driftTo + perf.d + (prom ? prom.delta : 0));
     var sponsor = sponsorTP(fansNow);
     /* Career counters for the achievements, then who your rival is after this week */
-    var newStats = tallyTournament(S.player.stats, ts.log, { bo: tier.bo, tierIdx: ts.tierIdx, wonTitle: wonTitle, rivalId: rivalNow ? rivalNow.id : null, promiseKept: !!(prom && prom.kept) });
+    var newStats = tallyTournament(S.player.stats, ts.log, { bo: tier.bo, tierIdx: ts.skipGS ? -1 : ts.tierIdx, wonTitle: wonTitle, rivalId: rivalNow ? rivalNow.id : null, promiseKept: !!(prom && prom.kept) });
     var rv = updateRival(S.player, S.sNum, curEv ? (curEv.type === "gs" ? "Grand Slam " + curEv.gsNum : "Week " + wLabel) : "");
     var settledRivals = S.player.settledRivals || [];
     if (rv.settled) { newStats.rivalsSettled = (newStats.rivalsSettled || 0) + 1; settledRivals = settledRivals.concat([rv.settled.id]); }
@@ -628,7 +622,7 @@ export default function Arena(props) {
     var histAdd = function(e, draw, deep){ var k = histEv.length; histEv.push(e); draw.forEach(function(p, slot){ if (p) histRiders[p.isP ? 1 : p.id] = [k, slot, deep[p.isP ? 1 : p.id] || 0]; }); };
     for (var pti = 0; pti < 6; pti++) {
       var tierEv = weekEv.filter(function(x){ return x.tier === pti && x.id !== ts.eventId; });
-      if (pti === ts.tierIdx) {
+      if (pti === ts.tierIdx && !ts.skipGS) {
         parallelResults.push({ tier: pti, playerEvent: true, count: 1, name: ts.eventName || null });
         var myDraw = [], myDeep = {};
         (ts.bracket[0] || []).forEach(function(m){ myDraw.push(m.a, m.b); });
@@ -740,9 +734,10 @@ export default function Arena(props) {
     var moneyEarned = 0;
     for (var mri = 0; mri <= pRound; mri++) { moneyEarned += (tier.money || [])[mri] || 0; }
     moneyEarned = ts.rest ? 0 : Math.round(moneyEarned * evMoney); /* a rest week pays nothing */
-    var hist = (S.tHist||[]).slice(-119).concat([{ num: ((S.tHist||[]).length ? (S.tHist[S.tHist.length-1].num || S.tHist.length) : 0) + 1, season: S.sNum, tier: ts.tierIdx, tierName: tier.name, eventName: ts.eventName || null, cond: ts.cond || null, pPts: pp, defending: defending, netChange: netChange, pRound: pRound, roundName: ts.rest ? "Rested" : rNames[pRound], money: moneyEarned, winner: champW ? { name: champW.isP ? S.pName : champW.name, emoji: champW.emoji||"👑", isP: champW.isP } : null }]);
+    var hist = (S.tHist||[]).slice(-119).concat([{ num: ((S.tHist||[]).length ? (S.tHist[S.tHist.length-1].num || S.tHist.length) : 0) + 1, season: S.sNum, tier: ts.tierIdx, tierName: tier.name, eventName: ts.eventName || null, cond: ts.cond || null, pPts: pp, defending: defending, netChange: netChange, pRound: pRound, roundName: ts.skipGS ? "Not qualified" : ts.rest ? "Rested" : rNames[pRound], money: moneyEarned, winner: champW ? { name: champW.isP ? S.pName : champW.name, emoji: champW.emoji||"👑", isP: champW.isP } : null }]);
     var cal = S.cal.slice(); cal[S.calIdx].done = true; cal[S.calIdx].tier = ts.tierIdx; cal[S.calIdx].result = { pPts: pp, defending: defending, net: netChange, pRound: pRound, won: !!wonTitle, parallel: parallelResults };
     if (ts.eventName) { cal[S.calIdx].result.eventName = ts.eventName; cal[S.calIdx].result.cond = ts.cond || "classic"; }
+    if (ts.skipGS) cal[S.calIdx].result.skip = true; /* the Slam went on without you */
     newP.earned = (S.player.earned != null ? S.player.earned : (S.player.money || 0)) + moneyEarned;
     newP.money = (newP.money || 0) + moneyEarned;
     newP.seasonMoney = (newP.seasonMoney || 0) + moneyEarned;
@@ -756,7 +751,7 @@ export default function Arena(props) {
     if (tourHist) afterS.hist = tourHist;
     var issue = null;
     try {
-      issue = buildIssue({ before: S, after: afterS, bracket: ts.bracket, roundNames: rNames, tierIdx: ts.tierIdx, tierName: ts.eventName || tier.name, pRound: pRound, wonTitle: wonTitle,
+      issue = buildIssue({ away: ts.skipGS ? "slam" : ts.rest ? "rest" : null, before: S, after: afterS, bracket: ts.bracket, roundNames: rNames, tierIdx: ts.tierIdx, tierName: ts.eventName || tier.name, pRound: pRound, wonTitle: wonTitle,
         pts: pp, net: netChange, money: moneyEarned, champ: champW, parallel: parallelResults, shock: shock, trainLog: trainLog, weekLabel: curEv && curEv.type === "gs" ? "Grand Slam " + curEv.gsNum : "Week " + wLabel });
     } catch (e) { console.error("News issue failed:", e); }
     if (issue) {

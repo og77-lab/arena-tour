@@ -18,7 +18,7 @@ function roundName(ev) {
   if (r.won) return "Champion";
   return (t.rounds === 6 ? RN6 : RN5)[r.pRound] || "";
 }
-function skipped(ev) { return ev.type === "gs" && ev.result && !ev.result.pPts && !(ev.result.parallel || []).length; }
+function skipped(ev) { return ev.type === "gs" && ev.result && (ev.result.skip || (!ev.result.pPts && !(ev.result.parallel || []).length)); }
 
 /* A target on the ladder: am I in, and if not, how many points short of the rider holding the cut-off spot */
 function Goal(props) {

@@ -106,7 +106,8 @@ export function buildIssue(o) {
       name: o.after.pName, kit: (o.after.player && o.after.player.kit) || null, tierIdx: o.tierIdx, tierName: o.tierName, reached: o.wonTitle ? "Champion" : o.roundNames[o.pRound], champion: !!o.wonTitle,
       wins: matches.filter(function (m) { return m.won; }).length, losses: matches.filter(function (m) { return !m.won; }).length,
       pts: o.pts, net: o.net, money: o.money, rankBefore: before[1], rankAfter: myAfter,
-      bestWin: bestWin, lostTo: lostTo, rivalry: lostTo ? { w: h2h.filter(function (e) { return e.w; }).length, l: h2h.filter(function (e) { return !e.w; }).length } : null
+      bestWin: bestWin, lostTo: lostTo, rivalry: lostTo ? { w: h2h.filter(function (e) { return e.w; }).length, l: h2h.filter(function (e) { return !e.w; }).length } : null,
+      away: o.away || null /* "rest" (a week off) or "slam" (not in the Slam): you didn't ride */
     },
     myEvent: { tierIdx: o.tierIdx, tierName: o.tierName, champ: o.champ ? (o.champ.isP || o.champ.id === 1 ? { id: 1, name: o.after.pName, isP: true } : who(o.champ)) : null },
     peers: { climber: climber && climber.d > 0 ? climber : null, faller: faller && faller.d < 0 ? faller : null, gym: gym ? { p: who(npcById[gym.id]), lv: gym.lv, rank: after[gym.id] } : null },

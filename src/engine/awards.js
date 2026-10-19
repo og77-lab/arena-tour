@@ -63,7 +63,7 @@ export function seasonAwards(S) {
 export function yourSeason(S) {
   var start = startOf(S), ranked = getRanked(S), me = 0;
   ranked.forEach(function (p, i) { if (p.isP) me = i + 1; });
-  var played = S.cal.filter(function (e) { return e.done && e.result && (e.result.pPts || (e.result.parallel || []).length); });
+  var played = S.cal.filter(function (e) { return e.done && e.result && !e.result.skip && (e.result.pPts || (e.result.parallel || []).length); });
   var titles = played.filter(function (e) { return e.result.won; }), tmix = titleMix(seasonTitles(S));
   var pts = played.reduce(function (a, e) { return a + (e.result.pPts || 0); }, 0);
   var scalp = null;

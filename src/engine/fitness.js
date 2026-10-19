@@ -42,7 +42,7 @@ export function putFit(p, f) {
 /* A match of unknown length (the quick sim, a rival's past rounds): the average sets for its format */
 export function matchCost(bo) { var sets = (bo || 3) >= 5 ? 4 : 2.5; return { g: COST.g * sets, r: COST.r * sets }; }
 export function afterSets(f, sets) { return { g: clamp(f.g - COST.g * sets), r: clamp(f.r - COST.r * sets) }; }
-export function setsOf(score) { var m = String(score || "").match(/(d+)D+(d+)/); return m ? (+m[1]) + (+m[2]) : 2.5; }
+export function setsOf(score) { var m = String(score || "").match(/(\d+)\D+(\d+)/); return m ? (+m[1]) + (+m[2]) : 2.5; } /* "3-1" → 4 sets ridden */
 export function tierBo(ti) { return (TIERS[ti] && TIERS[ti].bo) || 3; }
 export function afterMatches(f, n, bo) { var c = matchCost(bo); return { g: clamp(f.g - c.g * n), r: clamp(f.r - c.r * n) }; }
 

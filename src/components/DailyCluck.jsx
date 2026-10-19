@@ -67,6 +67,10 @@ function pk(pool, v, off) { var n = pool.length; return pool[(((v + (off || 0)) 
 function leadStory(y, v) {
   var T = up(y.tierName), N = up(y.name), t = y.tierName, n = y.name, R = up(y.reached), W = y.wins;
   var wins = W + (W === 1 ? " win" : " wins");
+  if (y.away) return { pose: "idle",
+    h: pk([N + " PUTS HER FEET UP", "A WEEK OFF FOR " + N, N + " WATCHES FROM THE STANDS", "DECKCHAIR DUTY FOR " + N, "KETTLE ON, LANCE DOWN: " + N + " RESTS"], v, 0),
+    deck: y.away === "slam" ? "Not in the top 64, so " + n + " watched " + t + " from the stands with a flask of tea." : n + " gave her knees and her rooster a week off.",
+    say: pk(["A granny needs her rest. And her biscuits.", "I was there in spirit. And in a deckchair.", "Next year they'll be watching me.", "The rooster needed a lie-in. So did I."], v, 1) };
   if (y.champion) return { pose: "cheer",
     h: pk([N + " CONQUERS " + T + "!", "ALL HAIL QUEEN " + N, N + " TAKES " + T + " BY THE WATTLES", "TROPHY! " + N + " RULES " + T, "GRANNY GOLD: " + N + " SWEEPS " + T, "FEATHERS FLY AS " + N + " WINS " + T, "UNSTOPPABLE! " + N + " LIFTS " + T + " CUP",
       N + " IS QUEEN OF " + T, "CROWN AND CUSTARD: " + N + " WINS " + T, N + " KNITS UP THE " + T + " TITLE", "BINGO! " + N + " SCOOPS " + T,
@@ -327,7 +331,7 @@ export function CluckPaper(props) {
               <div style={{ marginBottom: -4 }}><Rider palette={PLAYER_PALETTE} width={youLead ? 112 : 88} pose={lead.pose === "fallen" ? "knocked" : lead.pose} crown={y.champion} hatOff={lead.pose === "fallen"} /></div>
             </Photo>
             <div style={{ minWidth: 0 }}>
-              <Body>{y.name} collected <b>{y.pts} points</b>{y.money ? " and " + money(y.money) + " in prize money" : ""} at {y.tierName}. {rankLine}</Body>
+              <Body>{y.away === "slam" ? y.name + " wasn't in the top 64, so she sat out " + y.tierName + " and rested." : y.away ? y.name + " rested this week: no points, double the recovery." : (<span>{y.name} collected <b>{y.pts} points</b>{y.money ? " and " + money(y.money) + " in prize money" : ""} at {y.tierName}.</span>)} {rankLine}</Body>
               {y.bestWin && (<Body>Highlight of the week: victory over {y.bestWin.foe.emoji} {sh(y.bestWin.foe.name)}{y.bestWin.foeRank ? " (world #" + y.bestWin.foeRank + ")" : ""} in the {y.bestWin.round}.</Body>)}
               {y.lostTo && (<Body>{y.lostTo.foe.emoji} {sh(y.lostTo.foe.name)} ended the run in the {y.lostTo.round}{y.rivalry ? " — the head-to-head now reads " + y.rivalry.w + "–" + y.rivalry.l + (y.rivalry.l > y.rivalry.w ? ". A rivalry is brewing." : ".") : "."}</Body>)}
             </div>
