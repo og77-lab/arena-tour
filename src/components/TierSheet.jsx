@@ -121,7 +121,7 @@ export default function TierSheet(props) {
 }
 
 /* One named event: the lanes as a picture and one line, the payout, and whether it suits you */
-/* Points you hold after winning each round: R32 40 · R16 90 · … · F 500 */
+/* Points you hold once you reach each round: R16 40 · QF 90 · … · F 300 · Win 500 */
 export function Ladder(props) {
   return (
     <div style={{ display: "flex", gap: 3, marginTop: 5 }}>

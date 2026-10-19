@@ -141,14 +141,14 @@ function body(id) {
         ["Masters", "1–100", "Best of 5", "2,000", "$460K"],
         ["Grand Slam", "1–64", "Best of 5", "4,000", "$1.6M"]
       ]} />
-      <P>Each tournament is a knockout bracket (32 riders, 64 at a Slam). Every round you win adds points and prize money; the totals above are for winning the whole thing. Lose and your week is over. Each tier is worth <B>double</B> the one below, and each round is a fixed share of the title, as on the real tennis tour. Points you hold after winning each round (shown on every tournament card and in the match header):</P>
-      <Table head={["Tier", "R32", "R16", "QF", "SF", "F"]} rows={[
+      <P>Each tournament is a knockout bracket (32 riders, 64 at a Slam). Every round you win adds points and prize money; the totals above are for winning the whole thing. Lose and your week is over. Each tier is worth <B>double</B> the one below, and each round is a fixed share of the title, as on the real tennis tour. Points you hold once you reach each round — reach the final and lose it, you keep the F number; win it, you get the Win number (shown on every tournament card):</P>
+      <Table head={["Tier", "R16", "QF", "SF", "F", "Win"]} rows={[
         ["Futures", "10", "20", "35", "60", "100"],
         ["Challenger", "20", "45", "90", "150", "250"],
         ["Tour 250", "40", "90", "180", "300", "500"],
         ["Tour 500", "80", "180", "360", "600", "1,000"],
         ["Masters", "160", "360", "720", "1,200", "2,000"],
-        ["Slam (R64 160)", "320", "720", "1,440", "2,400", "4,000"]
+        ["Slam (R32 160)", "320", "720", "1,440", "2,400", "4,000"]
       ]} />
       <P>Beating a higher-ranked rider earns no extra ranking points (the same as in tennis) — the crowd loves an upset, though.</P>
       <H>Named events: pick your week</H>

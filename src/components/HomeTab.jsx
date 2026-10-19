@@ -155,6 +155,10 @@ export default function HomeTab(props) {
       <Row onClick={function () { props.onReadPaper(); }} icon="paper" tint="#f4ecd8" bg="#fbf6ea" chev="#9a3412" title={(<span style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontWeight: 900 }}>The Daily Cluck</span>)}
         sub={S.news && S.news[0] ? S.news[0].wk + " · your week, your rivals, the world's best" : "Special edition · the legends and the tour ahead"} />
 
+      {/* Tour results: every tournament's draw, week by week, and any granny's results (engine/history) */}
+      <Row onClick={props.onResults} icon="trophy" tint="#e0f2fe" title="Tour results"
+        sub={S.hist && S.hist.wk && S.hist.wk.length ? "Every tournament's draw, week by week · find any granny" : "Every draw is kept from your next tournament on"} />
+
       {/* Around the tour last week (shown until the first issue is printed) */}
       {!(S.news && S.news[0]) && news.length > 0 && (
         <div style={card({ padding: "10px 12px" })}>

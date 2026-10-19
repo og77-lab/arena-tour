@@ -938,14 +938,21 @@ export default function Arena(props) {
     var n = S.npcs.filter(function(x){ return x.id === id; })[0]; if (n) setProf({ p: n, rank: rankMap(S)[id] });
   }
   function histLayer() {
-    var wkV = weekView ? findWeek(S.hist, weekView.s, weekView.c) : null;
+    /* Tour results: weekView is { s, c } for one week, or { latest: true } (opens the newest week, or explains when none is kept yet) */
+    var allW = (S.hist && S.hist.wk) || [], wi = -1;
+    if (weekView) allW.forEach(function(x, i){ if (weekView.latest || (x.s === weekView.s && x.c === weekView.c)) wi = i; });
+    var wkV = wi >= 0 ? allW[wi] : null;
+    var goW = function(i){ var x = allW[i]; if (x) setWeekView({ s: x.s, c: x.c }); };
+    var rkAll = weekView ? rankMap(S) : null;
+    var riderList = weekView ? [{ id: 1, name: S.pName, emoji: "👵", rank: pRank }].concat(S.npcs.map(function(n){ return { id: n.id, name: n.name, emoji: n.emoji || "", rank: rkAll[n.id] || 1000 }; })).sort(function(a, b){ return a.rank - b.rank; }) : [];
     var trW = treeView ? findWeek(S.hist, treeView.s, treeView.c) : null, tree = trW ? treeOf(trW, treeView.idx, riderRef) : null;
     var pid = prof ? (prof.p.isP ? 1 : prof.p.id) : null;
     return (
       <>
         {prof && (<Profile player={prof.p} rank={prof.rank} me={S.player} myRank={pRank} myTitles={playerTitles(S)} roosterName={S.player.roosterName} onRenameRooster={renameRooster} onRenamePlayer={renamePlayer} isRival={!!(S.player.rival && prof.p.id === S.player.rival.id)} playerName={S.pName} h2h={!prof.p.isP && S.player.h2h ? (S.player.h2h[prof.p.id] || []) : null} timeline={prof.p.isP ? (S.player.timeline || []) : null}
           weeks={riderWeeks(S.hist, pid)} past={riderPast(S.hist, pid)} onTree={function(w){ setTreeView({ s: w.s, c: w.c, idx: w.idx, focus: pid }); }} onClose={function(){setProf(null)}} />)}
-        {wkV && (<WeekEvents week={wkV} nameOf={riderRef} onOpen={function(idx){ setTreeView({ s: wkV.s, c: wkV.c, idx: idx, focus: 1 }); }} onClose={function(){ setWeekView(null); }} />)}
+        {weekView && (<WeekEvents week={wkV} nameOf={riderRef} riders={riderList} hasPrev={wi > 0} hasNext={wi >= 0 && wi < allW.length - 1} onPrev={function(){ goW(wi - 1); }} onNext={function(){ goW(wi + 1); }}
+          onRider={function(id){ setWeekView(null); openProfileOf(id); }} onOpen={function(idx){ setTreeView({ s: wkV.s, c: wkV.c, idx: idx, focus: 1 }); }} onClose={function(){ setWeekView(null); }} />)}
         {tree && (<BracketView ts={tree} playerName={S.pName} title={tree.eventName} sub={"Season " + trW.s + " · " + trW.l} focusId={treeView.focus}
           onPick={function(p){ setTreeView(null); setWeekView(null); openProfileOf(p.id); }} onClose={function(){ setTreeView(null); }} />)}
       </>
@@ -1011,7 +1018,7 @@ export default function Arena(props) {
           {hubTab === "home" && (
             <HomeTab S={S} pRank={pRank} curEvent={curEvent} seasonDone={seasonDone}
               onPlay={playCurrent} onFinals={startFinals} onNextSeason={openGala}
-              onReadPaper={function(){ goTab("news"); }} onKnitter={function(){ setShowKnitter(true); }}
+              onReadPaper={function(){ goTab("news"); }} onResults={function(){ setWeekView({ latest: true }); }} onKnitter={function(){ setShowKnitter(true); }}
               ach={{ n: achCount(S), total: ACHIEVEMENTS.length }} onAch={function(){ setShowAch(true); }}
               rival={S.player.rival ? { p: S.player.rival, rank: rankMap(S)[S.player.rival.id], rec: rivalRecord(S.player) } : null}
               onRival={function(){ var rp = S.npcs.filter(function(n){ return n.id === S.player.rival.id; })[0]; if (rp) setProf({ p: rp, rank: rankMap(S)[rp.id] }); }}

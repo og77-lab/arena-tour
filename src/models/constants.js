@@ -65,11 +65,12 @@ export const STRIKES_PER_SET = 3;
 /* Round-name labels for 5-round and 6-round tournaments */
 export const RN5 = ["Round of 32","Round of 16","Quarterfinals","Semifinals","Final"];
 export const RN6 = ["Round of 64","Round of 32","Round of 16","Quarterfinals","Semifinals","Final"];
-/* What you hold after winning each round (× the event's points multiplier): [{ r: "R32", pts: 40 }, … { r: "F", pts: 500 }] */
+/* What you hold once you reach each round (× the event's points multiplier): [{ r: "R16", pts: 40 }, … { r: "F", pts: 300 }, { r: "Win", pts: 500 }].
+   Labelled by the round you reach, so losing the final (F) and winning it (Win) read as different numbers. */
 var RSHORT = { "Round of 64": "R64", "Round of 32": "R32", "Round of 16": "R16", "Quarterfinals": "QF", "Semifinals": "SF", "Final": "F" };
 export function ptsLadder(ti, mul) {
   var T = TIERS[ti], names = T.rounds === 6 ? RN6 : RN5, sum = 0;
-  return T.pts.map(function (p, i) { sum += p; return { r: RSHORT[names[i]], pts: Math.round(sum * (mul || 1)) }; });
+  return T.pts.map(function (p, i) { sum += p; return { r: i + 1 < names.length ? RSHORT[names[i + 1]] : "Win", pts: Math.round(sum * (mul || 1)) }; });
 }
 export function champTotal(ti, key) { return (TIERS[ti][key || "pts"] || []).reduce(function (a, b) { return a + b; }, 0); }
 
