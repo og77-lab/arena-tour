@@ -2,7 +2,8 @@
 
 import { TOTAL_EVENTS } from "../models/constants";
 import { mkNPCs } from "./npcGenerator";
-import { turnOver, toAge, ageCap } from "./aging";
+import { turnOver, toAge, ageCap, hofReason } from "./aging";
+import { playerTitles } from "./titles";
 import { statCap } from "./investments";
 import { getRanked } from "../models/formulas";
 
@@ -69,6 +70,11 @@ export function mkSeason(name, num, prev) {
     /* a retired granny can't become your next rival: her head-to-head book closes */
     if (turn.gone.length && S.player.h2h) { var h2 = Object.assign({}, S.player.h2h); turn.gone.forEach(function (g) { delete h2[g.id]; }); S.player.h2h = h2; }
     if (prev.hist) S.hist = prev.hist; /* the tour's history (engine/history) */
+    /* Record books that last forever: year-end No. 1s, the Hall of Fame, and your family of grannies */
+    if (prev.yearEnd) S.yearEnd = prev.yearEnd;
+    var inducted = turn.gone.filter(function (g) { return g.hof; });
+    if (prev.hof || inducted.length) S.hof = (prev.hof || []).concat(inducted);
+    if (prev.family) S.family = prev.family;
     if (prev.newsSeenAt != null) S.newsSeenAt = prev.newsSeenAt;
   }
   S.pts = 2;                       /* points on the current table, rivals' points rolling (engine/migrate toPts2) */
@@ -77,6 +83,29 @@ export function mkSeason(name, num, prev) {
   S = toAge(S);                    /* a new tour: rivals of every age, you in your first season (engine/aging) */
   S.start = seasonSnapshot(S);
   return S;
+}
+
+/* You retire: your career goes on the family wall (and into the Hall of Fame if it earned it), and the next granny of the
+   family starts from nothing in the same world — the bottom of the ranking, first season on tour. N = the new season. */
+export function passTheLance(N, prev, name) {
+  var P = prev.player, b = P.best || {}, tt = playerTitles(prev), y = P.y || prev.sNum || 1;
+  /* her best world rank: the record, her rank history and where she finished, whichever is best */
+  var fin = 1001; getRanked(prev).forEach(function (p, i) { if (p.isP) fin = i + 1; });
+  var peak = Math.min.apply(null, [b.rank || 1001, fin].concat((P.rankHist || []).filter(function (x) { return x > 0; })));
+  var rec = { name: prev.pName, s0: Math.max(1, (prev.sNum || 1) - y + 1), s1: prev.sNum || 1, y: y, peak: peak, titles: b.titles || 0, gsTitles: b.gsTitles || 0, mst: tt[4] || 0 };
+  if (b.gsSet) rec.gsSet = b.gsSet;
+  if (P.kit) rec.kit = P.kit;
+  var why = hofReason(b, prev.yearEnd, 1); if (why) rec.hof = why;
+  var zeros = []; for (var i = 0; i < TOTAL_EVENTS; i++) zeros.push(0);
+  var player = { id: 1, isP: true, y: 1, sp: 0, ap: 0, tr: { r: 0, p: 0, f: 0, s: 0, g: 0, tp: 0 }, best: { rank: 1001, peakS: 0, titles: 0, gsTitles: 0, finals: 0 },
+    def: zeros, res: zeros.slice(), money: 0, seasonMoney: 0, rankHist: [], h2h: {}, timeline: [{ type: "start", s: N.sNum, w: 0 }], startPts: 10 };
+  /* badges and the coach's tips belong to you, the one holding the phone */
+  ["ach", "tips", "tutorial", "ivSeen", "lastTones"].forEach(function (k) { if (P[k] != null) player[k] = P[k]; });
+  var out = Object.assign({}, N, { pName: (name || "").trim().slice(0, 20) || prev.pName + " Jr", player: player, family: (prev.family || []).concat([rec]) });
+  if (rec.hof) out.hof = (N.hof || []).concat([Object.assign({ id: 1, isP: true, s: rec.s1, rank: 0 }, rec)]);
+  out.farewell = Object.assign({}, N.farewell, { heir: prev.pName }); delete out.farewell.lost; delete out.farewell.rival;
+  out.start = seasonSnapshot(out);
+  return out;
 }
 
 function trTotal(tr) { tr = tr || {}; return (tr.r || 0) + (tr.p || 0) + (tr.f || 0) + (tr.s || 0) + (tr.g || 0); }

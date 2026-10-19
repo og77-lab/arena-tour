@@ -60,22 +60,61 @@ function newcomer(id, name, rnd) {
   return n;
 }
 
+/* How each one left — read out at the gala. Tasteful, mostly. */
+var CAUSES = [
+  "Hung up her lance and opened a tea room.", "Her knees filed for divorce.", "Ran off with the postman — and the rooster.",
+  "Took up competitive knitting. Already ranked.", "Became a professional bingo caller.", "Retired to grow prize-winning marrows.",
+  "Moved in with her grandchildren, who now regret it.", "Bought a caravan and was last seen heading north.", "Discovered daytime television.",
+  "Wrote a tell-all memoir: 'Lances, Lies and Lavender'.", "Became a lollipop lady. Nobody crosses her.", "Went on a cruise and simply never came back.",
+  "Opened a jousting school. Two pupils, both terrified.", "Her rooster retired first; she followed out of solidarity.",
+  "Joined the Great Henhouse in the Sky.", "Promoted to the Heavenly Tour — still unbeaten up there.", "Now jousting with the angels. Points pending.",
+  "Left for the big coop upstairs. The rooster took it badly.", "Ascended to the eternal tea party beyond the clouds.", "Nodded off in her armchair and decided to stay there."
+];
+export function causeText(g) { return CAUSES[((g && g.cause) || 0) % CAUSES.length]; }
+
+/* The Hall of Fame: very hard to enter — all four Slams, or eight Slams, or year-end No. 1 three seasons running */
+function bits(x) { var n = 0; for (var i = 0; i < 4; i++) if (x & (1 << i)) n++; return n; }
+export function no1Streak(yearEnd, id) {
+  var best = 0, run = 0, last = null;
+  (yearEnd || []).slice().sort(function (a, b) { return a.s - b.s; }).forEach(function (e) {
+    if (e.id !== id) run = 0; else run = run > 0 && last === e.s - 1 ? run + 1 : 1;
+    last = e.s; if (run > best) best = run;
+  });
+  return best;
+}
+export function hofReason(best, yearEnd, id) {
+  best = best || {};
+  if (bits(best.gsSet || 0) >= 4) return "Won all four Grand Slams";
+  if ((best.gsTitles || 0) >= 8) return best.gsTitles + " Grand Slam titles";
+  if (no1Streak(yearEnd, id) >= 3) return "Year-end world No. 1, " + no1Streak(yearEnd, id) + " seasons running";
+  return null;
+}
+export var HOF_RULE = "all four Grand Slams, or 8 Grand Slams, or year-end No. 1 three seasons running";
+
+/* Decided at the gala, so the ceremony can say goodbye; the new season then carries it out */
+export function retirementPlan(S, rnd) {
+  rnd = rnd || Math.random;
+  var ranked = getRanked(S).filter(function (p) { return !p.isP; }), N = ranked.length, gone = [];
+  ranked.forEach(function (n, i) {
+    if (rnd() < retireChance(ageOf(n), i / N)) {
+      var b = n.best || {}, g = { id: n.id, name: n.name, emoji: n.emoji || "", y: ageOf(n), s: S.sNum || 1, rank: i + 1, pts: n.sp || 0, peak: Math.min(b.rank || 1001, i + 1),
+        titles: b.titles || 0, gsTitles: b.gsTitles || 0, cause: Math.floor(rnd() * 1000) };
+      if (b.tt) g.tt = b.tt;
+      if (b.gsSet) g.gsSet = b.gsSet;
+      var why = hofReason(b, S.yearEnd, n.id); if (why) g.hof = why;
+      gone.push(g);
+    }
+  });
+  return gone;
+}
+
 /* End of season `prev`: who retires, who comes in. Returns { npcs, gone, rivalGone, nextId } — everyone a season older,
    levels clamped to the new cap. gone = what the record keeps of each retiree. */
 export function turnOver(prev, rnd) {
   rnd = rnd || Math.random;
-  var ranked = getRanked(prev).filter(function (p) { return !p.isP; }), N = ranked.length, rankOf = {};
-  ranked.forEach(function (p, i) { rankOf[p.id] = i + 1; });
-  var gone = [], goneIds = {};
-  ranked.forEach(function (n, i) {
-    if (rnd() < retireChance(ageOf(n), i / N)) {
-      var b = n.best || {};
-      goneIds[n.id] = 1;
-      gone.push({ id: n.id, name: n.name, emoji: n.emoji || "", y: ageOf(n), s: prev.sNum || 1, rank: i + 1, pts: n.sp || 0, peak: Math.min(b.rank || 1001, i + 1),
-        titles: b.titles || 0, gsTitles: b.gsTitles || 0, tt: b.tt || null, cause: Math.floor(rnd() * 1000) });
-    }
-  });
-  gone.forEach(function (g) { if (g.tt == null) delete g.tt; });
+  var live = {}; prev.npcs.forEach(function (n) { live[n.id] = 1; });
+  var gone = (prev.retiring && prev.retiring.s === prev.sNum ? prev.retiring.gone : retirementPlan(prev, rnd)).filter(function (g) { return live[g.id]; }), goneIds = {};
+  gone.forEach(function (g) { goneIds[g.id] = 1; });
   var taken = {}, recent = {};
   prev.npcs.forEach(function (n) { if (!goneIds[n.id]) taken[n.name.split(" the ")[0].replace(/ [IVX]+$/, "")] = 1; });
   (prev.gone || []).concat(gone).forEach(function (g) { var f = g.name.split(" the ")[0], base = f.replace(/ [IVX]+$/, ""), k = ROMAN.indexOf(f.slice(base.length)); recent[base] = Math.max(recent[base] || 0, (k < 0 ? 0 : k) + 1); });
@@ -91,3 +130,6 @@ export function turnOver(prev, rnd) {
   var rival = prev.player && prev.player.rival;
   return { npcs: npcs, gone: gone, rivalGone: rival && goneIds[rival.id] ? gone.filter(function (g) { return g.id === rival.id; })[0] : null, nextId: nextId };
 }
+
+/* From this many seasons on tour, the gala offers you retirement: the next granny of the family takes over */
+export var RETIRE_FROM = 15;

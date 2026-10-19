@@ -14,7 +14,7 @@ import { shapePotentials } from "./engine/npcGenerator";
 import StartTalent from "./components/StartTalent";
 import { KnitterSheet } from "./components/KnitterFeed";
 import { followersOf, followersGain, followersLift, crowdLove, weekKnits, fmtFollowers, fanChain } from "./engine/social";
-import { mkSeason } from "./engine/seasonManager";
+import { mkSeason, passTheLance } from "./engine/seasonManager";
 import PowerBar from "./components/PowerBar";
 import Profile from "./components/Profile";
 import Confetti from "./components/Confetti";
@@ -40,7 +40,7 @@ import { buildIssue, buildSpecialEdition, rankMap } from "./engine/news";
 import { tallyTournament, checkAchievements } from "./engine/achievements";
 import { updateRival, rivalRecord } from "./engine/rivalry";
 import { uniqueNames, needsUniqueNames, toPts2, needsPts2 } from "./engine/migrate";
-import { ageCap, toAge, needsAge } from "./engine/aging";
+import { ageCap, toAge, needsAge, retirementPlan, hofReason, RETIRE_FROM, causeText } from "./engine/aging";
 import { weekEvents, lowestTierFor, stepDownTier, dropsLeft, DROP_LIMIT } from "./engine/events";
 import { ACHIEVEMENTS } from "./engine/achievements";
 import AchievementsSheet, { AchToast, achCount } from "./components/Achievements";
@@ -57,6 +57,7 @@ import { C, FONT, display, label, card, button, money } from "./ui/theme";
 import { addTitle, titleMix, playerTitles, npcTitles, seasonTitles } from "./engine/titles";
 import { recordWeek, findWeek, treeOf, riderWeeks, riderPast } from "./engine/history";
 import WeekEvents from "./components/WeekEvents";
+import FamilyWall from "./components/FamilyWall";
 
 const { useState, useEffect, useRef } = React;
 
@@ -235,6 +236,7 @@ export default function Arena(props) {
   function toggleMusic() { var n = !musicOn; setMusicOn(n); setMusicOnState(n); }
   var _confetti = useState(false), confetti = _confetti[0], setConfetti = _confetti[1];
   var _showBracket = useState(false), showBracket = _showBracket[0], setShowBracket = _showBracket[1];
+  var _fam = useState(false), showFamily = _fam[0], setShowFamily = _fam[1]; /* the family wall and the Hall of Fame */
   var _weekView = useState(null), weekView = _weekView[0], setWeekView = _weekView[1]; /* { s, c }: every event of a past week */
   var _treeView = useState(null), treeView = _treeView[0], setTreeView = _treeView[1]; /* { s, c, idx, focus }: one past draw */
   var _showScout = useState(false), showScout = _showScout[0], setShowScout = _showScout[1];
@@ -527,11 +529,12 @@ export default function Arena(props) {
     var pRound = 0; for (var ri = 0; ri < ts.bracket.length; ri++) { var rd = ts.bracket[ri]; if (rd) for (var mi = 0; mi < rd.length; mi++) { var mm = rd[mi]; if ((mm.a && mm.a.id===1)||(mm.b && mm.b.id===1)) pRound = ri; } }
     var champM = ts.bracket[tier.rounds - 1] && ts.bracket[tier.rounds - 1][0]; var champW = champM && champM.w;
     var wonTitle = champW && champW.id === 1;
+    var slamBit = isGS && S.cal[S.calIdx] && S.cal[S.calIdx].gsNum ? 1 << ((S.cal[S.calIdx].gsNum - 1) % 4) : 0; /* which of the four Slams (Hall of Fame: win all four) */
     var newNpcs = S.npcs.map(function(n){
       var e = tally(n.id);
       var tr = Object.assign({s:0,g:0}, n.tr||{});
       var nb = Object.assign({}, n.best||{});
-      if (champW && champW.id === n.id) { nb.titles = (nb.titles||0) + 1; nb.tt = addTitle(nb.tt, ts.tierIdx); if (isGS) nb.gsTitles = (nb.gsTitles||0) + 1; }
+      if (champW && champW.id === n.id) { nb.titles = (nb.titles||0) + 1; nb.tt = addTitle(nb.tt, ts.tierIdx); if (isGS) { nb.gsTitles = (nb.gsTitles||0) + 1; nb.gsSet = (nb.gsSet||0) | slamBit; } }
       var nb2 = Object.assign({}, nb, { careerMoney: (nb.careerMoney||0) + Math.round(e * 3) });
       /* Rolling points, as for you: what she won at this week last season drops off, this week's result takes its place */
       var w = n.w ? n.w.slice() : spreadPts(n.sp), drop = w[S.calIdx] || 0; w[S.calIdx] = e;
@@ -540,7 +543,7 @@ export default function Arena(props) {
     /* Update player with DEFENDING POINTS system */
     var pb = Object.assign({}, S.player.best||{});
     var oldPeak = pb.rank || 1001;
-    if (wonTitle) { pb.titles = (pb.titles||0) + 1; if (isGS) pb.gsTitles = (pb.gsTitles||0) + 1; }
+    if (wonTitle) { pb.titles = (pb.titles||0) + 1; if (isGS) { pb.gsTitles = (pb.gsTitles||0) + 1; pb.gsSet = (pb.gsSet||0) | slamBit; } }
     /* Defending: points earned at this calendar slot last season */
     var defending = (S.player.def && S.player.def[S.calIdx]) || 0;
     var netChange = pp - defending;
@@ -678,7 +681,7 @@ export default function Arena(props) {
             var totalWin = 0; for (var wp = 0; wp < pt.pts.length; wp++) totalWin += pt.pts[wp]; totalWin = Math.round(totalWin * evMul);
             addWeek(wNpc, totalWin);
             wNpc.best = Object.assign({},wNpc.best||{}); wNpc.best.titles = (wNpc.best.titles||0)+1; wNpc.best.tt = addTitle(wNpc.best.tt, pti);
-            if (pti === 5) wNpc.best.gsTitles = (wNpc.best.gsTitles||0)+1;
+            if (pti === 5) { wNpc.best.gsTitles = (wNpc.best.gsTitles||0)+1; if (curEvent && curEvent.gsNum) wNpc.best.gsSet = (wNpc.best.gsSet||0) | (1 << ((curEvent.gsNum - 1) % 4)); }
             if (!topWinner || totalWin > (topWinner.pts||0)) topWinner = { name: winner.name, emoji: winner.emoji, id: winner.id, pts: totalWin, event: tierEv[ev].name };
             /* How unlikely was this champion? Compare her to the event's top seed */
             var fav = pool.reduce(function(a, p){ return (rkOf[p.id] || 9999) < (rkOf[a.id] || 9999) ? p : a; }, pool[0]);
@@ -772,6 +775,19 @@ export default function Arena(props) {
             if (k.who.handle) o2.handle = k.who.handle; if (k.photo) o2.photo = k.photo; if (k.reply) o2.reply = k.reply;
             return o2;
           });
+        /* First week of a season: the Knitter says goodbye to the off-season's retirees (engine/aging) */
+        var fwl = S.farewell;
+        if (S.calIdx === 0 && fwl && fwl.s === S.sNum - 1) {
+          var goneBy = {}; (S.gone || []).forEach(function(g){ goneBy[g.id] = g; });
+          var star = goneBy[fwl.top[0]], no1 = getRanked(afterS).filter(function(p){ return !p.isP; })[0], extraK = [];
+          if (fwl.heir) extraK.push({ name: S.pName, isP: true, fan: false, id: 1, rank: newRank, emoji: "👵", text: "First week on tour. " + sh(fwl.heir) + "'s lance is heavier than it looks. 🐓", likes: 400 + (pp % 300), followers: newP.followers || 0 });
+          if (fwl.rival && goneBy[fwl.rival]) extraK.push({ name: S.pName, isP: true, fan: false, id: 1, rank: newRank, emoji: "👵", text: sh(goneBy[fwl.rival].name) + " has retired. Who am I supposed to glare at now? 😤", likes: 300 + (pp % 200), followers: newP.followers || 0 });
+          if (star) {
+            extraK.push({ name: star.name, isP: false, fan: false, id: star.id, rank: star.rank, emoji: star.emoji || "", text: "Hanging up the lance after " + star.y + " seasons. " + causeText(star) + " Thank you, coop! 💐", likes: 3000 + star.titles * 150, followers: 20000 + star.titles * 2000 });
+            if (no1) extraK.push({ name: no1.name, isP: false, fan: false, id: no1.id, rank: 1, emoji: no1.emoji || "", text: "End of an era. " + sh(star.name) + ", the lanes won't be the same without you. 🫡", likes: 2200, followers: followersOf(no1, 1) });
+          }
+          issue.knits = extraK.concat(issue.knits || []);
+        }
         var ch = fanChain(newP, curRank); issue.fanChain = { fol: ch.fol, lift: ch.lift, settle: ch.settle, fans: ch.fans, tp: ch.tp, edge: Math.round(ch.edge * 10) / 10 };
       } catch (e) { console.error("knits", e); }
       /* The feud column: your rival's week, and what happened if you met */
@@ -823,19 +839,30 @@ export default function Arena(props) {
       S2 = Object.assign({}, S, { champs: (S.champs || []).concat([{ name: champ.isP ? S.pName : champ.name, s: S.sNum, isP: !!champ.isP, id: champ.isP ? 1 : champ.id, emoji: champ.emoji || "" }]) });
       save(S2);
     }
+    /* The year-end No. 1 (Hall of Fame: three in a row), and who retires this off-season (engine/aging) — decided once, here, so the gala can say goodbye */
+    var top1 = getRanked(S2)[0], extra = {};
+    if (top1 && !(S2.yearEnd || []).some(function(e){ return e.s === S.sNum; })) extra.yearEnd = (S2.yearEnd || []).concat([{ s: S.sNum, id: top1.isP ? 1 : top1.id, name: top1.isP ? S.pName : top1.name }]);
+    if (!S2.retiring || S2.retiring.s !== S.sNum) extra.retiring = { s: S.sNum, gone: retirementPlan(Object.assign({}, S2, extra)) };
+    if (Object.keys(extra).length) { S2 = Object.assign({}, S2, extra); save(S2); }
+    var goneNow = S2.retiring.gone.slice().sort(function(a, b){ return a.rank - b.rank; });
     var ranked2 = getRanked(S2), cRank = 1;
     ranked2.forEach(function(p, i){ if ((p.isP && champ.isP) || p.id === champ.id) cRank = i + 1; });
     var ys = yourSeason(S2);
     setGala({
       champ: champ.isP ? { id: 1, name: S.pName, emoji: "👵", isP: true } : { id: champ.id, name: champ.name, emoji: champ.emoji || "" },
       runnerUp: runner ? { id: runner.id, name: runner.isP ? S.pName : runner.name, isP: !!runner.isP } : null, champRank: cRank,
-      awards: seasonAwards(S2), you: ys, hall: hallOfHelmets(S2), goal: nextGoal(ys.rankEnd, S.sNum + 1)
+      awards: seasonAwards(S2), you: ys, hall: hallOfHelmets(S2), goal: nextGoal(ys.rankEnd, S.sNum + 1),
+      farewell: { n: goneNow.length, top: goneNow.slice(0, 8), hof: goneNow.filter(function(g){ return g.hof; }), rival: S.player.rival ? goneNow.filter(function(g){ return g.id === S.player.rival.id; })[0] || null : null },
+      retire: (S.player.y || S.sNum || 1) >= RETIRE_FROM ? { y: S.player.y || S.sNum, hof: hofReason(S.player.best, S2.yearEnd, 1) } : null
     });
   }
-  function finishGala() {
+  /* heir = the name of the granny who takes over when you retire (engine/aging passTheLance) */
+  function finishGala(heir) {
     var g = gala; setGala(null); setFS(null);
     if (!S) return;
-    nextSeason(Object.assign({}, S, { player: Object.assign({}, S.player, { goal: g ? g.goal : S.player.goal }) }));
+    var from = Object.assign({}, S, { player: Object.assign({}, S.player, { goal: g ? g.goal : S.player.goal }) });
+    if (heir) { doSync(from); save(passTheLance(mkSeason(from.pName, (from.sNum||1)+1, from), from, heir)); setScr("hub"); setTab("home"); return; }
+    nextSeason(from);
   }
   function advF(st) {
     if (st.champ) return;
@@ -1008,9 +1035,10 @@ export default function Arena(props) {
           onBuyEntry={buyEntry} onRest={restWeek} rest={(function(){ var f = fitOf(S.player), b = (S.player.tr || {}).b || 0; return { g: Math.round(recoveryOf(b, true, f.g)), r: Math.round(recoveryOf(b, true, f.r)), ng: Math.round(recoveryOf(b, false, f.g)), nr: Math.round(recoveryOf(b, false, f.r)), fit: f, def: (S.player.def && S.player.def[S.calIdx]) || 0 }; })()} onClose={function(){setPicking(false)}} events={weekEvents(S)} nearGaps={(function(){ var o = {}, me = effTr(S.player); GAP_KEYS.forEach(function(k){ o[k] = (me[k] || 0) - (rivalTr[k] || 0); }); return o; })()} onPickEvent={function(ev){ setPicking(false); setPrep({ tier: ev.tier, ev: ev }); }}
           onPick={function(ti){ setPicking(false); setPrep({ tier: ti, ev: null }); }} />)}
         {prep && (<PrepScreen S={S} ev={prep.ev} tier={prep.tier} tr={effTr(S.player)} topTier={Math.max.apply(null, availableTiers(S))} onCancel={function(){ var t = prep.tier; setPrep(null); if (t < 5) setPicking(true); }} onConfirm={confirmPrep} />)}
-        {gala && (<SeasonGala S={S} champ={gala.champ} runnerUp={gala.runnerUp} champRank={gala.champRank} awards={gala.awards} you={gala.you} hall={gala.hall} goal={gala.goal} onDone={finishGala} />)}
+        {gala && (<SeasonGala S={S} champ={gala.champ} runnerUp={gala.runnerUp} champRank={gala.champRank} awards={gala.awards} you={gala.you} hall={gala.hall} goal={gala.goal} farewell={gala.farewell} retire={gala.retire} pName={S.pName} onDone={finishGala} />)}
         {achQ.length > 0 && (<AchToast queue={achQ} onShown={function(){ setAchQ(function(q){ return q.slice(1); }); }} onOpen={function(){ setAchQ([]); setShowAch(true); }} />)}
         {showAch && (<AchievementsSheet S={S} onClose={function(){ setShowAch(false); }} />)}
+        {showFamily && (<FamilyWall S={S} myMasters={playerTitles(S)[4] || 0} onClose={function(){ setShowFamily(false); }} />)}
         {showGuide && (<GameGuide onClose={function(){ setShowGuide(false); }} />)}
         {showLb && createPortal(
           <div style={{position:"fixed",inset:0,zIndex:960,background:"#f8fafc",overflowY:"auto"}}>
@@ -1270,6 +1298,10 @@ export default function Arena(props) {
                   <div style={{display:"flex",alignItems:"center",gap:12,minWidth:0}}><IconTile name="globe" tint="#e0f2fe" size={40} /><div style={{minWidth:0}}><div style={labelStyle}>World Leaderboard</div><div style={hintStyle}>Real players — best ranks, titles and prize money</div></div></div>
                   <span style={{color:C.goldInk,fontSize:20,fontWeight:900}}>›</span>
                 </button>
+                <button onClick={function(){ setShowFamily(true); }} style={rowStyle}>
+                  <div style={{display:"flex",alignItems:"center",gap:12,minWidth:0}}><IconTile name="granny" tint="#fef3c7" size={40} /><div style={{minWidth:0}}><div style={labelStyle}>Family wall & Hall of Fame</div><div style={hintStyle}>{(S.family || []).length ? (S.family.length + " grannies of your family before you") : "The grannies before you, and the tour's legends"}{(S.hof || []).length ? " · " + S.hof.length + " in the Hall" : ""}</div></div></div>
+                  <span style={{color:C.goldInk,fontSize:20,fontWeight:900}}>›</span>
+                </button>
                 <button onClick={function(){setShowAch(true)}} style={rowStyle}>
                   <div style={{display:"flex",alignItems:"center",gap:12,minWidth:0}}><IconTile name="medal" tint="#fef3c7" size={40} /><div style={{minWidth:0}}><div style={labelStyle}>Achievements</div><div style={hintStyle}>{achCount(S)} of {ACHIEVEMENTS.length} badges earned</div></div></div>
                   <span style={{color:C.goldInk,fontSize:20,fontWeight:900}}>›</span>
@@ -1380,7 +1412,7 @@ export default function Arena(props) {
     var fpm=null,fopp=null; if(fs.pending!=null&&!fs.champ){if(fs.phase==="groups")fpm=fs.gm[fs.pending];else if(fs.phase==="semis")fpm=fs.semis[fs.pending];else if(fs.phase==="final")fpm=fs.final;if(fpm)fopp=fpm.a.isP?fpm.b:fpm.a;} var pQ=false;for(var hi=0;hi<fs.houses.length;hi++)for(var pi=0;pi<fs.houses[hi].length;pi++)if(fs.houses[hi][pi].isP)pQ=true;
     return (
       <motion.div key="finals" {...screenAnim} style={W}>
-        {gala && (<SeasonGala S={S} champ={gala.champ} runnerUp={gala.runnerUp} champRank={gala.champRank} awards={gala.awards} you={gala.you} hall={gala.hall} goal={gala.goal} onDone={finishGala} />)}
+        {gala && (<SeasonGala S={S} champ={gala.champ} runnerUp={gala.runnerUp} champRank={gala.champRank} awards={gala.awards} you={gala.you} hall={gala.hall} goal={gala.goal} farewell={gala.farewell} retire={gala.retire} pName={S.pName} onDone={finishGala} />)}
         <style dangerouslySetInnerHTML={{__html:CSS}} />
         <div style={{textAlign:"center",marginBottom:8}}>
           <div style={{fontSize:15,fontWeight:900,letterSpacing:3,background:"linear-gradient(90deg,#ef4444,#f59e0b,#22c55e,#3b82f6,#a855f7)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>SEASON {S.sNum} FINALS</div>

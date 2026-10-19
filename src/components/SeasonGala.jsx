@@ -10,6 +10,7 @@ import { Rider, Face, PLAYER_PALETTE, paletteFor } from "./Rider";
 import { Sparks, CountUp, REDUCED_MOTION, vibrate } from "./fx";
 import { sh } from "../models/formulas";
 import { playVictoryBig, playRankUp, playClang, playTitle, playWhoosh } from "../sounds";
+import { causeText, HOF_RULE } from "../engine/aging";
 
 const { useState, useEffect } = React;
 
@@ -88,7 +89,11 @@ function Num(props) {
 
 export default function SeasonGala(props) {
   var S = props.S, champ = props.champ, awards = props.awards || [], ys = props.you, hall = props.hall || [], goal = props.goal;
-  var stages = ["intro", "champ"].concat(awards.map(function (_, i) { return "award" + i; }), ["you", "hall", "goal"]);
+  var fw = props.farewell, ret = props.retire;
+  var _h = useState(""), heir = _h[0], setHeir = _h[1];
+  var _r = useState(false), retiring = _r[0], setRetiring = _r[1];
+  /* After the helmets: who left the tour this year, then anyone who walked into the Hall of Fame */
+  var stages = ["intro", "champ"].concat(awards.map(function (_, i) { return "award" + i; }), ["you", "hall"], fw && fw.n ? ["farewell"] : [], fw && fw.hof.length ? ["hof"] : [], ["goal"]);
   var _i = useState(0), i = _i[0], setI = _i[1];
   var st = stages[i], last = i === stages.length - 1;
   var champRank = props.champRank || 1;
@@ -97,7 +102,7 @@ export default function SeasonGala(props) {
     if (st === "intro") playWhoosh();
     else if (st === "champ") { playVictoryBig(); vibrate([40, 60, 40]); }
     else if (st.indexOf("award") === 0) { playClang(); setTimeout(function () { (awards[+st.slice(5)].who.isP ? playTitle : playRankUp)(); }, 450); }
-    else if (st === "hall") playRankUp();
+    else if (st === "hall" || st === "hof") playRankUp();
   }, [st]);
 
   function next() { if (!last) setI(i + 1); }
@@ -202,6 +207,49 @@ export default function SeasonGala(props) {
               </Stage>
             )}
 
+            {st === "farewell" && (
+              <Stage k="farewell">
+                <Kicker>Season {S.sNum} · In memoriam (mostly)</Kicker>
+                <div style={{ marginTop: 6 }}><Big size={28}>FAREWELL, LADIES</Big></div>
+                <div style={{ fontSize: 13.5, color: SOFT, marginTop: 8 }}>{fw.n} grannies hang up their lances this year. {fw.n} newcomers take their places at the bottom.</div>
+                {fw.rival && (<div style={{ fontSize: 13.5, fontWeight: 900, color: "#fda4af", marginTop: 8 }}>Your arch-rival {fw.rival.emoji} {sh(fw.rival.name)} is leaving. Who will you argue with now?</div>)}
+                <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 12, textAlign: "left" }}>
+                  {fw.top.map(function (g, j) {
+                    return (
+                      <motion.div key={g.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 + j * 0.12 }}
+                        style={{ display: "flex", alignItems: "center", gap: 9, padding: "6px 9px", borderRadius: 12, background: "rgba(255,255,255,0.06)", border: "1.5px solid rgba(253,230,138,0.2)" }}>
+                        <div style={{ filter: "grayscale(0.35) sepia(0.3)", flexShrink: 0 }}><Face palette={paletteFor(g.id, g.rank)} size={36} /></div>
+                        <div style={{ minWidth: 0, flex: 1 }}>
+                          <div style={{ fontSize: 13.5, fontWeight: 900, color: CREAM }}>{g.emoji} {g.name}</div>
+                          <div style={{ fontSize: 11.5, fontWeight: 800, color: GOLD }}>#{g.rank} · best #{g.peak} · {g.y} seasons · {g.titles} {g.titles === 1 ? "title" : "titles"}{g.gsTitles ? " · " + g.gsTitles + " Slam" + (g.gsTitles > 1 ? "s" : "") : ""}</div>
+                          <div style={{ fontSize: 12, fontStyle: "italic", color: SOFT, fontFamily: "Georgia, serif" }}>{causeText(g)}</div>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              </Stage>
+            )}
+
+            {st === "hof" && (
+              <Stage k="hof">
+                <Kicker>The Hall of Fame</Kicker>
+                <div style={{ marginTop: 6 }}><Big size={30}>{fw.hof.length > 1 ? "NEW LEGENDS" : "A NEW LEGEND"}</Big></div>
+                {fw.hof.map(function (g, j) {
+                  return (
+                    <motion.div key={g.id} initial={{ scale: 0.7, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ delay: 0.3 + j * 0.4, type: "spring", stiffness: 200, damping: 15 }} style={{ marginTop: 12 }}>
+                      <div style={{ display: "flex", justifyContent: "center" }}><Rider palette={paletteFor(g.id, 1)} width={150} pose="cheer" crown={true} /></div>
+                      <div style={{ fontSize: 20, fontWeight: 900, color: CREAM }}>{g.emoji} {g.name}</div>
+                      <div style={{ fontSize: 14, fontWeight: 900, color: GOLD, marginTop: 2 }}>{g.hof}</div>
+                      <div style={{ fontSize: 12.5, color: SOFT, marginTop: 2 }}>{g.y} seasons · best #{g.peak} · {g.titles} titles · {g.gsTitles} Slams</div>
+                    </motion.div>
+                  );
+                })}
+                <Sparks count={26} spread={240} delay={0.5} colors={[GOLD, "#ffffff", "#fde68a"]} zIndex={3} />
+                <div style={{ fontSize: 12, color: SOFT, marginTop: 14 }}>The bar: {HOF_RULE}.</div>
+              </Stage>
+            )}
+
             {st === "goal" && (
               <Stage k="goal">
                 <Kicker>Season {S.sNum + 1} awaits</Kicker>
@@ -209,6 +257,21 @@ export default function SeasonGala(props) {
                 <Big size={28}>YOUR GOAL</Big>
                 <div style={{ fontSize: 18, fontWeight: 900, color: CREAM, marginTop: 10, lineHeight: 1.3 }}>{goal.text}.</div>
                 <div style={{ fontSize: 13, color: SOFT, marginTop: 8, lineHeight: 1.5 }}>Last season's points carry over — and you'll defend them week by week. The rivals are already back at the gym.</div>
+                {ret && (
+                  <div onClick={function (e) { e.stopPropagation(); }} style={{ marginTop: 16, padding: "10px 12px", borderRadius: 14, background: "rgba(255,255,255,0.07)", border: "1.5px solid rgba(253,230,138,0.3)", textAlign: "left" }}>
+                    <div style={{ fontSize: 14, fontWeight: 900, color: CREAM }}>👵 {ret.y} seasons on the tour.</div>
+                    <div style={{ fontSize: 12.5, color: SOFT, marginTop: 3, lineHeight: 1.45 }}>You can retire now: your career goes up on the family wall{ret.hof ? (<b style={{ color: GOLD }}> and into the Hall of Fame ({ret.hof})</b>) : " (the Hall of Fame asks for: " + HOF_RULE + ")"}, and a new granny of the family starts from the very bottom, in this same tour.</div>
+                    {!retiring ? (
+                      <button onClick={function () { setRetiring(true); }} style={{ marginTop: 8, fontFamily: FONT, fontWeight: 900, fontSize: 13, padding: "8px 12px", borderRadius: 10, cursor: "pointer", background: "transparent", color: CREAM, border: "1.5px solid " + SOFT }}>Retire and pass the lance…</button>
+                    ) : (
+                      <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
+                        <input autoFocus value={heir} maxLength={20} onChange={function (e) { setHeir(e.target.value); }} placeholder="Her name"
+                          style={{ flex: 1, minWidth: 0, fontSize: 15, padding: "8px 10px", borderRadius: 10, border: "2px solid #3f2a1d", fontWeight: 800 }} />
+                        <button disabled={!heir.trim()} onClick={function () { props.onDone(heir.trim()); }} style={{ fontFamily: FONT, fontWeight: 900, fontSize: 13, padding: "8px 12px", borderRadius: 10, cursor: heir.trim() ? "pointer" : "default", opacity: heir.trim() ? 1 : 0.5, background: GOLD, color: "#3f2a1d", border: "2px solid #3f2a1d" }}>Pass it on</button>
+                      </div>
+                    )}
+                  </div>
+                )}
                 <button onClick={function (e) { e.stopPropagation(); props.onDone(); }}
                   style={{ marginTop: 18, width: "100%", fontFamily: FONT, fontWeight: 900, fontSize: 17, letterSpacing: 1, textTransform: "uppercase", padding: "15px 18px", borderRadius: 14, cursor: "pointer",
                     background: "linear-gradient(180deg,#fde68a,#f59e0b)", color: "#3f2a1d", border: "2px solid #3f2a1d", boxShadow: "0 5px 0 #3f2a1d" }}>
