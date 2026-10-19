@@ -18,12 +18,12 @@ Every one of the 999 other grannies is a full rider too: she plays her own tourn
 
 | Tab | What's there |
 |---|---|
-| 🏠 **Home** | Your granny card (tap it for your profile), the next event and its button, your **fitness** (both meters, injuries, what tiredness is doing), your rival, achievements, the latest newspaper and your ranking chart. |
+| 🏠 **Home** | Your granny card (tap it for your profile), the next event and its button, your **fitness** (both meters, injuries, what tiredness is doing), your rival, achievements, the latest newspaper, **Tour results** (every draw of every week) and your ranking chart. At the start of a season, the off-season's **farewells**. |
 | 🏋️ **Train** | Spend training points on six stats, this week's investment (private coach, physio, pedigree), and how you compare with the riders near your rank. A red badge shows how many stats you can afford. |
 | 📅 **Season** | The season road map: progress through the four blocks, what's up next, what you're chasing (Grand Slam entry, the Finals), and every week's result. |
 | 📰 **News** | The Daily Cluck — a fresh issue after every tournament, plus the archive. A **!** badge means an unread issue. |
 | 🏆 **Ranks** | The world rankings, opening on your own row. Toggle *Around me* / *Top 50*, and tap any granny for her profile. |
-| ⚙️ **More** | Your account, the world leaderboard, the game guide, achievements, replaying the tutorial, the rules, music and sound switches, and saves. |
+| ⚙️ **More** | Your account, the **family wall & Hall of Fame**, the world leaderboard, the game guide, achievements, replaying the tutorial, the rules, music and sound switches, and saves. |
 
 ## 3. The season
 
@@ -31,7 +31,7 @@ A season is **20 events** in four blocks. Each block is four weekly tournaments 
 
 **Ranking points and defending.** Your world rank is your *season points*. Points carry over into the next season, but the points you won at a given week last season **drop off** when that week comes round again. You "defend" them: win more than last time and you climb, less and you slip. The Season tab shows what you're defending, in red. Every rival plays by the same rule, so a rank always means the points won over the last 20 weeks.
 
-**Grand Slams.** Only the **top 64** may enter. A rider ranked 65–74 with **80+ fans** gets a fan wildcard. If you can't enter, you sit the week out. Slams have 64 riders, best of 5 sets, and enormous points.
+**Grand Slams.** Only the **top 64** may enter. A rider ranked 65–74 with **80+ fans** gets a fan wildcard. If you can't enter, the Slam is still played — by the 64 rivals who made it — and your week counts as a rest week (no points; last season's points for that week drop off, as they do for everyone). Slams have 64 riders, best of 5 sets, and enormous points.
 
 **Season Finals.** The top 16 after event 20 are split into four houses of four (🔥 Phoenix, 🌊 Kraken, 🐉 Wyvern, ⚡ Chimera). Everyone plays everyone in her house (3 points a win); the four house winners meet in the semifinals and then the World Final. Every Finals match is best of 5, and every one tires you (and her). If you don't qualify, the Finals are played without you and a world champion is crowned all the same.
 
@@ -50,16 +50,16 @@ Tap **Choose tournament** on Home or Season. Your rank decides which tiers are o
 
 Each tournament is a knockout bracket (32 riders, 64 at a Slam). Every round you win adds points and prize money; the totals above are for winning the whole thing. Lose and your week is over.
 
-Each tier is worth **double** the one below, and each round is a fixed share of the title, as on the real tennis tour. Points you hold after winning each round (shown on every tournament card and in the match header):
+Each tier is worth **double** the one below, and each round is a fixed share of the title, as on the real tennis tour. Points you hold once you reach each round — reach the final and lose it, you keep the **F** number; win it, you get the **Win** number (shown on every tournament card):
 
-| Tier | R32 | R16 | QF | SF | F |
+| Tier | R16 | QF | SF | F | Win |
 |---|---|---|---|---|---|
 | Futures | 10 | 20 | 35 | 60 | 100 |
 | Challenger | 20 | 45 | 90 | 150 | 250 |
 | Tour 250 | 40 | 90 | 180 | 300 | 500 |
 | Tour 500 | 80 | 180 | 360 | 600 | 1,000 |
 | Masters | 160 | 360 | 720 | 1,200 | 2,000 |
-| Slam (R64 160) | 320 | 720 | 1,440 | 2,400 | 4,000 |
+| Slam (R32 160) | 320 | 720 | 1,440 | 2,400 | 4,000 |
 
 Beating a higher-ranked rider earns no extra ranking points (the same as in tennis) — the crowd loves an upset, though.
 
@@ -85,6 +85,11 @@ Grand Slam weeks have a single named Slam (The Coop Open, The Swamp Slam, Wimble
 **Getting into a higher tier early**
 - **Fan wildcard:** if you're ranked just outside the tier above (within 15% of its cut) and have 70+ fans, it opens for free.
 - **Paid entry:** at the bottom of the tournament list you can buy your way into the tier above for this week only (it uses this week's investment).
+
+**Stepping down a tier**
+1. Any rider may enter the tier just **below** her rank range — at most **4 times a season**. The count starts again each season.
+2. You choose when. It's marked **STEP DOWN** in the tournament list, with how many you have left.
+3. Rivals follow the same limit. A rival steps down only when she's worn (under 45% on either meter) or carrying an injury.
 
 During a tournament the header shows the tier, the round, best-of and the bracket path. **Scout** opens the opponent's full report; 🌐 opens the bracket.
 
@@ -181,7 +186,7 @@ The gold zone never shrinks to nothing: once it is under 8% of the bar, every fu
 
 ## 9. Stats & training
 
-Six stats, each from level 0 to 20 — each one moves one element of the match, and the game always names it with the stat: **Reflexes (slower bar) · bar speed**, **Steady Stride (bigger gold) · gold zone**, **Aim (extra points) · every strike**, **Stubbornness (softer misses) · misses**, **Stamina (less speed-up) · speed-up**, **Bounce-back · recovery**. three for the granny, two for the rooster, and 🔋 Bounce-back for recovery. Every level builds **your own bar**; her levels build hers. Each level gives a little less than the one before (level 20 works like 11). A new granny starts with **10 points** to spread however she likes. An injury knocks a few levels off a stat until it heals.
+Six stats, each from level 0 to 20 (lower later in a career — see *Age, retirement & legends*) — each one moves one element of the match, and the game always names it with the stat: **Reflexes (slower bar) · bar speed**, **Steady Stride (bigger gold) · gold zone**, **Aim (extra points) · every strike**, **Stubbornness (softer misses) · misses**, **Stamina (less speed-up) · speed-up**, **Bounce-back · recovery**. three for the granny, two for the rooster, and 🔋 Bounce-back for recovery. Every level builds **your own bar**; her levels build hers. Each level gives a little less than the one before (level 20 works like 11). A new granny starts with **10 points** to spread however she likes. An injury knocks a few levels off a stat until it heals.
 
 | Stat | What it does | Each level (first levels) |
 |---|---|---|
@@ -313,17 +318,50 @@ The Ranks tab lists all 1,000 riders by season points and opens on your own row,
 
 Tap your own card on Home for your profile. The ✏️ buttons rename your granny and your rooster.
 
+**Week by week.** Every profile ends with each tournament she rode this season and last, the round she reached and the points she won. Tap a week to see that tournament's whole draw, with her path lit up.
+
+**Tour results**
+1. **Tour results** on Home opens every tournament of a week — yours and all the others — with each champion. ‹ › step between weeks.
+2. Tap a tournament for its full draw, round 1 to the final. Tap a name in the draw for her profile.
+3. The search box finds any granny by name. The Season tab (tap a played week) and the paper (*Every draw of the week*) open the same list.
+4. The tour keeps every week of this season and last; older seasons keep each rider's best round and titles in every tier.
+
 ## 17. Achievements
 
 **35 achievements** in six groups — on the tour, with the lance, the ladder, feuds, crowd & press, and the gym. A badge slides down from the top when you earn one; Home and More show your collection, with progress bars on the counted ones and how to earn the ones you're missing.
 
 ## 18. End of season
 
-When the season is over, the **Grand Gala** plays: the world champion is crowned, the season's awards are handed out one envelope at a time (most titles, biggest climb, most training, your best quote, fan favourite — and the participation ribbon), your season in numbers, the hall of the golden helmets, and a goal for next season.
+When the season is over, the **Grand Gala** plays: the world champion is crowned, the season's awards are handed out one envelope at a time (most titles, biggest climb, most training, your best quote, fan favourite — and the participation ribbon), your season in numbers, the hall of the golden helmets, the grannies who retire this year (*In memoriam, mostly* — with how each one left), anyone entering the **Hall of Fame**, and a goal for next season.
 
 Your training, prize money, lances and saddles, badges, fans, rival and newspaper archive all carry over into the new season (your fitness starts fresh and injuries heal over the break) — and so do last season's points, which you'll defend week by week.
 
-## 19. Settings & saves
+## 19. Age, retirement & legends
+
+Grannies get older, and every rider ages by the same rule — you included. Age is counted in **seasons on the tour** (your profile and the Train tab show yours).
+
+**The age cap on training**
+1. Up to season 12, every stat can be trained to 20.
+2. After that the cap drops, a little more every season.
+3. Levels above the new cap are lost at the start of a season. The rooster pedigree still adds its levels on top.
+
+| Season on tour | 10 | 15 | 20 | 22 | 25 | 28 | 30 |
+|---|---|---|---|---|---|---|---|
+| Highest level | 20 | 18 | 15 | 13 | 10 | 7 | 5 |
+
+**Retirements and newcomers**
+1. At the end of each season about 50 rivals retire. Nobody retires before 8 seasons; after that the chance grows with age, and riders ranked low go sooner.
+2. Each one is replaced by a newcomer who starts at the bottom of the ranking with her own talent and potential. Now and then a prodigy arrives.
+3. The gala says goodbye (and how each one left), Home lists the best of them, and the Knitter posts the farewells. If your rival retires, a new grudge will find you.
+
+**Your own retirement**
+1. From season 15 on the tour, the gala's last page lets you retire. It's always your choice.
+2. Your career goes up on the **family wall** (More tab): your portrait, best world rank, Grand Slams and Masters titles.
+3. The next granny of your family starts from nothing, in the same tour with the same rivals: #1000, first season, 10 starting points. Your badges stay yours.
+
+**The Hall of Fame.** Very hard to enter: all four Grand Slams, or 8 Grand Slams, or year-end No. 1 three seasons running. Riders are judged when they retire — rivals and you alike. The Hall is on the More tab, next to the family wall.
+
+## 20. Settings & saves
 
 | In More | What it does |
 |---|---|
@@ -339,7 +377,7 @@ Your training, prize money, lances and saddles, badges, fans, rival and newspape
 
 The game saves after every change — every strike, every level, every answer — in a compact format (about 100 KB for the whole tour of 1,000 riders).
 
-## 20. Coach's tips
+## 21. Coach's tips
 
 - Aim for the white line, not just the gold. 100 against 86 is the difference between winning and losing a set.
 - If you keep overshooting, train Reflexes (slower bar). If you land just next to the gold, train Steady Stride (bigger gold). If your misses are wild, Stubbornness (softer misses).
