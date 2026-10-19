@@ -30,7 +30,7 @@ export function startLevels(n) {
 export function mkNPCs() {
   var npcs = [];
   for (var i = 0; i < 999; i++) {
-    var name = npcName(i) + " the " + TT[(i * 13) % TT.length]; /* unique full name + a title */
+    var name = npcName(i) + " the " + TT[(i * 13) % TT.length]; /* unique full name + a title (~160 titles, each on a handful of riders) */
     var pct = i / 999;
     var skill = pct < 0.03 ? 82 + Math.random() * 10
               : pct < 0.1  ? 70 + Math.random() * 14

@@ -77,6 +77,7 @@ export function mkSeason(name, num, prev) {
     if (prev.family) S.family = prev.family;
     if (prev.newsSeenAt != null) S.newsSeenAt = prev.newsSeenAt;
   }
+  S.titles = 2;                    /* titles from the big pool (engine/migrate retitle) */
   S.pts = 3;                       /* points on the current table (engine/migrate toPts3), rivals' points rolling */
   S.eng = 2;                       /* the match engine version: each rider on her own bar (engine/joust) */
   if (!prev) S.player.startPts = 10;  /* starting talent: 10 points to spread over the stats before the first event */

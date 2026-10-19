@@ -4,7 +4,7 @@
 import { npcName } from "../models/persona";
 import { sh, spreadPts, getRanked } from "../models/formulas";
 import { findWeek, weekPts } from "./history";
-import { TIERS, TOTAL_EVENTS } from "../models/constants";
+import { TIERS, TOTAL_EVENTS, TT } from "../models/constants";
 
 export function needsUniqueNames(S) {
   if (!S || !S.npcs) return false;
@@ -20,7 +20,11 @@ export function uniqueNames(S) {
     var title = (n.name || "").split(" the ")[1];
     map[n.id] = npcName(Math.max(0, n.id - 2) % 999) + (title ? " the " + title.replace(/ \d+$/, "") : "");
   });
-  /* Walk the whole save: any object with an NPC id and a name gets the new name */
+  return renameAll(S, map);
+}
+
+/* Walk the whole save: any object with an NPC id and a name gets the new name (map: id → name) */
+function renameAll(S, map) {
   function walk(v) {
     if (Array.isArray(v)) return v.map(walk);
     if (v && typeof v === "object") {
@@ -36,6 +40,18 @@ export function uniqueNames(S) {
   var h2h = out.player && out.player.h2h;
   if (h2h) Object.keys(h2h).forEach(function (id) { if (map[id]) h2h[id] = h2h[id].map(function (e) { return Object.assign({}, e, { name: map[id] }); }); });
   return out;
+}
+
+/* Titles (once per save: S.titles = 2). Tours began with only 20 titles, about 50 riders each ("the Swift" everywhere);
+   the pool is now ~160, so every rider still on tour gets a title from it — her first name stays, and so does everything
+   else. Each title ends up on 6–7 riders at most. Retired riders keep the name they retired with. */
+export function titleFor(id) { return TT[(Math.max(0, id - 2) * 13) % TT.length]; }
+export function needsTitles(S) { return !!(S && S.npcs && S.titles !== 2); }
+export function retitle(S) {
+  if (!needsTitles(S)) return S;
+  var map = {};
+  S.npcs.forEach(function (n) { map[n.id] = (n.name || "").split(" the ")[0] + " the " + titleFor(n.id); });
+  return Object.assign(renameAll(S, map), { titles: 2 });
 }
 
 /* ═══ Points table conversion (once per save: S.pts = 2) ═══

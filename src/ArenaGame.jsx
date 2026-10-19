@@ -39,7 +39,7 @@ import { roosterName, trait, standing } from "./models/persona";
 import { buildIssue, buildSpecialEdition, rankMap } from "./engine/news";
 import { tallyTournament, checkAchievements } from "./engine/achievements";
 import { updateRival, rivalRecord } from "./engine/rivalry";
-import { uniqueNames, needsUniqueNames, toPts3, needsPts3 } from "./engine/migrate";
+import { uniqueNames, needsUniqueNames, toPts3, needsPts3, retitle, needsTitles } from "./engine/migrate";
 import { ageCap, toAge, needsAge, retirementPlan, hofReason, RETIRE_FROM, causeText } from "./engine/aging";
 import { weekEvents, lowestTierFor, stepDownTier, dropsLeft, DROP_LIMIT } from "./engine/events";
 import { ACHIEVEMENTS } from "./engine/achievements";
@@ -191,6 +191,8 @@ export default function Arena(props) {
       if (!d || !d.player) { setScr("title"); return; }
       /* Older tours reused first names: give every rider her own (once, then save) */
       if (needsUniqueNames(d)) { d = uniqueNames(d); try { sSet(d); } catch (e) {} }
+      /* Tours began with 20 titles ("the Swift" everywhere): every rider gets one from the big pool, once */
+      if (needsTitles(d)) { d = retitle(d); try { sSet(d); } catch (e) {} }
       if (!d.eng || d.eng < 2) { d = toEngine2(d); try { sSet(d); } catch (e) {} }
       /* Points from before the current table: converted once, and rivals' points start dropping off like yours */
       if (needsPts3(d)) { d = toPts3(d); try { sSet(d); } catch (e) {} } /* older tables first, then the current one (engine/migrate) */
@@ -227,7 +229,7 @@ export default function Arena(props) {
     queueCloudSave(userId, snap, saveGameToCloud);
   }, [ts, fs]);
   function exportSave() { if (!S) return; var b = new Blob([JSON.stringify(pack(S))],{type:"application/json"}); var u = URL.createObjectURL(b); var a = document.createElement("a"); a.href = u; a.download = "arena-"+S.pName+"-s"+S.sNum+".json"; a.click(); URL.revokeObjectURL(u); }
-  function importSave(e) { var f = e.target.files && e.target.files[0]; if (!f) return; var r = new FileReader(); r.onload = function(ev){ try { var d = unpack(JSON.parse(ev.target.result)); if (d && d.player) { if (!d.eng || d.eng < 2) d = toEngine2(d); save(toAge(toPts3(uniqueNames(d)))); setScr("hub"); } } catch(err){} }; r.readAsText(f); }
+  function importSave(e) { var f = e.target.files && e.target.files[0]; if (!f) return; var r = new FileReader(); r.onload = function(ev){ try { var d = unpack(JSON.parse(ev.target.result)); if (d && d.player) { if (!d.eng || d.eng < 2) d = toEngine2(d); save(toAge(toPts3(retitle(uniqueNames(d))))); setScr("hub"); } } catch(err){} }; r.readAsText(f); }
   var _syncing = useState(false), syncing = _syncing[0], setSyncing = _syncing[1];
   var _syncMsg = useState(""), syncMsg = _syncMsg[0], setSyncMsg = _syncMsg[1];
   var _mutedState = useState(isMuted()), mutedState = _mutedState[0], setMutedState = _mutedState[1];
