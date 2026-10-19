@@ -66,6 +66,7 @@ export default function HelpScreen(props) {
 
         <Section icon="dumbbell" tint="#e0e7ff" title="Training">
           <Text>Every level makes <B>your own bar</B> easier; her levels make hers easier. Each level gives a little less than the one before.</Text>
+          <Text>Stats go up to 20 for your first 12 seasons on tour; after that the cap drops a little every season, for every granny alike. From season 15 you may retire and hand the lance to the next granny of your family.</Text>
           <div style={{ background: "#fffbeb", borderRadius: 14, padding: "6px 10px" }}>
             {groups.map(function (g) {
               var list = STATS.filter(function (s) { return s.who === g[0]; });

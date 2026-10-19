@@ -13,6 +13,7 @@ import FanRules from "./FanRules";
 import { CONDITIONS, FIELDS, DROP_LIMIT, STEP_TIRED } from "../engine/events";
 import { GEAR } from "../engine/gear";
 import { fatigueFx } from "../engine/fitness";
+import { ageCap, RETIRE_FROM, HOF_RULE, PEAK_SEASONS } from "../engine/aging";
 
 /* One row per thing: icon + name on the left, its effect chips on the right */
 function ChipRows(props) {
@@ -94,6 +95,7 @@ var CHAPTERS = [
   { id: "ranks", icon: "🏆", ic: "rank", title: "Rankings & profiles" },
   { id: "ach", icon: "🏅", ic: "medal", title: "Achievements" },
   { id: "gala", icon: "🎩", ic: "crown", title: "End of season" },
+  { id: "age", icon: "🌅", ic: "granny", title: "Age, retirement & legends" },
   { id: "settings", icon: "⚙️", ic: "gear", title: "Settings & saves" },
   { id: "tips", icon: "📣", ic: "whistle", title: "Coach's tips" }
 ];
@@ -112,12 +114,12 @@ function body(id) {
     case "tabs": return (<>
       <P>Six tabs live in the bar at the bottom of the screen:</P>
       <Table head={["Tab", "What's there"]} rows={[
-        ["🏠 Home", "Your granny card (tap it for your profile), the next event and its button, your rival, achievements, the latest newspaper and your ranking chart."],
+        ["🏠 Home", "Your granny card (tap it for your profile), the next event and its button, your rival, achievements, the latest newspaper, Tour results (every draw of every week) and your ranking chart. At the start of a season, the off-season's farewells."],
         ["🏋️ Train", "Spend training points on six stats, this week's investment (private coach, physio, pedigree), and how you compare with the riders near your rank. A red badge shows how many stats you can afford."],
         ["📅 Season", "The season road map: progress through the four blocks, what's up next, what you're chasing (Grand Slam entry, the Finals), and every week's result."],
         ["📰 News", "The Daily Cluck — a fresh issue after every tournament, plus the archive. A ! badge means an unread issue."],
         ["🏆 Ranks", "The world rankings, opening on your own row. Toggle 'Around me' or 'Top 50', and tap any granny for her profile."],
-        ["⚙️ More", "Your account, the world leaderboard, achievements, replaying the tutorial, the rules, music and sound switches, and saves."]
+        ["⚙️ More", "Your account, the family wall and the Hall of Fame, the world leaderboard, achievements, replaying the tutorial, the rules, music and sound switches, and saves."]
       ]} />
     </>);
 
@@ -126,7 +128,7 @@ function body(id) {
       <H>Ranking points and defending</H>
       <P>Your world rank is your <B>season points</B>. Points carry over into the next season, but the points you won at a given week last season <B>drop off</B> when that week comes round again. You "defend" them: win more than last time and you climb, less and you slip. The Season tab shows what you're defending, in red. Every rival plays by the same rule, so a rank always means the points won over the last 20 weeks.</P>
       <H>Grand Slams</H>
-      <P>Only the <B>top 64</B> may enter a Slam. A rider ranked 65–74 with <B>80+ fans</B> gets a fan wildcard. If you can't enter, you sit the week out. Slams are 64 riders, best of 5 sets, and worth enormous points.</P>
+      <P>Only the <B>top 64</B> may enter a Slam. A rider ranked 65–74 with <B>80+ fans</B> gets a fan wildcard. If you can't enter, the Slam is played without you by the 64 rivals who made it, and your week counts as a rest week (no points; last season's points for that week drop off, as for everyone). Slams are 64 riders, best of 5 sets, and worth enormous points.</P>
       <H>Season Finals</H>
       <P>The top 16 after event 20 are split into four houses of four (🔥 Phoenix, 🌊 Kraken, 🐉 Wyvern, ⚡ Chimera). Everyone plays everyone in her house (3 points a win); the four house winners meet in the semifinals and then the World Final. Every Finals match is best of 5, and every one tires you (and her). If you don't qualify, the Finals are played without you and a world champion is crowned all the same.</P>
     </>);
@@ -155,7 +157,6 @@ function body(id) {
       <P>Each week several tournaments run at once in every tier, and all 1,000 riders play one of them. Tap a tier to see its events. Each card shows:</P>
       <List items={[
         <span key="n"><B>Name and lanes</B> — the conditions change the match for both riders:</span>,
-                <span key="ln"><B>The lanes</B> change the match for both riders:</span>,
         <span key="e"><B>Entrants (★)</B> — who signed up. ★★★ tough entrants: mostly the tier's top-ranked riders, +10% points. ★★ mixed. ★ weaker entrants: mostly lower-ranked riders, −10% points.</span>,
         <span key="s"><B>Top seeds</B> — the two best-ranked riders in the draw, and what the champion takes home.</span>
       ]} />
@@ -244,7 +245,7 @@ function body(id) {
     </>);
 
     case "training": return (<>
-      <P>Six stats, each from level 0 to 20: three for the granny, two for the rooster, and Bounce-back for recovery. Every level builds <B>your own bar</B>; her levels build hers. Each level gives a little less than the one before (level 20 works like 11).</P>
+      <P>Six stats, each from level 0 to 20 (lower later in a career — see <B>Age, retirement & legends</B>): three for the granny, two for the rooster, and Bounce-back for recovery. Every level builds <B>your own bar</B>; her levels build hers. Each level gives a little less than the one before (level 20 works like 11).</P>
       <ChipRows rows={[["r", "⚡ Reflexes (slower bar)"], ["f", "🎯 Aim (extra points)"], ["g", "🛡️ Stubbornness (softer misses)"], ["s", "🫀 Stamina (less speed-up)"], ["p", "🐾 Steady Stride (bigger gold)"], ["b", "🔋 Bounce-back"]].map(function (x) { return { k: x[0], name: x[1], sub: x[0] === "b" ? "counts on its own" : "each level ahead", list: statEffect(x[0]) }; })} />
       <H>Training points (TP)</H>
       <P>Everyone on tour — you and every rival — earns TP by the same rule every week: <B>8 for turning up, plus the ranking points you won ÷ 1.8</B>. A deep run buys you a few levels on the riders who went out early; the edge fades once you move up to a tier where everyone is winning that much. You also get <B>sponsor TP</B> from your fans (one per 10 fans).</P>
@@ -332,6 +333,14 @@ function body(id) {
       <H>Profiles</H>
       <P>Tap any granny for her profile: her rider and rooster, trait and quote, ranks and points, natural talent and potential, training levels, titles, and your head-to-head — every match with its result in sets and each set's score.</P>
       <P>Tap your own card on Home for your profile. The ✏️ buttons rename your granny and your rooster.</P>
+      <P>Every profile ends with <B>Week by week</B>: each tournament she rode this season and last, the round she reached and the points she won. Tap a week to see that tournament's whole draw, with her path lit up.</P>
+      <H>Tour results</H>
+      <List items={[
+        <span key="a"><B>Tour results</B> on Home opens every tournament of a week, yours and all the others, with each champion. ‹ › step between weeks.</span>,
+        <span key="b">Tap a tournament for its full draw, round 1 to the final. Tap a name in the draw for her profile.</span>,
+        <span key="c">The search box finds any granny by name. The Season tab (tap a played week) and the paper ("Every draw of the week") open the same list.</span>,
+        <span key="d">The tour keeps every week of this season and last; older seasons keep each rider's best round and titles in every tier.</span>
+      ]} />
     </>);
 
     case "ach": return (<>
@@ -339,7 +348,32 @@ function body(id) {
     </>);
 
     case "gala": return (<>
-      <P>When the season is over, the <B>Grand Gala</B> plays: the world champion is crowned, the season's awards are handed out one envelope at a time (most titles, biggest climb, most training, your best quote, fan favourite — and the participation ribbon), your season in numbers, the hall of the golden helmets, and a goal for next season. Your training, prize money, badges, fans, rival and newspaper archive all carry over into the new season — and so do last season's points, which you'll defend week by week.</P>
+      <P>When the season is over, the <B>Grand Gala</B> plays: the world champion is crowned, the season's awards are handed out one envelope at a time (most titles, biggest climb, most training, your best quote, fan favourite — and the participation ribbon), your season in numbers, the hall of the golden helmets, the grannies who retire this year (In memoriam, mostly), anyone entering the Hall of Fame, and a goal for next season. Your training, prize money, badges, fans, rival and newspaper archive all carry over into the new season — and so do last season's points, which you'll defend week by week.</P>
+    </>);
+
+    case "age": return (<>
+      <P>Grannies get older, and every rider ages by the same rule, you included. Age is counted in <B>seasons on the tour</B> (your profile and the Train tab show yours).</P>
+      <H>The age cap on training</H>
+      <List items={[
+        <span key="a">Up to season {PEAK_SEASONS + 2}, every stat can be trained to 20.</span>,
+        <span key="b">After that the cap drops, a little more every season.</span>,
+        <span key="c">Levels above the new cap are lost at the start of a season. The rooster pedigree still adds its levels on top.</span>
+      ]} />
+      <Table head={["Season on tour", "10", "15", "20", "22", "25", "28", "30"]} rows={[["Highest level"].concat([10, 15, 20, 22, 25, 28, 30].map(function (y) { return String(ageCap(y)); }))]} />
+      <H>Retirements and newcomers</H>
+      <List items={[
+        <span key="a">At the end of each season about 50 rivals retire. Nobody retires before 8 seasons; after that the chance grows with age, and riders ranked low go sooner.</span>,
+        <span key="b">Each one is replaced by a newcomer who starts at the bottom of the ranking with her own talent and potential. Now and then a prodigy arrives.</span>,
+        <span key="c">The gala says goodbye (and how each one left), Home lists the best of them, and the Knitter posts the farewells. If your rival retires, a new grudge will find you.</span>
+      ]} />
+      <H>Your own retirement</H>
+      <List items={[
+        <span key="a">From season {RETIRE_FROM} on the tour, the gala's last page lets you retire. It's always your choice.</span>,
+        <span key="b">Your career goes up on the <B>family wall</B> (More tab): your portrait, best world rank, Grand Slams and Masters titles.</span>,
+        <span key="c">The next granny of your family starts from nothing, in the same tour with the same rivals: #1000, first season, 10 starting points. Your badges stay yours.</span>
+      ]} />
+      <H>The Hall of Fame</H>
+      <P>Very hard to enter: {HOF_RULE}. Riders are judged when they retire, rivals and you alike. The Hall is on the More tab, next to the family wall.</P>
     </>);
 
     case "settings": return (<>
