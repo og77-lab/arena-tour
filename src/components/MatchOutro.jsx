@@ -4,7 +4,7 @@ import * as React from "react";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
 import { bs } from "../models/formulas";
-import { playVictoryBig, playDefeatBig, playCrack } from "../sounds";
+import { playVictoryBig, playDefeatBig, playCrack, playCrowdRoar } from "../sounds";
 import { Sparks, CountUp, vibrate, REDUCED_MOTION } from "./fx";
 import { Rider } from "./Rider";
 
@@ -17,6 +17,33 @@ function DefeatedRider(props) {
   var _f = useState(false), fallen = _f[0], setFallen = _f[1];
   useEffect(function () { var t = setTimeout(function () { setFallen(true); }, 450); return function () { clearTimeout(t); }; }, []);
   return (<Rider palette={props.palette} width={140} pose={fallen ? "fallen" : "knocked"} hatOff={true} />);
+}
+
+/* The big events put their badge on the result: a silver MASTERS shield, a gold GRAND SLAM crest */
+function Plaque(props) {
+  var slam = props.tier >= 5;
+  return (
+    <motion.div initial={{ y: -30, opacity: 0, scale: 1.3 }} animate={{ y: 0, opacity: props.dim ? 0.75 : 1, scale: 1 }} transition={{ delay: props.delay || 0.15, type: "spring", stiffness: 340, damping: 18 }}
+      style={{ marginBottom: 10, padding: "4px 16px", borderRadius: slam ? 10 : 4, fontSize: 12, fontWeight: 900, letterSpacing: 4, whiteSpace: "nowrap",
+        background: slam ? "linear-gradient(180deg,#fde68a,#f59e0b 60%,#b45309)" : "linear-gradient(180deg,#f8fafc,#cbd5e1 55%,#94a3b8)",
+        color: slam ? "#451a03" : "#831843", border: "2px solid " + (slam ? "#78350f" : "#ec4899"), boxShadow: slam ? "0 0 22px rgba(251,191,36,0.6)" : "0 0 18px rgba(236,72,153,0.55)" }}>
+      {slam ? "👑 " : "★ "}{String(props.label || (slam ? "Grand Slam" : "Masters")).toUpperCase()}{slam ? " 👑" : " ★"}
+    </motion.div>
+  );
+}
+
+/* Ribbons of confetti drifting down over a big win */
+function Confetti(props) {
+  if (REDUCED_MOTION) return null;
+  return (
+    <div aria-hidden style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none", zIndex: 4 }}>
+      {Array.from({ length: props.count }).map(function (_, i) {
+        var c = props.colors[i % props.colors.length];
+        return (<div key={i} style={{ position: "absolute", top: 0, left: ((i * 53) % 100) + "%", width: i % 3 ? 6 : 4, height: i % 3 ? 10 : 14, borderRadius: 1, background: c, opacity: 0,
+          animation: "confetti-fall " + (2.6 + (i % 5) * 0.45).toFixed(2) + "s linear " + (0.4 + (i % 7) * 0.33).toFixed(2) + "s infinite" }} />);
+      })}
+    </div>
+  );
 }
 
 function avg(a) { var s = 0; for (var i = 0; i < a.length; i++) s += a[i]; return a.length ? s / a.length : 0; }
@@ -41,14 +68,30 @@ function SetChips(props) {
 function Victory(props) {
   var champion = props.champion;
   var word = champion ? "CHAMPION" : "VICTORY";
+  var tier = props.tier || 0, masters = tier === 4, slam = tier >= 5;
+  /* Masters wins glow pink and silver; everything else stays gold, the Slam with fireworks on top */
+  var bg = masters ? "radial-gradient(circle at 50% 30%,#fbcfe8 0%,#ec4899 13%,#9d174d 30%,#4a0f33 54%,#170816 80%,#0c0a09 100%)"
+    : "radial-gradient(circle at 50% 30%,#fcd34d 0%,#d97706 13%,#92400e 28%,#451a03 52%,#1c1006 78%,#0c0a09 100%)";
   return (
-    <div style={{ position: "absolute", inset: 0, background: "radial-gradient(circle at 50% 30%,#fcd34d 0%,#d97706 13%,#92400e 28%,#451a03 52%,#1c1006 78%,#0c0a09 100%)" }}>
+    <div style={{ position: "absolute", inset: 0, background: bg }}>
       <div aria-hidden style={{ position: "absolute", left: "50%", top: "34%", width: "220vmax", height: "220vmax", marginLeft: "-110vmax", marginTop: "-110vmax", background: "repeating-conic-gradient(from 0deg,rgba(255,255,255,0.13) 0deg 7deg,transparent 7deg 18deg)", WebkitMaskImage: "radial-gradient(circle,#000 6%,transparent 38%)", maskImage: "radial-gradient(circle,#000 6%,transparent 38%)", animation: REDUCED_MOTION ? "none" : "spin 18s linear infinite", pointerEvents: "none" }} />
       <motion.div aria-hidden initial={{ opacity: 0.85 }} animate={{ opacity: 0 }} transition={{ duration: 0.45 }} style={{ position: "absolute", inset: 0, background: "#fff", pointerEvents: "none" }} />
-      <Sparks count={30} spread={230} top="30%" delay={0.2} />
+      {tier >= 2 && !REDUCED_MOTION && Array.from({ length: tier * 3 }).map(function (_, i) {
+        return (<div key={"cf" + i} aria-hidden style={{ position: "absolute", left: (3 + (i * 37) % 94) + "%", top: (6 + (i * 29) % 86) + "%", width: 5, height: 5, borderRadius: "50%", background: "#fff", boxShadow: "0 0 8px #fff", opacity: 0,
+          animation: "camFlash " + (1.6 + (i % 4) * 0.45).toFixed(2) + "s ease-out " + ((i % 6) * 0.25).toFixed(2) + "s infinite" }} />);
+      })}
+      <Sparks count={24 + tier * 3} spread={210 + tier * 10} top="30%" delay={0.2} colors={masters ? ["#ec4899", "#fbcfe8", "#ffffff", "#cbd5e1"] : undefined} />
+      {masters && (<Confetti count={26} colors={["#ec4899", "#f8fafc", "#cbd5e1", "#f9a8d4"]} />)}
+      {slam && (<Confetti count={36} colors={["#fbbf24", "#fde68a", "#ffffff", "#ef4444", "#38bdf8"]} />)}
+      {slam && [[18, "24%", 0.9], [80, "18%", 1.35], [50, "10%", 1.8], [30, "14%", 2.4], [70, "26%", 2.9]].map(function (f, i) {
+        return (<div key={"fw" + i} aria-hidden style={{ position: "absolute", left: f[0] + "%", top: 0, width: 0, height: "100%", pointerEvents: "none" }}>
+          <Sparks count={22} spread={90} top={f[1]} delay={f[2]} colors={i % 2 ? ["#fde68a", "#fbbf24", "#ffffff"] : ["#f472b6", "#38bdf8", "#ffffff"]} />
+        </div>);
+      })}
       {champion && (<Sparks count={30} spread={300} top="30%" delay={0.75} colors={["#fde68a", "#22c55e", "#38bdf8", "#f472b6"]} />)}
 
       <div style={{ position: "relative", zIndex: 6, height: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 18px", textAlign: "center" }}>
+        {tier >= 4 && (<Plaque tier={tier} label={props.tierName} />)}
         {champion && (
           <motion.div initial={{ y: -320, rotate: -35, scale: 0.6 }} animate={{ y: 0, rotate: 0, scale: 1 }} transition={{ type: "spring", stiffness: 260, damping: 13, delay: 0.35 }}
             style={{ fontSize: 54, lineHeight: 1, marginBottom: -6, filter: "drop-shadow(0 0 22px rgba(253,224,71,0.9))" }}>🏆</motion.div>
@@ -116,6 +159,7 @@ function Defeat(props) {
       <Sparks count={18} spread={170} top="42%" delay={0.55} colors={["#94a3b8", "#ef4444", "#e5e7eb"]} />
 
       <div style={{ position: "relative", zIndex: 6, height: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 18px", textAlign: "center", animation: REDUCED_MOTION ? "none" : "arenaShakeHard 0.5s ease 0.12s" }}>
+        {(props.tier || 0) >= 4 && (<Plaque tier={props.tier} label={props.tierName} dim={true} delay={0.3} />)}
         <motion.div initial={{ y: -60, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ type: "spring", stiffness: 200, damping: 12 }}
           style={{ filter: "saturate(0.6) drop-shadow(0 0 20px rgba(239,68,68,0.5))" }}>
           <DefeatedRider palette={props.youPalette} />
@@ -152,10 +196,11 @@ export default function MatchOutro(props) {
 
   useEffect(function () {
     var crack = null;
+    var roar = won && (props.tier || 0) >= 4 ? setTimeout(playCrowdRoar, 250) : null;
     if (won) { playVictoryBig(); vibrate(props.champion ? [40, 60, 40, 60, 120] : [30, 50, 80]); }
     else { playDefeatBig(); vibrate([120, 60, 200]); crack = setTimeout(playCrack, 500); }
     var t = setTimeout(function () { setReady(true); }, 1200);
-    return function () { clearTimeout(t); clearTimeout(crack); };
+    return function () { clearTimeout(t); clearTimeout(crack); clearTimeout(roar); };
   }, []);
 
   var footer = (

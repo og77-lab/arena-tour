@@ -11,6 +11,7 @@ import { Sparks, vibrate, REDUCED_MOTION } from "./fx";
 import { Rider, Face } from "./Rider";
 import FinalReveal from "./FinalReveal";
 import SlamIntro from "./SlamIntro";
+import MastersIntro from "./MastersIntro";
 
 const { useState, useEffect, useRef } = React;
 
@@ -137,7 +138,7 @@ export default function MatchIntro(props) {
   }, []);
 
   /* A final gets its own build-up first (trophy, your road, the opponent revealed), then the usual VS and countdown */
-  function startShow() { clearAll(); if (props.isFinal && !props.resumeSet) setStage("final"); else if (props.isSlam && !props.resumeSet) setStage("slamIntro"); else startCinematic(); }
+  function startShow() { clearAll(); if (props.isFinal && !props.resumeSet) setStage("final"); else if (props.isSlam && !props.resumeSet) setStage("slamIntro"); else if (props.isMasters && !props.resumeSet) setStage("mastersIntro"); else startCinematic(); }
 
   /* Only the scouting report waits for the player */
   function advance() { if (stage === "scout") startShow(); }
@@ -151,6 +152,8 @@ export default function MatchIntro(props) {
   }, [props.skipSignal]);
 
   var tierColor = props.tierColor || "#f59e0b";
+  /* Every tier up adds a little pomp to the VS: more sparks, camera flashes from Tour 250, a gleam and a second shockwave from Tour 500 */
+  var tier = Math.max(0, Math.min(5, props.tier == null ? 0 : props.tier));
 
   return createPortal(
     <motion.div
@@ -190,16 +193,22 @@ export default function MatchIntro(props) {
       )}
 
       {stage === "slamIntro" && (<SlamIntro you={props.you} foe={props.foe} roundLabel={props.roundLabel} slamLabel={props.tierName} onDone={startCinematic} />)}
+      {stage === "mastersIntro" && (<MastersIntro you={props.you} foe={props.foe} roundLabel={props.roundLabel} eventLabel={props.tierName} onDone={startCinematic} />)}
       {stage === "final" && (<FinalReveal you={props.you} foe={props.foe} scout={props.scout} road={props.road} tierName={props.tierName} oppId={props.oppId} onDone={startCinematic} />)}
 
       {/* 2 · The cinematic, mounted fresh so every animation plays from the start */}
-      {stage !== "scout" && stage !== "final" && stage !== "slamIntro" && (
+      {stage !== "scout" && stage !== "final" && stage !== "slamIntro" && stage !== "mastersIntro" && (
       <div style={{ position: "absolute", inset: 0, animation: REDUCED_MOTION ? "none" : "arenaShakeHard 0.45s ease 0.42s" }}>
         {/* Diagonal split halves */}
         <motion.div initial={{ x: "-100%" }} animate={{ x: 0 }} transition={{ type: "spring", stiffness: 200, damping: 26 }}
           style={{ position: "absolute", inset: 0, clipPath: "polygon(0 0,62% 0,38% 100%,0 100%)", background: "linear-gradient(140deg,#451a03 0%,#92400e 35%,#d97706 75%,#fbbf24 100%)" }} />
         <motion.div initial={{ x: "100%" }} animate={{ x: 0 }} transition={{ type: "spring", stiffness: 200, damping: 26 }}
           style={{ position: "absolute", inset: 0, clipPath: "polygon(62% 0,100% 0,100% 100%,38% 100%)", background: "linear-gradient(220deg,#0f172a 0%,#1e293b 40%,#7f1d1d 100%)" }} />
+        {/* Camera flashes in the dark from Tour 250 up */}
+        {tier >= 2 && !REDUCED_MOTION && Array.from({ length: tier * 3 }).map(function (_, i) {
+          return (<div key={"cf" + i} aria-hidden style={{ position: "absolute", left: (4 + (i * 37) % 92) + "%", top: (8 + (i * 23) % 80) + "%", width: 5, height: 5, borderRadius: "50%", background: "#fff", boxShadow: "0 0 8px #fff", opacity: 0, zIndex: 1,
+            animation: "camFlash " + (1.5 + (i % 4) * 0.4).toFixed(2) + "s ease-out " + (0.5 + (i % 5) * 0.21).toFixed(2) + "s infinite" }} />);
+        })}
         {/* Speed lines */}
         <div aria-hidden style={{ position: "absolute", inset: 0, background: "repeating-linear-gradient(115deg,rgba(255,255,255,0.04) 0 2px,transparent 2px 22px)", pointerEvents: "none" }} />
         {/* Lightning seam */}
@@ -229,14 +238,19 @@ export default function MatchIntro(props) {
         <div style={{ position: "absolute", left: "50%", top: "50%", zIndex: 5 }}>
           <motion.div aria-hidden initial={{ scale: 0, opacity: 0.9 }} animate={{ scale: 9, opacity: 0 }} transition={{ delay: 0.42, duration: 0.6, ease: "easeOut" }}
             style={{ position: "absolute", width: 40, height: 40, marginLeft: -20, marginTop: -20, borderRadius: "50%", border: "4px solid #fff" }} />
+          {tier >= 3 && (<motion.div aria-hidden initial={{ scale: 0, opacity: 0.9 }} animate={{ scale: 12, opacity: 0 }} transition={{ delay: 0.55, duration: 0.75, ease: "easeOut" }}
+            style={{ position: "absolute", width: 40, height: 40, marginLeft: -20, marginTop: -20, borderRadius: "50%", border: "3px solid " + tierColor }} />)}
           <motion.div initial={{ scale: 4, opacity: 0, rotate: -15 }}
             animate={{ scale: 1, opacity: stage === "slam" ? 1 : 0.12, rotate: 0 }}
             transition={{ delay: stage === "slam" ? 0.4 : 0, type: "spring", stiffness: 420, damping: 16 }}
             style={{ position: "absolute", left: 0, top: 0, transformOrigin: "0 0" }}>
-            <div style={{ transform: "translate(-50%,-50%)", fontSize: 76, fontWeight: 900, fontStyle: "italic", letterSpacing: -2, lineHeight: 1.1, whiteSpace: "nowrap", color: "#fffbeb", textShadow: "0 2px 0 #fde68a, 0 4px 0 #f59e0b, 0 6px 0 #b45309, 0 8px 0 #7c2d12, 0 0 26px rgba(250,204,21,0.85)" }}>VS</div>
+            <div style={{ transform: "translate(-50%,-50%)", fontSize: 76, fontWeight: 900, fontStyle: "italic", letterSpacing: -2, lineHeight: 1.1, whiteSpace: "nowrap", color: "#fffbeb", textShadow: "0 2px 0 #fde68a, 0 4px 0 #f59e0b, 0 6px 0 #b45309, 0 8px 0 #7c2d12, 0 0 26px rgba(250,204,21,0.85)", position: "relative", overflow: "hidden" }}>VS
+              {tier >= 3 && !REDUCED_MOTION && (<motion.span aria-hidden initial={{ x: "-160%" }} animate={{ x: "160%" }} transition={{ delay: 0.9, duration: 0.7, ease: "easeInOut" }}
+                style={{ position: "absolute", inset: 0, background: "linear-gradient(105deg,transparent 30%,rgba(255,255,255,0.75) 48%,transparent 66%)", mixBlendMode: "overlay" }} />)}
+            </div>
           </motion.div>
         </div>
-        <Sparks count={22} delay={0.42} spread={190} zIndex={4} />
+        <Sparks count={14 + tier * 5} delay={0.42} spread={170 + tier * 14} zIndex={4} colors={tier >= 4 ? ["#facc15", "#fde68a", "#ffffff", tierColor] : undefined} />
 
         <AnimatePresence>
           {(stage === "count" || stage === "out") && (

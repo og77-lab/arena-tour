@@ -477,7 +477,7 @@ export default function PowerBar(props) {
           you={{ name: youName, emoji: youEmoji, sub: props.youSub, palette: youPal }}
           foe={{ name: oppName, emoji: oppEmoji, sub: props.foeSub, palette: foePal }}
           roundLabel={props.roundLabel} tierName={props.tierName} tierColor={tierColor}
-          bestOf={bestOf} resumeSet={sets.length > 0 || myH.length > 0 ? setNum : null} scout={props.scout} coach={props.coach} isFinal={!!props.isFinal} isSlam={props.tier >= 5} road={props.road} oppId={props.oppId} oppRank={props.oppRank}
+          bestOf={bestOf} resumeSet={sets.length > 0 || myH.length > 0 ? setNum : null} scout={props.scout} coach={props.coach} isFinal={!!props.isFinal} isSlam={props.tier >= 5} isMasters={props.tier === 4} tier={props.tier} road={props.road} oppId={props.oppId} oppRank={props.oppRank}
           skipSignal={skip}
           onDone={function () { setPh(sets.length > 0 && myH.length === 0 ? "setintro" : "go"); if (sets.length > 0 && myH.length === 0) setTimeout(function () { setPh("go"); }, 1100); }} />
       )}
@@ -495,7 +495,7 @@ export default function PowerBar(props) {
           won={res.w} champion={res.w && !!props.isFinal} eliminated={!res.w && props.eliminated !== false}
           pa={res.pa} oa={res.oa} sets={res.sets} setsWon={res.setsWon} setsLost={res.setsLost}
           foeName={oppName} roundLabel={props.roundLabel} nextLabel={props.nextLabel} tierName={props.tierName}
-          stakes={props.stakes} story={story} youPalette={youPal} foePalette={foePal}
+          stakes={props.stakes} story={story} tier={props.tier} tierColor={tierColor} youPalette={youPal} foePalette={foePal}
           onContinue={finish} />
       )}
 
