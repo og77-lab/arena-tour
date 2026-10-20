@@ -244,7 +244,7 @@ export default function MatchIntro(props) {
             animate={{ scale: 1, opacity: stage === "slam" ? 1 : 0.12, rotate: 0 }}
             transition={{ delay: stage === "slam" ? 0.4 : 0, type: "spring", stiffness: 420, damping: 16 }}
             style={{ position: "absolute", left: 0, top: 0, transformOrigin: "0 0" }}>
-            <div style={{ transform: "translate(-50%,-50%)", fontSize: 76, fontWeight: 900, fontStyle: "italic", letterSpacing: -2, lineHeight: 1.1, whiteSpace: "nowrap", color: "#fffbeb", textShadow: "0 2px 0 #fde68a, 0 4px 0 #f59e0b, 0 6px 0 #b45309, 0 8px 0 #7c2d12, 0 0 26px rgba(250,204,21,0.85)", position: "relative", overflow: "hidden" }}>VS
+            <div style={{ transform: "translate(-50%,-50%)", padding: "0 0.22em 0 0.08em", fontSize: 76, fontWeight: 900, fontStyle: "italic", letterSpacing: -2, lineHeight: 1.1, whiteSpace: "nowrap", color: "#fffbeb", textShadow: "0 2px 0 #fde68a, 0 4px 0 #f59e0b, 0 6px 0 #b45309, 0 8px 0 #7c2d12, 0 0 26px rgba(250,204,21,0.85)", position: "relative", overflow: "hidden" }}>VS
               {tier >= 3 && !REDUCED_MOTION && (<motion.span aria-hidden initial={{ x: "-160%" }} animate={{ x: "160%" }} transition={{ delay: 0.9, duration: 0.7, ease: "easeInOut" }}
                 style={{ position: "absolute", inset: 0, background: "linear-gradient(105deg,transparent 30%,rgba(255,255,255,0.75) 48%,transparent 66%)", mixBlendMode: "overlay" }} />)}
             </div>

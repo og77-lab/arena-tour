@@ -94,6 +94,79 @@ function Pennant(props) {
   );
 }
 
+
+/* ── The world around the ground, by tier ── drawn in the same ink-and-flat-colour style as the riders.
+   Futures: a village fete on the green (hills, round trees, a little church, cottages, sheep).
+   Challenger: a market town (rooftops along the hill, a clock tower). Tour 250: the town over full stands, a castle tower.
+   Tour 500: a city skyline. Masters and up: a stadium roof with its lamps lit. The weather tints it all. */
+var INKB = "#3f2a1d";
+function Scenery(props) {
+  var W = props.W, top = props.top, G = props.G, tier = props.tier, cond = props.cond;
+  var hill = cond === "mud" ? ["#9aae8c", "#6f8a62"] : cond === "heat" ? ["#e3cf8f", "#c9ad62"] : cond === "green" ? ["#9bd36f", "#5fa23a"] : ["#a7dc8e", "#73b85c"];
+  var far = cond === "mud" ? "#b6c2cf" : "#c7d7e8";
+  function tree(x, y, r, k) { return (<g key={"t" + k}><rect x={x - r * 0.18} y={y} width={r * 0.36} height={r * 0.9} fill="#7c4a1e" stroke={INKB} strokeWidth="0.6" /><circle cx={x} cy={y - r * 0.2} r={r} fill={cond === "heat" ? "#a3a145" : "#4f9a3a"} stroke={INKB} strokeWidth="0.7" /><circle cx={x - r * 0.35} cy={y - r * 0.5} r={r * 0.35} fill="rgba(255,255,255,0.18)" /></g>); }
+  function house(x, y, w, h, roof, k) { return (<g key={"h" + k}><rect x={x} y={y - h} width={w} height={h} fill="#fef3c7" stroke={INKB} strokeWidth="0.6" /><polygon points={(x - 1.5) + "," + (y - h) + " " + (x + w / 2) + "," + (y - h - w * 0.55) + " " + (x + w + 1.5) + "," + (y - h)} fill={roof} stroke={INKB} strokeWidth="0.6" /><rect x={x + w * 0.35} y={y - h * 0.55} width={w * 0.3} height={h * 0.55} fill="#78350f" /></g>); }
+  var out = [];
+  if (tier <= 1) {
+    var y1 = tier === 0 ? top - 6 : top + 4, y2 = tier === 0 ? top + 10 : top + 16;
+    out.push(<path key="fh" d={"M0," + y1 + " Q" + W * 0.25 + "," + (y1 - 14) + " " + W * 0.5 + "," + y1 + " T" + W + "," + (y1 - 4) + " L" + W + "," + G + " L0," + G + " Z"} fill={hill[0]} stroke={INKB} strokeWidth="0.6" />);
+    if (cond === "wind") out.push(<rect key="sea" x="0" y={y1 - 3} width={W} height="4" fill="#38bdf8" opacity="0.7" />);
+    if (tier === 0) {
+      var cx = W * 0.07;
+      out.push(<g key="church"><rect x={cx} y={y1 - 22} width="12" height="14" fill="#e7e5e4" stroke={INKB} strokeWidth="0.6" /><rect x={cx + 3.5} y={y1 - 34} width="5" height="12" fill="#e7e5e4" stroke={INKB} strokeWidth="0.6" /><polygon points={(cx + 3) + "," + (y1 - 34) + " " + (cx + 6) + "," + (y1 - 42) + " " + (cx + 9) + "," + (y1 - 34)} fill="#64748b" stroke={INKB} strokeWidth="0.6" /><polygon points={(cx - 1) + "," + (y1 - 22) + " " + (cx + 6) + "," + (y1 - 28) + " " + (cx + 13) + "," + (y1 - 22)} fill="#94a3b8" stroke={INKB} strokeWidth="0.6" /></g>);
+      out.push(house(W * 0.84, y1 - 8, 9, 7, "#dc2626", 1), house(W * 0.91, y1 - 6, 8, 6, "#9a3412", 2));
+    } else {
+      for (var i = 0; i < 9; i++) out.push(house(i * W / 9 + 2, y1 - 2 - (i % 3) * 2, W / 9 - 6, 7 + (i % 2) * 3, i % 2 ? "#b91c1c" : "#7c2d12", 10 + i));
+      var tx = W * 0.82;
+      out.push(<g key="clock"><rect x={tx} y={y1 - 30} width="9" height="28" fill="#fde68a" stroke={INKB} strokeWidth="0.6" /><polygon points={(tx - 1) + "," + (y1 - 30) + " " + (tx + 4.5) + "," + (y1 - 38) + " " + (tx + 10) + "," + (y1 - 30)} fill="#475569" stroke={INKB} strokeWidth="0.6" /><circle cx={tx + 4.5} cy={y1 - 24} r="2.6" fill="#fff" stroke={INKB} strokeWidth="0.5" /><line x1={tx + 4.5} y1={y1 - 24} x2={tx + 4.5} y2={y1 - 25.8} stroke={INKB} strokeWidth="0.5" /></g>);
+    }
+    out.push(<path key="nh" d={"M0," + y2 + " Q" + W * 0.3 + "," + (y2 - 10) + " " + W * 0.6 + "," + y2 + " T" + W + "," + (y2 - 2) + " L" + W + "," + G + " L0," + G + " Z"} fill={hill[1]} stroke={INKB} strokeWidth="0.6" />);
+    [0.03, 0.12, 0.88, 0.97].forEach(function (f, k) { out.push(tree(W * f, y2 - 2 + (k % 2) * 3, 6 + (k % 2) * 2, k)); });
+    if (tier === 0) [0.2, 0.75].forEach(function (f, k) { out.push(<g key={"sh" + k}><ellipse cx={W * f} cy={y2 + 2} rx="3.4" ry="2.4" fill="#fff" stroke={INKB} strokeWidth="0.5" /><circle cx={W * f + 3} cy={y2 + 1.4} r="1.3" fill="#1c1917" /></g>); });
+  } else if (tier <= 3) {
+    var base = top + 2, n = tier === 2 ? 10 : 13;
+    out.push(<path key="bh" d={"M0," + (base - 4) + " Q" + W * 0.3 + "," + (base - 12) + " " + W * 0.6 + "," + (base - 5) + " T" + W + "," + (base - 8) + " L" + W + "," + G + " L0," + G + " Z"} fill={far} />);
+    for (var j = 0; j < n; j++) {
+      var bw = W / n - 2, bh = tier === 2 ? 6 + ((j * 7) % 5) * 2 : 8 + ((j * 7) % 6) * 3, bx = j * (W / n) + 1;
+      if (tier === 2) out.push(house(bx, base, bw - 3, bh - 2, j % 3 ? "#b45309" : "#7f1d1d", 30 + j));
+      else out.push(<g key={"b" + j}><rect x={bx} y={base - bh} width={bw} height={bh} fill={j % 2 ? "#cbd5e1" : "#e2e8f0"} stroke={INKB} strokeWidth="0.5" />{[0, 1, 2].map(function (r) { return (<rect key={r} x={bx + 2} y={base - bh + 2 + r * 3.5} width={bw - 4} height="1.4" fill="#93c5fd" opacity="0.8" />); })}</g>);
+    }
+    if (tier === 2) { var kx = W * 0.12; out.push(<g key="castle"><rect x={kx} y={base - 22} width="10" height="22" fill="#d6d3d1" stroke={INKB} strokeWidth="0.6" />{[0, 1, 2].map(function (q) { return (<rect key={q} x={kx + q * 3.6} y={base - 25} width="2.6" height="3" fill="#d6d3d1" stroke={INKB} strokeWidth="0.5" />); })}<rect x={kx + 4} y={base - 33} width="0.8" height="8" fill={INKB} /><polygon points={(kx + 4.8) + "," + (base - 33) + " " + (kx + 10) + "," + (base - 31) + " " + (kx + 4.8) + "," + (base - 29)} fill="#ef4444" /></g>); }
+    else { out.push(<g key="tower"><rect x={W * 0.78} y={base - 34} width="7" height="34" fill="#94a3b8" stroke={INKB} strokeWidth="0.6" /><rect x={W * 0.78 + 3} y={base - 42} width="1" height="8" fill={INKB} /><circle cx={W * 0.78 + 3.5} cy={base - 42} r="1.2" fill="#ef4444" /></g>); }
+  } else {
+    out.push(<path key="roof" d={"M0,0 L" + W + ",0 L" + W + "," + (top - 4) + " Q" + (W / 2) + "," + (top + 2) + " 0," + (top - 4) + " Z"} fill={props.night ? "#0f172a" : "#334155"} stroke={INKB} strokeWidth="0.6" />);
+    for (var l = 0; l < 9; l++) out.push(<circle key={"lamp" + l} cx={W * (0.06 + l * 0.11)} cy={top - 5 + Math.abs(4 - l) * 0.4} r="1.3" fill="#fef9c3" opacity="0.95" />);
+  }
+  return (<svg width={W} height={G} viewBox={"0 0 " + W + " " + G} style={{ position: "absolute", left: 0, top: 0, overflow: "visible" }}>{out}</svg>);
+}
+
+/* ── Pitch side ── the strip between the stands and the lane: a grassy bank and a low wall that fits the event:
+   a white picket fence, flowers, hay and the tea tent at the fete; painted signs from the locals in the middle tiers;
+   a dark wall under the sponsors' boards at the big events */
+var LOCALS = ["JAM & SCONES", "TEA 10p", "BINGO TUES", "KNIT CLUB", "EGGS 4 SALE", "CAKE STALL", "WI WELCOME", "HAY RIDES"];
+function PitchSide(props) {
+  var W = props.W, y0 = props.from, G = props.G, tier = props.tier, col = props.col, cond = props.cond;
+  var bank = cond === "mud" ? "#6b7f55" : cond === "heat" ? "#c7b36a" : "#6fb35a";
+  var wallTop = G - 15, parts = [];
+  parts.push(<div key="bank" style={{ position: "absolute", left: 0, right: 0, top: y0, height: G - y0, background: tier >= 4 ? "linear-gradient(180deg,#1e293b,#334155)" : "linear-gradient(180deg," + bank + "," + bank + " 70%,#4d7c0f)" }} />);
+  if (tier === 0) {
+    for (var x = 2; x < W; x += 7) parts.push(<div key={"p" + x} style={{ position: "absolute", left: x, top: wallTop + 2, width: 4, height: 11, background: "#fffbeb", border: "0.6px solid " + INKB, borderRadius: "2px 2px 0 0" }} />);
+    parts.push(<div key="rail" style={{ position: "absolute", left: 0, right: 0, top: wallTop + 6, height: 2, background: "#fffbeb", borderTop: "0.6px solid " + INKB, borderBottom: "0.6px solid " + INKB }} />);
+    [0.1, 0.32, 0.55, 0.8].forEach(function (f, i) { parts.push(<div key={"fl" + i} style={{ position: "absolute", left: W * f, top: wallTop - 4, fontSize: 6 }}>{["🌼", "🌷", "🌻", "🌸"][i]}</div>); });
+    parts.push(<div key="hay" style={{ position: "absolute", left: W * 0.02, top: wallTop - 9, width: 16, height: 10, borderRadius: 2, background: "repeating-linear-gradient(170deg,#facc15 0 2px,#eab308 2px 4px)", border: "0.8px solid " + INKB }} />);
+    parts.push(<div key="tent" style={{ position: "absolute", right: W * 0.03, top: wallTop - 20, width: 22, height: 20, background: "repeating-linear-gradient(90deg,#ef4444 0 4px,#fff 4px 8px)", border: "0.8px solid " + INKB, clipPath: "polygon(50% 0,100% 45%,100% 100%,0 100%,0 45%)" }} />);
+  } else if (tier <= 3) {
+    var n = Math.max(3, Math.round(W / 60)), bw = (W - 4 - (n - 1) * 3) / n;
+    for (var i = 0; i < n; i++) {
+      var dark = (i + tier) % 2;
+      parts.push(<div key={"sg" + i} style={{ position: "absolute", left: 2 + i * (bw + 3), top: wallTop, width: bw, height: 12, background: dark ? col : "#fffbeb", border: "0.8px solid " + INKB, borderRadius: 1.5,
+        display: "flex", alignItems: "center", justifyContent: "center", fontSize: 5.6, fontWeight: 900, letterSpacing: 0.4, color: dark ? "#fff" : INKB, whiteSpace: "nowrap", overflow: "hidden", fontFamily: "'Nunito', sans-serif" }}>{LOCALS[(i + tier * 3) % LOCALS.length]}</div>);
+    }
+    if (tier >= 2) [0.25, 0.75].forEach(function (f, k) { parts.push(<div key={"pot" + k} style={{ position: "absolute", left: W * f - 4, top: wallTop - 7, fontSize: 7 }}>🪴</div>); });
+  }
+  return (<>{parts}</>);
+}
+
 export default function ArenaBackdrop(props) {
   var W = props.W, groundTop = props.groundTop, col = props.tierColor || "#f59e0b";
   var tier = Math.max(0, Math.min(6, props.tier == null ? 2 : props.tier)), L = LOOK[tier];
@@ -140,6 +213,7 @@ export default function ArenaBackdrop(props) {
           background: cond === "mud" ? "rgba(100,116,139,0.85)" : "rgba(255,255,255,0.85)",
           animation: REDUCED_MOTION ? "none" : "cloudDrift " + ((cond === "wind" ? 9 : 38) + i * (cond === "wind" ? 4 : 14)) + "s linear " + (-i * 17) + "s infinite" }} />);
       })}
+      <Scenery W={W} top={standTop} G={groundTop} tier={tier} cond={cond} night={!!L.gold} />
       {/* Spotlights for the biggest nights */}
       {tier >= 5 && [0, 1].map(function (i) {
         return (<div key={"sp" + i} style={{ position: "absolute", top: -10, [i ? "right" : "left"]: "18%", width: 46, height: groundTop + 10, background: "linear-gradient(180deg,rgba(255,255,255,0.45),rgba(255,255,255,0))", clipPath: "polygon(40% 0,60% 0,100% 100%,0 100%)",
@@ -176,7 +250,7 @@ export default function ArenaBackdrop(props) {
       )}
       {/* depth: the roof's shade over the top rows, and a light haze between the stands and the lane */}
       <div style={{ position: "absolute", left: spanL, width: spanR - spanL, top: standTop, height: Math.max(8, (standBottom - standTop) * 0.45), background: "linear-gradient(180deg,rgba(20,12,4,0.32),rgba(20,12,4,0))" }} />
-      <div style={{ position: "absolute", left: 0, right: 0, top: standBottom - 2, height: Math.max(10, groundTop - standBottom - 18), background: "linear-gradient(180deg,rgba(255,250,235,0.42),rgba(255,250,235,0))" }} />
+      <PitchSide W={W} from={standBottom} G={groundTop} tier={tier} col={col} cond={cond} />
 
       {/* Advertising boards along the pitch side: painted panels at the Masters, glowing LED boards at a Slam */}
       {L.boards && (function () {
@@ -233,13 +307,6 @@ export default function ArenaBackdrop(props) {
       </>)}
 
       {!L.screen && (<><Pennant side="left" h={standTop + 10} color={col} /><Pennant side="right" h={standTop + 10} color="#ef4444" /></>)}
-
-      {/* Tilt barrier down the lane (behind the riders) */}
-      <div style={{ position: "absolute", left: "6%", right: "6%", top: groundTop - 20, height: 14, background: "repeating-linear-gradient(90deg," + col + " 0 14px,#fffbeb 14px 28px)", border: "1.5px solid #3f2a1d", borderRadius: 2, opacity: 0.9 }} />
-      <div style={{ position: "absolute", left: "6%", right: "6%", top: groundTop - 23, height: 4, background: "#92400e", border: "1px solid #3f2a1d", borderRadius: 2 }} />
-      {[0.06, 0.28, 0.5, 0.72, 0.94].map(function (p) {
-        return (<div key={p} style={{ position: "absolute", left: "calc(" + (p * 100) + "% - 2px)", top: groundTop - 24, width: 4, height: 24, background: "#78350f", border: "1px solid #3f2a1d" }} />);
-      })}
 
       {/* Hats in the air on a big hit */}
       {(mood === "big" || mood === "party") && !REDUCED_MOTION && [0, 1, 2, 3, 4, 5].map(function (i) {

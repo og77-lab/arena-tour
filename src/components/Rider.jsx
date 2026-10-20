@@ -334,7 +334,7 @@ export function Rider(props) {
           {props.crown && (<text x="45" y="23" fontSize="17" style={{ transform: props.flip ? "scaleX(-1)" : "none", transformBox: "fill-box", transformOrigin: "center" }}>👑</text>)}
 
           {/* Lance with a boxing-glove tip */}
-          <g style={svgT("68px 56px", "rotate(" + (LANCE_ANGLE[pose] != null ? LANCE_ANGLE[pose] : -24) + "deg)", pose === "charge" ? "transform 0.18s ease-in" : "transform 0.3s cubic-bezier(.3,1.5,.5,1)")}>
+          <g style={svgT("68px 56px", "rotate(" + (props.aim != null ? props.aim : LANCE_ANGLE[pose] != null ? LANCE_ANGLE[pose] : -24) + "deg)", props.aim != null ? "transform 0.07s ease-out" : pose === "charge" ? "transform 0.18s ease-in" : "transform 0.3s cubic-bezier(.3,1.5,.5,1)")}>{/* aim: the angle that points the glove at the other rider (JoustStage) */}
             <LanceShaft id={lance} knit={L.knit} plume={p.plume} />
             <rect x="117" y="46" width="5" height="8" rx="1.5" fill="#fff" stroke={INK} strokeWidth="1.6" />
             <ellipse cx="127" cy="50" rx="7" ry="6" fill="#dc2626" stroke={INK} strokeWidth="1.8" />

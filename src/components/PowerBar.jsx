@@ -324,7 +324,8 @@ export default function PowerBar(props) {
     setReveal({ id: id, you: sc, opp: osc, youWon: youWon, tie: tie, label: strikeLabel(Math.round(base)), set: setNum, strike: nm.length, stamped: false, why: why });
     var perfect = !result && youWon && base >= 99;
     if (perfect) word = "PERFECT!";
-    setJoust({ id: id, phase: "charge", youWon: joustWon, big: big, word: word, perfect: perfect });
+    /* a set that ends here (not the match) leaves its loser dizzy on the stage */
+    setJoust({ id: id, phase: "charge", youWon: joustWon, big: big, word: word, perfect: perfect, setLoss: setDone && !result ? (avMy > avOp ? "foe" : "you") : null });
     playStrike(sc);
     playGallop();
     vibrate(12);
@@ -366,7 +367,7 @@ export default function PowerBar(props) {
         spd.current += accel;
         posRef.current = 0; dir.current = 1; busy.current = false; setPh("go");
       }
-    }, 1500);
+    }, setDone ? 2400 : 1500); /* a lost set holds a beat longer, so the loser's dizzy spell shows */
   }
 
   var setIntroLock = useRef(false);
