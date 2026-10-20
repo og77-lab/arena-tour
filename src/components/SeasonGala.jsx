@@ -10,7 +10,9 @@ import { Rider, Face, PLAYER_PALETTE, paletteFor } from "./Rider";
 import { Sparks, CountUp, REDUCED_MOTION, vibrate } from "./fx";
 import { sh } from "../models/formulas";
 import { playVictoryBig, playRankUp, playClang, playTitle, playWhoosh } from "../sounds";
-import { causeText, HOF_RULE } from "../engine/aging";
+import { HOF_RULE } from "../engine/aging";
+import { enterGala, leaveGala } from "../music";
+import FarewellNotice from "./FarewellNotice";
 
 const { useState, useEffect } = React;
 
@@ -97,6 +99,8 @@ export default function SeasonGala(props) {
   var _i = useState(0), i = _i[0], setI = _i[1];
   var st = stages[i], last = i === stages.length - 1;
   var champRank = props.champRank || 1;
+  /* "Glory and Gravy" plays for the whole ceremony, and only here */
+  useEffect(function () { enterGala(); return leaveGala; }, []);
 
   useEffect(function () {
     if (st === "intro") playWhoosh();
@@ -213,17 +217,12 @@ export default function SeasonGala(props) {
                 <div style={{ marginTop: 6 }}><Big size={28}>FAREWELL, LADIES</Big></div>
                 <div style={{ fontSize: 13.5, color: SOFT, marginTop: 8 }}>{fw.n} grannies hang up their lances this year. {fw.n} newcomers take their places at the bottom.</div>
                 {fw.rival && (<div style={{ fontSize: 13.5, fontWeight: 900, color: "#fda4af", marginTop: 8 }}>Your arch-rival {fw.rival.emoji} {sh(fw.rival.name)} is leaving. Who will you argue with now?</div>)}
-                <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 12, textAlign: "left" }}>
+                {/* The notices, pinned up one by one like the back page of the parish paper */}
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))", gap: 10, marginTop: 12 }}>
                   {fw.top.map(function (g, j) {
                     return (
-                      <motion.div key={g.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 + j * 0.12 }}
-                        style={{ display: "flex", alignItems: "center", gap: 9, padding: "6px 9px", borderRadius: 12, background: "rgba(255,255,255,0.06)", border: "1.5px solid rgba(253,230,138,0.2)" }}>
-                        <div style={{ filter: "grayscale(0.35) sepia(0.3)", flexShrink: 0 }}><Face palette={paletteFor(g.id, g.rank)} size={36} /></div>
-                        <div style={{ minWidth: 0, flex: 1 }}>
-                          <div style={{ fontSize: 13.5, fontWeight: 900, color: CREAM }}>{g.emoji} {g.name}</div>
-                          <div style={{ fontSize: 11.5, fontWeight: 800, color: GOLD }}>#{g.rank} · best #{g.peak} · {g.y} seasons · {g.titles} {g.titles === 1 ? "title" : "titles"}{g.gsTitles ? " · " + g.gsTitles + " Slam" + (g.gsTitles > 1 ? "s" : "") : ""}</div>
-                          <div style={{ fontSize: 12, fontStyle: "italic", color: SOFT, fontFamily: "Georgia, serif" }}>{causeText(g)}</div>
-                        </div>
+                      <motion.div key={g.id} initial={{ opacity: 0, y: 14, rotate: j % 2 ? 1.5 : -1.5 }} animate={{ opacity: 1, y: 0, rotate: j % 2 ? 0.6 : -0.6 }} transition={{ delay: 0.2 + j * 0.25 }}>
+                        <FarewellNotice g={g} />
                       </motion.div>
                     );
                   })}

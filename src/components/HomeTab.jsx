@@ -9,7 +9,7 @@ import { KnitterPreview } from "./KnitterFeed";
 import { Rider, Face, PLAYER_PALETTE, paletteFor, withKit } from "./Rider";
 import RankSparkline from "./RankSparkline";
 import { FitnessCard, FansCard } from "./Fitness";
-import { causeText } from "../engine/aging";
+import FarewellNotice from "./FarewellNotice";
 
 function Bunting(props) {
   var n = 18, flags = [];
@@ -166,15 +166,10 @@ export default function HomeTab(props) {
             <div style={{ fontSize: 13.5, fontWeight: 800, color: C.text, marginTop: 4 }}>{f.n} grannies hung up their lances. {f.n} newcomers start at the bottom of the ranking.</div>
             {f.heir && (<div style={{ fontSize: 13, fontWeight: 800, color: C.goldInk, marginTop: 5 }}>{f.heir} has retired — her portrait is on the family wall. Welcome, {S.pName}: first season on tour, from the very bottom.</div>)}
             {riv && (<div style={{ fontSize: 13, fontWeight: 800, color: "#be123c", marginTop: 5 }}>Your rival {riv.emoji} {riv.name} has retired. A new grudge will find you soon.</div>)}
-            <div style={{ marginTop: 6, display: "flex", flexDirection: "column", gap: 3 }}>
+            {/* the notices, swipe for more */}
+            <div style={{ display: "flex", gap: 8, overflowX: "auto", marginTop: 8, paddingBottom: 4 }}>
               {f.top.map(function (id) { var g = byId[id]; if (!g) return null; return (
-                <div key={id} style={{ fontSize: 12.5, borderTop: "1px dashed " + C.line, paddingTop: 3 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
-                    <span style={{ fontWeight: 800, color: C.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{g.emoji} {g.name}{g.hof ? " 🏛️" : ""}</span>
-                    <span style={{ color: C.textSoft, whiteSpace: "nowrap" }}>#{g.rank} · {g.y} seasons · {g.titles} {g.titles === 1 ? "title" : "titles"}{g.gsTitles ? " · " + g.gsTitles + " Slam" + (g.gsTitles > 1 ? "s" : "") : ""}</span>
-                  </div>
-                  <div style={{ fontSize: 11.5, fontStyle: "italic", color: C.textMuted }}>{causeText(g)}</div>
-                </div>); })}
+                <div key={id} style={{ flex: "0 0 230px" }}><FarewellNotice g={g} small /></div>); })}
             </div>
             {f.lost > 0 && (<div style={{ fontSize: 12.5, color: C.redInk, fontWeight: 800, marginTop: 6 }}>You're a season older too: every stat now stops at {f.cap}, and you lost {f.lost} {f.lost === 1 ? "level" : "levels"}.</div>)}
           </div>

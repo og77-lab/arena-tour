@@ -2,6 +2,7 @@
 // Two channels, each a shuffled playlist where a tune never comes back within two tracks:
 //   menu   — the screens around the match; fades out while a match is on screen
 //   battle — only the match itself: starts when the opening animation ends, fades out when the match is decided
+//   gala   — "Glory and Gravy", only during the end-of-season gala (menu music steps aside, then comes back)
 
 var VOLUME = 0.35, FADE_MS = 900, GAP_MS = 1500;
 var KEY_ON = "arena-music";
@@ -67,9 +68,10 @@ function Channel(tracks, recentKey, gapMs) {
 
 var menu = Channel(["/music/rooster.mp3", "/music/jousting.mp3", "/music/grandma.mp3", "/music/grandma-joust.mp3", "/music/roosters-and-sticks.mp3"], "arena-music-recent", GAP_MS);
 var battle = Channel(["/music/fight-1.mp3", "/music/fight-2.mp3", "/music/fight-3.mp3", "/music/fight-4.mp3"], "arena-battle-recent", 300);
+var gala = Channel(["/music/gala.mp3"], "arena-gala-recent", 800);
 menu.want = true;
 
-function syncAll() { menu.sync(); battle.sync(); }
+function syncAll() { menu.sync(); battle.sync(); gala.sync(); }
 
 /* ── Public API ── */
 
@@ -96,15 +98,19 @@ export function leaveMatch() {
 export function startBattle() { if (!battle.want) { battle.want = true; battle.sync(); } }
 export function stopBattle() { if (battle.want) { battle.want = false; battle.drop(); } }
 
+/* The season gala has its own tune, and only the gala plays it */
+export function enterGala() { menu.want = false; menu.sync(); gala.want = true; gala.sync(); }
+export function leaveGala() { gala.want = false; gala.drop(); if (matchDepth === 0) { menu.want = true; menu.sync(); } }
+
 /* First tap/key anywhere unlocks audio; music pauses while the app is in the background */
 if (typeof window !== "undefined") {
   var unlock = function () { if (unlocked) return; unlocked = true; syncAll(); };
   window.addEventListener("pointerdown", unlock, true);
   window.addEventListener("keydown", unlock, true);
   document.addEventListener("visibilitychange", function () {
-    if (hidden()) { [menu, battle].forEach(function (c) { if (c.audio) c.audio.pause(); }); } else syncAll();
+    if (hidden()) { [menu, battle, gala].forEach(function (c) { if (c.audio) c.audio.pause(); }); } else syncAll();
   });
   /* Read-only peek and a skip, for debugging from the console */
-  window.__gjMusic = function () { return { enabled: enabled, unlocked: unlocked, menu: menu.peek(), battle: battle.peek() }; };
+  window.__gjMusic = function () { return { enabled: enabled, unlocked: unlocked, menu: menu.peek(), battle: battle.peek(), gala: gala.peek() }; };
   window.__gjMusicSkip = function (which) { (which === "battle" ? battle : menu).skip(); };
 }
