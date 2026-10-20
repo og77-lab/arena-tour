@@ -333,6 +333,7 @@ function body(id) {
       <P>The Ranks tab lists all 1,000 riders by season points and opens on your own row, with 25 above and below ("show 25 more" to see further). Switch to <B>Top 50</B> to see the leaders. Golden helmets mark the top ten; the world #1 wears the crown.</P>
       <H>Profiles</H>
       <P>Tap any granny for her profile: her rider and rooster, trait and quote, ranks and points, natural talent and potential, training levels, titles, and your head-to-head — every match with its result in sets and each set's score.</P>
+      <P>A rival's <B>talent</B> grows slowly through her career, up to her <B>potential</B>. Only five riders can ever reach 90; below them the ceiling falls steadily with each rider's place in the talent order, so the very best stand apart. The three strongest post a set of 100+ about one set in five, the 30th about one in seven, the 100th about one in thirty: a matter of chance, never a schedule.</P>
       <P>Tap your own card on Home for your profile. The ✏️ buttons rename your granny and your rooster.</P>
       <P>Every profile ends with <B>Week by week</B>: each tournament she rode this season and last, the round she reached and the points she won. Tap a week to see that tournament's whole draw, with her path lit up.</P>
       <H>Tour results</H>

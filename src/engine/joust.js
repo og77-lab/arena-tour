@@ -47,9 +47,10 @@ export function landScore(d, bar, jitter) {
 }
 
 /* ── Hands ── a rider's wobble, in "% of a normal-speed bar" units (a normal bar crosses 144% a second, so 1 unit ≈ 7 ms).
-   Anchored to how precisely people can stop a moving marker — not to any one player: talent 90 ≈ elite (~18 ms, 2.6),
-   50 ≈ an average practised player (~40 ms, 6.5), 20 ≈ a beginner (~65 ms, 9.4). Your hands are measured on this scale. */
-export var HANDS = { a: 11.35, b: 0.097 };
+   Anchored to how precisely people stop a moving marker: a beginner (~65 ms, 9.4) reads 35, an average practised player
+   (~40 ms, 6.5) 65, and the tour's elite talent 90 is ~2.0 (~14 ms). Your hands are measured on this same scale.
+   (Until the season-8 rebalance a was 11.35; the whole scale moved 15 up, rivals and your reading alike.) */
+export var HANDS = { a: 12.8, b: 0.097 };
 export function handsOf(talent) { return Math.max(1, HANDS.a - (talent || 50) * HANDS.b); }
 export function talentOfHands(h) { return Math.max(0, Math.min(100, (HANDS.a - h) / HANDS.b)); }
 function gauss(rnd) { var u = 0, v = 0; while (!u) u = rnd(); while (!v) v = rnd(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }

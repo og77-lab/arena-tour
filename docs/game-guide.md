@@ -154,7 +154,7 @@ On top of the base score:
 
 **How your opponent scores.** She strikes on **her own bar**, built exactly like yours but from **her** levels, her lanes, her kit, her tiredness and her crowd, and she's scored by the same rule. Where she stops is down to her **accuracy** — her talent: a gifted granny lands near the centre time after time, a developing one wobbles more, and everyone wobbles a little more as their bar runs faster. Each match she has a **form for the day** (about ±8%), and her bad strikes stay bad, not disasters: a set in the 20s or 30s only comes from real weakness or tiredness.
 
-**Talent and potential.** A rival's talent grows slowly through her career, up to her **potential**. Only **five** riders on the whole tour can ever reach 90 — one a touch above the rest, one close behind her, and three just over the line.
+**Talent and potential.** A rival's talent grows slowly through her career, up to her **potential**. Only **five** riders on the whole tour can ever reach 90 — one a touch above the rest, one close behind her, and three just over the line. Below them each rider's ceiling falls steadily with her place in the talent order (about 84 for the 30th most talented, 80 for the 100th, 72 for the 300th), so the very best stand apart: the three strongest post a set of 100+ about one set in five, the 30th about one in seven, the 100th about one in thirty — a matter of chance, never a schedule.
 
 **Your accuracy.** Your accuracy is your own finger. Your profile measures them from your last 200 strikes (how far from the centre you stop, allowing for the bar's speed) and shows them on the same scale as a rival's talent — "Your accuracy ≈ 64". It's a mirror only; it never changes a score.
 

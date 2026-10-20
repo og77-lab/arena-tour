@@ -80,7 +80,7 @@ function TaleOfTape(props) {
       </div>
       {row("World rank", y.rank ? "#" + y.rank : "—", "#" + sc.rank, y.rank && sc.rank ? sc.rank - y.rank : 0)}
       <div onClick={function (e) { e.stopPropagation(); setAccInfo(!accInfo); }} style={{ cursor: "pointer" }}>{row("Accuracy ⓘ", y.hands != null ? y.hands : "—", sc.hands != null ? sc.hands : sc.talent, y.hands != null && sc.hands != null ? y.hands - sc.hands : 0)}</div>
-      {accInfo && (<div style={{ fontSize: 11.5, color: "rgba(255,255,255,0.85)", textAlign: "center", padding: "3px 6px 5px", lineHeight: 1.35 }}>How close to the centre a rider usually stops: 20 a beginner · 50 an average practised player · 90 elite. Yours is measured from your last 200 strikes; hers is her talent.</div>)}
+      {accInfo && (<div style={{ fontSize: 11.5, color: "rgba(255,255,255,0.85)", textAlign: "center", padding: "3px 6px 5px", lineHeight: 1.35 }}>How close to the centre a rider usually stops: 35 a beginner · 65 an average practised player · 90 the tour's elite. Yours is measured from your last 200 strikes; hers is her talent.</div>)}
       {sc.bars && row("Gold zone today", sc.bars.you.zone.toFixed(1) + "%", sc.bars.foe.zone.toFixed(1) + "%", Math.round((sc.bars.you.zone - sc.bars.foe.zone) * 10))}
       {sc.bars && row("Bar speed today", Math.round(sc.bars.you.speed) + "%", Math.round(sc.bars.foe.speed) + "%", Math.round(sc.bars.foe.speed - sc.bars.you.speed))}
       {sc.stats.map(function (s) {

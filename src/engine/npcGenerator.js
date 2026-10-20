@@ -6,12 +6,14 @@ import { trainCost, spreadPts } from "../models/formulas";
 import { placePts } from "./migrate";
 
 /* Talent ceilings: only five riders on the whole tour can ever reach 90 — one a touch above the rest, one close
-   behind her, three more just over the line. Everyone else tops out below 90. Talent never passes potential. */
+   behind her, three more just over the line. Below them the ceiling falls steadily with each rider's place in the
+   talent order (89.4 − √place: about 84 at the 30th, 79.5 at the 100th, 72 at the 300th), so the strongest stand out
+   instead of hundreds sharing one ceiling. Talent never passes potential. */
 var ELITE_POT = [94, 92.5, 91, 90.5, 90];
 export function shapePotentials(npcs) {
   var order = npcs.slice().sort(function (a, b) { return (b.pot || 0) + (b.skill || 0) * 0.5 - ((a.pot || 0) + (a.skill || 0) * 0.5); });
   order.forEach(function (n, i) {
-    n.pot = i < ELITE_POT.length ? ELITE_POT[i] : Math.min(n.pot || 60, 89.4 - i * 0.002);
+    n.pot = i < ELITE_POT.length ? ELITE_POT[i] : Math.min(n.pot || 60, 89.4 - 1.0 * Math.sqrt(i - ELITE_POT.length + 1));
     if (n.skill > n.pot) n.skill = n.pot;
   });
   return npcs;

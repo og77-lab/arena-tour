@@ -154,7 +154,7 @@ export default function Profile(props) {
               <span style={{ color: "#475569", fontWeight: 700 }}>🎯 Your accuracy</span>
               <span style={{ color: "#0f172a", fontWeight: 800 }}>{ht != null ? "≈ " + ht : "—"}</span>
             </div>
-            <div style={{ fontSize: 12, color: "#64748b", marginTop: 2, lineHeight: 1.35 }}>{ht != null ? "How close to the centre you usually stop, from your last " + n + " strikes: 20 a beginner · 50 an average practised player · 90 elite. Rivals' talent uses the same scale." : "Measured from your strikes — ready after 30 (" + n + " so far)."}</div>
+            <div style={{ fontSize: 12, color: "#64748b", marginTop: 2, lineHeight: 1.35 }}>{ht != null ? "How close to the centre you usually stop, from your last " + n + " strikes: 35 a beginner · 65 an average practised player · 90 the tour's elite. Rivals' talent uses the same scale." : "Measured from your strikes — ready after 30 (" + n + " so far)."}</div>
           </div>); })()}
         {!p.isP && (
           <div style={{ marginBottom: 10, padding: 8, background: "#ffffff", borderRadius: 6 }}>

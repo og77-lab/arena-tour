@@ -127,6 +127,9 @@ function toEngine2(d) {
   return n;
 }
 
+/* The talent ladder (once per save: S.tal = 2): every rival's ceiling from her place in the talent order, talent above it trimmed */
+function toTal2(d) { return Object.assign({}, d, { npcs: shapePotentials(d.npcs.map(function (x) { return Object.assign({}, x); })), tal: 2 }); }
+
 /* Season finals between rivals: the finals' own round difficulty (groups 3, semis 4, final 5) */
 function finCtx(S, d) { var rm = rankMap(S); return { tier: 6, diff: d, bo: FINALS_BO, cond: "classic", rank: function (p) { return rm[p.id] || 1000; } }; }
 
@@ -195,6 +198,7 @@ export default function Arena(props) {
       if (needsTitles(d)) { d = retitle(d); try { sSet(d); } catch (e) {} }
       if (needsWorldNames(d)) { d = renameWorld(d); try { sSet(d); } catch (e) {} }
       if (!d.eng || d.eng < 2) { d = toEngine2(d); try { sSet(d); } catch (e) {} }
+      if (d.npcs && d.tal !== 2) { d = toTal2(d); try { sSet(d); } catch (e) {} }
       /* Points from before the current table: converted once, and rivals' points start dropping off like yours */
       if (needsPts3(d)) { d = toPts3(d); try { sSet(d); } catch (e) {} } /* older tables first, then the current one (engine/migrate) */
       /* Ages: rivals spread over 1–16 seasons on tour, you counted from season 1 (engine/aging) */
@@ -230,7 +234,7 @@ export default function Arena(props) {
     queueCloudSave(userId, snap, saveGameToCloud);
   }, [ts, fs]);
   function exportSave() { if (!S) return; var b = new Blob([JSON.stringify(pack(S))],{type:"application/json"}); var u = URL.createObjectURL(b); var a = document.createElement("a"); a.href = u; a.download = "arena-"+S.pName+"-s"+S.sNum+".json"; a.click(); URL.revokeObjectURL(u); }
-  function importSave(e) { var f = e.target.files && e.target.files[0]; if (!f) return; var r = new FileReader(); r.onload = function(ev){ try { var d = unpack(JSON.parse(ev.target.result)); if (d && d.player) { if (!d.eng || d.eng < 2) d = toEngine2(d); save(renameWorld(toAge(toPts3(retitle(uniqueNames(d)))))); setScr("hub"); } } catch(err){} }; r.readAsText(f); }
+  function importSave(e) { var f = e.target.files && e.target.files[0]; if (!f) return; var r = new FileReader(); r.onload = function(ev){ try { var d = unpack(JSON.parse(ev.target.result)); if (d && d.player) { if (!d.eng || d.eng < 2) d = toEngine2(d); if (d.tal !== 2) d = toTal2(d); save(renameWorld(toAge(toPts3(retitle(uniqueNames(d)))))); setScr("hub"); } } catch(err){} }; r.readAsText(f); }
   var _syncing = useState(false), syncing = _syncing[0], setSyncing = _syncing[1];
   var _syncMsg = useState(""), syncMsg = _syncMsg[0], setSyncMsg = _syncMsg[1];
   var _mutedState = useState(isMuted()), mutedState = _mutedState[0], setMutedState = _mutedState[1];
@@ -536,7 +540,7 @@ export default function Arena(props) {
       var nb2 = Object.assign({}, nb, { careerMoney: (nb.careerMoney||0) + Math.round(e * 3) });
       /* Rolling points, as for you: what she won at this week last season drops off, this week's result takes its place */
       var w = n.w ? n.w.slice() : spreadPts(n.sp), drop = w[S.calIdx] || 0; w[S.calIdx] = e;
-      return Object.assign({}, n, { sp: Math.max(0, (n.sp||0) - drop + e), ap: (n.ap||0)+e, w: w, skill: Math.min(n.pot||92, (n.skill||30)+(Math.random()*0.3-0.05)), tr: tr, best: nb2 });
+      return Object.assign({}, n, { sp: Math.max(0, (n.sp||0) - drop + e), ap: (n.ap||0)+e, w: w, skill: Math.min(n.pot||92, (n.skill||30)+(Math.random()*0.12-0.03)), tr: tr, best: nb2 }); /* talent creeps up slowly (about +0.6 a season) toward her ceiling */
     });
     /* Update player with DEFENDING POINTS system */
     var pb = Object.assign({}, S.player.best||{});
