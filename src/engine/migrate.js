@@ -195,3 +195,14 @@ export function toPts3(S) {
   if (S.activeT && S.activeT.bracket) out.activeT = Object.assign({}, S.activeT, { bracket: S.activeT.bracket.map(function (rd) { return rd ? rd.map(function (m) { return Object.assign({}, m, { a: fix(m.a), b: fix(m.b), w: m.w ? fix(m.w) : null }); }) : rd; }) });
   return out;
 }
+
+/* Place names that were too close to real ones (once per save: S.world = 2): "Wimbledon-on-Wold" is now "Wimblehen-on-Wold"
+   everywhere the save mentions it — the history, last results, the paper's archive */
+var RENAMED = [["Wimbledon-on-Wold", "Wimblehen-on-Wold"]];
+export function needsWorldNames(S) { return !!(S && S.player && S.world !== 2); }
+export function renameWorld(S) {
+  if (!needsWorldNames(S)) return S;
+  var j = JSON.stringify(S);
+  RENAMED.forEach(function (r) { j = j.split(r[0]).join(r[1]); });
+  return Object.assign(JSON.parse(j), { world: 2 });
+}

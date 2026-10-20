@@ -80,7 +80,7 @@ Each week several tournaments run at once in every tier, and all 1,000 riders pl
 
 **🗺 Compare the 5 lanes** (top of the list) shows all five side by side, and before every match the tale of the tape opens with **Today's lanes** — the picture and the chips again. Which lanes suit you depends on your stats and your kit: strong Reflexes (slower bar) love the mud, strong Steady Stride (bigger gold) loves the wind, strong Stamina (less speed-up) loves a heatwave, and the village green helps whoever is behind on stats. The game works it out for you: a weighted stat chip says what the weighting does to **your** bar against that event's entrants — *Steady Stride (bigger gold) ×2 · you lead by 1.5 → gold zone +1.8% for you* — green when it helps you, red when it hurts. In the tale of the tape it compares you with your actual opponent.
 
-Grand Slam weeks have a single named Slam (The Coop Open, The Swamp Slam, Wimbledon-on-Wold, The Gale Cup), each with its own lanes.
+Grand Slam weeks have a single named Slam (The Coop Open, The Swamp Slam, Wimblehen-on-Wold, The Gale Cup), each with its own lanes.
 
 **Getting into a higher tier early**
 - **Fan wildcard:** if you're ranked just outside the tier above (within 15% of its cut) and have 70+ fans, it opens for free.
@@ -367,8 +367,9 @@ Grannies get older, and every rider ages by the same rule — you included. Age 
 
 **Your own retirement**
 1. From season 15 on the tour, the gala's last page lets you retire. It's always your choice.
-2. Your career goes up on the **family wall** (More tab): your portrait, best world rank, Grand Slams and Masters titles.
-3. The next granny of your family starts from nothing, in the same tour with the same rivals: #1000, first season, 10 starting points. Your badges stay yours.
+2. A retirement ceremony follows: a lap of honour, your career in numbers, and the family torch passed to the granny who takes over.
+3. Your career goes up on the **family wall** (More tab): your portrait, best world rank, Grand Slams and Masters titles.
+4. The next granny of your family starts from nothing, in the same tour with the same rivals: #1000, first season, 10 starting points. Your badges stay yours.
 
 **The Hall of Fame.** Very hard to enter: all four Grand Slams, or 8 Grand Slams, or year-end No. 1 three seasons running. Riders are judged when they retire — rivals and you alike. The Hall is on the More tab, next to the family wall.
 

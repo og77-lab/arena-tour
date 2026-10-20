@@ -191,11 +191,11 @@ export default function JoustStage(props) {
   return (
     <div ref={ref} style={{ position: "relative", height: H, margin: "2px -2px 0", overflow: "hidden", borderRadius: 14, background: "#bae6fd", boxShadow: "0 2px 0 rgba(63,42,29,0.10), 0 8px 20px rgba(63,42,29,0.14)" }}>
      {/* the camera */}
-     <div style={{ position: "absolute", inset: 0, transform: "scale(" + cam.z + ")", transformOrigin: camOrigin, transition: cam.t }}>
+     <div style={{ position: "absolute", inset: 0, transform: "scale(" + cam.z + ")", transformOrigin: camOrigin, transition: cam.t, willChange: "transform" }}>{/* its own GPU layer: zooming costs nothing to redraw */}
      {/* everything inside shakes on a big clash */}
      <div style={{ position: "absolute", inset: 0, animation: shake }}>
       {/* The stands, drawn for a smaller lane and enlarged; further back, so they move less with the camera */}
-      <div style={{ position: "absolute", left: 0, top: 0, width: W, height: laneTop, transform: "scale(" + standZ + ")", transformOrigin: camOrigin, transition: cam.t }}>
+      <div style={{ position: "absolute", left: 0, top: 0, width: W, height: laneTop, transform: "scale(" + standZ + ")", transformOrigin: camOrigin, transition: cam.t, willChange: "transform" }}>
         <div style={{ position: "absolute", left: 0, top: 0, width: W / bs, height: BACKDROP_GROUND, transform: "scale(" + bs + ")", transformOrigin: "0 0" }}>
           <ArenaBackdrop W={W / bs} groundTop={BACKDROP_GROUND} tierColor={props.tierColor} tier={props.tier} cond={props.cond} cheerId={a ? a.id : 0} cheer={cheer} />
           <Bunting color={props.tierColor || "#f59e0b"} />
@@ -242,7 +242,7 @@ export default function JoustStage(props) {
       {impact && a.perfect && (<div key={"gold-" + a.id} aria-hidden style={{ position: "absolute", left: clashX - 50 * k, top: clashY - 50 * k, width: 100 * k, height: 100 * k, borderRadius: "50%", background: "radial-gradient(circle,rgba(253,224,71,0.95) 0%,rgba(250,204,21,0.6) 30%,rgba(250,204,21,0) 70%)", boxShadow: "0 0 30px 10px rgba(250,204,21,0.45)", animation: "goldBurst 0.6s ease-out forwards", pointerEvents: "none", zIndex: 5 }} />)}
 
       {/* the foreground: a hay bale and a bucket close to the camera, slightly soft, moving more than the lane */}
-      <div aria-hidden style={{ position: "absolute", inset: 0, zIndex: 7, pointerEvents: "none", transform: "scale(" + frontZ + ")", transformOrigin: camOrigin, transition: cam.t }}>
+      <div aria-hidden style={{ position: "absolute", inset: 0, zIndex: 7, pointerEvents: "none", transform: "scale(" + frontZ + ")", transformOrigin: camOrigin, transition: cam.t, willChange: "transform" }}>
         <div style={{ position: "absolute", left: -18 * k, bottom: -14 * k, width: 70 * k, height: 40 * k, borderRadius: 8 * k, background: "repeating-linear-gradient(170deg,#facc15 0 3px,#eab308 3px 6px)", border: "2px solid #3f2a1d", filter: "blur(1px)", boxShadow: "inset 0 -6px 0 rgba(146,64,14,0.35)" }} />
         <div style={{ position: "absolute", right: -6 * k, bottom: -10 * k, width: 34 * k, height: 34 * k, borderRadius: "4px 4px 10px 10px", background: "linear-gradient(90deg,#94a3b8,#cbd5e1 40%,#64748b)", border: "2px solid #3f2a1d", filter: "blur(1px)" }} />
       </div>

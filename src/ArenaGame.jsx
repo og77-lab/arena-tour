@@ -39,7 +39,7 @@ import { roosterName, trait, standing } from "./models/persona";
 import { buildIssue, buildSpecialEdition, rankMap } from "./engine/news";
 import { tallyTournament, checkAchievements } from "./engine/achievements";
 import { updateRival, rivalRecord } from "./engine/rivalry";
-import { uniqueNames, needsUniqueNames, toPts3, needsPts3, retitle, needsTitles } from "./engine/migrate";
+import { uniqueNames, needsUniqueNames, toPts3, needsPts3, retitle, needsTitles, renameWorld, needsWorldNames } from "./engine/migrate";
 import { ageCap, toAge, needsAge, retirementPlan, hofReason, RETIRE_FROM, causeText } from "./engine/aging";
 import { weekEvents, lowestTierFor, stepDownTier, dropsLeft, DROP_LIMIT } from "./engine/events";
 import { ACHIEVEMENTS } from "./engine/achievements";
@@ -193,6 +193,7 @@ export default function Arena(props) {
       if (needsUniqueNames(d)) { d = uniqueNames(d); try { sSet(d); } catch (e) {} }
       /* Tours began with 20 titles ("the Swift" everywhere): every rider gets one from the big pool, once */
       if (needsTitles(d)) { d = retitle(d); try { sSet(d); } catch (e) {} }
+      if (needsWorldNames(d)) { d = renameWorld(d); try { sSet(d); } catch (e) {} }
       if (!d.eng || d.eng < 2) { d = toEngine2(d); try { sSet(d); } catch (e) {} }
       /* Points from before the current table: converted once, and rivals' points start dropping off like yours */
       if (needsPts3(d)) { d = toPts3(d); try { sSet(d); } catch (e) {} } /* older tables first, then the current one (engine/migrate) */
@@ -229,7 +230,7 @@ export default function Arena(props) {
     queueCloudSave(userId, snap, saveGameToCloud);
   }, [ts, fs]);
   function exportSave() { if (!S) return; var b = new Blob([JSON.stringify(pack(S))],{type:"application/json"}); var u = URL.createObjectURL(b); var a = document.createElement("a"); a.href = u; a.download = "arena-"+S.pName+"-s"+S.sNum+".json"; a.click(); URL.revokeObjectURL(u); }
-  function importSave(e) { var f = e.target.files && e.target.files[0]; if (!f) return; var r = new FileReader(); r.onload = function(ev){ try { var d = unpack(JSON.parse(ev.target.result)); if (d && d.player) { if (!d.eng || d.eng < 2) d = toEngine2(d); save(toAge(toPts3(retitle(uniqueNames(d))))); setScr("hub"); } } catch(err){} }; r.readAsText(f); }
+  function importSave(e) { var f = e.target.files && e.target.files[0]; if (!f) return; var r = new FileReader(); r.onload = function(ev){ try { var d = unpack(JSON.parse(ev.target.result)); if (d && d.player) { if (!d.eng || d.eng < 2) d = toEngine2(d); save(renameWorld(toAge(toPts3(retitle(uniqueNames(d)))))); setScr("hub"); } } catch(err){} }; r.readAsText(f); }
   var _syncing = useState(false), syncing = _syncing[0], setSyncing = _syncing[1];
   var _syncMsg = useState(""), syncMsg = _syncMsg[0], setSyncMsg = _syncMsg[1];
   var _mutedState = useState(isMuted()), mutedState = _mutedState[0], setMutedState = _mutedState[1];
@@ -851,7 +852,14 @@ export default function Arena(props) {
       runnerUp: runner ? { id: runner.id, name: runner.isP ? S.pName : runner.name, isP: !!runner.isP } : null, champRank: cRank,
       awards: seasonAwards(S2), you: ys, hall: hallOfHelmets(S2), goal: nextGoal(ys.rankEnd, S.sNum + 1),
       farewell: { n: goneNow.length, top: goneNow.slice(0, 8), hof: goneNow.filter(function(g){ return g.hof; }), rival: S.player.rival ? goneNow.filter(function(g){ return g.id === S.player.rival.id; })[0] || null : null },
-      retire: (S.player.y || S.sNum || 1) >= RETIRE_FROM ? { y: S.player.y || S.sNum, hof: hofReason(S.player.best, S2.yearEnd, 1) } : null
+      retire: (S.player.y || S.sNum || 1) >= RETIRE_FROM ? (function(){
+        /* her career, for the retirement ceremony: the same numbers the family wall will keep */
+        var b = S.player.best || {}, y = S.player.y || S.sNum, myRank = 1001; ranked2.forEach(function(p, i){ if (p.isP) myRank = i + 1; });
+        var peak = Math.min.apply(null, [b.rank || 1001, myRank].concat((S.player.rankHist || []).filter(function(x){ return x > 0; })));
+        var fam = (S.family || []).length;
+        return { y: y, hof: hofReason(b, S2.yearEnd, 1), career: { y: y, s0: Math.max(1, S.sNum - y + 1), s1: S.sNum, peak: peak, titles: b.titles || 0, gs: b.gsTitles || 0, mst: playerTitles(S)[4] || 0, hof: hofReason(b, S2.yearEnd, 1) },
+          kit: S.player.kit || null, generation: fam ? (fam === 1 ? "the granny" : "the " + fam + " grannies") : null };
+      })() : null
     });
   }
   /* heir = the name of the granny who takes over when you retire (engine/aging passTheLance) */

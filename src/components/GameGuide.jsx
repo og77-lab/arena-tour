@@ -161,7 +161,7 @@ function body(id) {
       ]} />
       <CompareLanes />
       <ChipRows rows={Object.keys(FIELDS).map(function (k) { var f = FIELDS[k]; return { k: k, name: "★".repeat(f.stars) + " " + f.label, list: effectsOf({ pts: f.pts }), empty: "Normal points" }; })} />
-      <P>Grand Slam weeks have a single named Slam (The Coop Open, The Swamp Slam, Wimbledon-on-Wold, The Gale Cup), each with its own lanes.</P>
+      <P>Grand Slam weeks have a single named Slam (The Coop Open, The Swamp Slam, Wimblehen-on-Wold, The Gale Cup), each with its own lanes.</P>
       <H>Getting into a higher tier early</H>
       <List items={[
         <span key="a"><B>Fan wildcard:</B> if you're ranked just outside the tier above (within 15% of its cut) and have 70+ fans, it opens for free.</span>,
@@ -370,6 +370,7 @@ function body(id) {
       <H>Your own retirement</H>
       <List items={[
         <span key="a">From season {RETIRE_FROM} on the tour, the gala's last page lets you retire. It's always your choice.</span>,
+        <span key="r">A retirement ceremony follows: a lap of honour, your career in numbers, and the family torch passed to the granny who takes over.</span>,
         <span key="b">Your career goes up on the <B>family wall</B> (More tab): your portrait, best world rank, Grand Slams and Masters titles.</span>,
         <span key="c">The next granny of your family starts from nothing, in the same tour with the same rivals: #1000, first season, 10 starting points. Your badges stay yours.</span>
       ]} />

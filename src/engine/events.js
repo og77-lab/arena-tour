@@ -25,14 +25,14 @@ export var FIELDS = {
 };
 
 var PLACES = ["Puddleby", "Little Clucking", "Bramblewick", "Lower Henswick", "Cobbleford", "Featherstone", "Marmalade Bay", "Thistledown", "Gooseberry Hill", "Kettlewell",
-  "Crumpet Cross", "Honeydale", "Pickering Vale", "Biscuit Point", "Nettlebed", "Teacake Green", "Wimbledon-on-Wold", "Saffron Hollow", "Bumblecombe", "Whistledown", "Oddsock Moor",
+  "Crumpet Cross", "Honeydale", "Pickering Vale", "Biscuit Point", "Nettlebed", "Teacake Green", "Wimblehen-on-Wold", "Saffron Hollow", "Bumblecombe", "Whistledown", "Oddsock Moor",
   "Primrose Hill", "Hollyhock Lane", "Mossbottom", "Larkspur Fields", "Peppercorn Pier", "Clatterbuck", "Fiddlestick Farm", "Plumstead", "Quill Bay"];
 var SUFFIX = [["Fete Cup", "Village Classic", "Garden Party Joust", "Allotment Open", "Bake-Off Trophy"],
   ["Challenger", "County Cup", "Market Day Trophy", "Harvest Challenger"],
   ["Open", "Trophy", "Seaside Classic"],
   ["Championships", "Grand Prix"],
   ["Masters"]];
-var SLAMS = [{ name: "The Coop Open", cond: "classic" }, { name: "The Swamp Slam", cond: "mud" }, { name: "Wimbledon-on-Wold", cond: "green" }, { name: "The Gale Cup", cond: "wind" }];
+var SLAMS = [{ name: "The Coop Open", cond: "classic" }, { name: "The Swamp Slam", cond: "mud" }, { name: "Wimblehen-on-Wold", cond: "green" }, { name: "The Gale Cup", cond: "wind" }];
 
 /* Small seeded random, so a week's events never change once seen */
 function rng(seed) { var x = seed >>> 0 || 1; return function () { x ^= x << 13; x >>>= 0; x ^= x >> 17; x ^= x << 5; x >>>= 0; return x / 4294967296; }; }

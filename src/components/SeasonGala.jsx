@@ -13,6 +13,7 @@ import { playVictoryBig, playRankUp, playClang, playTitle, playWhoosh } from "..
 import { HOF_RULE } from "../engine/aging";
 import { enterGala, leaveGala } from "../music";
 import FarewellNotice from "./FarewellNotice";
+import RetireCeremony from "./RetireCeremony";
 
 const { useState, useEffect } = React;
 
@@ -94,6 +95,7 @@ export default function SeasonGala(props) {
   var fw = props.farewell, ret = props.retire;
   var _h = useState(""), heir = _h[0], setHeir = _h[1];
   var _r = useState(false), retiring = _r[0], setRetiring = _r[1];
+  var _c = useState(false), ceremony = _c[0], setCeremony = _c[1]; /* your retirement ceremony (RetireCeremony) */
   /* After the helmets: who left the tour this year, then anyone who walked into the Hall of Fame */
   var stages = ["intro", "champ"].concat(awards.map(function (_, i) { return "award" + i; }), ["you", "hall"], fw && fw.n ? ["farewell"] : [], fw && fw.hof.length ? ["hof"] : [], ["goal"]);
   var _i = useState(0), i = _i[0], setI = _i[1];
@@ -111,6 +113,9 @@ export default function SeasonGala(props) {
 
   function next() { if (!last) setI(i + 1); }
   var climbed = ys.rankStart - ys.rankEnd;
+
+  /* retiring: the gala hands over to the ceremony, which starts the new granny's career at its end */
+  if (ceremony && ret) return (<RetireCeremony name={props.pName} heir={heir.trim()} career={ret.career} kit={ret.kit} generation={ret.generation} onDone={function () { props.onDone(heir.trim()); }} />);
 
   return createPortal(
     <div onClick={next} style={{ position: "fixed", inset: 0, zIndex: 970, fontFamily: FONT, overflow: "hidden", userSelect: "none", WebkitUserSelect: "none", cursor: last ? "default" : "pointer",
@@ -266,7 +271,7 @@ export default function SeasonGala(props) {
                       <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
                         <input autoFocus value={heir} maxLength={20} onChange={function (e) { setHeir(e.target.value); }} placeholder="Her name"
                           style={{ flex: 1, minWidth: 0, fontSize: 15, padding: "8px 10px", borderRadius: 10, border: "2px solid #3f2a1d", fontWeight: 800 }} />
-                        <button disabled={!heir.trim()} onClick={function () { props.onDone(heir.trim()); }} style={{ fontFamily: FONT, fontWeight: 900, fontSize: 13, padding: "8px 12px", borderRadius: 10, cursor: heir.trim() ? "pointer" : "default", opacity: heir.trim() ? 1 : 0.5, background: GOLD, color: "#3f2a1d", border: "2px solid #3f2a1d" }}>Pass it on</button>
+                        <button disabled={!heir.trim()} onClick={function () { setCeremony(true); }} style={{ fontFamily: FONT, fontWeight: 900, fontSize: 13, padding: "8px 12px", borderRadius: 10, cursor: heir.trim() ? "pointer" : "default", opacity: heir.trim() ? 1 : 0.5, background: GOLD, color: "#3f2a1d", border: "2px solid #3f2a1d" }}>Pass it on</button>
                       </div>
                     )}
                   </div>

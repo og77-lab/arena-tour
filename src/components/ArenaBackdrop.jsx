@@ -6,7 +6,7 @@
    a groan with hands on heads when she does, hats in the air on a big hit, and a standing party at the end. */
 
 import * as React from "react";
-import { REDUCED_MOTION } from "./fx";
+import { REDUCED_MOTION, LOW_END } from "./fx";
 
 const { useMemo } = React;
 
@@ -38,6 +38,7 @@ function Spectator(props) {
   else if (mood === "party") anim = "crowdCheer " + (0.5 + s.r * 0.3).toFixed(2) + "s ease-out " + (s.r * 0.3).toFixed(2) + "s infinite";
   else if (mood === "groan") anim = "crowdGroan 0.7s ease-out " + (s.r * 0.1).toFixed(2) + "s 1 both";
   else if (props.wave) anim = "crowdWave 7s ease-in-out " + (s.x / props.W * 1.6 - 7).toFixed(2) + "s infinite";
+  else if (LOW_END) anim = "none";
   else if (s.hop) anim = "crowdHop " + (5 + s.r * 6).toFixed(1) + "s ease-out " + (s.r * -9).toFixed(1) + "s infinite";
   else anim = "crowdBob " + (1.6 + s.r * 1.4).toFixed(2) + "s ease-in-out " + (s.r * -2).toFixed(2) + "s infinite";
   var up = mood === "cheer" || mood === "big" || mood === "party", head = mood === "groan";

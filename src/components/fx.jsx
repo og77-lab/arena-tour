@@ -7,6 +7,8 @@ import { playTick } from "../sounds";
 const { useState, useEffect, useRef } = React;
 
 export var REDUCED_MOTION = typeof window !== "undefined" && window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+/* A weak phone (4 cores or fewer, or 2 GB or less): the crowd stops its idle bobbing (it still cheers and groans) */
+export var LOW_END = typeof navigator !== "undefined" && ((navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4) || (navigator.deviceMemory && navigator.deviceMemory <= 2));
 
 export function vibrate(pattern) {
   try { if (navigator.vibrate) navigator.vibrate(pattern); } catch (e) {}
