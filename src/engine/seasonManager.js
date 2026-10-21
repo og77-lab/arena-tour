@@ -2,7 +2,7 @@
 
 import { TOTAL_EVENTS } from "../models/constants";
 import { mkNPCs } from "./npcGenerator";
-import { turnOver, toAge, ageCap, hofReason } from "./aging";
+import { turnOver, toAge, ageCap, ageStats, hofReason } from "./aging";
 import { playerTitles } from "./titles";
 import { statCap } from "./investments";
 import { getRanked } from "../models/formulas";
@@ -33,7 +33,12 @@ export function mkSeason(name, num, prev) {
   }
   var ptr = prev ? Object.assign({ s: 0, g: 0 }, prev.player.tr) : { r: 0, p: 0, f: 0, s: 0, g: 0, tp: 0 };
   var pAge = prev ? (prev.player.y || prev.sNum || 1) + 1 : 1, pLost = 0;
-  if (prev) { var pped = { y: pAge, pedigree: prev.player.pedigree }; ["r", "p", "f", "s", "g", "b"].forEach(function (k) { var c = statCap(pped, k); if ((ptr[k] || 0) > c) { pLost += ptr[k] - c; ptr[k] = c; } }); }
+  var pAc = null, pDrops = {}, pSeed = prev ? prev.player.ageSeed || 1 + Math.floor(Math.random() * 1e9) : 1 + Math.floor(Math.random() * 1e9);
+  if (prev) { /* a season older: each of your stats ages on its own (engine/aging); the pedigree's levels stay on top */
+    var extra = {}; ["r", "p", "f", "s", "g", "b"].forEach(function (k) { extra[k] = statCap({ pedigree: prev.player.pedigree }, k) - 20; });
+    var ag = ageStats({ isP: true, ageSeed: pSeed, tr: ptr, ac: prev.player.ac }, pAge, Math.random, extra);
+    ptr = Object.assign({}, ptr, ag.tr); pLost = ag.lost; pAc = ag.ac; pDrops = ag.drops;
+  }
   var pBest = prev ? prev.player.best : { rank: 1001, peakS: 0, titles: 0, gsTitles: 0, finals: 0 };
   var pSP = 0; for (var di = 0; di < TOTAL_EVENTS; di++) pSP += (def[di] || 0);
   var res = []; for (var ri = 0; ri < TOTAL_EVENTS; ri++) res.push(0);
@@ -51,7 +56,7 @@ export function mkSeason(name, num, prev) {
       tr: ptr, best: pBest,
       def: def, res: res,
       money: prev ? prev.player.money : 0, seasonMoney: 0,
-      rankHist: rankHist, h2h: h2h, timeline: timeline
+      rankHist: rankHist, h2h: h2h, timeline: timeline, ageSeed: pSeed
     },
     champs: prev ? prev.champs : [],
     tHist: prev ? prev.tHist : [],
@@ -65,7 +70,7 @@ export function mkSeason(name, num, prev) {
     S.gone = (prev.gone || []).filter(function (g) { return g.s >= (num || 1) - 2; }).concat(turn.gone);
     S.nextId = turn.nextId;
     var top = turn.gone.slice().sort(function (a, b) { return a.rank - b.rank; }).slice(0, 6);
-    S.farewell = { s: prev.sNum || 1, n: turn.gone.length, top: top.map(function (g) { return g.id; }), cap: ageCap(pAge), lost: pLost };
+    S.farewell = { s: prev.sNum || 1, n: turn.gone.length, top: top.map(function (g) { return g.id; }), cap: ageCap(pAge), lost: pLost, drops: pDrops };
     if (turn.rivalGone) { S.farewell.rival = turn.rivalGone.id; delete S.player.rival; }
     /* a retired granny can't become your next rival: her head-to-head book closes */
     if (turn.gone.length && S.player.h2h) { var h2 = Object.assign({}, S.player.h2h); turn.gone.forEach(function (g) { delete h2[g.id]; }); S.player.h2h = h2; }
@@ -78,6 +83,7 @@ export function mkSeason(name, num, prev) {
     if (prev.newsSeenAt != null) S.newsSeenAt = prev.newsSeenAt;
   }
   S.titles = 2;                    /* titles from the big pool (engine/migrate retitle) */
+  if (pAc) S.player.ac = pAc;
   S.tal = 4;                       /* new training prices, talent ladder and floor (ArenaGame toTal4) */
   S.world = 2;                     /* place names (engine/migrate renameWorld) */
   S.pts = 3;                       /* points on the current table (engine/migrate toPts3), rivals' points rolling */
@@ -100,7 +106,7 @@ export function passTheLance(N, prev, name) {
   if (P.kit) rec.kit = P.kit;
   var why = hofReason(b, prev.yearEnd, 1); if (why) rec.hof = why;
   var zeros = []; for (var i = 0; i < TOTAL_EVENTS; i++) zeros.push(0);
-  var player = { id: 1, isP: true, y: 1, sp: 0, ap: 0, tr: { r: 0, p: 0, f: 0, s: 0, g: 0, tp: 0 }, best: { rank: 1001, peakS: 0, titles: 0, gsTitles: 0, finals: 0 },
+  var player = { id: 1, isP: true, y: 1, ageSeed: 1 + Math.floor(Math.random() * 1e9), sp: 0, ap: 0, tr: { r: 0, p: 0, f: 0, s: 0, g: 0, tp: 0 }, best: { rank: 1001, peakS: 0, titles: 0, gsTitles: 0, finals: 0 },
     def: zeros, res: zeros.slice(), money: 0, seasonMoney: 0, rankHist: [], h2h: {}, timeline: [{ type: "start", s: N.sNum, w: 0 }], startPts: 10 };
   /* badges and the coach's tips belong to you, the one holding the phone */
   ["ach", "tips", "tutorial", "ivSeen", "lastTones"].forEach(function (k) { if (P[k] != null) player[k] = P[k]; });

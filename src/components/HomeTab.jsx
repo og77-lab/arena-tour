@@ -1,7 +1,7 @@
 /* ═══ HomeTab ═══ Hub home: who you are, the one thing to do next, how the season is going */
 
 import { motion } from "framer-motion";
-import { TIERS, TOTAL_EVENTS, champTotal } from "../models/constants";
+import { TIERS, TOTAL_EVENTS, champTotal, STATS } from "../models/constants";
 import { sh } from "../models/formulas";
 import { C, FONT, display, label, card, button, pill, money, BODY, HEAD, card2, title2, cap2, button2 } from "../ui/theme";
 import Icon, { IconTile } from "./Icons";
@@ -171,7 +171,7 @@ export default function HomeTab(props) {
               {f.top.map(function (id) { var g = byId[id]; if (!g) return null; return (
                 <div key={id} style={{ flex: "0 0 230px" }}><FarewellNotice g={g} small /></div>); })}
             </div>
-            {f.lost > 0 && (<div style={{ fontSize: 12.5, color: C.redInk, fontWeight: 800, marginTop: 6 }}>You're a season older too: every stat now stops at {f.cap}, and you lost {f.lost} {f.lost === 1 ? "level" : "levels"}.</div>)}
+            {f.lost > 0 && (<div style={{ fontSize: 12.5, color: C.redInk, fontWeight: 800, marginTop: 6 }}>You're a season older too: you lost {f.drops ? STATS.filter(function (s) { return f.drops[s.k]; }).map(function (s) { return s.label + " −" + f.drops[s.k]; }).join(", ") : f.lost + (f.lost === 1 ? " level" : " levels")}.</div>)}
           </div>
         );
       })()}

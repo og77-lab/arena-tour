@@ -359,16 +359,19 @@ Your training, prize money, lances and saddles, badges, fans, rival and newspape
 
 ## 19. Age, retirement & legends
 
-Grannies get older, and every rider ages by the same rule — you included. Age is counted in **seasons on the tour** (your profile and the Train tab show yours).
+Grannies get older, and every rider ages by the same rules — you included. Age is counted in **seasons on the tour** (your profile and the Train tab show yours).
 
-**The age cap on training**
-1. Up to season 12, every stat can be trained to 20.
-2. After that the cap drops, a little more every season.
-3. Levels above the new cap are lost at the start of a season. The rooster pedigree still adds its levels on top.
+**Each stat ages on its own**
+1. Each stat has its own first season of decline, somewhere after season 9 to 13, and its own pace (slow, average or fast). Both are fixed for each granny when she starts, and nobody knows them in advance.
+2. When a stat starts to age, it gets a ceiling: the level it holds then (at least 12). From then on the ceiling drops every season, about a quarter of a level at first and a little faster each year, with a dice roll on top. It never goes back up.
+3. Levels above a ceiling are lost at the start of a season. The rooster pedigree still adds its levels on top.
+4. So one granny's Reflexes fade early while her Aim holds for years, and the next one the other way round. The Train tab shows each stat's ceiling once it has one.
 
-| Season on tour | 10 | 15 | 20 | 22 | 25 | 28 | 30 |
-|---|---|---|---|---|---|---|---|
-| Highest level | 20 | 18 | 15 | 13 | 10 | 7 | 5 |
+A top rider's five stats together (out of 100), typically:
+
+| Season on tour | 10 | 13 | 16 | 20 | 25 | 30 |
+|---|---|---|---|---|---|---|
+| Five stats together | 76 | 76 | 72 | 65 | 53 | 41 |
 
 **Retirements and newcomers**
 1. At the end of each season about 50 rivals retire. Nobody retires before 8 seasons; after that the chance grows with age, and riders ranked low go sooner.

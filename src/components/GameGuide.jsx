@@ -13,7 +13,7 @@ import FanRules from "./FanRules";
 import { CONDITIONS, FIELDS, DROP_LIMIT, STEP_TIRED } from "../engine/events";
 import { GEAR } from "../engine/gear";
 import { fatigueFx } from "../engine/fitness";
-import { ageCap, RETIRE_FROM, HOF_RULE, PEAK_SEASONS } from "../engine/aging";
+import { RETIRE_FROM, HOF_RULE } from "../engine/aging";
 import { TIERS, ptsLadder, champTotal } from "../models/constants";
 import { weeklyTP, trainPts } from "../models/formulas";
 /* Points you hold on reaching each round (R16 … F, Win), straight from the table; the Slam's R32 goes in its label */
@@ -354,14 +354,16 @@ function body(id) {
     </>);
 
     case "age": return (<>
-      <P>Grannies get older, and every rider ages by the same rule, you included. Age is counted in <B>seasons on the tour</B> (your profile and the Train tab show yours).</P>
-      <H>The age cap on training</H>
+      <P>Grannies get older, and every rider ages by the same rules, you included. Age is counted in <B>seasons on the tour</B> (your profile and the Train tab show yours).</P>
+      <H>Each stat ages on its own</H>
       <List items={[
-        <span key="a">Up to season {PEAK_SEASONS + 2}, every stat can be trained to 20.</span>,
-        <span key="b">After that the cap drops, a little more every season.</span>,
-        <span key="c">Levels above the new cap are lost at the start of a season. The rooster pedigree still adds its levels on top.</span>
+        <span key="a">Each stat has its own first season of decline, somewhere after season 9 to 13, and its own pace (slow, average or fast). Both are fixed for each granny when she starts, and nobody knows them in advance.</span>,
+        <span key="b">When a stat starts to age, it gets a ceiling: the level it holds then (at least 12). From then on the ceiling drops every season, about a quarter of a level at first and a little faster each year, with a dice roll on top. It never goes back up.</span>,
+        <span key="c">Levels above a ceiling are lost at the start of a season. The rooster pedigree still adds its levels on top.</span>,
+        <span key="d">So one granny's Reflexes fade early while her Aim holds for years, and the next one the other way round. The Train tab shows each stat's ceiling once it has one.</span>
       ]} />
-      <Table head={["Season on tour", "10", "15", "20", "22", "25", "28", "30"]} rows={[["Highest level"].concat([10, 15, 20, 22, 25, 28, 30].map(function (y) { return String(ageCap(y)); }))]} />
+      <P>A top rider's five stats together (out of 100), typically:</P>
+      <Table head={["Season on tour", "10", "13", "16", "20", "25", "30"]} rows={[["Five stats together", "76", "76", "72", "65", "53", "41"]]} />
       <H>Retirements and newcomers</H>
       <List items={[
         <span key="a">At the end of each season about 50 rivals retire. Nobody retires before 8 seasons; after that the chance grows with age, and riders ranked low go sooner.</span>,

@@ -40,7 +40,7 @@ import { buildIssue, buildSpecialEdition, rankMap } from "./engine/news";
 import { tallyTournament, checkAchievements } from "./engine/achievements";
 import { updateRival, rivalRecord } from "./engine/rivalry";
 import { uniqueNames, needsUniqueNames, toPts3, needsPts3, retitle, needsTitles, renameWorld, needsWorldNames } from "./engine/migrate";
-import { ageCap, toAge, needsAge, retirementPlan, hofReason, RETIRE_FROM, causeText } from "./engine/aging";
+import { ageCap, riderCap, toAge, needsAge, retirementPlan, hofReason, RETIRE_FROM, causeText } from "./engine/aging";
 import { weekEvents, lowestTierFor, stepDownTier, dropsLeft, DROP_LIMIT } from "./engine/events";
 import { ACHIEVEMENTS } from "./engine/achievements";
 import AchievementsSheet, { AchToast, achCount } from "./components/Achievements";
@@ -75,8 +75,7 @@ function npcTrainWeek(n, tp) {
   var fav = focusStat(n.id), bought = 0;
   for (var guard = 0; guard < 20; guard++) {
     var best = null, bestScore = 1e9;
-    var cap = ageCap(n.y); /* the same age cap as yours (engine/aging) */
-    STAT_KEYS.forEach(function (k) { var lv = tr[k] || 0; if (lv >= cap) return; var sc = (k === "b" ? lv * 2 : lv) - (k === fav ? 2 : 0); /* Bounce-back kept at about half the others */ if (sc < bestScore) { bestScore = sc; best = k; } });
+    STAT_KEYS.forEach(function (k) { var lv = tr[k] || 0; if (lv >= riderCap(n, k)) return; /* each stat's own age ceiling, as yours (engine/aging) */ var sc = (k === "b" ? lv * 2 : lv) - (k === fav ? 2 : 0); /* Bounce-back kept at about half the others */ if (sc < bestScore) { bestScore = sc; best = k; } });
     if (!best) break;
     var cost = trainCost(tr[best] || 0);
     if (tr.tp < cost) break;
@@ -1094,8 +1093,8 @@ export default function Arena(props) {
           {hubTab === "train" && (
             <div>
               {sectionTitle("Training Camp", "Spend training points between tournaments. Every level makes your own bar easier.")}
-              {(function(){ var y = S.player.y || S.sNum || 1, c = ageCap(y), nx = ageCap(y + 1), drop = y; while (ageCap(drop) >= 20 && drop < 40) drop++; /* the age cap, same for every rider (engine/aging) */
-                return (<div style={card({ padding: "8px 12px", marginBottom: 10, fontSize: 13, color: C.textSoft, lineHeight: 1.4 })}><b style={{ color: C.text }}>Season {y} on tour</b> · every stat can be trained to <b style={{ color: C.text }}>{c}</b>{nx < c ? (<span> · next season <b style={{ color: C.redInk }}>{nx}</b> — levels above it are lost</span>) : c >= 20 ? (<span> until season {drop - 1}, then a little lower each season</span>) : null}. Every granny ages by the same rule.</div>); })()}
+              {(function(){ var y = S.player.y || S.sNum || 1, old = STATS.filter(function (s) { return riderCap(S.player, s.k) < 20; }); /* each stat ages on its own (engine/aging) */
+                return (<div style={card({ padding: "8px 12px", marginBottom: 10, fontSize: 13, color: C.textSoft, lineHeight: 1.4 })}><b style={{ color: C.text }}>Season {y} on tour</b> · {old.length ? (<span>ageing has begun: {old.map(function (s, i) { return (<span key={s.k}>{i ? ", " : ""}{s.label} up to <b style={{ color: C.redInk }}>{riderCap(S.player, s.k)}</b></span>); })}. Each stat ages on its own, and a ceiling only goes down.</span>) : (<span>every stat can still be trained to <b style={{ color: C.text }}>20</b>. Somewhere after season 9–13 each stat starts to age, each at its own time and pace.</span>)}</div>); })()}
               <div style={card({textAlign:"center",marginBottom:10,padding:"10px 12px"})}>
                 <div style={label()}>Training points</div>
                 <div style={display(30, C.goldInk)}>{tpNow} TP</div>
@@ -1148,14 +1147,14 @@ export default function Arena(props) {
                       return (
                         <div key={st.k} style={{padding:"9px 0",borderTop:"1px dashed "+C.line}}>
                           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6,gap:8}}>
-                            <div><span style={{color:C.text,fontWeight:900,fontSize:15}}><StatIcon k={st.k} size={19} style={{ marginRight: 4, verticalAlign: "-4px" }} />{st.label}</span>{st.el && (<span style={{color:C.goldInk,fontSize:12,fontWeight:900,marginLeft:5}}>({st.el})</span>)}<span style={{color:C.textSoft,fontSize:13,marginLeft:6,fontWeight:700}}>Lv {lv}/{cap}{cap > ageCap(S.player.y) ? " 🧬" : ""}</span></div>
+                            <div><span style={{color:C.text,fontWeight:900,fontSize:15}}><StatIcon k={st.k} size={19} style={{ marginRight: 4, verticalAlign: "-4px" }} />{st.label}</span>{st.el && (<span style={{color:C.goldInk,fontSize:12,fontWeight:900,marginLeft:5}}>({st.el})</span>)}<span style={{color:C.textSoft,fontSize:13,marginLeft:6,fontWeight:700}}>Lv {lv}/{cap}{cap > riderCap(S.player, st.k) ? " 🧬" : ""}</span></div>
                             <button onClick={function(){doTrain(st.k)}} disabled={!can} style={button(can?"gold":"ghost",{padding:"6px 12px",fontSize:13,opacity:can?1:0.6,cursor:can?"pointer":"default"})}>{lv>=cap?"MAX":cost+" TP"}</button>
                           </div>
                           {(function(){
                             var rv = rivalTr[st.k] || 0;
                             return (
                               <div style={{position:"relative",display:"flex",gap:2,marginBottom:5}}>
-                                {Array.from({length:cap}).map(function(_,i){return(<div key={i} style={{flex:1,height:7,borderRadius:2,background:i<lv?st.col:i>=ageCap(S.player.y)?"#e9d5ff":"#efe3c4"}}/>);})}
+                                {Array.from({length:cap}).map(function(_,i){return(<div key={i} style={{flex:1,height:7,borderRadius:2,background:i<lv?st.col:i>=riderCap(S.player,st.k)?"#e9d5ff":"#efe3c4"}}/>);})}
                                 <div title="Average of riders ranked near you" style={{position:"absolute",top:-3,height:13,width:3,borderRadius:2,background:C.ink,left:"calc("+Math.min(100,rv/cap*100)+"% - 1.5px)"}} />
                               </div>
                             );

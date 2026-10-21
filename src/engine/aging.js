@@ -1,6 +1,6 @@
-/* ═══ Engine / Aging ═══ Grannies get older. One age curve for everyone, you included: y = seasons on the tour (1 in the
-   first). Up to season 10 every stat can be trained to 20; after that the cap drops, a little more every season —
-   18 at 15, 15 at 20, 10 at 25, 5 at 30 — and levels above the cap are lost at the start of a season.
+/* ═══ Engine / Aging ═══ Grannies get older, you included: y = seasons on the tour (1 in the first). Each stat ages on
+   its own (ageStats below: its own first season of decline and its own pace), and levels above a stat's ceiling are
+   lost at the start of a season. ageCap is the old single curve, kept for the off-season notice and old saves.
    At the end of every season some rivals retire (from 8 seasons on, more the older and the lower ranked — about 50 a
    year) and each is replaced by a newcomer who starts at the bottom with her own talent and potential.
    Measured over 30 seasons on the real engine: the field keeps moving instead of everyone maxing out. */
@@ -17,6 +17,40 @@ var K = 0.117, P = 1.63;
 /* Highest level a stat can be trained to at this age (before any rooster pedigree) */
 export function ageCap(y) { y = y || 1; return y <= PEAK_SEASONS ? 20 : Math.max(1, Math.round(20 - K * Math.pow(y - PEAK_SEASONS, P))); }
 export function ageOf(p) { return (p && p.y) || 1; }
+
+/* ── Each stat ages on its own ── for every rider, each stat has its own first season of decline (after season 9–13)
+   and its own pace (×0.6–1.5), fixed by her seed (a rival's id; yours is drawn when your granny starts). From then on
+   the stat has a ceiling (S.ac, one per stat): it starts at the level she holds (at least 12) and drops every season —
+   about a quarter of a level a season at first, a little faster each year, times her pace, with a dice roll on top. Levels above the
+   ceiling are lost. So one granny's Reflexes go early while her Power holds, and the next one the other way round. */
+var SK = ["r", "p", "f", "s", "g", "b"];
+function hash01(seed, i, salt) {
+  var x = (Math.imul(seed | 0, 2654435761) + Math.imul(i + 1, 40503) + salt) | 0;
+  x = Math.imul(x ^ (x >>> 16), 2246822519); x = Math.imul(x ^ (x >>> 13), 3266489917); x ^= x >>> 16;
+  return (x >>> 0) / 4294967296;
+}
+export var AGE = { from: 9, spread: 5, pace0: 0.6, paceSpan: 0.9, base: 0.25, grow: 0.05, start: 12 };
+export function ageShape(seed, k) { var i = SK.indexOf(k); return { from: AGE.from + Math.floor(hash01(seed, i, 17) * AGE.spread), pace: AGE.pace0 + hash01(seed, i, 91) * AGE.paceSpan }; }
+export function ageSeedOf(p) { return (p && (p.isP ? p.ageSeed : p.id)) || 1; }
+/* The level a stat can be trained to now (before any rooster pedigree): 20 until its decline begins */
+export function riderCap(p, k) { var i = SK.indexOf(k), ac = p && p.ac; return ac && ac[i] != null ? Math.max(1, Math.floor(ac[i])) : 20; }
+/* A season older (y = the new season on tour): each stat's ceiling starts or keeps falling. extra[k] = pedigree levels
+   on top of the ceiling. Returns { tr, ac (null while no stat has started), lost, drops: { stat: levels lost } } */
+export function ageStats(p, y, rnd, extra) {
+  rnd = rnd || Math.random; extra = extra || {};
+  var seed = ageSeedOf(p), tr = Object.assign({}, (p && p.tr) || {}), ac = ((p && p.ac) || []).slice(), lost = 0, drops = {}, any = false;
+  SK.forEach(function (k, i) {
+    var a = ageShape(seed, k);
+    if (y > a.from) {
+      if (ac[i] == null) ac[i] = Math.max(AGE.start, (tr[k] || 0) - (extra[k] || 0)) + 0.99;
+      ac[i] = Math.max(1, Math.round((ac[i] - AGE.base * a.pace * (1 + AGE.grow * (y - a.from)) * (0.4 + rnd() * 1.2)) * 10) / 10);
+      var c = Math.floor(ac[i]) + (extra[k] || 0);
+      if ((tr[k] || 0) > c) { drops[k] = tr[k] - c; lost += tr[k] - c; tr[k] = c; }
+      any = true;
+    } else ac[i] = null;
+  });
+  return { tr: tr, ac: any ? ac : null, lost: lost, drops: drops };
+}
 
 /* Season start: levels above the cap are gone (returns how many were lost) */
 export function clampToAge(tr, cap) {
@@ -123,7 +157,8 @@ export function turnOver(prev, rnd) {
   (prev.gone || []).forEach(function (g) { if (g.id >= nextId) nextId = g.id + 1; });
   var npcs = prev.npcs.filter(function (n) { return !goneIds[n.id]; }).map(function (n) {
     var c = Object.assign({}, n); if (n.w) c.w = n.w.slice();
-    c.y = ageOf(n) + 1; c.tr = clampToAge(n.tr, ageCap(c.y)).tr;
+    c.y = ageOf(n) + 1;
+    var ag = ageStats(n, c.y, rnd); c.tr = ag.tr; if (ag.ac) c.ac = ag.ac; else delete c.ac;
     return c;
   });
   gone.forEach(function () { npcs.push(newcomer(nextId, freshName(taken, recent, rnd), rnd)); nextId++; });
