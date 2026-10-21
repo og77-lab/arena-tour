@@ -3,9 +3,13 @@
    the grind. Prices follow the prizes at your level, so they stay meaningful as you climb. */
 
 import { TIERS } from "../models/constants";
+import { weeklyTP, trainPts } from "../models/formulas";
 import { riderCap } from "./aging";
 
 export var COACH_TP = 10;
+/* A private session teaches about a quarter of what reaching the second round of your best tier does (at least 10):
+   10 at Futures and Challenger level, 15 at the 250s, 27 at the 500s, 52 at the Masters */
+export function coachTP(bestTier) { var t = Math.max(0, Math.min(4, bestTier || 0)); return Math.max(COACH_TP, Math.round(weeklyTP(trainPts(t, 2)) / 4)); }
 export var BASE_CAP = 20;
 /* Rooster pedigree: each certificate lifts the cap on the rooster's stats (Stamina, Steady Stride) */
 export var PEDIGREE = [{ cap: 22, price: 250000 }, { cap: 24, price: 1000000 }, { cap: 26, price: 3000000 }];

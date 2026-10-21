@@ -48,7 +48,7 @@ import { CoachCard } from "./components/Coach";
 import TrainStage from "./components/TrainingAnim";
 import Leaderboard from "./Leaderboard";
 import GameGuide from "./components/GameGuide";
-import { COACH_TP, coachPrice, entryFee, nextPedigree, statCap, weekInvestment, stampInvestment, paidEntryTier } from "./engine/investments";
+import { coachTP, coachPrice, entryFee, nextPedigree, statCap, weekInvestment, stampInvestment, paidEntryTier } from "./engine/investments";
 import { fansOf, clampFans, weeklyDrift, performanceDelta, sponsorTP, hasTierWildcard, hasSlamWildcard } from "./engine/fans";
 import { makeInterview, resolvePromise } from "./engine/interview";
 import Interview from "./components/Interview";
@@ -938,7 +938,7 @@ export default function Arena(props) {
   function bookCoach() {
     if (weekInvestment(S)) return;
     if (spend(coachPrice(bestOpenTier()), function (p) {
-      return { tr: Object.assign({}, p.tr, { tp: (p.tr.tp || 0) + COACH_TP }), invest: stampInvestment(S, "coach") };
+      return { tr: Object.assign({}, p.tr, { tp: (p.tr.tp || 0) + coachTP(bestOpenTier()) }), invest: stampInvestment(S, "coach") };
     })) playRankUp();
   }
   function staffPrice(st) { var t = TIERS[Math.max(0, Math.min(4, bestOpenTier()))]; var c = t.money.reduce(function(a, b){ return a + b; }, 0) * st.priceMul; var m = c >= 100000 ? 5000 : c >= 10000 ? 500 : 50; return Math.max(m, Math.round(c / m) * m); }
@@ -1125,7 +1125,7 @@ export default function Arena(props) {
                       {used ? (<span><Icon name="check" size={14} style={{ verticalAlign: "-2px", marginRight: 3 }} />Done for this week ({used.kind === "coach" ? "private session" : used.kind === "entry" ? "paid entry" : used.kind === "staff" ? "physio booked" : "pedigree certificate"}). Play this week's tournament to unlock the next one.</span>)
                         : "Pick one per tournament week: a private session, physio for fitness, a paid entry (from the tournament list), or a pedigree certificate."}
                     </div>
-                    {row("whistle", "Private session with Coach Hettie", "+" + COACH_TP + " training points. Priced to the prizes at your level.", cp, bookCoach, "+" + COACH_TP + " TP", "coach")}
+                    {row("whistle", "Private session with Coach Hettie", "+" + coachTP(bestOpenTier()) + " training points. Price and lesson grow with your level.", cp, bookCoach, "+" + coachTP(bestOpenTier()) + " TP", "coach")}
                     {STAFF.map(function(st){ var f = fitOf(S.player); return row(st.id === "nurse" ? "cross" : st.id === "doctor" ? "bone" : "tub", st.name, st.sub + " " + [st.g ? "granny +" + st.g + "%" : "", st.r ? "rooster +" + st.r + "%" : ""].filter(Boolean).join(", ") + " fitness now (you're at " + f.g + "% / " + f.r + "%).", staffPrice(st), function(){ bookStaff(st.id); }, "Book", st.id); })}
                     {ped && (function(){ var pc = statCap(Object.assign({}, S.player, { pedigree: (S.player.pedigree || 0) + 1 }), "s"); /* the age cap applies under the pedigree too */
                       return row("scroll", "Rooster pedigree certificate", "Lifts Stamina (less speed-up) and Steady Stride (bigger gold)'s cap to level " + pc + " (+" + (ped.cap - 20) + " over your age cap). Everything you've trained stays.", ped.price, buyPedigree, "Lv " + pc, "ped"); })()}

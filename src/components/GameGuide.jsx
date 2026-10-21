@@ -291,7 +291,7 @@ function body(id) {
     case "money": return (<>
       <P>Prize money buys <B>one investment per tournament week</B>. After you make one, the rest lock until you play that week's tournament. Prices follow the prizes at your level, so they stay meaningful as you climb.</P>
       <Table head={["Investment", "What you get", "Price"]} rows={[
-        ["📣 Private session", "+10 TP (Train tab)", "20% of a champion's prize at your top open tier — about $900 at Futures, $90K at Masters"],
+        ["📣 Private session", "+10 TP at Futures and Challenger level, 15 at the 250s, 27 at the 500s, 52 at the Masters (Train tab)", "20% of a champion's prize at your top open tier — about $900 at Futures, $90K at Masters"],
         ["🎟️ Paid entry", "The tier above your range, this week only (tournament list)", "35% of that tier's champion's prize — about $5.7K for Challenger"],
         ["🩺 Physio", "Fitness back now, injuries heal a tournament sooner (Train tab)", "12–18% of a champion's prize"],
         ["🧬 Pedigree certificate", "Raises the cap on Stamina (less speed-up) and Steady Stride (bigger gold): 20 → 22 → 24 → 26", "$250K, $1M, $3M"]
