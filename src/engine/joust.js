@@ -38,19 +38,23 @@ export function speedAt(bar, setIdx, strikeIdx) { return bar.speed + setIdx * ba
 /* Where it landed → points, then the bonuses on top, with no ceiling.
    The landing: 100 only dead on the line, 85 at the gold's edge, 70 just outside, falling to the floor.
    The bonus (Aim, gear, tiredness) is added after, so a near-perfect strike with good training can read 103. */
+/* In the gold: 100 only dead on the line, 85 at the gold's edge — and the points fall fastest near the centre (exponent < 1),
+   so real precision pays: a strike a fifth of the way out keeps about 95, half way out about 91. Same for every rider. */
+export var GOLD = { exp: 0.75 };
+export function goldBase(rel) { return 100 - 15 * Math.pow(Math.max(0, Math.min(1, rel)), GOLD.exp); }
 export function landScore(d, bar, jitter) {
   var half = bar.zone / 2, inZ = d <= half;
-  var base = inZ ? 100 - 15 * (d / half) : Math.max(bar.floor, 70 - (d - half) * (bar.slope || 2.2));
+  var base = inZ ? goldBase(d / half) : Math.max(bar.floor, 70 - (d - half) * (bar.slope || 2.2));
   base = Math.max(0, Math.min(100, base + (jitter || 0)));
   var bonus = bar.aim + (inZ ? bar.gold : bar.miss);
   return { inZ: inZ, base: base, bonus: bonus, total: Math.max(0, base + bonus) };
 }
 
 /* ── Hands ── a rider's wobble, in "% of a normal-speed bar" units (a normal bar crosses 144% a second, so 1 unit ≈ 7 ms).
-   Anchored to how precisely people stop a moving marker: a beginner (~65 ms, 9.4) reads 35, an average practised player
-   (~40 ms, 6.5) 65, and the tour's elite talent 90 is ~2.0 (~14 ms). Your hands are measured on this same scale.
-   (Until the season-8 rebalance a was 11.35; the whole scale moved 15 up, rivals and your reading alike.) */
-export var HANDS = { a: 12.8, b: 0.097 };
+   Anchored to how precisely people stop a moving marker: a beginner (~65 ms, 9.4) reads 25, an average practised player
+   (~40 ms, 6.5) 55, and the tour's elite talent 90 is ~3.1 (~21 ms). Your hands are measured on this same scale.
+   (a was 11.35 until season 8, then 12.8; 11.8 since the ability ladder — rivals and your reading move together.) */
+export var HANDS = { a: 11.8, b: 0.097 };
 export function handsOf(talent) { return Math.max(1, HANDS.a - (talent || 50) * HANDS.b); }
 export function talentOfHands(h) { return Math.max(0, Math.min(100, (HANDS.a - h) / HANDS.b)); }
 function gauss(rnd) { var u = 0, v = 0; while (!u) u = rnd(); while (!v) v = rnd(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
@@ -71,7 +75,24 @@ export function addHands(hm, sample) {
 }
 export function handsTalent(hm) { return hm && hm.n >= 30 ? Math.round(talentOfHands(hm.m / 0.73)) : null; }
 
-/* ── Nerves ── the lower-ranked rider feels it, two ways (the bigger one counts, they don't add up):
+/* ── Ability and the gap between two riders ── a rider's ability is her typical strike from her talent and her training
+   alone (no kit, no tiredness, no lanes: those come and go): her hands' usual miss on a reference bar. When two meet,
+   the stronger one's gold grows and the weaker one's shrinks, by GAP.c % of the bar per point of difference, at most
+   GAP.cap % in all (split between them). Two riders of a level feel nothing; a qualifier facing a top-3 legend feels it.
+   The weaker rider's part fades with every set she wins. Same rule for you (your measured hands) and every rival. */
+export var GAP = { c: 0.15, cap: 2 };
+export function abilityRating(tr, talent) {
+  var bar = riderBar({ tr: tr, diff: 3, cond: "classic", kit: null, fit: { g: 100, r: 100 } });
+  return landScore(0.73 * handsOf(talent) * bar.speed / BASE.speed, bar).total;
+}
+/* + = her gold grows (she's the stronger), − = it shrinks */
+export function gapEdge(myRating, herRating, setsWon) {
+  var e = Math.max(-GAP.cap, Math.min(GAP.cap, ((myRating || 0) - (herRating || 0)) * GAP.c)) / 2;
+  if (e < 0) e *= Math.max(0, 1 - 0.4 * (setsWon || 0));
+  return Math.round(e * 100) / 100;
+}
+
+/* ── Nerves (old, by rank; kept for older code paths) ── the lower-ranked rider feels it, two ways (the bigger one counts, they don't add up):
    · by how many times lower she's ranked: under ×3 nothing, ×3 −0.3%, ×30 about −0.9%, never more than 1%;
    · facing a star: a top-3 rider costs −0.6% (−0.3% if you're top 10 yourself), a top-10 rider −0.4% (nothing if
      you're top 10 too). It fades with every set she wins. */
@@ -89,9 +110,10 @@ export function simMatch(A, B, ctx, crowdEdgeFn, rnd) {
   rnd = rnd || Math.random;
   var need = Math.ceil((ctx.bo || 3) / 2), wa = 0, wb = 0, setIdx = 0, out = [];
   var fa = dayForm(rnd), fb = dayForm(rnd), ce = crowdEdgeFn ? crowdEdgeFn(A.love || 0, B.love || 0) : { me: 0, her: 0 };
+  var ra = abilityRating(A.tr, A.talent), rb = abilityRating(B.tr, B.talent);
   while (wa < need && wb < need) {
-    var barA = riderBar({ tr: A.tr, diff: ctx.diff, cond: ctx.cond, kit: A.kit, fit: A.fit, crowd: ce.me, nerves: nerves(A.rank, B.rank, wa) });
-    var barB = riderBar({ tr: B.tr, diff: ctx.diff, cond: ctx.cond, kit: B.kit, fit: B.fit, crowd: ce.her, nerves: nerves(B.rank, A.rank, wb) });
+    var barA = riderBar({ tr: A.tr, diff: ctx.diff, cond: ctx.cond, kit: A.kit, fit: A.fit, crowd: ce.me, nerves: -gapEdge(ra, rb, wa) });
+    var barB = riderBar({ tr: B.tr, diff: ctx.diff, cond: ctx.cond, kit: B.kit, fit: B.fit, crowd: ce.her, nerves: -gapEdge(rb, ra, wb) });
     var sa = 0, sb = 0, n = 0;
     for (var k = 0; k < STRIKES + 5; k++) {
       sa += landScore(Math.abs(npcMiss(A.talent, fa, speedAt(barA, setIdx, k), rnd)), barA).total;

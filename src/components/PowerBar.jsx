@@ -17,7 +17,7 @@ import Icon from "./Icons";
 import { conditionOf, softZone } from "../engine/events"
 import { kitFx } from "../engine/gear"
 import { fatigueFx } from "../engine/fitness";
-import { riderBar, speedAt, landScore, npcMiss, dayForm, nerves, handsSample, CTR } from "../engine/joust";
+import { riderBar, speedAt, landScore, npcMiss, dayForm, nerves, abilityRating, gapEdge, goldBase, handsSample, CTR } from "../engine/joust";
 import { enterMatch, leaveMatch, startBattle, stopBattle } from "../music";
 
 const { useState, useEffect, useRef } = React;
@@ -205,11 +205,13 @@ export default function PowerBar(props) {
   var FT = fatigueFx(props.fit || { g: 100, r: 100 }), OFT = fatigueFx(props.oppFit || { g: 100, r: 100 });
   /* Her kit bends her own strikes, exactly as yours bends yours */
   var OKIT = kitFx(props.oppGear, props.cond);
-  /* Each rider's own bar, from her own abilities only (engine/joust): yours from your levels, hers from hers.
-     Nerves: the much lower-ranked rider's gold zone is a little smaller, fading with every set she wins. */
-  var myNerves = nerves(props.myRank, props.oppRank, countWon(sets)), herNerves = nerves(props.oppRank, props.myRank, sets.length - countWon(sets));
-  var MYBAR = riderBar({ tr: tr, diff: props.diff, cond: props.cond, kit: props.gear, fit: props.fit, nerves: myNerves });
-  var OBAR = riderBar({ tr: otr, diff: props.diff, cond: props.cond, kit: props.oppGear, fit: props.oppFit, nerves: herNerves });
+  /* Each rider's own bar, from her own abilities only (engine/joust): yours from your levels, hers from hers. */
+  /* The gap in ability (talent + training; yours from your measured hands) tilts the gold a little toward the stronger */
+  var myRating = abilityRating(tr, props.myTalent || 50), herRating = abilityRating(otr, props.oppSkill || 50);
+  var myEdge = gapEdge(myRating, herRating, countWon(sets)), herEdge = gapEdge(herRating, myRating, sets.length - countWon(sets));
+  var myNerves = myEdge < 0 ? -myEdge : 0, herNerves = herEdge < 0 ? -herEdge : 0;
+  var MYBAR = riderBar({ tr: tr, diff: props.diff, cond: props.cond, kit: props.gear, fit: props.fit, nerves: -myEdge });
+  var OBAR = riderBar({ tr: otr, diff: props.diff, cond: props.cond, kit: props.oppGear, fit: props.oppFit, nerves: -herEdge });
   var ctr = CTR, swBase = MYBAR.zone, fb = MYBAR.lvAim;
   var accel = MYBAR.accel, minSc = MYBAR.floor;
   /* Bar resets every set, but each new set starts a little faster (fatigue — Stamina (less speed-up) softens it) */
@@ -244,7 +246,7 @@ export default function PowerBar(props) {
      Inside the gold zone: 100 on the centre line, sliding to 85 at the zone's edge.
      Just outside it drops sharply to 70, and keeps falling the further out you are, down to the floor. */
   function strikeScore(d, half, floor) {
-    var s = d <= half ? 100 - 15 * (d / half) : Math.max(floor, 70 - (d - half) * MYBAR.slope);
+    var s = d <= half ? goldBase(d / half) : Math.max(floor, 70 - (d - half) * MYBAR.slope); /* same precision curve as hers */
     return s + (Math.random() * 2 - 1);
   }
   function gauss() { var u = 0, v = 0; while (!u) u = Math.random(); while (!v) v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
@@ -447,14 +449,14 @@ export default function PowerBar(props) {
       : "Outscore them by " + Math.ceil(-gapSoFar) + "+ to take the set";
     if (tieBreaking) banner = { tag: "⚠ Tie-break " + (cnt - STRIKES_PER_SET + 1), col: INK_RED, target: "Outscore her on this strike to take the set" };
     else if (deciding) banner = { tag: "🔥 All on the line", col: INK_RED, target: target };
-    else if (setsWon === need - 1) banner = { tag: "⚡ Match point", col: INK_GOLD, target: target };
+    else if (setsWon === need - 1) banner = { tag: "⚡ Last strike for the match", col: INK_GOLD, target: target };
     else if (setsLost === need - 1) banner = { tag: "⚠ Save the match", col: INK_RED, target: target };
-    else banner = { tag: "⚠ Set point", col: INK_RED, target: target };
+    else banner = { tag: "⚠ Last strike of the set", col: INK_RED, target: target };
   }
 
   var setTag = null, setTagColor = "#fde68a";
   if (deciding) { setTag = "DECIDING SET"; setTagColor = "#f87171"; }
-  else if (setsWon === need - 1) { setTag = "MATCH POINT"; setTagColor = "#facc15"; }
+  else if (setsWon === need - 1) { setTag = "SET FOR THE MATCH"; setTagColor = "#facc15"; }
   else if (setsLost === need - 1) { setTag = "ON THE BRINK"; setTagColor = "#f87171"; }
 
   /* First joust: the coach talks you through the first set (shown over the arena, so nothing moves) */

@@ -67,6 +67,20 @@ export function weeklyTP(pts) { return TP_BASE + Math.floor((pts || 0) / 1.8); }
 export function trainPts(tier, roundsWon, mul) { var T = TIERS[tier]; if (!T) return 0; var p = 0; for (var i = 0; i < (roundsWon || 0) && i < T.tp.length; i++) p += T.tp[i]; return Math.round(p * (mul || 1)); }
 
 /* Training point cost for next level of a stat */
-export function trainCost(lv) {
-  return (lv + 1) * 15 + Math.max(0, lv - 8) * 15;
+/* Levels 1–10 cost 15, 30, 45 … 165; from level 11 each costs almost double the one before (314, 596, 1,132, 2,150 …),
+   so every rider tops out at her own height: the best reach 14–16 in a stat over a long career, and nobody maxes them all */
+export var TRAIN = { growth: 1.9 };
+export function trainCost(lv) { return lv < 10 ? oldTrainCost(lv) : Math.round(oldTrainCost(9) * Math.pow(TRAIN.growth, lv - 9)); }
+export function oldTrainCost(lv) { return (lv + 1) * 15 + Math.max(0, lv - 8) * 15; }
+/* A rider's levels re-bought at the new prices: per stat, what she spent there before buys what it buys now; the rest
+   goes back into her training points */
+export function retrainAtNewPrices(tr) {
+  var out = Object.assign({}, tr || {}), back = 0;
+  ["r", "p", "f", "s", "g", "b"].forEach(function (k) {
+    var lv = out[k] || 0, spent = 0, i; for (i = 0; i < lv; i++) spent += oldTrainCost(i);
+    var nl = 0; while (nl < 20 && spent >= trainCost(nl)) { spent -= trainCost(nl); nl++; }
+    out[k] = nl; back += spent;
+  });
+  out.tp = Math.round((out.tp || 0) + back);
+  return out;
 }

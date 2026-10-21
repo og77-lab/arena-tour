@@ -80,7 +80,7 @@ function TaleOfTape(props) {
       </div>
       {row("World rank", y.rank ? "#" + y.rank : "—", "#" + sc.rank, y.rank && sc.rank ? sc.rank - y.rank : 0)}
       <div onClick={function (e) { e.stopPropagation(); setAccInfo(!accInfo); }} style={{ cursor: "pointer" }}>{row("Accuracy ⓘ", y.hands != null ? y.hands : "—", sc.hands != null ? sc.hands : sc.talent, y.hands != null && sc.hands != null ? y.hands - sc.hands : 0)}</div>
-      {accInfo && (<div style={{ fontSize: 11.5, color: "rgba(255,255,255,0.85)", textAlign: "center", padding: "3px 6px 5px", lineHeight: 1.35 }}>How close to the centre a rider usually stops: 35 a beginner · 65 an average practised player · 90 the tour's elite. Yours is measured from your last 200 strikes; hers is her talent.</div>)}
+      {accInfo && (<div style={{ fontSize: 11.5, color: "rgba(255,255,255,0.85)", textAlign: "center", padding: "3px 6px 5px", lineHeight: 1.35 }}>How close to the centre a rider usually stops: 25 a beginner · 55 an average practised player · 90 the tour's elite. Yours is measured from your last 200 strikes; hers is her talent.</div>)}
       {sc.bars && row("Gold zone today", sc.bars.you.zone.toFixed(1) + "%", sc.bars.foe.zone.toFixed(1) + "%", Math.round((sc.bars.you.zone - sc.bars.foe.zone) * 10))}
       {sc.bars && row("Bar speed today", Math.round(sc.bars.you.speed) + "%", Math.round(sc.bars.foe.speed) + "%", Math.round(sc.bars.foe.speed - sc.bars.you.speed))}
       {sc.stats.map(function (s) {
@@ -92,11 +92,26 @@ function TaleOfTape(props) {
           </div>
         );
       })}
+      {sc.gear && (<div>
+        <div style={{ textAlign: "center", fontSize: 10, fontWeight: 900, letterSpacing: 2, color: "#fde68a", marginTop: 6 }}>🛡️ GEAR TODAY</div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, borderTop: "1px solid rgba(255,255,255,0.1)", padding: "4px 0", fontSize: 11.5, lineHeight: 1.35 }}>
+          {[sc.gear.you, sc.gear.foe].map(function (g, i) {
+            return (
+              <div key={i} style={{ textAlign: i ? "left" : "right", minWidth: 0 }}>
+                <div style={{ fontWeight: 900 }}>{g.lance}</div>
+                <div style={{ fontWeight: 900 }}>{g.saddle}</div>
+                {g.fx.length ? g.fx.map(function (l) { return (<div key={l.text} style={{ fontWeight: 700, color: l.good ? GOOD : BAD }}>{l.text}</div>); })
+                  : (<div style={{ fontWeight: 700, color: "rgba(255,255,255,0.6)" }}>No effects</div>)}
+              </div>
+            );
+          })}
+        </div>
+      </div>)}
       <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "4px 12px", marginTop: 8, fontSize: 12, fontWeight: 800, color: "rgba(255,255,255,0.85)" }}>
         <span>Difficulty <b style={{ color: sc.diff.colOnDark }}>{sc.diff.label}</b></span>
         <span>{h.w + h.l === 0 ? "First meeting" : "Head-to-head " + h.w + "–" + h.l}</span>
         {sc.rooster && (<span>🐓 {sc.rooster}</span>)}
-        {sc.kit && (<span>Her kit {sc.kit}</span>)}
+        {sc.kit && !sc.gear && (<span>Her kit {sc.kit}</span>)}
         {(sc.injuries || []).map(function (t) { return (<span key={t} style={{ color: "#fca5a5", flexBasis: "100%", textAlign: "center" }}>🩹 {t}</span>); })}
       </div>
     </motion.div>

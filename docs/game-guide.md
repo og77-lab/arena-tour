@@ -121,7 +121,7 @@ Everything that changes a match — lanes, gear, tiredness, training, injuries �
 **4 · Striking.** A blue marker sweeps back and forth across the bar. Tap the big round **STRIKE** button (or the arena, or press Space) when it's in the gold zone — as close to the white centre line as you can. The bar gets a little faster with every strike and every set.
 
 **5 · Reading the screen**
-- The chip at the top shows the set and strike. On the last strike of a set it turns into *Set point*, *Match point*, *Save the match* or *All on the line*, with the score you need.
+- The chip at the top shows the set and strike. On the last strike of a set it turns into *Last strike of the set*, *Last strike for the match*, *Save the match* or *All on the line*, with the score you need.
 - Coloured orbs under each name are that set's strikes; the bar below them is the set's running gap.
 - Your strike leaves a tick on the bar, hers a red ▲. Under your score a line shows where it came from: *In the gold 92 + 2 Aim (extra points) + 3 Gear − 0 Tired = 97*. Between sets a break screen shows the set result.
 - The header shows your fitness (👵 / 🐓, with 🩹 if you're injured), your kit and the lanes. If you get injured during a tournament, a red **Ouch!** note appears between matches.
@@ -136,7 +136,7 @@ Both of you are scored the same way: **where the lance lands on the bar.**
 | Where you land | Base score |
 |---|---|
 | On the centre line | 100 |
-| Inside the gold zone | Slides from 100 down to 85 at the zone's edge |
+| Inside the gold zone | 100 only dead on the line, 85 at the zone's edge — falling fastest near the centre (a fifth of the way out keeps about 95, half way about 91) |
 | Just outside the gold | A sharp drop to 70 |
 | Further out | Falls about 2 points for every % of the bar, down to your floor |
 
@@ -154,11 +154,21 @@ On top of the base score:
 
 **How your opponent scores.** She strikes on **her own bar**, built exactly like yours but from **her** levels, her lanes, her kit, her tiredness and her crowd, and she's scored by the same rule. Where she stops is down to her **accuracy** — her talent: a gifted granny lands near the centre time after time, a developing one wobbles more, and everyone wobbles a little more as their bar runs faster. Each match she has a **form for the day** (about ±8%), and her bad strikes stay bad, not disasters: a set in the 20s or 30s only comes from real weakness or tiredness.
 
-**Talent and potential.** A rival's talent grows slowly through her career, up to her **potential**. Only **five** riders on the whole tour can ever reach 90 — one a touch above the rest, one close behind her, and three just over the line. Below them each rider's ceiling falls steadily with her place in the talent order (about 84 for the 30th most talented, 80 for the 100th, 72 for the 300th), so the very best stand apart: the three strongest post a set of 100+ about one set in five, the 30th about one in seven, the 100th about one in thirty — a matter of chance, never a schedule.
+**Talent and potential.** A rival's talent grows slowly through her career, up to her **potential**. Nobody on the tour is below talent 60 (newcomers start at 60–62). Only **three** riders on the whole tour can ever pass 90 — one a touch above the rest, two close behind her. Below them each rider's ceiling falls steadily with her place in the talent order (about 82 for the 30th most talented, 77.5 for the 100th, 70 for the 300th), so every few dozen places down the tour is a step weaker. By ability (not ranking), a set of 100+ comes about:
+
+1. The three strongest: one set in six to eight.
+2. The 4th–10th: one in twelve.
+3. The 11th–30th: one in twenty.
+4. The 31st–60th: one in thirty-five.
+5. The 61st–100th: one in seventy.
+6. The 101st–300th: one in a hundred and fifty to four hundred.
+7. Below the 300th: almost never.
+
+A matter of chance, never a schedule.
 
 **Your accuracy.** Your accuracy is your own finger. Your profile measures them from your last 200 strikes (how far from the centre you stop, allowing for the bar's speed) and shows them on the same scale as a rival's talent — "Your accuracy ≈ 64". It's a mirror only; it never changes a score.
 
-**Nerves.** The lower-ranked rider's gold zone shrinks: by the rank gap (nothing under ×3, −0.3% at ×3, about −0.9% at ×30) or facing a star (top 3: −0.6%, or −0.3% if you're top 10; top 10: −0.4%, nothing if you're top 10 too) — whichever is bigger, never more than 1%, less with every set she wins. It works the same for you, for her, and in rival-vs-rival matches. The status line in the match shows it (😰).
+**The gap in ability.** Each rider's ability is her usual strike from her talent and training alone (gear, tiredness and lanes don't count — they come and go). The stronger rider's gold zone grows and the weaker one's shrinks, by 0.15% of the bar per point of difference, at most 1% each (a gap of about 7 points or more). Two riders of a level feel nothing; a qualifier facing one of the three best feels it all. The weaker rider's part fades with every set she wins. It works the same for you, for her, and in rival-vs-rival matches. The status line in the match shows it (😰).
 
 **The stands.** Whoever the crowd loves more gets a slightly wider gold zone: **+1% of the bar per 25 ❤️ more** than the other rider (at most +1.5%), **doubled on match-point strikes**.
 
@@ -169,7 +179,7 @@ On top of the base score:
 | 1 · Your levels | Your own levels build your own bar: a slower bar, a wider gold zone, extra points, softer misses. Her levels build her bar, never yours. |
 | 2 · The round | Each tier starts a step harder, and each round adds a little more: a narrower gold zone and a faster bar for both of you. |
 | 3 · Accuracy | Where you stop is your finger. Where she stops is her talent (how close to the centre she lands, a little worse on a faster bar, with a form for the day). Your profile shows your hands on the same scale. |
-| 3b · Nerves | The lower-ranked rider's gold zone shrinks: by the rank gap (nothing under ×3, −0.3% at ×3, about −0.9% at ×30) or facing a star (top 3: −0.6%, or −0.3% if you're top 10; top 10: −0.4%, nothing if you're top 10 too) — whichever is bigger, never more than 1%, less with every set she wins. |
+| 3b · The gap | The gap in ability: each rider's ability is her usual strike from her talent and training alone (gear, tiredness and lanes don't count — they come and go). The stronger rider's gold zone grows and the weaker one's shrinks, by 0.15% of the bar per point of difference, at most 1% each (a gap of about 7 points or more). Two riders of a level feel nothing; a qualifier facing one of the three best feels it all. The weaker rider's part fades with every set she wins. |
 | 4 · The lanes | Mud, wind, heat or green bend the bar for both of you and weight one stat. |
 | 5 · Kit and tiredness | Your lance, saddle and fitness bend your bar; hers bend hers. |
 
@@ -210,7 +220,7 @@ Six stats, each from level 0 to 20 (lower later in a career — see *Age, retire
 
  A deep run buys you a few levels on the riders who went out early; the edge fades once you move up to a tier where everyone is winning that much. You also get **sponsor TP** from your fans (one per 10 fans).
 
-Each level costs more than the last: 15 TP for level 1, 30 for level 2, 45 for level 3… and from level 9 the price climbs faster still.
+Each level costs more than the last: 15 TP for level 1, 30 for level 2, 45 for level 3… up to 165 for level 10. From level 11 each level costs almost double the one before (314, 596, 1,132, 2,150…), so every rider tops out at her own height: the best reach 14–16 in a stat over a long career, and nobody maxes them all.
 
 **On the Train tab**
 - Each stat shows what it does, its exact per-level effect as a chip, and when it's worth training.

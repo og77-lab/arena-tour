@@ -5,15 +5,20 @@ import { npcName } from "../models/persona";
 import { trainCost, spreadPts } from "../models/formulas";
 import { placePts } from "./migrate";
 
-/* Talent ceilings: only five riders on the whole tour can ever reach 90 — one a touch above the rest, one close
-   behind her, three more just over the line. Below them the ceiling falls steadily with each rider's place in the
-   talent order (89.4 − √place: about 84 at the 30th, 79.5 at the 100th, 72 at the 300th), so the strongest stand out
-   instead of hundreds sharing one ceiling. Talent never passes potential. */
-var ELITE_POT = [94, 92.5, 91, 90.5, 90];
+/* Talent ceilings: only three riders on the whole tour can ever pass 90 — one a touch above the rest, two close
+   behind her. Below them the ceiling falls steadily with each rider's place in the talent order
+   (87.5 − √place: about 82 at the 30th, 77.5 at the 100th, 70 at the 300th), so every few dozen places down the
+   tour is a step weaker, instead of hundreds sharing one ceiling. Talent never passes potential. */
+var ELITE_POT = [94, 92.5, 91];
+export var LADDER = { top: 87.5, k: 1.0 };
+/* The talent floor: a rider who made the tour can hold a lance — what used to be 15–64 is squeezed into 60–64,
+   order kept, and no ceiling sits below 62, so even the 1000th is a real match for a fresh granny */
+export var FLOOR = 60;
+export function liftTalent(s) { return s < 64 ? Math.max(s, FLOOR + (s - 15) * 4 / 49) : s; }
 export function shapePotentials(npcs) {
   var order = npcs.slice().sort(function (a, b) { return (b.pot || 0) + (b.skill || 0) * 0.5 - ((a.pot || 0) + (a.skill || 0) * 0.5); });
   order.forEach(function (n, i) {
-    n.pot = i < ELITE_POT.length ? ELITE_POT[i] : Math.min(n.pot || 60, 89.4 - 1.0 * Math.sqrt(i - ELITE_POT.length + 1));
+    n.pot = i < ELITE_POT.length ? ELITE_POT[i] : Math.max(FLOOR + 2, Math.min(n.pot || 60, LADDER.top - LADDER.k * Math.sqrt(i - ELITE_POT.length + 1)));
     if (n.skill > n.pot) n.skill = n.pot;
   });
   return npcs;
@@ -39,6 +44,7 @@ export function mkNPCs() {
               : pct < 0.25 ? 55 + Math.random() * 18
               : pct < 0.5  ? 38 + Math.random() * 20
               :              15 + Math.random() * 28;
+    skill = liftTalent(skill);
     /* Seed SP based on rank position — quadratic decay, everyone has base points */
     var pot = Math.round(skill + 6 + Math.random() * 12);
     npcs.push({

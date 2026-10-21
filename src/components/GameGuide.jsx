@@ -194,7 +194,7 @@ function body(id) {
       <P>A blue marker sweeps back and forth across the bar. Tap the big round <B>STRIKE</B> button (or the arena, or press Space) when it's in the gold zone — as close to the white centre line as you can. The bar gets a little faster with every strike and every set; a new set starts a touch faster than the last.</P>
       <H>5 · Reading the screen</H>
       <List items={[
-        <span key="a">The chip at the top shows the set and strike. On the last strike of a set it turns into <B>Set point</B>, <B>Match point</B>, <B>Save the match</B> or <B>All on the line</B>, with the score you need.</span>,
+        <span key="a">The chip at the top shows the set and strike. On the last strike of a set it turns into <B>Last strike of the set</B>, <B>Last strike for the match</B>, <B>Save the match</B> or <B>All on the line</B>, with the score you need.</span>,
         <span key="b">Coloured orbs under each name are that set's strikes. The bar below them is the set's running gap.</span>,
         <span key="c">Your strike leaves a tick on the bar, hers a red ▲. Between sets a break screen shows the set result.</span>,
         <span key="d">When the match is decided, the loser is unseated and the outro shows the score, points and prize.</span>
@@ -207,7 +207,7 @@ function body(id) {
       <ScoreBar />
       <Table head={["Where you land", "Score"]} rows={[
         ["On the centre line", "100"],
-        ["Inside the gold zone", "Slides from 100 down to 85 at the zone's edge"],
+        ["Inside the gold zone", "100 only dead on the line, 85 at the zone's edge — falling fastest near the centre (a fifth of the way out keeps about 95, half way about 91)"],
         ["Just outside the gold", "A sharp drop to 70"],
         ["Further out", "Falls about 2 points for every % of the bar, down to your floor"]
       ]} />
@@ -231,7 +231,7 @@ function body(id) {
         ["1 · Your levels", "Your own levels build your own bar: a slower bar, a wider gold zone, extra points, softer misses. Her levels build her bar, never yours."],
         ["2 · The round", "Each tier starts a step harder, and each round within a tournament adds a little more. This narrows the gold zone and speeds the bar for both of you."],
         ["3 · Accuracy", "Where you stop on your bar is your finger. Where she stops is her talent: how close to the centre she lands, a little worse when her bar runs faster, with a form for the day."],
-        ["4 · Nerves", "The lower-ranked rider's gold zone shrinks: by the rank gap (nothing under ×3, −0.3% at ×3, about −0.9% at ×30) or facing a star (top 3: −0.6%, or −0.3% if you're top 10; top 10: −0.4%, nothing if you're top 10 too) — whichever is bigger, never more than 1%, less with every set she wins."]
+        ["4 · The gap", "Each rider's ability is her usual strike from her talent and training alone (gear, tiredness and lanes don't count — they come and go). The stronger rider's gold zone grows and the weaker one's shrinks, by 0.15% of the bar per point of difference, at most 1% each (a gap of about 7 points or more). Two riders of a level feel nothing; a qualifier facing one of the three best feels it all. The weaker rider's part fades with every set she wins."]
       ]} />
       <P>An example — the width of your gold zone with Steady Stride (bigger gold):</P>
       <Table head={["Situation", "Gold zone"]} rows={[
@@ -240,7 +240,7 @@ function body(id) {
         ["Same, Steady Stride 10", "15%"],
         ["Masters final, Steady Stride 15", "about 6.6%"]
       ]} />
-      <P>The gold zone never shrinks to nothing: once it is under 8% of the bar, every further squeeze (a late round, wind, tiredness, gear, nerves) counts less and less, so it bottoms out around 4–5%. The bar never gets impossibly fast or slow either.</P>
+      <P>The gold zone never shrinks to nothing: once it is under 8% of the bar, every further squeeze (a late round, wind, tiredness, gear, the gap) counts less and less, so it bottoms out around 4–5%. The bar never gets impossibly fast or slow either.</P>
     </>);
 
     case "training": return (<>
@@ -250,7 +250,7 @@ function body(id) {
       <P>Everyone on tour — you and every rival — earns TP by the same rule every week: <B>8 for turning up, plus more for every round you win</B> — the deeper the run and the higher the tier, the more. A deep run buys you a few levels on the riders who went out early; the edge fades once you move up to a tier where everyone is winning that much.</P>
       <Table head={["Tier", "Out in R1", "R16", "QF", "SF", "F", "Win"]} rows={tpRows()} />
       <P>(At a Slam the first column is reaching the R32.) You also get <B>sponsor TP</B> from your fans (one per 10 fans).</P>
-      <P>Each level costs more than the last: 15 TP for level 1, 30 for level 2, 45 for level 3… and from level 9 the price climbs faster still.</P>
+      <P>Each level costs more than the last: 15 TP for level 1, 30 for level 2, 45 for level 3… up to 165 for level 10. From level 11 each level costs almost double the one before (314, 596, 1,132, 2,150…), so every rider tops out at her own height: the best reach 14–16 in a stat over a long career, and nobody maxes them all.</P>
       <H>On the Train tab</H>
       <List items={[
         <span key="a">Each stat shows what it does, its exact per-level effect, and when it's worth training.</span>,
@@ -333,7 +333,7 @@ function body(id) {
       <P>The Ranks tab lists all 1,000 riders by season points and opens on your own row, with 25 above and below ("show 25 more" to see further). Switch to <B>Top 50</B> to see the leaders. Golden helmets mark the top ten; the world #1 wears the crown.</P>
       <H>Profiles</H>
       <P>Tap any granny for her profile: her rider and rooster, trait and quote, ranks and points, natural talent and potential, training levels, titles, and your head-to-head — every match with its result in sets and each set's score.</P>
-      <P>A rival's <B>talent</B> grows slowly through her career, up to her <B>potential</B>. Only five riders can ever reach 90; below them the ceiling falls steadily with each rider's place in the talent order, so the very best stand apart. The three strongest post a set of 100+ about one set in five, the 30th about one in seven, the 100th about one in thirty: a matter of chance, never a schedule.</P>
+      <P>A rival's <B>talent</B> grows slowly through her career, up to her <B>potential</B>. Nobody on the tour is below talent 60 — newcomers start at 60–62 — and only three riders can ever pass 90; below them the ceiling falls steadily with each rider's place in the talent order, so every few dozen places down the tour is a step weaker. By ability (not ranking), the three strongest post a set of 100+ about one set in six to eight, the next seven about one in twelve, the 11th–30th about one in twenty, the 31st–60th about one in thirty-five, the 61st–100th about one in seventy, and below the 300th almost never: a matter of chance, never a schedule.</P>
       <P>Tap your own card on Home for your profile. The ✏️ buttons rename your granny and your rooster.</P>
       <P>Every profile ends with <B>Week by week</B>: each tournament she rode this season and last, the round she reached and the points she won. Tap a week to see that tournament's whole draw, with her path lit up.</P>
       <H>Tour results</H>

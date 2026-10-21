@@ -78,7 +78,7 @@ export function mkSeason(name, num, prev) {
     if (prev.newsSeenAt != null) S.newsSeenAt = prev.newsSeenAt;
   }
   S.titles = 2;                    /* titles from the big pool (engine/migrate retitle) */
-  S.tal = 2;                       /* talent ceilings on the ladder (npcGenerator shapePotentials) */
+  S.tal = 4;                       /* new training prices, talent ladder and floor (ArenaGame toTal4) */
   S.world = 2;                     /* place names (engine/migrate renameWorld) */
   S.pts = 3;                       /* points on the current table (engine/migrate toPts3), rivals' points rolling */
   S.eng = 2;                       /* the match engine version: each rider on her own bar (engine/joust) */

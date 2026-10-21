@@ -62,7 +62,7 @@ export function FanChain(props) {
     <div style={{ marginTop: 8, padding: "9px 11px", borderRadius: 14, background: "#fff1f2", color: C.textSoft }}>
       <div style={{ fontFamily: HEAD, fontSize: 14, fontWeight: 600, color: "#9f1239" }}>What {c.fans} gives you</div>
       <div style={row}>• <b style={{ color: C.greenInk }}>+{c.tp} training points</b> a week from sponsors</div>
-      <div style={row}>• Riders near your rank have about ❤️ {c.typLove}. Against them: {e > 0.05 ? (<b style={{ color: C.greenInk }}>your gold zone +{e.toFixed(1)}%</b>) : e < -0.05 ? (<b style={{ color: C.redInk }}>her gold zone +{(-e).toFixed(1)}%</b>) : (<b>no edge either way</b>)}{Math.abs(e) > 0.05 ? " (×2 on match point)" : ""}</div>
+      <div style={row}>• Riders near your rank have about ❤️ {c.typLove}. Against them: {e > 0.05 ? (<b style={{ color: C.greenInk }}>your gold zone +{e.toFixed(1)}%</b>) : e < -0.05 ? (<b style={{ color: C.redInk }}>her gold zone +{(-e).toFixed(1)}%</b>) : (<b>no edge either way</b>)}{Math.abs(e) > 0.05 ? " (×2 on the last strike with the match on the line)" : ""}</div>
       <div style={{ fontFamily: HEAD, fontSize: 14, fontWeight: 600, color: "#9f1239", marginTop: 8 }}>Where it's heading</div>
       <div style={row}>Each week it slides 10% toward <b>{c.settle}</b> ({c.base} for your rank{c.lift ? (<span> + <b style={{ color: C.greenInk }}>{c.lift}</b> for {k(c.fol)} followers</span>) : ""}), then your results move it.</div>
     </div>

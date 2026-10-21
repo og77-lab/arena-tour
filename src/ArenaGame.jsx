@@ -6,11 +6,11 @@ import { syncAchievements, saveGameToCloud, loadGameFromCloud } from "./firebase
 import { playTitle, playRankUp, isMuted, setMuted } from "./sounds";
 import { isMusicOn, setMusicOn } from "./music";
 import { W, CSS, EMO, TIERS, RN5, RN6, HN, HC, HI, TOTAL_EVENTS, FINALS_BO, STATS, STAT_GROUPS, screenAnim, ptsLadder, champTotal } from "./models/constants";
-import { sh, bs, nW, pRankOf, getRanked, getARanked, trainCost, weeklyTP, trainPts, spreadPts } from "./models/formulas";
+import { sh, bs, nW, pRankOf, getRanked, getARanked, trainCost, weeklyTP, trainPts, spreadPts, retrainAtNewPrices } from "./models/formulas";
 import { sSet, sGet, stamp, pickNewest, queueCloudSave, cancelCloudSave } from "./engine/persistence";
 import { pack, unpack } from "./engine/codec";
 import { addHands, simMatch, handsTalent, riderBar, BASE } from "./engine/joust";
-import { shapePotentials } from "./engine/npcGenerator";
+import { shapePotentials, liftTalent } from "./engine/npcGenerator";
 import StartTalent from "./components/StartTalent";
 import { KnitterSheet } from "./components/KnitterFeed";
 import { followersOf, followersGain, followersLift, crowdLove, weekKnits, fmtFollowers, fanChain } from "./engine/social";
@@ -30,7 +30,7 @@ import { EffectList, statEffect } from "./components/Effect";
 import { BY_ID as GEAR_BY_ID } from "./engine/gear";
 import { fitOf, putFit, afterMatches, afterSets, setsOf, recover, recoveryOf, STAFF, rollInjury, addInjury, tickInjuries, treatInjuries, effTr, injuryText } from "./engine/fitness";
 import { npcKit, npcStaff, prizeFor, kitStrength } from "./engine/npcBrain";
-import { BY_ID as GEAR_ID } from "./engine/gear";
+import { BY_ID as GEAR_ID, kitFx, fxLines } from "./engine/gear";
 import BottomNav, { NAV_HEIGHT } from "./components/BottomNav";
 import MatchHeader from "./components/MatchHeader";
 import ScoutSheet from "./components/ScoutSheet";
@@ -118,6 +118,11 @@ function kitBonus(S, cond, tier) {
     kit: function (p) { if (!p || p.isP) return null; if (!cache[p.id]) cache[p.id] = kitOfNpc(S, p, cond, tier, rm[p.id]); return cache[p.id]; } };
 }
 function kitIcons(k) { return k && (k.lance !== "broom" || k.saddle !== "teacosy") ? (GEAR_ID[k.lance].icon + GEAR_ID[k.saddle].icon) : null; }
+/* A rider's lance and saddle for the tale of the tape: names, and what they do in today's lanes */
+function kitCard(k, cond) {
+  var l = GEAR_ID[(k && k.lance) || "broom"] || GEAR_ID.broom, s = GEAR_ID[(k && k.saddle) || "teacosy"] || GEAR_ID.teacosy;
+  return { lance: l.icon + " " + l.name, saddle: s.icon + " " + s.name, fx: fxLines(kitFx({ lance: l.id, saddle: s.id }, cond)) };
+}
 
 /* A save from before each-rider-on-her-own-bar: talent ceilings reshaped (only five can reach 90), and a one-time
    gift of the 10 starting points every new granny gets */
@@ -127,8 +132,17 @@ function toEngine2(d) {
   return n;
 }
 
-/* The talent ladder (once per save: S.tal = 2): every rival's ceiling from her place in the talent order, talent above it trimmed */
-function toTal2(d) { return Object.assign({}, d, { npcs: shapePotentials(d.npcs.map(function (x) { return Object.assign({}, x); })), tal: 2 }); }
+/* Once per save (S.tal = 3): the training price list changed (levels above 10 cost far more), so every rider — you too —
+   gets back exactly what she put into each stat: the points she spent there at the old prices buy what they buy now,
+   and what's left over goes back into her training points. Then the talent ladder (npcGenerator shapePotentials). */
+/* S.tal = 4: nobody on the tour is a pushover — the weakest talents are lifted to the new floor (npcGenerator liftTalent) */
+function toTal4(d) {
+  var old = d.tal === 3, p = old ? d.player : Object.assign({}, d.player, { tr: retrainAtNewPrices(d.player.tr) });
+  return Object.assign({}, d, { player: p, npcs: shapePotentials(d.npcs.map(function (x) {
+    var s = liftTalent(x.skill || 30);
+    return Object.assign({}, x, { tr: old ? x.tr : retrainAtNewPrices(x.tr), skill: s, pot: Math.max(x.pot || 60, Math.round(s + 4)) });
+  })), tal: 4 });
+}
 
 /* Season finals between rivals: the finals' own round difficulty (groups 3, semis 4, final 5) */
 function finCtx(S, d) { var rm = rankMap(S); return { tier: 6, diff: d, bo: FINALS_BO, cond: "classic", rank: function (p) { return rm[p.id] || 1000; } }; }
@@ -161,6 +175,7 @@ function buildScout(S, o, oRank, d, me) {
     bars: { you: { zone: myBar.zone, speed: myBar.speed / normal * 100 }, foe: { zone: herBar.zone, speed: herBar.speed / normal * 100 } },
     h2h: { w: w, l: meetings.length - w }, rival: !!(S.player.rival && S.player.rival.id === o.id),
     kit: o._kit ? kitIcons(o._kit) : null,
+    gear: { you: kitCard(me && me.gear, cond), foe: kitCard(o._kit, cond) },
     injuries: ((S.player.inj || []).map(function (x) { return "You " + injuryText(x); })).concat((o.inj || []).map(function (x) { return "Her " + injuryText(x); })),
     stats: STATS.filter(function (s) { return s.k !== "b"; }).map(function (s) { return { k: s.k, icon: s.icon, label: s.label + (s.el ? " (" + s.el + ")" : ""), what: s.what, who: s.who, you: mine[s.k] || 0, foe: hers[s.k] || 0 }; })
       .concat(fitRows(S, o)),
@@ -198,7 +213,7 @@ export default function Arena(props) {
       if (needsTitles(d)) { d = retitle(d); try { sSet(d); } catch (e) {} }
       if (needsWorldNames(d)) { d = renameWorld(d); try { sSet(d); } catch (e) {} }
       if (!d.eng || d.eng < 2) { d = toEngine2(d); try { sSet(d); } catch (e) {} }
-      if (d.npcs && d.tal !== 2) { d = toTal2(d); try { sSet(d); } catch (e) {} }
+      if (d.npcs && d.tal !== 4) { d = toTal4(d); try { sSet(d); } catch (e) {} }
       /* Points from before the current table: converted once, and rivals' points start dropping off like yours */
       if (needsPts3(d)) { d = toPts3(d); try { sSet(d); } catch (e) {} } /* older tables first, then the current one (engine/migrate) */
       /* Ages: rivals spread over 1–16 seasons on tour, you counted from season 1 (engine/aging) */
@@ -234,7 +249,7 @@ export default function Arena(props) {
     queueCloudSave(userId, snap, saveGameToCloud);
   }, [ts, fs]);
   function exportSave() { if (!S) return; var b = new Blob([JSON.stringify(pack(S))],{type:"application/json"}); var u = URL.createObjectURL(b); var a = document.createElement("a"); a.href = u; a.download = "arena-"+S.pName+"-s"+S.sNum+".json"; a.click(); URL.revokeObjectURL(u); }
-  function importSave(e) { var f = e.target.files && e.target.files[0]; if (!f) return; var r = new FileReader(); r.onload = function(ev){ try { var d = unpack(JSON.parse(ev.target.result)); if (d && d.player) { if (!d.eng || d.eng < 2) d = toEngine2(d); if (d.tal !== 2) d = toTal2(d); save(renameWorld(toAge(toPts3(retitle(uniqueNames(d)))))); setScr("hub"); } } catch(err){} }; r.readAsText(f); }
+  function importSave(e) { var f = e.target.files && e.target.files[0]; if (!f) return; var r = new FileReader(); r.onload = function(ev){ try { var d = unpack(JSON.parse(ev.target.result)); if (d && d.player) { if (!d.eng || d.eng < 2) d = toEngine2(d); if (d.tal !== 4) d = toTal4(d); save(renameWorld(toAge(toPts3(retitle(uniqueNames(d)))))); setScr("hub"); } } catch(err){} }; r.readAsText(f); }
   var _syncing = useState(false), syncing = _syncing[0], setSyncing = _syncing[1];
   var _syncMsg = useState(""), syncMsg = _syncMsg[0], setSyncMsg = _syncMsg[1];
   var _mutedState = useState(isMuted()), mutedState = _mutedState[0], setMutedState = _mutedState[1];
@@ -1389,7 +1404,7 @@ export default function Arena(props) {
 
         {pm && ts.alive && opp && (
           <div>
-            <PowerBar key={"t-"+ts.round} tier={ts.tierIdx} cond={ts.cond} gear={ts.gear || null} fit={fitOf(S.player)} oppFit={afterMatches(fitOf(opp), ts.round, tier.bo)} oppGear={kitOfNpc(S, opp, ts.cond, ts.tierIdx, rankMap(S)[opp.id])} eventName={ts.eventName} road={ts.log.filter(function(m){ return m.won; }).map(function(m){ return { name: sh(m.opp), id: m.oppId, round: m.round, rank: m.oppRank || null, sc: m.sc || null }; })} coach={tipOn("match")} scout={scoutT} onDone={onTR} oppSkill={opp.skill||50} diff={roundDiff(ts.tierIdx, ts.round)} tr={effTr(S.player)} otr={effTr(opp)} playerName={S.pName} playerEmoji="⚔️" oppName={sh(opp.name)} oppEmoji={opp.emoji||"👤"} oppId={opp.id} oppRank={oppRank} myRank={pRank} fans={fansOf(S.player)} oppFans={crowdLove(opp, oppRank)} tierColor={tier.col} roundLabel={rNames[ts.round]}
+            <PowerBar key={"t-"+ts.round} tier={ts.tierIdx} cond={ts.cond} gear={ts.gear || null} fit={fitOf(S.player)} oppFit={afterMatches(fitOf(opp), ts.round, tier.bo)} oppGear={kitOfNpc(S, opp, ts.cond, ts.tierIdx, rankMap(S)[opp.id])} eventName={ts.eventName} road={ts.log.filter(function(m){ return m.won; }).map(function(m){ return { name: sh(m.opp), id: m.oppId, round: m.round, rank: m.oppRank || null, sc: m.sc || null }; })} coach={tipOn("match")} scout={scoutT} onDone={onTR} oppSkill={opp.skill||50} myTalent={handsTalent(S.player.hm) || 50} diff={roundDiff(ts.tierIdx, ts.round)} tr={effTr(S.player)} otr={effTr(opp)} playerName={S.pName} playerEmoji="⚔️" oppName={sh(opp.name)} oppEmoji={opp.emoji||"👤"} oppId={opp.id} oppRank={oppRank} myRank={pRank} fans={fansOf(S.player)} oppFans={crowdLove(opp, oppRank)} tierColor={tier.col} roundLabel={rNames[ts.round]}
               tierName={ts.eventName || tier.name} youSub={"World #"+pRank} foeSub={"World #"+oppRank+" · "+talentLabel(opp.skill)}
               isFinal={ts.round >= tier.rounds-1} nextLabel={ts.round < tier.rounds-1 ? rNames[ts.round+1] : null} eliminated={true}
               stakes={{ pts: Math.round(tier.pts[ts.round] * (ts.ptsMul || 1)), money: Math.round(((tier.money||[])[ts.round]||0) * (ts.moneyMul || 1)) }}
@@ -1437,7 +1452,7 @@ export default function Arena(props) {
           <MatchHeader tierName={"Season " + S.sNum + " Finals"} tierColor="#a855f7" roundLabel={fs.phase==="final"?"World Final":fs.phase==="semis"?"Semifinal":"Group Stage"}
             bestOf={FINALS_BO} rounds={["Group Stage","Semifinal","World Final"]} roundIdx={fs.phase==="final"?2:fs.phase==="semis"?1:0}
             onScout={function(){ setShowScout(true); }} onHelp={function(){ setHelp(true); }} />
-          <PowerBar key={"f-"+fs.phase+"-"+fopp.id} tier={6} road={(fs.log||[]).filter(function(m){ return m.won; }).map(function(m){ return { name: sh(m.opp), round: m.phase === "groups" ? "Groups" : "Semifinal", rank: m.oppRank || null, sc: m.sc || null }; })} scout={scoutF} onDone={onFR} oppSkill={fopp.skill||60} diff={fs.phase==="final"?5:fs.phase==="semis"?4:3} tr={effTr(S.player)} otr={effTr(fopp)} fit={fitOf(S.player)} oppFit={afterMatches(fitOf(fopp), finalsRidden(fs, fopp.id), FINALS_BO)} playerName={S.pName} playerEmoji="⚔️" oppName={sh(fopp.name)} oppEmoji={fopp.emoji||"👤"} oppId={fopp.id} oppRank={fRank} myRank={pRank} fans={fansOf(S.player)} oppFans={crowdLove(fopp, fRank)} tierColor={fs.phase==="final"?"#b45309":"#8b5cf6"} roundLabel={fs.phase==="final"?"World Final":fs.phase==="semis"?"Semifinal":"Group Stage"}
+          <PowerBar key={"f-"+fs.phase+"-"+fopp.id} tier={6} road={(fs.log||[]).filter(function(m){ return m.won; }).map(function(m){ return { name: sh(m.opp), round: m.phase === "groups" ? "Groups" : "Semifinal", rank: m.oppRank || null, sc: m.sc || null }; })} scout={scoutF} onDone={onFR} oppSkill={fopp.skill||60} myTalent={handsTalent(S.player.hm) || 50} diff={fs.phase==="final"?5:fs.phase==="semis"?4:3} tr={effTr(S.player)} otr={effTr(fopp)} fit={fitOf(S.player)} oppFit={afterMatches(fitOf(fopp), finalsRidden(fs, fopp.id), FINALS_BO)} playerName={S.pName} playerEmoji="⚔️" oppName={sh(fopp.name)} oppEmoji={fopp.emoji||"👤"} oppId={fopp.id} oppRank={fRank} myRank={pRank} fans={fansOf(S.player)} oppFans={crowdLove(fopp, fRank)} tierColor={fs.phase==="final"?"#b45309":"#8b5cf6"} roundLabel={fs.phase==="final"?"World Final":fs.phase==="semis"?"Semifinal":"Group Stage"}
           tierName={"Season "+S.sNum+" Finals"} youSub={"World #"+pRank} foeSub={talentLabel(fopp.skill)}
           isFinal={fs.phase==="final"} nextLabel={fs.phase==="semis"?"World Final":null} eliminated={fs.phase!=="groups"}
           bestOf={FINALS_BO} initialProgress={fs.match}

@@ -39,7 +39,7 @@ export default function FanRules() {
 
       <Head>3 · What it gives you</Head>
       <Row a="Sponsors" b="+1 training point a week for every 10 ❤️" />
-      <Row a="The stands, if your ❤️ is higher than hers" b="+1% gold zone per 25 ❤️ more (max +1.5%), ×2 on match point" />
+      <Row a="The stands, if your ❤️ is higher than hers" b="+1% gold zone per 25 ❤️ more (max +1.5%), ×2 on the last strike when the match is on the line" />
       <div style={{ fontSize: 11.5, color: C.textMuted }}>The same for her if her ❤️ is higher.</div>
 
       <Head>4 · Wildcards: only if you're nearly in</Head>

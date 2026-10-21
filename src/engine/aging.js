@@ -9,7 +9,7 @@ import { TOTAL_EVENTS } from "../models/constants";
 import { FIRST_NAMES } from "../models/names";
 import { TT, EMO } from "../models/constants";
 import { getRanked } from "../models/formulas";
-import { startLevels } from "./npcGenerator";
+import { startLevels, liftTalent } from "./npcGenerator";
 
 export var PEAK_SEASONS = 10;
 var K = 0.117, P = 1.63;
@@ -50,9 +50,9 @@ function freshName(taken, recent, rnd) {
   return first + " the " + TT[Math.floor(rnd() * TT.length)];
 }
 
-/* A newcomer: low talent, her own potential (one in 25 is a prodigy), no points yet */
+/* A newcomer: talent at the tour's floor (60–62), her own potential (one in 25 is a prodigy), no points yet */
 function newcomer(id, name, rnd) {
-  var skill = 15 + rnd() * 28, prodigy = rnd() < 0.04;
+  var skill = liftTalent(15 + rnd() * 28), prodigy = rnd() < 0.04;
   var pot = Math.min(89.4, Math.round(prodigy ? 82 + rnd() * 7 : skill + 6 + rnd() * 30));
   var n = { id: id, name: name, skill: skill, pot: pot, sp: 0, ap: 0, isP: false, emoji: EMO[Math.floor(rnd() * EMO.length)], y: 1, money: 500,
     w: new Array(TOTAL_EVENTS).fill(0), best: { rank: 1001, peakS: 0, titles: 0, gsTitles: 0, finals: 0, careerMoney: 0 } };

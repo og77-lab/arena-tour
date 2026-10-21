@@ -41,7 +41,7 @@ export default function SetBreak(props) {
 
   var next;
   if (w === need - 1 && l === need - 1) next = { tag: "DECIDING SET", sub: "Winner takes all", col: "#ef4444" };
-  else if (w === need - 1) next = { tag: "MATCH POINT", sub: "Win this set to take the match", col: "#facc15" };
+  else if (w === need - 1) next = { tag: "SET FOR THE MATCH", sub: "Win this set to take the match", col: "#facc15" };
   else if (l === need - 1) next = { tag: "ON THE BRINK", sub: props.eliminated ? "Lose this set and you're out" : "Lose this set and the match is theirs", col: "#ef4444" };
   else next = { tag: "SET " + (setNum + 1), sub: "Bar resets — but fatigue builds", col: "#e5e7eb" };
   var tense = next.col === "#ef4444";
