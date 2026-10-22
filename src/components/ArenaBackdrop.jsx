@@ -23,12 +23,20 @@ var LOOK = [
   { rows: 2, fill: 0.55, span: 0.8, kids: 0.3, flags: 0.1, signs: 1, royal: false, tv: false, flashes: false, wave: false, screen: false },
   { rows: 2, fill: 0.85, span: 1, kids: 0.15, flags: 0.14, signs: 2, royal: true, tv: false, flashes: false, wave: false, screen: false },
   { rows: 3, fill: 0.9, span: 1, kids: 0.1, flags: 0.18, signs: 3, royal: true, tv: false, flashes: true, wave: false, screen: false },
-  { rows: 4, fill: 1, span: 1, kids: 0.05, flags: 0.26, signs: 4, royal: true, tv: true, flashes: 12, wave: true, screen: false, ribbon: "MASTERS", towers: true, dusk: true, boards: "print" },
-  { rows: 4, fill: 1, span: 1, kids: 0.05, flags: 0.3, signs: 5, royal: true, tv: true, flashes: 16, wave: true, screen: true, ribbon: "GRAND SLAM", towers: true, boards: "led", spider: true },
-  { rows: 4, fill: 1, span: 1, kids: 0.05, flags: 0.3, signs: 5, royal: true, tv: true, flashes: 16, wave: true, screen: true, ribbon: "WORLD FINAL", towers: true, gold: true, boards: "led", spider: true }
+  { rows: 4, fill: 1, span: 1, kids: 0.05, flags: 0.12, signs: 4, royal: true, tv: true, flashes: 12, wave: true, screen: false, ribbon: "MASTERS", towers: true, dusk: true, boards: "print" },
+  { rows: 4, fill: 1, span: 1, kids: 0.05, flags: 0.14, signs: 5, royal: true, tv: true, flashes: 16, wave: true, screen: true, ribbon: "GRAND SLAM", towers: true, boards: "led", spider: true },
+  { rows: 4, fill: 1, span: 1, kids: 0.05, flags: 0.14, signs: 5, royal: true, tv: true, flashes: 16, wave: true, screen: true, ribbon: "WORLD FINAL", towers: true, gold: true, boards: "led", spider: true }
 ];
 
 function rnd(i, salt) { var x = Math.sin(i * 12.9898 + salt * 78.233) * 43758.5453; return x - Math.floor(x); }
+/* a blend of two #rrggbb colours (t = how much of the second) */
+function mix(a, b, t) {
+  var x = parseInt(a.slice(1), 16), y = parseInt(b.slice(1), 16);
+  function ch(sh) { return Math.round(((x >> sh) & 255) * (1 - t) + ((y >> sh) & 255) * t); }
+  return "#" + ((1 << 24) + (ch(16) << 16) + (ch(8) << 8) + ch(0)).toString(16).slice(1);
+}
+/* the crowd is mostly the grannies' own generation: white, silver and grey hair, a few dyed */
+var CROWD_HAIR = ["#f5f5f4", "#e7e5e4", "#d6d3d1", "#a8a29e", "#57534e", "#78350f", "#c4b5fd", "#f5f5f4"];
 
 function Spectator(props) {
   var s = props.s, mood = props.mood;
@@ -42,16 +50,24 @@ function Spectator(props) {
   else if (s.hop) anim = "crowdHop " + (5 + s.r * 6).toFixed(1) + "s ease-out " + (s.r * -9).toFixed(1) + "s infinite";
   else anim = "crowdBob " + (1.6 + s.r * 1.4).toFixed(2) + "s ease-in-out " + (s.r * -2).toFixed(2) + "s infinite";
   var up = mood === "cheer" || mood === "big" || mood === "party", head = mood === "groan";
+  /* depth: the further back the row, the more the colours fade into the air of the stadium */
+  var t = (s.dep || 0) * 0.42, haze = props.haze || "#cbd5e1";
+  var shirt = mix(s.shirt, haze, t), skin = mix(s.skin, haze, t * 0.8), hair = mix(s.hair, haze, t);
+  var shirtBg = "linear-gradient(180deg," + mix(shirt, "#ffffff", 0.22) + " 0%," + shirt + " 45%," + mix(shirt, "#000000", 0.28) + " 100%)";
+  var headBg = "radial-gradient(circle at 36% 30%," + mix(skin, "#ffffff", 0.35) + " 0%," + skin + " 45%," + mix(skin, "#3f2a1d", 0.3) + " 100%)";
   return (
     <div style={{ position: "absolute", left: s.x, top: s.y, width: 12, height: 18, transform: "scale(" + s.sc + ")", transformOrigin: "50% 100%" }}>
       <div style={{ position: "absolute", inset: 0, animation: anim }}>
         {(up || head) && (<>
-          <div style={{ position: "absolute", left: head ? 0 : -2, top: head ? 1 : 4, width: 2.5, height: head ? 7 : 8, borderRadius: 2, background: s.shirt, transform: head ? "rotate(35deg)" : "rotate(-25deg)" }} />
-          <div style={{ position: "absolute", right: head ? 0 : -2, top: head ? 1 : 4, width: 2.5, height: head ? 7 : 8, borderRadius: 2, background: s.shirt, transform: head ? "rotate(-35deg)" : "rotate(25deg)" }} />
+          <div style={{ position: "absolute", left: head ? 0 : -2, top: head ? 1 : 4, width: 2.6, height: head ? 7 : 8, borderRadius: 2, background: shirt, transform: head ? "rotate(35deg)" : "rotate(-25deg)" }} />
+          <div style={{ position: "absolute", right: head ? 0 : -2, top: head ? 1 : 4, width: 2.6, height: head ? 7 : 8, borderRadius: 2, background: shirt, transform: head ? "rotate(-35deg)" : "rotate(25deg)" }} />
         </>)}
-        <div style={{ position: "absolute", left: 1, top: 8, width: 10, height: 10, borderRadius: "5px 5px 2px 2px", background: s.shirt, border: "1px solid rgba(63,42,29,0.55)" }} />
-        <div style={{ position: "absolute", left: 2, top: 0, width: 8, height: 8, borderRadius: "50%", background: s.skin, border: "1px solid rgba(63,42,29,0.55)" }} />
-        {s.hat && (<div style={{ position: "absolute", left: 1.5, top: -1.5, width: 9, height: 3.5, borderRadius: "4px 4px 1px 1px", background: s.hat, border: "1px solid rgba(63,42,29,0.45)" }} />)}
+        <div style={{ position: "absolute", left: 0, top: 7.6, width: 12, height: 10.4, borderRadius: "6px 6px 2px 2px", background: shirtBg, boxShadow: "0 0 0 0.5px rgba(40,25,10,0.35)" }} />
+        <div style={{ position: "absolute", left: 3.6, top: 7.4, width: 4.8, height: 2.2, borderRadius: "0 0 3px 3px", background: skin, opacity: 0.9 }} />
+        <div style={{ position: "absolute", left: 2, top: 0, width: 8, height: 8.4, borderRadius: "50%", background: headBg, boxShadow: "0 0 0 0.5px rgba(40,25,10,0.35)" }} />
+        {!s.hat && (<div style={{ position: "absolute", left: 1.6, top: -0.6, width: 8.8, height: 4.6, borderRadius: "5px 5px 2px 2px", background: "linear-gradient(180deg," + mix(hair, "#ffffff", 0.25) + "," + hair + ")" }} />)}
+        {!s.hat && s.bun && (<div style={{ position: "absolute", left: 3.8, top: -3, width: 4.4, height: 3.6, borderRadius: "50%", background: hair }} />)}
+        {s.hat && (<div style={{ position: "absolute", left: 1.2, top: -1.6, width: 9.6, height: 4, borderRadius: "5px 5px 1px 1px", background: "linear-gradient(180deg," + mix(mix(s.hat, haze, t), "#ffffff", 0.25) + "," + mix(s.hat, haze, t) + ")", boxShadow: "0 0 0 0.5px rgba(40,25,10,0.3)" }} />)}
         {s.flag && (
           <div style={{ position: "absolute", left: 10, top: -9, width: 1.5, height: 16, background: "#78350f" }}>
             <div style={{ position: "absolute", left: 1.5, top: 0, width: 9, height: 6, background: props.flagColor, transformOrigin: "0 50%", animation: REDUCED_MOTION ? "none" : "flagWave 0.9s ease-in-out " + (s.r * -1).toFixed(2) + "s infinite" }} />
@@ -188,7 +204,8 @@ export default function ArenaBackdrop(props) {
         var kid = rnd(k, 8) < L.kids;
         var s = { x: x + (rnd(k, 1) * 3 - 1.5), y: y + rnd(k, 2) * 2 + (kid ? 4 : 0), sc: kid ? sc * 0.72 : sc, r: rnd(k, 3),
           skin: SKINS[Math.floor(rnd(k, 4) * SKINS.length)], shirt: SHIRTS[Math.floor(rnd(k, 5) * SHIRTS.length)], hat: HATS[Math.floor(rnd(k, 6) * HATS.length)],
-          flag: rnd(k, 7) < L.flags, hop: rnd(k, 11) < 0.2 };
+          flag: rnd(k, 7) < L.flags, hop: rnd(k, 11) < 0.2,
+          hair: CROWD_HAIR[Math.floor(rnd(k, 13) * CROWD_HAIR.length)], bun: rnd(k, 14) < 0.35, dep: L.rows > 1 ? (L.rows - 1 - ri) / (L.rows - 1) : 0 };
         if (signsLeft > 0 && ri === L.rows - 1 && rnd(k, 12) < 0.18 && !s.flag) { s.sign = SIGNS[signsLeft % SIGNS.length]; signsLeft--; }
         out.push(s);
       }
@@ -203,6 +220,7 @@ export default function ArenaBackdrop(props) {
   var mood = props.cheer === "groan" ? "groan" : props.cheer === "party" ? "party" : props.cheer === "big" ? "big" : props.cheer ? "cheer" : null;
   var cond = props.cond || "classic";
   var sky = cond === "mud" ? "linear-gradient(180deg,#94a3b8 0%,#cbd5e1 55%,#e2e8f0 100%)" : cond === "heat" ? "linear-gradient(180deg,#fb923c 0%,#fdba74 35%,#fde68a 75%,#fef3c7 100%)" : L.gold ? "linear-gradient(180deg,#1e1b4b 0%,#4c1d95 45%,#fde68a 100%)" : L.dusk ? "linear-gradient(180deg,#f9a8d4 0%,#fbcfe8 30%,#fed7aa 68%,#fde68a 100%)" : tier >= 5 ? "linear-gradient(180deg,#7dd3fc 0%,#bae6fd 40%,#fef3c7 100%)" : "linear-gradient(180deg,#bae6fd 0%,#e0f2fe 30%,#fef3c7 70%,#fde68a 100%)";
+  var haze = L.gold ? "#4c1d95" : L.dusk ? "#f3c9b8" : cond === "mud" ? "#94a3b8" : cond === "heat" ? "#f6d7a7" : "#c7d7e8";
   var wood = tier >= 4 ? "repeating-linear-gradient(180deg,#475569 0 3px,#334155 3px 4px,#64748b 4px " + rowH + "px)" : "repeating-linear-gradient(180deg,#b45309 0 3px,#92400e 3px 4px,#c2621a 4px " + rowH + "px)";
 
   return (
@@ -229,7 +247,7 @@ export default function ArenaBackdrop(props) {
           <span style={{ animation: REDUCED_MOTION ? "none" : "screenGlow 1.6s ease-in-out infinite" }}>{props.cheer === "groan" ? "OOOH!" : props.cheer ? "WHAM!" : tier === 6 ? "WORLD FINAL" : "GRAND SLAM"}</span>
         </div>
       )}
-      {crowd.map(function (s, i) { return (<Spectator key={i} s={s} mood={mood} wave={L.wave} W={W} flagColor={col} />); })}
+      {crowd.map(function (s, i) { return (<Spectator key={i} s={s} mood={mood} wave={L.wave} W={W} flagColor={col} haze={haze} />); })}
       {L.flashes && !REDUCED_MOTION && flashes.map(function (f, i) {
         return (<div key={"fl" + i} style={{ position: "absolute", left: f.x, top: f.y, width: 6, height: 6, borderRadius: "50%", background: "radial-gradient(circle,#fff 0%,rgba(255,255,255,0.6) 40%,transparent 70%)", opacity: 0,
           animation: "camFlash " + f.p + "s ease-out " + f.d + "s infinite" }} />);

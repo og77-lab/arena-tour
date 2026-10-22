@@ -7,7 +7,7 @@
 
 import * as React from "react";
 import { Rider, Feathers } from "./Rider";
-import { REDUCED_MOTION } from "./fx";
+import { REDUCED_MOTION, LOW_END } from "./fx";
 import ArenaBackdrop from "./ArenaBackdrop";
 
 const { useState, useEffect, useRef } = React;
@@ -195,7 +195,7 @@ export default function JoustStage(props) {
      {/* everything inside shakes on a big clash */}
      <div style={{ position: "absolute", inset: 0, animation: shake }}>
       {/* The stands, drawn for a smaller lane and enlarged; further back, so they move less with the camera */}
-      <div style={{ position: "absolute", left: 0, top: 0, width: W, height: laneTop, transform: "scale(" + standZ + ")", transformOrigin: camOrigin, transition: cam.t, willChange: "transform" }}>
+      <div style={{ position: "absolute", left: 0, top: 0, width: W, height: laneTop, transform: "scale(" + standZ + ")", transformOrigin: camOrigin, transition: cam.t, willChange: "transform", filter: LOW_END || REDUCED_MOTION ? "none" : "blur(0.6px) saturate(0.92)" }}>{/* a shallow focus: the stands sit just soft behind the riders */}
         <div style={{ position: "absolute", left: 0, top: 0, width: W / bs, height: BACKDROP_GROUND, transform: "scale(" + bs + ")", transformOrigin: "0 0" }}>
           <ArenaBackdrop W={W / bs} groundTop={BACKDROP_GROUND} tierColor={props.tierColor} tier={props.tier} cond={props.cond} cheerId={a ? a.id : 0} cheer={cheer} />
           <Bunting color={props.tierColor || "#f59e0b"} />
@@ -205,10 +205,11 @@ export default function JoustStage(props) {
       {/* The lane: far side lighter (haze), near side full colour; rake marks show its depth */}
       <div aria-hidden style={{ position: "absolute", left: 0, right: 0, top: laneTop, bottom: 0, background: "linear-gradient(180deg," + gb[0] + " 0%," + gb[1] + " 100%)", borderTop: "2px solid " + (cond === "green" ? "#3f6212" : cond === "mud" ? "#3b2a14" : "#8b6435") }} />
       <div aria-hidden style={{ position: "absolute", left: 0, right: 0, top: laneTop, height: railY - laneTop, background: "linear-gradient(180deg,rgba(255,250,235,0.35),rgba(255,250,235,0.08))" }} />
-      {[0.25, 0.55, 0.8].map(function (f, i) {
-        var y = laneTop + (H - laneTop) * f;
-        return (<div key={f} aria-hidden style={{ position: "absolute", left: 0, right: 0, top: y, height: 1 + i, background: "repeating-linear-gradient(90deg,rgba(63,42,29," + (0.12 + i * 0.06) + ") 0 " + (6 + i * 4) + "px,transparent " + (6 + i * 4) + "px " + (16 + i * 10) + "px)" }} />);
-      })}
+      {/* the ground's grain: fine pebbles and hoof-scuffs, a pool of light where the riders meet, darker towards the camera */}
+      <div aria-hidden style={{ position: "absolute", left: 0, right: 0, top: laneTop, bottom: 0, opacity: cond === "green" ? 0.5 : 0.9,
+        backgroundImage: "radial-gradient(rgba(63,42,29,0.16) 0.7px, transparent 1.3px), radial-gradient(rgba(255,250,235,0.22) 0.6px, transparent 1.2px), radial-gradient(ellipse 14px 3px at 50% 50%, rgba(63,42,29,0.09), transparent 70%)",
+        backgroundSize: "9px 7px, 13px 11px, 46px 17px", backgroundPosition: "0 0, 4px 3px, 10px 6px" }} />
+      <div aria-hidden style={{ position: "absolute", left: 0, right: 0, top: laneTop, bottom: 0, background: "radial-gradient(60% 70% at 50% 40%, rgba(255,247,225,0.35) 0%, rgba(255,247,225,0) 70%), linear-gradient(180deg, rgba(0,0,0,0) 45%, rgba(40,25,10,0.28) 100%)" }} />
       {cond === "mud" && [0.08, 0.3, 0.5, 0.7, 0.9].map(function (x, i) { var y = i % 2 ? H - 18 * k : railY + 6; return (<div key={x} aria-hidden style={{ position: "absolute", left: (x * 100) + "%", top: y, width: (40 - (i % 2) * 12) * k, height: 9 * k, borderRadius: "50%", zIndex: 1, background: "radial-gradient(ellipse at 40% 35%,#e2e8f0 0%,#94a3b8 45%,#475569 100%)", border: "1.5px solid #3b2a14", boxShadow: "inset 0 -2px 0 rgba(30,41,59,0.4)" }} />); })}
       {cond === "green" && [0.04, 0.17, 0.3, 0.43, 0.56, 0.69, 0.82, 0.95].map(function (x, i) { var y = i % 2 ? H - 14 * k : laneTop + 6; return (<div key={x} aria-hidden style={{ position: "absolute", left: (x * 100) + "%", top: y, width: 8 * k, height: 8 * k, borderRadius: "50%", zIndex: 1, background: "radial-gradient(circle,#facc15 0 30%,#fff 32% 100%)", boxShadow: "0 0 0 1px rgba(63,98,18,0.5)" }} />); })}
       {cond === "heat" && (<div aria-hidden style={{ position: "absolute", left: 0, right: 0, top: laneTop, bottom: 0, background: "linear-gradient(180deg,rgba(255,237,213,0.25),rgba(214,176,115,0.0))" }} />)}
@@ -243,7 +244,9 @@ export default function JoustStage(props) {
 
       {/* the foreground: a hay bale and a bucket close to the camera, slightly soft, moving more than the lane */}
       <div aria-hidden style={{ position: "absolute", inset: 0, zIndex: 7, pointerEvents: "none", transform: "scale(" + frontZ + ")", transformOrigin: camOrigin, transition: cam.t, willChange: "transform" }}>
-        <div style={{ position: "absolute", left: -18 * k, bottom: -14 * k, width: 70 * k, height: 40 * k, borderRadius: 8 * k, background: "repeating-linear-gradient(170deg,#facc15 0 3px,#eab308 3px 6px)", border: "2px solid #3f2a1d", filter: "blur(1px)", boxShadow: "inset 0 -6px 0 rgba(146,64,14,0.35)" }} />
+        <div style={{ position: "absolute", left: -18 * k, bottom: -14 * k, width: 70 * k, height: 40 * k, borderRadius: 10 * k, filter: "blur(1.2px)", border: "1.5px solid rgba(63,42,29,0.8)",
+          background: "linear-gradient(90deg, transparent 30%, rgba(120,53,15,0.85) 30% 34%, transparent 34% 68%, rgba(120,53,15,0.85) 68% 72%, transparent 72%), repeating-linear-gradient(175deg, rgba(255,251,235,0.35) 0 1px, transparent 1px 4px), linear-gradient(180deg,#fde68a 0%,#facc15 35%,#ca8a04 100%)",
+          boxShadow: "inset 0 -8px 10px rgba(120,53,15,0.4), inset 0 4px 6px rgba(255,251,235,0.4)" }} />
         <div style={{ position: "absolute", right: -6 * k, bottom: -10 * k, width: 34 * k, height: 34 * k, borderRadius: "4px 4px 10px 10px", background: "linear-gradient(90deg,#94a3b8,#cbd5e1 40%,#64748b)", border: "2px solid #3f2a1d", filter: "blur(1px)" }} />
       </div>
      </div>
