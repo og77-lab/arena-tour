@@ -1,6 +1,6 @@
 # The Grand Granny Rooster Joust — Game Guide
 
-*Every tab, every rule, every number that matters. The same guide is in the game under **More → 📖 Game Guide**.*
+*Every tab, every rule, every number that matters — and, in the 🧠 boxes, the thinking behind each rule. The rules are also in the game under **More → 📖 Game Guide**.*
 
 ---
 
@@ -13,6 +13,11 @@ Every one of the 999 other grannies is a full rider too: she plays her own tourn
 **Your starting talent.** Before your first event you spread **10 points** over the six stats — any way you like, even all in one. Older saves get the same 10 points once.
 
 > 📣 The whole game rests on one skill: stopping the moving marker on the centre of the gold zone. Everything else — training, money, fans — shifts the odds, but your timing decides matches.
+
+> 🧠 **Why it works this way.** The game is a serious sports simulation wearing a silly costume, and the joke only works if the sport is real. So nothing is faked for you: all 999 rivals are full riders on the same engine, the ranking is earned week by week, and the comedy (grannies, roosters, a tabloid, solemn farewell notices) never bends a rule. The match is the heart of it, so matches are long, cinematic events and are never simulated for you. The STRIKE button never moves on the screen, so the only thing between you and the centre line is your eye and your finger.
+
+![Home: your granny, the next event, fitness and crowd](guide-img/home.jpg)
+![More: family wall, leaderboard, guide and saves](guide-img/more.jpg)
 
 ## 2. Getting around
 
@@ -34,6 +39,10 @@ A season is **20 events** in four blocks. Each block is four weekly tournaments 
 **Grand Slams.** Only the **top 64** may enter. A rider ranked 65–74 with **80+ fans** gets a fan wildcard. If you can't enter, the Slam is still played — by the 64 rivals who made it — and your week counts as a rest week (no points; last season's points for that week drop off, as they do for everyone). Slams have 64 riders, best of 5 sets, and enormous points.
 
 **Season Finals.** The top 16 after event 20 are split into four houses of four (🔥 Phoenix, 🌊 Kraken, 🐉 Wyvern, ⚡ Chimera). Everyone plays everyone in her house (3 points a win); the four house winners meet in the semifinals and then the World Final. Every Finals match is best of 5, and every one tires you (and her). If you don't qualify, the Finals are played without you and a world champion is crowned all the same.
+
+> 🧠 **Why it works this way.** A rank should say how a rider has been riding lately, not what she did three seasons ago. That's why points last exactly 20 weeks and then drop off, the way tennis works: a lead can't be banked, every week of the calendar matters twice (once to win, once to defend), and a slump shows up quickly. The Slams are limited to 64 and the Finals to 16 so that the big stages stay rare, and getting there means something.
+
+![Season: the road map, what you're defending and chasing](guide-img/season.jpg)
 
 ## 4. Tournaments
 
@@ -63,6 +72,8 @@ Every step up is a real step: **winning a tier is worth about reaching the quart
 
 Beating a higher-ranked rider earns no extra ranking points (the same as in tennis) — the crowd loves an upset, though.
 
+> 🧠 **Why it works this way.** Each tier has to be a real step up. An earlier points table paid more for winning a Tour 500 than for a Masters semifinal, which rewarded hiding in a smaller tier. Now winning a tier is worth about a quarterfinal of the tier above, so moving up is always worth it once you can hold your own there. Upsets earn no extra points, because points measure how far you went, not who you beat on the way.
+
 **Named events: pick your week**
 
 Each week several tournaments run at once in every tier, and all 1,000 riders play one of them. Tap a tier to see its events. Each card shows:
@@ -91,6 +102,11 @@ Grand Slam weeks have a single named Slam (The Coop Open, The Swamp Slam, Wimble
 2. You choose when. It's marked **STEP DOWN** in the tournament list, with how many you have left.
 3. Rivals follow the same limit. A rival steps down only when she's worn (under 45% on either meter) or carrying an injury.
 
+> 🧠 **Why it works this way.** Access is earned by merit. Fans alone never open a tier: a wildcard only goes to a rider already just outside the cut. Paid entry costs a third of the champion's prize, so it's a gamble, not a shortcut. Stepping down is capped at four a season, so a strong rider can catch her breath in a softer week but can't farm the tier below. The five lanes exist to make your training a strategy: each one weights one stat, so the riders you can beat depend on where you choose to play.
+
+![Choose your tournament: tiers by rank, events, points per round](guide-img/picker.jpg)
+![Compare the 5 lanes: what each one does to both riders](guide-img/lanes.jpg)
+
 During a tournament the header shows the tier, the round, best-of and the bracket path. **Scout** opens the opponent's full report; 🌐 opens the bracket.
 
 ## 5. Reading the screens
@@ -107,9 +123,11 @@ Everything that changes a match — lanes, gear, tiredness, training, injuries �
 - **Shop items** say in one line what they help (✓ green) and what they cost (✗ red), in the lanes you picked.
 - **Your numbers** at the bottom of Get ready: those three rows, for a **normal** match, **this event** (lanes, your stats against the entrants, your tiredness) and **with your kit**. Green ▲ is better for you, red ▼ worse.
 
+> 🧠 **Why it works this way.** The game shows facts, not verdicts. It never labels an option "good for you" or picks for you; it names things plainly, gives the numbers in one line, and leaves the decision to you. The three numbers (gold zone, bar speed, points per strike) exist because every effect in the game — lanes, gear, tiredness, training, the gap between riders — comes down to them, so you can compare any two choices on the same scale.
+
 ## 6. The match
 
-**1 · The scouting report.** Before every match a "tale of the tape" compares you side by side: **today's lanes**, world rank, season points, her talent, every stat (green where you're stronger, red where she is), **both riders' fitness right now**, the difficulty, your head-to-head, her rooster, **her kit** and **any injuries** (yours and hers). A red banner marks your arch-rival. Take your time, then tap **To the lanes!**
+**1 · The scouting report.** Before every match a "tale of the tape" compares you side by side: **today's lanes**, world rank, season points, her talent, every stat (green where you're stronger, red where she is), **both riders' fitness right now**, the difficulty, your head-to-head, her rooster, **both riders' gear and what it does today** and **any injuries** (yours and hers). A red banner marks your arch-rival. Take your time, then tap **To the lanes!**
 
 **2 · The opening.** The VS splash plays in full, then 3–2–1 and the announcer's **FIGHT!** Before a **final** (only a final) you first get a special build-up: the trophy, your road to the final, and your opponent revealed from the shadows.
 
@@ -128,6 +146,14 @@ Everything that changes a match — lanes, gear, tiredness, training, injuries �
 - When the match is decided, the loser is unseated and the outro shows the score, points and prize.
 
 > 📣 Progress is saved after every strike. Close the game mid-match and you'll pick up exactly where you left off.
+
+> 🧠 **Why it works this way.** Before every match you see everything about her that she could see about you: her stats, fitness, crowd, gear and what it does in today's lanes. The match should be decided by riding, not by hidden information. Sets are three strikes and the average counts, so one bad strike can be rescued, and a match is decided over many strikes, not one lucky tap. When the decisive set comes, the screen says so in plain words, never in tennis terms that don't exist here.
+
+![The tale of the tape: you and her, side by side, gear included](guide-img/tale.jpg)
+![The walk-out before the match](guide-img/vs.jpg)
+
+![The match: the arena, the sets, the bar and the STRIKE button](guide-img/match.jpg)
+![Between sets: the averages and what comes next](guide-img/setbreak.jpg)
 
 ## 7. Scoring
 
@@ -166,11 +192,15 @@ On top of the base score:
 
 A matter of chance, never a schedule.
 
+> 🧠 **Why it works this way.** Three things were tuned together here. First, the gold zone rewards real precision: the score falls fastest near the centre line, so 100 is earned, not handed out. Second, a rival's accuracy comes from her talent with a form for the day, so the best riders are dangerous but human: they post 100+ now and then, never on a timetable, and never every set. Third, talent is a ladder. Only three riders can pass 90, then every few dozen places is a step weaker, so #31 and #800 really are different riders. A floor of 60 means even the 1000th is a real match for a new granny, because the start of a career should be a challenge, not a warm-up. The numbers above were measured over thousands of simulated sets, by ability rather than by rank, because a rank can flatter a rider and ability can't.
+
 **Your accuracy.** Your accuracy is your own finger. Your profile measures them from your last 200 strikes (how far from the centre you stop, allowing for the bar's speed) and shows them on the same scale as a rival's talent — "Your accuracy ≈ 64". It's a mirror only; it never changes a score.
 
 **The gap in ability.** Each rider's ability is her usual strike from her talent and training alone (gear, tiredness and lanes don't count — they come and go). The stronger rider's gold zone grows and the weaker one's shrinks, by 0.15% of the bar per point of difference, at most 1% each (a gap of about 7 points or more). Two riders of a level feel nothing; a qualifier facing one of the three best feels it all. The weaker rider's part fades with every set she wins. It works the same for you, for her, and in rival-vs-rival matches. The status line in the match shows it (😰).
 
-**The stands.** Whoever the crowd loves more gets a slightly wider gold zone: **+1% of the bar per 25 ❤️ more** than the other rider (at most +1.5%), **doubled on match-point strikes**.
+> 🧠 **Why it works this way.** It used to be rank that rattled the weaker rider, but a rank can lie: a rider coming back from injury is ranked low and rides well. Ability (talent plus training) is what really separates two riders, so that's what counts. Gear is left out on purpose: it comes and goes, and sometimes a rider has none. The effect is small, so the gap tilts a match without deciding it. A #900 facing one of the three best feels it, two riders of a level feel nothing, and winning a set eases it.
+
+**The stands.** Whoever the crowd loves more gets a slightly wider gold zone: **+1% of the bar per 25 ❤️ more** than the other rider (at most +1.5%), **doubled on the last strike of a set when the match is on the line**.
 
 ## 8. Difficulty
 
@@ -179,7 +209,7 @@ A matter of chance, never a schedule.
 | 1 · Your levels | Your own levels build your own bar: a slower bar, a wider gold zone, extra points, softer misses. Her levels build her bar, never yours. |
 | 2 · The round | Each tier starts a step harder, and each round adds a little more: a narrower gold zone and a faster bar for both of you. |
 | 3 · Accuracy | Where you stop is your finger. Where she stops is her talent (how close to the centre she lands, a little worse on a faster bar, with a form for the day). Your profile shows your hands on the same scale. |
-| 3b · The gap | The gap in ability: each rider's ability is her usual strike from her talent and training alone (gear, tiredness and lanes don't count — they come and go). The stronger rider's gold zone grows and the weaker one's shrinks, by 0.15% of the bar per point of difference, at most 1% each (a gap of about 7 points or more). Two riders of a level feel nothing; a qualifier facing one of the three best feels it all. The weaker rider's part fades with every set she wins. |
+| 3b · The gap | Each rider's ability is her usual strike from her talent and training alone (gear, tiredness and lanes don't count — they come and go). The stronger rider's gold zone grows and the weaker one's shrinks, by 0.15% of the bar per point of difference, at most 1% each (a gap of about 7 points or more). Two riders of a level feel nothing; a qualifier facing one of the three best feels it all. The weaker rider's part fades with every set she wins. |
 | 4 · The lanes | Mud, wind, heat or green bend the bar for both of you and weight one stat. |
 | 5 · Kit and tiredness | Your lance, saddle and fitness bend your bar; hers bend hers. |
 
@@ -193,6 +223,8 @@ Example — the width of your gold zone with Steady Stride (bigger gold):
 | Masters final, Steady Stride 15 | about 6.6% |
 
 The gold zone never shrinks to nothing: once it is under 8% of the bar, every further squeeze (a late round, a stronger rider, wind, tiredness, gear) counts less and less, so it bottoms out around 4–5%. The bar never gets impossibly fast or slow either.
+
+> 🧠 **Why it works this way.** Difficulty climbs with the tier and the round, so a final feels like a final. But the zone never disappears and the bar never becomes a blur, because a match you can't possibly win isn't hard, it's broken.
 
 ## 9. Stats & training
 
@@ -222,6 +254,11 @@ Six stats, each from level 0 to 20 (lower later in a career — see *Age, retire
 
 Each level costs more than the last: 15 TP for level 1, 30 for level 2, 45 for level 3… up to 165 for level 10. From level 11 each level costs almost double the one before (314, 596, 1,132, 2,150…), so every rider tops out at her own height: the best reach 14–16 in a stat over a long career, and nobody maxes them all.
 
+> 🧠 **Why it works this way.** Everyone trains by the same rules, so a rival's levels mean what yours mean. The price nearly doubling after level 10 is what keeps the tour honest over many seasons: without it the whole top of the tour ended up at 20 in everything and the best could no longer be told apart. Now each rider tops out at her own height. Training makes you better, but the top 10 belongs to sharp eyes and fingers, not to hours put in. In a simulated career on a fresh tour, a player with average accuracy (about 55) settles around #70–200, a sharp one (about 68) around #40–90, and only exceptional hands (about 82) reach the top 10, after a dozen seasons. When the prices changed, every rider's levels, yours included, were re-bought at the new prices from exactly the points she had spent, with the change returned as training points.
+
+![Train tab: this week's investment](guide-img/train-invest.jpg)
+![Train tab: each stat, its effect and how you compare](guide-img/train-stats.jpg)
+
 **On the Train tab**
 - Each stat shows what it does, its exact per-level effect as a chip, and when it's worth training.
 - The dark tick on each bar, and the "Vs rivals" line, show the average level of the riders ranked near you — ahead, behind or level.
@@ -240,6 +277,11 @@ After you pick a tournament you land on **Get ready**. Choose a lance and a sadd
 - Gear changes **your** bar only, never your opponent's. After each strike the breakdown shows its points as **Gear**.
 - **Rivals shop too**, with prize money they actually won: each picks the kit she thinks suits the lanes (the tour's best judge it well, lower ranks guess), keeps a reserve, and books physio when worn out. Her kit shows in the tale of the tape.
 - Every item helps one thing and hurts another, and the lanes shift the balance. Precise riders tend to love the needle; riders who miss a lot get more from the baguette.
+
+> 🧠 **Why it works this way.** No item is simply better. Each one helps one thing and hurts another, and the lanes shift the balance, so the right kit depends on your stats, your hands and today's lanes. The game shows the effect and lets you try items on before buying, but it never tells you which to pick. Rivals buy kit with prize money they actually won, so a rich, well-judged rival is better equipped, just as you would be.
+
+![Get ready: your locker and your numbers](guide-img/gear-locker.jpg)
+![Mavis's shop: every item helps one thing and hurts another](guide-img/gear-shop.jpg)
 
 | Item | Effect | Lasts | Lanes change it |
 |---|---|---|---|
@@ -279,6 +321,8 @@ A week off counts down an injury too.
 - The Season Finals tire you too, and can injure you.
 - Every rider on tour plays by the same fitness rules.
 
+> 🧠 **Why it works this way.** A deep run should cost something. Without tiredness the best riders would simply win every week; with it, every week asks a question: chase the points while tired, or rest and defend later. Fitness only comes back between tournaments and only in part, so going deep week after week wears anyone down, rivals included.
+
 ## 12. Prize money
 
 Prize money buys **one investment per tournament week**. After you make one, the rest lock until you play that week's tournament. Prices follow the prizes at your level, so they stay meaningful as you climb.
@@ -292,6 +336,8 @@ Prize money buys **one investment per tournament week**. After you make one, the
 
 Lances and saddles from Mavis's shop are bought on the Get ready screen and don't use the weekly investment. The world leaderboard counts everything you've ever earned, so spending never costs you places there.
 
+> 🧠 **Why it works this way.** Money should speed you up without replacing the grind, so it buys one investment a week and prices follow your level. The private session used to give 10 training points everywhere, which at Masters level cost $92K for almost nothing; now the lesson grows with your level as the price does. Even booking it every week moves a career by only a few levels.
+
 ## 13. Crowd love, Knitter & the press
 
 Your **crowd love** (❤️, 0–100, starting at 20) is a score of how much the crowd loves you — not a head count; your Knitter **followers** are the people. The **Crowd love & Knitter** card on Home (tap ❤️ Crowd at the top to jump to it) shows your crowd love, how much they moved this week and why (*riding +6 · interview +3 · weekly drift −1*), and your Knitter followers.
@@ -299,7 +345,7 @@ Your **crowd love** (❤️, 0–100, starting at 20) is a score of how much the
 **What crowd love gives you** (the card shows each in numbers, and 📜 opens all the rules)
 - **Sponsors:** one training point every week for each 10 ❤️.
 - **Wildcards (only if you are nearly in):** 70+ fans and a rank within 15% of the tier above's cut (Tour 500: 201–230, Masters: 101–115); for a Slam, 80+ fans and rank 65–74.
-- **The stands:** the crowd backs whichever rider it loves more — a slightly wider gold zone for the favourite (up to +1.5% of the bar), doubled on match-point strikes. Your rivals have crowds too; the tale of the tape shows both (📣 The stands).
+- **The stands:** the crowd backs whichever rider it loves more — a slightly wider gold zone for the favourite (up to +1.5% of the bar), doubled on the last strike when the match is on the line. Your rivals have crowds too; the tale of the tape shows both (📣 The stands).
 
 **What moves it**
 - **Riding:** each win +1, a comeback +2, a real upset +2, each loss −1 (at most +6 a week), plus a title bonus (+4, +10 for a Slam). The closer you are to 100, the harder each point comes.
@@ -312,6 +358,8 @@ Your **crowd love** (❤️, 0–100, starting at 20) is a score of how much the
 
 **The press conference.** Before you answer you see what this outlet's readers love and dislike, and every answer is labelled: 😏 cheeky dig, 🙈 daft excuse, 😇 good sport, 💪 bold promise. There's no dice: the result comes from the readers' taste, the moment (a humble winner, a gracious loser, a dig at your rival…) and whether you repeat last week's kind of answer. A well-liked answer can go viral and double. Afterwards the screen shows every point and why.
 
+> 🧠 **Why it works this way.** The crowd is flavour with a small edge, never a shortcut. It can tilt a gold zone a little and pay a few training points; it can never open a tier on its own. Interviews have no dice: the result comes from what the readers like and what you said, so you can learn to play the press.
+
 ## 14. The Daily Cluck
 
 A new issue prints after every tournament, and you can read it any time in the News tab (with the archive of recent issues).
@@ -323,6 +371,9 @@ A new issue prints after every tournament, and you can read it any time in the N
 - Every story names the actual tournament — *"won the Puddleby Fete Cup as an outsider"* — and the photos show each rider's kit.
 
 When it opens after a tournament, tap **Fold the paper** to put it away.
+
+![The Daily Cluck: the week's big story and your diary](guide-img/news.jpg)
+![Ranks: all 1,000 riders, opening on your row](guide-img/ranks.jpg)
 
 ## 15. Rivals
 
@@ -385,6 +436,10 @@ A top rider's five stats together (out of 100), typically:
 4. The next granny of your family starts from nothing, in the same tour with the same rivals: #1000, first season, 10 starting points. Your badges stay yours.
 
 **The Hall of Fame.** Very hard to enter: all four Grand Slams, or 8 Grand Slams, or year-end No. 1 three seasons running. Riders are judged when they retire — rivals and you alike. The Hall is on the More tab, next to the family wall.
+
+> 🧠 **Why it works this way.** A career should rise, peak and fade, and no two should fade alike. That's why each stat ages on its own schedule and at its own pace, drawn when the granny starts, so one keeps her Reflexes and loses her Aim and the next the other way round. The ceiling starts at the level she holds, so potential drops first and the levels follow. Retirements (about 50 a year) and newcomers keep the tour moving instead of freezing at the top. Your own career can end too, but the game doesn't: the family torch passes to the next granny, in the same world, so your history stays part of it. The farewells are deliberately dull, formal notices, because that's the joke. And the Hall of Fame is very hard to enter on purpose, so it means something. The game doesn't give you a hidden potential: your real potential is your own hands, and the game already measures those.
+
+![The family wall and the Hall of Fame](guide-img/family.jpg)
 
 ## 20. Settings & saves
 
