@@ -34,7 +34,7 @@ Every one of the 999 other grannies is a full rider too: she plays her own tourn
 
 A season is **20 events** in four blocks. Each block is four weekly tournaments followed by a **Grand Slam**. After the 20th event the top 16 ride in the **Season Finals**, then the season ends with a gala.
 
-**Ranking points and defending.** Your world rank is your *season points*. Points carry over into the next season, but the points you won at a given week last season **drop off** when that week comes round again. You "defend" them: win more than last time and you climb, less and you slip. The Season tab shows what you're defending, in red. Every rival plays by the same rule, so a rank always means the points won over the last 20 weeks.
+**Ranking points and defending.** Your world rank is your *season points*. Points carry over into the next season, but the points you won at a given week last season **drop off** when that week comes round again. You "defend" them: win more than last time and you climb, less and you slip. Home and the Season tab show what you're defending this week (🛡️) and how much is still to defend this season; the Season tab opens at the current week, with each week's points to defend in red. Every rival plays by the same rule, so a rank always means the points won over the last 20 weeks.
 
 **Grand Slams.** Only the **top 64** may enter. A rider ranked 65–74 with **80+ fans** gets a fan wildcard. If you can't enter, the Slam is still played — by the 64 rivals who made it — and your week counts as a rest week (no points; last season's points for that week drop off, as they do for everyone). Slams have 64 riders, best of 5 sets, and enormous points.
 

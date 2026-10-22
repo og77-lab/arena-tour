@@ -7,6 +7,8 @@ import { getRanked, sh } from "../models/formulas";
 import { C, FONT, display, label, card, button, pill } from "../ui/theme";
 import Icon from "./Icons";
 import { findWeek } from "../engine/history";
+import { useEffect } from "react";
+import DefendBox from "./Defending";
 import { titleMix as seasonMixOf, seasonTitles } from "../engine/titles";
 function seasonMix(S) { return seasonMixOf(seasonTitles(S)); }
 
@@ -44,6 +46,11 @@ function Goal(props) {
 }
 
 export default function SeasonTab(props) {
+  /* open where you are: the current week's row, right in view */
+  useEffect(function () {
+    var el = document.getElementById("season-current-week");
+    if (el) { var t = setTimeout(function () { el.scrollIntoView({ block: "center" }); }, 60); return function () { clearTimeout(t); }; }
+  }, []);
   var S = props.S, pRank = props.pRank, ev = props.curEvent, done = props.seasonDone;
   var ranked = getRanked(S), myPts = S.player.sp || 0;
   var at = function (n) { var p = ranked[n - 1]; return p ? { pts: p.sp || 0, name: p.isP ? null : p.name } : { pts: 0, name: null }; };
@@ -94,7 +101,6 @@ export default function SeasonTab(props) {
           style={card({ padding: "12px", background: "linear-gradient(180deg,#ffffff,#fffbeb)", borderColor: C.lineStrong })}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
             <span style={pill()}><span aria-hidden style={{ width: 7, height: 7, borderRadius: "50%", background: isGS ? C.gold : "#0ea5e9" }} />Up next</span>
-            {def > 0 && (<span style={{ fontSize: 12, fontWeight: 800, color: C.redInk }}>Defending {def} pts</span>)}
           </div>
           <div style={Object.assign(display(24), { marginTop: 8 })}>{isGS ? (<span><Icon name="crown" size={24} style={{ verticalAlign: "-3px", marginRight: 4 }} />{"Grand Slam " + ev.gsNum}</span>) : "Week " + ev.block + "." + ev.week}</div>
           <div style={{ fontSize: 13, color: C.textSoft, marginTop: 3, lineHeight: 1.4 }}>
@@ -102,6 +108,7 @@ export default function SeasonTab(props) {
               ? (props.gsOk ? "64 riders, best of 5 sets, " + champTotal(5).toLocaleString() + " points to the champion." : "Only the top 64 ride in a Slam — you're #" + pRank + ". This week you sit it out.")
               : "Every rider plays one tournament this week. Pick the tier that fits your rank:"}
           </div>
+          <DefendBox S={S} def={def} mt={8} />
           {!isGS && (
             <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
               {avail.map(function (ti) {
@@ -161,7 +168,7 @@ export default function SeasonTab(props) {
                 var i = b * 5 + j, cur = i === S.calIdx && !done, gs = e.type === "gs", t = e.done && e.tier != null ? TIERS[e.tier] : null;
                 var d = S.player.def ? S.player.def[i] || 0 : 0, r = e.result, past = e.done && props.onWeek && !!findWeek(S.hist, S.sNum, i); /* tap a played week for all its draws */
                 return (
-                  <div key={i} onClick={cur ? props.onPlay : past ? function () { props.onWeek(i); } : undefined}
+                  <div key={i} id={cur ? "season-current-week" : undefined} onClick={cur ? props.onPlay : past ? function () { props.onWeek(i); } : undefined}
                     style={{ display: "flex", alignItems: "center", gap: 8, padding: "7px 8px", borderRadius: 10, cursor: cur || past ? "pointer" : "default",
                       background: cur ? C.goldSoft : gs ? "#fffbeb" : "transparent", border: cur ? "2px solid " + C.ink : "2px solid transparent", boxShadow: cur ? "0 3px 0 " + C.ink : "none" }}>
                     <span aria-hidden style={{ width: 22, height: 22, borderRadius: "50%", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 900,
@@ -177,7 +184,7 @@ export default function SeasonTab(props) {
                     <span style={{ textAlign: "right", flexShrink: 0, fontSize: 12.5, fontWeight: 900, lineHeight: 1.15 }}>
                       {e.done && r && !skipped(e)
                         ? (<span>{(r.pPts || 0).toLocaleString()}<span style={{ display: "block", fontSize: 11, color: r.net > 0 ? C.greenInk : r.net < 0 ? C.redInk : C.textMuted }}>{r.net > 0 ? "+" + r.net : r.net === 0 ? "±0" : r.net}</span></span>)
-                        : !e.done && d > 0 ? (<span style={{ color: C.redInk, fontSize: 11.5 }} title="Points from last season that drop off when this event is played">−{d} def.</span>) : null}
+                        : !e.done && d > 0 ? (<span style={{ color: C.redInk, fontSize: 11.5 }} title="Points from last season that drop off when this event is played">🛡️ {d.toLocaleString()}</span>) : null}
                     </span>
                     {past && (<span aria-label="All draws of this week" style={{ flexShrink: 0, fontSize: 15, fontWeight: 900, color: C.textMuted }}>›</span>)}
                   </div>
@@ -191,7 +198,7 @@ export default function SeasonTab(props) {
           <span style={{ flex: 1, fontSize: 13, fontWeight: 900, color: C.text }}>Season Finals <span style={{ fontWeight: 700, color: C.textSoft }}>· top 16 · four houses, then semis and a final</span></span>
         </div>
         <div style={{ fontSize: 11.5, color: C.textMuted, marginTop: 8, lineHeight: 1.4, padding: "0 4px" }}>
-          Red numbers are points you're <b style={{ color: C.text }}>defending</b> from last season — they drop off when that week is played, so beat them to climb. Tap a played week (›) to see every tournament of that week and its full draw.
+          🛡️ Red numbers are points you're <b style={{ color: C.text }}>defending</b> from last season — they drop off when that week is played, so beat them to climb. Tap a played week (›) to see every tournament of that week and its full draw.
         </div>
       </div>
     </div>

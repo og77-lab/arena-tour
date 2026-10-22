@@ -10,6 +10,7 @@ import { Rider, Face, PLAYER_PALETTE, paletteFor, withKit } from "./Rider";
 import RankSparkline from "./RankSparkline";
 import { FitnessCard, FansCard } from "./Fitness";
 import FarewellNotice from "./FarewellNotice";
+import DefendBox from "./Defending";
 
 function Bunting(props) {
   var n = 18, flags = [];
@@ -119,10 +120,10 @@ export default function HomeTab(props) {
         <Bunting color={heroColor} />
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
           <span style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(28,25,23,0.86)", color: "#fff", fontSize: 12, fontWeight: 800, padding: "4px 11px", borderRadius: 999 }}><span aria-hidden style={{ width: 8, height: 8, borderRadius: "50%", background: heroColor, boxShadow: "0 0 0 2px rgba(255,255,255,0.25)" }} />{hero.kicker}</span>
-          {def > 0 && !seasonDone && (<span style={{ fontSize: 11, fontWeight: 800, color: C.redInk }} title="Points you earned at this event last season drop off after it">Defending {def} pts</span>)}
         </div>
         <div style={Object.assign(title2(31), { marginTop: 12, fontWeight: 700 })}>{hero.title}</div>
         <div style={{ fontSize: 13.5, color: C.textSoft, marginTop: 5, lineHeight: 1.4, fontWeight: 700 }}>{hero.sub}</div>
+        {!seasonDone && ev && (<DefendBox S={S} def={def} />)}
         <button onClick={hero.act} style={button2(hero.kind === "gold" ? "gold" : "ghost", { width: "100%", marginTop: 14, fontSize: 18, padding: "15px 18px" })}>{hero.cta}</button>
         <div style={{ marginTop: 14 }}>
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
