@@ -7,7 +7,7 @@
 
 import * as React from "react";
 import { Rider, Feathers } from "./Rider";
-import { REDUCED_MOTION, LOW_END } from "./fx";
+import { REDUCED_MOTION } from "./fx";
 import ArenaBackdrop from "./ArenaBackdrop";
 
 const { useState, useEffect, useRef } = React;
@@ -55,10 +55,12 @@ export default function JoustStage(props) {
     return function () { ro.disconnect(); };
   }, []);
 
-  /* The frame: a tall stage, riders ~40% of its width; the lane starts at 62% of the height */
-  var rw = Math.round(Math.min(220, Math.max(110, W * 0.4)));
+  /* The frame: a big stage, riders nearly half its width, as tall as the screen allows (at most 40% of it, so the
+     bar and the STRIKE button always fit below and never move); the lane starts at 60% of the height */
+  var rw = Math.round(Math.min(260, Math.max(120, W * 0.47)));
   var k = rw / 140, rh = rw * 0.8;
-  var H = Math.round(Math.max(210, Math.min(380, W * 0.68)));
+  var vh = typeof window !== "undefined" && window.innerHeight ? window.innerHeight : 800;
+  var H = Math.round(Math.max(220, Math.min(460, W * 0.95, vh * 0.4)));
   var laneTop = Math.round(H * 0.6);
   var railY = Math.round(laneTop + (H - laneTop) * 0.3);   /* the tilt runs behind both riders */
   var railH = Math.round(Math.max(12, 16 * k));
@@ -195,7 +197,7 @@ export default function JoustStage(props) {
      {/* everything inside shakes on a big clash */}
      <div style={{ position: "absolute", inset: 0, animation: shake }}>
       {/* The stands, drawn for a smaller lane and enlarged; further back, so they move less with the camera */}
-      <div style={{ position: "absolute", left: 0, top: 0, width: W, height: laneTop, transform: "scale(" + standZ + ")", transformOrigin: camOrigin, transition: cam.t, willChange: "transform", filter: LOW_END || REDUCED_MOTION ? "none" : "blur(0.6px) saturate(0.92)" }}>{/* a shallow focus: the stands sit just soft behind the riders */}
+      <div style={{ position: "absolute", left: 0, top: 0, width: W, height: laneTop, transform: "scale(" + standZ + ")", transformOrigin: camOrigin, transition: cam.t, willChange: "transform" }}>
         <div style={{ position: "absolute", left: 0, top: 0, width: W / bs, height: BACKDROP_GROUND, transform: "scale(" + bs + ")", transformOrigin: "0 0" }}>
           <ArenaBackdrop W={W / bs} groundTop={BACKDROP_GROUND} tierColor={props.tierColor} tier={props.tier} cond={props.cond} cheerId={a ? a.id : 0} cheer={cheer} />
           <Bunting color={props.tierColor || "#f59e0b"} />
@@ -244,10 +246,10 @@ export default function JoustStage(props) {
 
       {/* the foreground: a hay bale and a bucket close to the camera, slightly soft, moving more than the lane */}
       <div aria-hidden style={{ position: "absolute", inset: 0, zIndex: 7, pointerEvents: "none", transform: "scale(" + frontZ + ")", transformOrigin: camOrigin, transition: cam.t, willChange: "transform" }}>
-        <div style={{ position: "absolute", left: -18 * k, bottom: -14 * k, width: 70 * k, height: 40 * k, borderRadius: 10 * k, filter: "blur(1.2px)", border: "1.5px solid rgba(63,42,29,0.8)",
+        <div style={{ position: "absolute", left: -18 * k, bottom: -14 * k, width: 70 * k, height: 40 * k, borderRadius: 10 * k, border: "1.5px solid rgba(63,42,29,0.8)",
           background: "linear-gradient(90deg, transparent 30%, rgba(120,53,15,0.85) 30% 34%, transparent 34% 68%, rgba(120,53,15,0.85) 68% 72%, transparent 72%), repeating-linear-gradient(175deg, rgba(255,251,235,0.35) 0 1px, transparent 1px 4px), linear-gradient(180deg,#fde68a 0%,#facc15 35%,#ca8a04 100%)",
           boxShadow: "inset 0 -8px 10px rgba(120,53,15,0.4), inset 0 4px 6px rgba(255,251,235,0.4)" }} />
-        <div style={{ position: "absolute", right: -6 * k, bottom: -10 * k, width: 34 * k, height: 34 * k, borderRadius: "4px 4px 10px 10px", background: "linear-gradient(90deg,#94a3b8,#cbd5e1 40%,#64748b)", border: "2px solid #3f2a1d", filter: "blur(1px)" }} />
+        <div style={{ position: "absolute", right: -6 * k, bottom: -10 * k, width: 34 * k, height: 34 * k, borderRadius: "4px 4px 10px 10px", background: "linear-gradient(90deg,#94a3b8,#cbd5e1 40%,#64748b)", border: "2px solid #3f2a1d" }} />
       </div>
      </div>
      </div>

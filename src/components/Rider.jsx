@@ -274,14 +274,13 @@ export function Rider(props) {
      gradient per drawing, in each shape's own box), so the cartoon reads as rounded and lit, not flat */
   var uid = useId().replace(/[^a-zA-Z0-9]/g, ""), VOL = "url(#v" + uid + ")", SICKLE = "url(#k" + uid + ")", COMB = "url(#c" + uid + ")";
   function lit(el, k) { return React.cloneElement(el, { key: k, fill: VOL, stroke: "none", style: Object.assign({}, el.props.style, { pointerEvents: "none" }) }); }
-  /* the rooster in one outline (tail root, back, neck, head, breast, belly) and his mane with pointed hackles */
-  var SIL = "M34 64 C46 56 66 57 80 53 C81 45 85 35 92 33 C99 31 104.5 36 105 42 C105.5 47 103 51 100.5 54 C102.5 63 101 76 92 85 C82 93 58 95 44 89 C36 85 31 76 34 64 Z";
-  var MANE = "M80 54 C81 45 85 35 92 33 C99 31 104.5 36 105 42 C105.5 47 103 51 100.5 54 C101 58 101 61 100 64 L97.5 72 L95.4 65.5 L92.6 74 L90.2 66.4 L87.2 73.4 L85 65.6 L82 71 L80.6 63.4 C79.4 60 79.4 57 80 54 Z";
-  var wingP = (<path d="M43 68 C53 60 69 61 76 69 C75 77 67 83 56 84 L51 87.5 L52.5 82.6 L46.6 84.4 L48.4 79.6 L42.6 79.8 C40.6 76 40.8 71.4 43 68 Z" fill={ch.wing} stroke={INK} strokeWidth="1.8" strokeLinejoin="round" />);
-  var skirt = (<path d="M36 66 Q50 54 72 63 L70 76 Q52 82 38 74 Z" fill={L.knit ? "#6b3f5a" : p.dress} />);
-  var torso = (<path d="M47 64 L49 41 Q56 36 63 41 L65 64 Z" fill={p.dress} />);
-  var faceC = (<circle cx="56" cy="30" r="9.5" fill={L.skin} stroke={INK} strokeWidth="2" />);
-  var plumage = shade(ch.body, 0.8), hackle = shade(neck, 0.78);
+  var neckE = (<ellipse cx="87" cy="60" rx="10.5" ry="15" fill={neck} transform="rotate(22 87 60)" />);
+  var wingP = (<path d="M43 68 C53 60 69 61 76 69 C75 77 67 83 56 84 L51 87.5 L52.5 82.6 L46.6 84.4 L48.4 79.6 L42.6 79.8 C40.6 76 40.8 71.4 43 68 Z" fill={ch.wing} stroke={INK} strokeWidth="2.4" strokeLinejoin="round" />);
+  var SKIRT = "M36 66 Q50 54 72 63 L70 76 Q52 82 38 74 Z";
+  var TORSO = "M46.5 64 C45.6 55 46 46.5 49.6 42 C52.6 38.6 59.4 38.6 62.4 42 C66 46.5 66.4 55 65.5 64 Z";
+  var skirt = (<path d={SKIRT} fill={L.knit ? "#6b3f5a" : p.dress} />);
+  var torso = (<path d={TORSO} fill={p.dress} />);
+  var faceC = (<circle cx="56" cy="30" r="9.5" fill={L.skin} stroke={INK} strokeWidth="2.2" />);
   return (
     <svg width={w} height={h} viewBox="0 0 140 112" aria-hidden style={{ overflow: "visible", display: "block", transform: props.flip ? "scaleX(-1)" : "none" }}>
       <defs>
@@ -302,15 +301,19 @@ export function Rider(props) {
           <stop offset="0.4" stopColor="#ef4444" />
           <stop offset="1" stopColor="#991b1b" />
         </radialGradient>
-        <clipPath id={"r" + uid}><path d={SIL} /></clipPath>
+        <clipPath id={"r" + uid}><ellipse cx="60" cy="74" rx="32" ry="21" /></clipPath>
+        <clipPath id={"hd" + uid}><circle cx="94" cy="44" r="12.5" /></clipPath>
+        <clipPath id={"sk" + uid}><path d={SKIRT} /></clipPath>
+        <clipPath id={"to" + uid}><path d={TORSO} /></clipPath>
+        <clipPath id={"fc" + uid}><circle cx="56" cy="30" r="9.5" /></clipPath>
       </defs>
       <g style={{ transformBox: "view-box", animation: REDUCED_MOTION ? "none" : (run ? "riderBob 0.22s ease-in-out infinite" : "riderIdle 1.6s ease-in-out infinite") }}>
         {/* ── Rooster ── two long sickle feathers with a sheen, then the tail coverts */}
-        <g stroke={INK} strokeWidth="1.7" strokeLinejoin="round">
+        <g stroke={INK} strokeWidth="2.2" strokeLinejoin="round">
           <path d="M35 63 Q10 52 7 26 Q22 45 39 59 Z" fill={SICKLE} />
           <path d="M33 70 Q5 67 -1 45 Q15 61 36 66 Z" fill={SICKLE} />
         </g>
-        <g stroke={INK} strokeWidth="2" strokeLinejoin="round">
+        <g stroke={INK} strokeWidth="2.4" strokeLinejoin="round">
           <ellipse cx="26" cy="58" rx="11" ry="5" fill={ch.tail} transform="rotate(-40 26 58)" />
           <ellipse cx="23" cy="67" rx="12" ry="5" fill={ch.tail} transform="rotate(-12 23 67)" />
           <ellipse cx="27" cy="76" rx="10" ry="4.5" fill={ch.tail} transform="rotate(18 27 76)" />
@@ -324,31 +327,29 @@ export function Rider(props) {
           <g style={Object.assign(svgT("68px 88px"), { animation: legB })}><path d="M68 88 L68 104 M63 107 L68 104 L73 107 M68 104 L69 108" /><path d="M66.6 93 L69.4 93 M66.6 97 L69.4 97 M66.6 101 L69.4 101" stroke="#9a3412" strokeWidth="0.9" />{saddle === "skates" && (<Skate x={68} />)}</g>
           <g style={Object.assign(svgT("56px 88px"), { animation: legA })}><path d="M56 88 L56 104 M51 107 L56 104 L61 107 M56 104 L57 108" /><path d="M54.6 93 L57.4 93 M54.6 97 L57.4 97 M54.6 101 L57.4 101" stroke="#9a3412" strokeWidth="0.9" />{saddle === "skates" && (<Skate x={56} />)}</g>
         </g>
-        {/* one body from tail to beak, shaded like a cel drawing: a soft shadow along the belly, light on the back */}
-        <path d={SIL} fill={ch.body} stroke={INK} strokeWidth="2" strokeLinejoin="round" />
+        {/* a round, puffed-up rooster: a plump body, a short neck, a big head with googly eyes — cel-shaded like a cartoon */}
+        <g stroke={INK} strokeWidth="2.4" strokeLinejoin="round">
+          {neckE}
+          <path d="M83 37 Q82 27 87.6 28.4 Q88.4 21.4 94 23.6 Q97 18.2 101 24 Q106.4 23.4 104.4 31.4 Q104 36.6 99 37.4 Z" fill={COMB} />
+          <circle cx="94" cy="44" r="12.5" fill={neck} />
+          <path d="M105 39.4 L117.5 44 L105 45.6 Z" fill="#fbbf24" />
+          <path d="M105 45.6 L115 46.8 L104.6 50.4 Z" fill="#d97706" />
+          <path d="M101 50 Q98.6 57.4 102.8 61 Q107.6 57.6 105.6 50 Z" fill={COMB} />
+          <ellipse cx="60" cy="74" rx="32" ry="21" fill={ch.body} />
+        </g>
         <g clipPath={"url(#r" + uid + ")"}>
-          <ellipse cx="64" cy="100" rx="48" ry="21" fill={shade(ch.body, 0.66)} />
-          <ellipse cx="56" cy="61" rx="25" ry="6.5" fill="#fff" opacity="0.24" />
-          <path d="M40 80 C52 88 74 90 90 82" fill="none" stroke="#fff" strokeWidth="1" opacity="0.18" />
+          <ellipse cx="66" cy="99" rx="46" ry="20" fill={shade(ch.body, 0.66)} />
+          <ellipse cx="53" cy="60" rx="22" ry="6" fill="#fff" opacity="0.28" />
         </g>
-        <g fill="none" stroke={plumage} strokeWidth="1.2" strokeLinecap="round" opacity="0.8">
-          <path d="M84 78 q2.6 2.6 5.2 0 M80.6 83.4 q2.6 2.6 5.2 0 M86 83.4 q2.4 2.4 4.8 0 M76 88 q2.4 2.4 4.8 0 M81.6 88.4 q2.4 2.4 4.8 0" />
+        <g clipPath={"url(#hd" + uid + ")"}>
+          <circle cx="99.5" cy="53" r="11" fill={shade(neck, 0.68)} />
+          <circle cx="89" cy="37" r="5" fill="#fff" opacity="0.3" />
         </g>
-        {/* the comb sits behind the mane; the mane's pointed hackles fall over the shoulders */}
-        <path d="M84.5 37 Q84 29.5 88.2 30.4 Q89 25 93.3 26.8 Q95.4 22.6 98.6 27 Q102.6 26.4 101.4 32.4 Q101.2 36.4 97.6 37.2 Z" fill={COMB} stroke={INK} strokeWidth="1.8" strokeLinejoin="round" />
-        <path d={MANE} fill={neck} stroke={INK} strokeWidth="1.8" strokeLinejoin="round" />
-        {lit(<path d={MANE} />, "mn")}
-        <path d="M84 60 L85.6 66 M88.6 61 L90.4 68 M93.4 60 L95 66" fill="none" stroke={hackle} strokeWidth="1.1" strokeLinecap="round" opacity="0.8" />
-        <g stroke={INK} strokeWidth="1.6" strokeLinejoin="round">
-          <path d="M104 40.6 L115 44.4 L104 45.2 Z" fill="#fbbf24" />
-          <path d="M104 45.2 L113 46.2 L104 49 Z" fill="#d97706" />
-          <path d="M101 48.8 Q99.4 54.6 102.6 58 Q106.4 55.4 105 49 Z" fill={COMB} />
-        </g>
-        <circle cx="98" cy="42" r="2.7" fill="#f59e0b" stroke="#78350f" strokeWidth="0.6" />
-        <circle cx="98.3" cy="42" r="1.45" fill="#111" />
-        <circle cx="98.9" cy="41.2" r="0.6" fill="#fff" />
-        <circle cx="105.4" cy="42.4" r="0.5" fill="#78350f" />
-        {(pose === "charge" || props.running) && (<line x1="94.5" y1="37.2" x2="101.5" y2="39.6" stroke="#111" strokeWidth="2" strokeLinecap="round" />)}
+        <ellipse cx="98.4" cy="41" rx="4.1" ry="4.9" fill="#fff" stroke={INK} strokeWidth="1.3" />
+        <circle cx="99.7" cy="41.8" r="2.3" fill="#111" />
+        <circle cx="100.4" cy="40.8" r="0.85" fill="#fff" />
+        <circle cx="107.4" cy="42.2" r="0.6" fill="#78350f" />
+        {(pose === "charge" || props.running) && (<line x1="93.6" y1="34.8" x2="103" y2="37.6" stroke="#111" strokeWidth="2.3" strokeLinecap="round" />)}
         <g style={Object.assign(svgT("46px 68px"), { animation: REDUCED_MOTION ? "none" : (run ? "wingFlap 0.22s ease-in-out infinite" : "wingIdle 1.6s ease-in-out infinite") })}>
           {wingP}
           {lit(wingP, "w")}
@@ -364,14 +365,25 @@ export function Rider(props) {
           <g transform="translate(56 66) scale(1.14) translate(-56 -66)">
           {/* her shadow on the rooster's back */}
           <ellipse cx="56" cy="71" rx="19" ry="4.2" fill="#1c0f05" opacity="0.18" />
-          <g stroke={INK} strokeWidth="2" strokeLinejoin="round">
+          <g stroke={INK} strokeWidth="2.4" strokeLinejoin="round">
             {skirt}
             <ellipse cx="63" cy="82" rx="5" ry="3" fill="#1f2937" />
             {torso}
           </g>
-          {lit(skirt, "sk")}{lit(torso, "to")}
+          {/* cel shading like the rooster's: shadow on the side away from the light, a highlight where it falls */}
+          <g clipPath={"url(#sk" + uid + ")"}>
+            <ellipse cx="58" cy="83" rx="24" ry="8" fill="#1c0f05" opacity="0.26" />
+            <path d="M40 66 Q50 58 66 61" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" opacity="0.28" />
+          </g>
+          <g clipPath={"url(#to" + uid + ")"}>
+            <path d="M59.5 38 C66.5 43 68 54 67 65 L58.6 65 C61.6 56 62 46 59.5 38 Z" fill="#1c0f05" opacity="0.24" />
+            <ellipse cx="50.2" cy="48" rx="2.6" ry="8" fill="#fff" opacity="0.26" />
+          </g>
           <path d="M44 72 Q47 66 46 62 M54 75 Q56 69 55 63 M63 74 Q64 69 63.4 64" fill="none" stroke={INK} strokeWidth="0.9" strokeLinecap="round" opacity="0.28" />
           <ellipse cx="63" cy="81.4" rx="2.4" ry="0.9" fill="#fff" opacity="0.35" />
+          {/* a lace collar */}
+          <path d="M50.6 41 Q56 45.4 61.4 41 Q60 45.2 56 46 Q52 45.2 50.6 41 Z" fill="#fffbeb" stroke={INK} strokeWidth="1" strokeLinejoin="round" />
+          <path d="M52.4 43.4 l0.8 0.8 M55.6 45 l0 1 M58.8 43.6 l-0.8 0.8" stroke="#d6d3d1" strokeWidth="0.7" strokeLinecap="round" />
           {L.knit ? (
             <g>
               <path d="M51 45 L50.5 62 M55 44 L55 63 M59 45 L59.5 63" stroke={INK} strokeWidth="0.8" opacity="0.22" />
@@ -381,10 +393,16 @@ export function Rider(props) {
             <path d="M47 45 Q56 53 65 45 L65 51 Q56 58 47 51 Z" fill={p.shawl} stroke={INK} strokeWidth="2" strokeLinejoin="round" />
           )}
           {(L.acc === "pearls" || L.acc === "scarf") && (<Accessory look={L} scarf={p.shawl} />)}
-          <g transform="translate(56 40) scale(1.1) translate(-56 -40)">
+          <g transform="translate(56 40) scale(1.32) translate(-56 -40)">
           <HairBack look={L} />
           {faceC}
-          {lit(faceC, "fc")}
+          <g clipPath={"url(#fc" + uid + ")"}>
+            <circle cx="62.5" cy="36.5" r="8.5" fill="#7c2d12" opacity="0.16" />
+            <circle cx="51.5" cy="25" r="7" fill="#fff" opacity="0.28" />
+          </g>
+          <ellipse cx="50.4" cy="31" rx="1.6" ry="2.2" fill={L.skin} stroke={INK} strokeWidth="1" />
+          <path d="M50.2 30 Q49.6 31 50.4 32" fill="none" stroke={shade(L.skin, 0.7)} strokeWidth="0.6" />
+          <g fill={L.hair} stroke={INK} strokeWidth="0.8"><circle cx="49.8" cy="24.6" r="1.9" /><circle cx="52" cy="22.9" r="1.9" /><circle cx="54.6" cy="22" r="1.8" /></g>
           <path d="M49.3 24.5 Q47.4 28.5 48.7 33.5" fill="none" stroke={L.hair} strokeWidth="2.6" strokeLinecap="round" />
           <path d="M49.8 25.4 Q48.8 28 49.4 30.6" fill="none" stroke="#fff" strokeWidth="0.8" strokeLinecap="round" opacity="0.6" />
           <circle cx="57.5" cy="34" r="2.4" fill="#fb7185" opacity="0.5" />
