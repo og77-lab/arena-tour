@@ -1,7 +1,7 @@
 /* ═══ FamilyWall ═══ The grannies of your family who rode before you, framed on the wall (newest nearest you), each with
    the two things worth remembering — her best world rank and her biggest titles — and the tour's Hall of Fame. */
 
-import { Rider, Face, PLAYER_PALETTE, paletteFor, withKit } from "./Rider";
+import { Rider, Face, PLAYER_PALETTE, paletteFor, withKit, lookPalette } from "./Rider";
 import { C, FONT, display, label } from "../ui/theme";
 import { HOF_RULE } from "../engine/aging";
 
@@ -15,7 +15,7 @@ function Frame(props) {
       <div style={{ fontSize: 11, fontWeight: 900, letterSpacing: 1, color: C.goldInk, textTransform: "uppercase", marginBottom: 4 }}>{props.title}</div>
       <div style={{ padding: 6, borderRadius: 10, background: "linear-gradient(135deg,#b45309,#fbbf24 40%,#92400e 70%,#fde68a)", boxShadow: "0 4px 10px rgba(63,42,29,0.35)" }}>
         <div style={{ height: 120, borderRadius: 6, background: props.me ? "linear-gradient(180deg,#e0f2fe,#fef3c7)" : "linear-gradient(180deg,#e7e5e4,#fef3c7)", display: "flex", alignItems: "flex-end", justifyContent: "center", overflow: "hidden", filter: props.me ? "none" : "sepia(0.45)" }}>
-          <Rider palette={withKit(PLAYER_PALETTE, r.kit)} width={124} pose={props.me ? "idle" : "cheer"} />
+          <Rider palette={withKit(props.me ? PLAYER_PALETTE : lookPalette(r.look), r.kit)} width={124} pose={props.me ? "idle" : "cheer"} />
         </div>
       </div>
       <div style={{ fontSize: 14, fontWeight: 900, color: C.text, marginTop: 5 }}>{r.name}{r.hof ? " 🏛️" : ""}</div>
@@ -47,7 +47,7 @@ export default function FamilyWall(props) {
         {hof.length ? hof.map(function (g, i) {
           return (
             <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, padding: "7px 9px", marginBottom: 4, borderRadius: 10, background: g.isP ? C.goldSoft : "#fff", border: "1.5px solid " + C.line }}>
-              {g.isP ? (<Face palette={withKit(PLAYER_PALETTE, g.kit)} size={38} />) : (<Face palette={paletteFor(g.id, 1)} size={38} />)}
+              {g.isP ? (<Face palette={withKit(lookPalette(g.look), g.kit)} size={38} />) : (<Face palette={paletteFor(g.id, 1)} size={38} />)}
               <div style={{ minWidth: 0 }}>
                 <div style={{ fontSize: 14, fontWeight: 900, color: C.text }}>{g.emoji || (g.isP ? "👵" : "")} {g.name}{g.isP ? " · your family" : ""}</div>
                 <div style={{ fontSize: 12, fontWeight: 900, color: C.goldInk }}>{g.hof}</div>

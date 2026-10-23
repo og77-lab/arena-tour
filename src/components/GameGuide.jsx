@@ -113,6 +113,7 @@ function body(id) {
         <Rider palette={PLAYER_PALETTE} width={120} pose="cheer" /><Rider palette={paletteFor(57, 7)} width={120} pose="idle" flip={true} />
       </div>
       <P>You're a granny on a rooster, starting at <B>#1000 of 1,000</B> on the world jousting tour. Every week you ride in a tournament, win matches with well-timed strikes, earn ranking points, prize money and training, and climb — from the dusty Futures lanes to the golden helmets of the top ten.</P>
+      <P><B>Your granny&apos;s look.</B> On the first screen you pick one of six looks for her (the original, the general, the disco nan, the gardener, the church lady or the biker) and give her a name. The look is for show only: it changes nothing in a match.</P>
       <P>Every one of the 999 other grannies is a full rider too: she plays her own tournaments, earns points, trains by the same rules as you, and has her own face, rooster, trait and opinions.</P>
       <Tip>The whole game rests on one skill: stopping the moving marker on the centre of the gold zone. Everything else — training, money, fans — shifts the odds, but your timing decides matches.</Tip>
     </>);
@@ -375,7 +376,7 @@ function body(id) {
         <span key="a">From season {RETIRE_FROM} on the tour, the gala's last page lets you retire. It's always your choice.</span>,
         <span key="r">A retirement ceremony follows: a lap of honour, your career in numbers, and the family torch passed to the granny who takes over.</span>,
         <span key="b">Your career goes up on the <B>family wall</B> (More tab): your portrait, best world rank, Grand Slams and Masters titles.</span>,
-        <span key="c">The next granny of your family starts from nothing, in the same tour with the same rivals: #1000, first season, 10 starting points. Your badges stay yours.</span>
+        <span key="c">The next granny of your family starts from nothing, in the same tour with the same rivals: #1000, first season, 10 starting points. You pick her look from the same six and give her a name. Your badges stay yours.</span>
       ]} />
       <H>The Hall of Fame</H>
       <P>Very hard to enter: {HOF_RULE}. From 45 points an active rider is a Hall of Fame candidate, and her profile (yours too) shows her points so far; with enough, it says Hall of Fame bound. Riders are inducted when they retire, rivals and you alike, and stay in the Hall for good. The Hall is on the More tab, next to the family wall, with everyone on course for it listed underneath.</P>

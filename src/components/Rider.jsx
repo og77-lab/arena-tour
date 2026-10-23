@@ -9,12 +9,27 @@ const { useRef, useId } = React;
 
 var INK = "#3f2a1d";
 
-/* The player's granny matches the game icon: floral bike helmet, round glasses, knit cardigan + pauldron, rainbow rooster */
-export var PLAYER_PALETTE = {
-  dress: "#c4a27c", shawl: "#7c5c3b", plume: "#facc15",
-  chicken: { body: "#0e7490", neck: "#f97316", wing: "#ea580c", tail: "#1e3a8a" },
-  look: { skin: "#f6d5bd", hair: "#f5f5f4", hairStyle: "bun", glasses: "round", brows: "fierce", hat: "floral", hatColor: "#14b8a6", acc: "pauldron", knit: true }
-};
+/* The player's granny: six starting looks to pick from (a new career, and every new granny of the family; S.player.look).
+   The first matches the game icon: floral bike helmet, round glasses, knit cardigan + pauldron, rainbow rooster. */
+export var PLAYER_LOOKS = [
+  { dress: "#c4a27c", shawl: "#7c5c3b", plume: "#facc15", chicken: { body: "#0e7490", neck: "#f97316", wing: "#ea580c", tail: "#1e3a8a" },
+    look: { skin: "#f6d5bd", hair: "#f5f5f4", hairStyle: "bun", glasses: "round", brows: "fierce", hat: "floral", hatColor: "#14b8a6", acc: "pauldron", knit: true } },
+  { dress: "#1e3a8a", shawl: "#cbd5e1", plume: "#ef4444", chicken: { body: "#f8fafc", wing: "#cbd5e1", tail: "#334155" },
+    look: { skin: "#f3cfb3", hair: "#d6d3d1", hairStyle: "bob", glasses: "monocle", brows: "fierce", hat: "colander", hatColor: "#94a3b8", acc: "pauldron" } },
+  { dress: "#7c3aed", shawl: "#f0abfc", plume: "#ec4899", chicken: { body: "#fcd34d", wing: "#f59e0b", tail: "#7c3aed" },
+    look: { skin: "#eac0a0", hair: "#c4b5fd", hairStyle: "curls", glasses: "cat", brows: "surprised", hat: "beanie", hatColor: "#f472b6", acc: "earrings" } },
+  { dress: "#15803d", shawl: "#fef08a", plume: "#84cc16", chicken: { body: "#c2410c", wing: "#9a3412", tail: "#14532d" },
+    look: { skin: "#d9a07b", hair: "#9ca3af", hairStyle: "braid", glasses: "square", brows: "sweet", hat: "beanie", hatColor: "#4ade80", acc: "flower" } },
+  { dress: "#db2777", shawl: "#fbcfe8", plume: "#f472b6", chicken: { body: "#fffbeb", wing: "#e7e5e4", tail: "#a8a29e" },
+    look: { skin: "#f6d5bd", hair: "#f5f5f4", hairStyle: "bun", glasses: "round", brows: "sweet", hat: "tophat", hatColor: "#f9a8d4", acc: "pearls" } },
+  { dress: "#1f2937", shawl: "#ef4444", plume: "#f97316", chicken: { body: "#57534e", wing: "#44403c", tail: "#0c0a09" },
+    look: { skin: "#b97a56", hair: "#dc2626", hairStyle: "bob", glasses: "square", brows: "fierce", hat: "helmet", hatColor: "#94a3b8", acc: "scarf" } }
+];
+export var LOOK_NAMES = ["The original", "The general", "The disco nan", "The gardener", "The church lady", "The biker"];
+/* the look of the granny you're playing now (ArenaGame sets it from S.player.look before drawing anything) */
+export var PLAYER_PALETTE = PLAYER_LOOKS[0];
+export function setPlayerLook(i) { PLAYER_PALETTE = PLAYER_LOOKS[i] || PLAYER_LOOKS[0]; }
+export function lookPalette(i) { return PLAYER_LOOKS[i] || PLAYER_LOOKS[0]; }
 
 var DRESSES = ["#be123c", "#15803d", "#7c3aed", "#0e7490", "#c2410c", "#4d7c0f", "#9d174d", "#334155", "#b45309", "#1d4ed8"];
 var SHAWLS = ["#fda4af", "#86efac", "#c4b5fd", "#67e8f9", "#fdba74", "#fef08a", "#f9a8d4", "#cbd5e1"];
@@ -394,6 +409,24 @@ function tint(hex, t) {
   return "#" + ((1 << 24) + (m(r) << 16) + (m(g) << 8) + m(b)).toString(16).slice(1);
 }
 
+
+/* Pick your granny: the six looks as faces, the chosen one named underneath */
+export function LookPicker(props) {
+  var v = props.value || 0;
+  return (
+    <div>
+      <div style={{ display: "flex", justifyContent: "center", gap: 3, flexWrap: "nowrap" }}>
+        {PLAYER_LOOKS.map(function (pal, i) {
+          return (<button key={i} type="button" onClick={function () { props.onChange(i); }} aria-label={LOOK_NAMES[i]}
+            style={{ padding: 1, borderRadius: "50%", border: "2px solid " + (i === v ? "#f59e0b" : "transparent"), background: "none", cursor: "pointer", lineHeight: 0 }}>
+            <Face palette={pal} size={props.size || 32} />
+          </button>);
+        })}
+      </div>
+      <div style={{ fontSize: 12.5, fontWeight: 900, color: props.dark ? "#fde68a" : "#92400e", textAlign: "center", marginTop: 4 }}>{LOOK_NAMES[v]}</div>
+    </div>
+  );
+}
 
 /* The same palette carrying a kit (lance + saddle ids) */
 export function withKit(pal, kit) { return kit ? Object.assign({}, pal, { kit: { lance: kit.lance || "broom", saddle: kit.saddle || "teacosy" } }) : pal; }

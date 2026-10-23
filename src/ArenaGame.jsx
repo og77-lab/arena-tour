@@ -34,7 +34,7 @@ import { BY_ID as GEAR_ID, kitFx, fxLines } from "./engine/gear";
 import BottomNav, { NAV_HEIGHT } from "./components/BottomNav";
 import MatchHeader from "./components/MatchHeader";
 import ScoutSheet from "./components/ScoutSheet";
-import { Rider, Face, PLAYER_PALETTE, paletteFor } from "./components/Rider";
+import { Rider, Face, PLAYER_PALETTE, paletteFor, setPlayerLook, LookPicker, lookPalette } from "./components/Rider";
 import { roosterName, trait, standing } from "./models/persona";
 import { buildIssue, buildSpecialEdition, rankMap } from "./engine/news";
 import { tallyTournament, checkAchievements } from "./engine/achievements";
@@ -342,7 +342,8 @@ export default function Arena(props) {
       .finally(function() { setSyncing(false); });
   }
 
-  function newSeason() { var ns = mkSeason(inp, 1, null); ns.player.tutorial = true; save(ns); setScr("hub"); }
+  var _lk = useState(0), lookPick = _lk[0], setLookPick = _lk[1];
+  function newSeason() { var ns = mkSeason(inp, 1, null); ns.player.tutorial = true; if (lookPick) ns.player.look = lookPick; save(ns); setScr("hub"); }
   /* Coach tips: each shows once; new games get the full tour, older saves only tips for features added since */
   function tipOn(id) {
     if (!S) return false;
@@ -892,11 +893,11 @@ export default function Arena(props) {
     });
   }
   /* heir = the name of the granny who takes over when you retire (engine/aging passTheLance) */
-  function finishGala(heir) {
+  function finishGala(heir, heirLook) {
     var g = gala; setGala(null); setFS(null);
     if (!S) return;
     var from = Object.assign({}, S, { player: Object.assign({}, S.player, { goal: g ? g.goal : S.player.goal }) });
-    if (heir) { doSync(from); save(passTheLance(mkSeason(from.pName, (from.sNum||1)+1, from), from, heir)); setScr("hub"); setTab("home"); return; }
+    if (heir) { doSync(from); save(passTheLance(mkSeason(from.pName, (from.sNum||1)+1, from), from, heir, heirLook)); setScr("hub"); setTab("home"); return; }
     nextSeason(from);
   }
   function advF(st) {
@@ -978,7 +979,9 @@ export default function Arena(props) {
       <h1 style={Object.assign(display(32),{margin:"2px 0 6px"})}>Granny Rooster Joust</h1>
       <p style={{color:C.textSoft,fontSize:13,margin:"0 0 16px",fontWeight:700}}>1000 grannies · 5 tournament tiers · Grand Slams · Season Finals</p>
       <div style={card({padding:"14px 18px 18px",maxWidth:320,width:"100%",boxSizing:"border-box",borderRadius:20})}>
-        <div style={{display:"flex",justifyContent:"center",margin:"-4px 0 4px"}}><Rider palette={PLAYER_PALETTE} width={120} pose="cheer" /></div>
+        <div style={{display:"flex",justifyContent:"center",margin:"-4px 0 4px"}}><Rider palette={lookPalette(lookPick)} width={120} pose="cheer" /></div>
+        <div style={{fontFamily:"'Fredoka','Nunito',sans-serif",fontSize:18,fontWeight:600,color:C.text,marginBottom:6}}>Pick your granny</div>
+        <div style={{marginBottom:12}}><LookPicker value={lookPick} onChange={function(i){ setLookPick(i); }} /></div>
         <div style={{fontFamily:"'Fredoka','Nunito',sans-serif",fontSize:18,fontWeight:600,color:C.text,marginBottom:8}}>Name your granny</div>
         <input value={inp} onChange={function(e){setInp(e.target.value)}} placeholder="e.g. Grandma Ruth, Nana Rosa…" onKeyDown={function(e){if(e.key==="Enter"&&inp.trim())newSeason()}}
           style={{width:"100%",padding:13,borderRadius:14,border:"1px solid rgba(63,42,29,0.16)",background:"#fffdf7",color:C.text,fontSize:17,fontWeight:800,outline:"none",boxSizing:"border-box",textAlign:"center",marginBottom:12,fontFamily:FONT,boxShadow:"inset 0 1px 2px rgba(63,42,29,0.06)"}} />
@@ -994,6 +997,7 @@ export default function Arena(props) {
   );
 
   if (!S) return (<div style={W}><p>Loading...</p></div>);
+  setPlayerLook(S.player.look || 0); /* every drawing of you below uses your granny's own look */
 
   var pRank = pRankOf(S);
   var ranked = getRanked(S);

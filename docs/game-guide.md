@@ -10,6 +10,8 @@ You're a granny on a rooster, starting at **#1000 of 1,000** on the world jousti
 
 Every one of the 999 other grannies is a full rider too: she plays her own tournaments, earns points, trains by the same rules as you, and has her own face, rooster, trait and opinions. Her matches against other rivals are played on the very same engine as yours, strike by strike.
 
+**Your granny's look.** On the first screen you pick one of six looks for her (the original, the general, the disco nan, the gardener, the church lady or the biker) and give her a name. The look is for show only: it changes nothing in a match.
+
 **Your starting talent.** Before your first event you spread **10 points** over the six stats — any way you like, even all in one. Older saves get the same 10 points once.
 
 > 📣 The whole game rests on one skill: stopping the moving marker on the centre of the gold zone. Everything else — training, money, fans — shifts the odds, but your timing decides matches.
@@ -433,7 +435,7 @@ A top rider's five stats together (out of 100), typically:
 1. From season 15 on the tour, the gala's last page lets you retire. It's always your choice.
 2. A retirement ceremony follows: a lap of honour, your career in numbers, and the family torch passed to the granny who takes over.
 3. Your career goes up on the **family wall** (More tab): your portrait, best world rank, Grand Slams and Masters titles.
-4. The next granny of your family starts from nothing, in the same tour with the same rivals: #1000, first season, 10 starting points. Your badges stay yours.
+4. The next granny of your family starts from nothing, in the same tour with the same rivals: #1000, first season, 10 starting points. You pick her look from the same six and give her a name. Your badges stay yours.
 
 **The Hall of Fame.** Very hard to enter. A career is counted in Hall of Fame points:
 

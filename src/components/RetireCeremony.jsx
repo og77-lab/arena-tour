@@ -10,7 +10,7 @@ import * as React from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { FONT } from "../ui/theme";
-import { Rider, PLAYER_PALETTE, withKit } from "./Rider";
+import { Rider, PLAYER_PALETTE, withKit, lookPalette } from "./Rider";
 import { Sparks, CountUp, REDUCED_MOTION, vibrate } from "./fx";
 import { playVictoryBig, playRankUp, playTitle, playWhoosh, playClang } from "../sounds";
 
@@ -55,7 +55,7 @@ function Portrait(props) {
 }
 
 export default function RetireCeremony(props) {
-  var c = props.career, pal = withKit(PLAYER_PALETTE, props.kit), heirPal = PLAYER_PALETTE;
+  var c = props.career, pal = withKit(PLAYER_PALETTE, props.kit), heirPal = lookPalette(props.heirLook);
   var stages = ["lap", "numbers", "torch", "wall"];
   var _i = useState(0), i = _i[0], setI = _i[1];
   var st = stages[i], last = i === stages.length - 1;
