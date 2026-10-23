@@ -254,12 +254,23 @@ export default function JoustStage(props) {
      </div>
      </div>
 
-      {/* the comic word stays readable, outside the camera */}
-      {impact && a.word && (
-        <div key={"w-" + a.id} aria-hidden style={{ position: "absolute", left: "50%", top: "30%", zIndex: 9, pointerEvents: "none", fontFamily: "'Fredoka', 'Nunito', sans-serif", fontSize: (a.perfect ? 40 : a.big ? 34 : 26) * Math.max(1, k * 0.9), fontWeight: 700, letterSpacing: 1, whiteSpace: "nowrap", color: a.perfect ? "#fde047" : a.youWon ? "#facc15" : "#f87171", textShadow: "-2px -2px 0 #3f2a1d, 2px -2px 0 #3f2a1d, -2px 2px 0 #3f2a1d, 2px 2px 0 #3f2a1d, 0 4px 0 #3f2a1d", animation: "comicPop 0.75s ease-out forwards" }}>
-          {a.word}
-        </div>
-      )}
+      {/* the comic beat of the hit, outside the camera, on the point where the glove lands (the camera zooms about that
+          very point, so it stays put): speed lines bursting out, a white flash on a big one, a jagged POW star, the word */}
+      {impact && (function () {
+        var r1 = (a.perfect || a.big ? 46 : 36) * Math.max(1, k * 0.9), r2 = r1 * 0.58, n = 13, star = [], lines = [], R = Math.max(W, H);
+        var cx = Math.max(r1, Math.min(W - r1, clashX)), cy = Math.max(r1 * 0.9, Math.min(H - r1, clashY - r1 * 0.35));
+        for (var i = 0; i < n * 2; i++) { var ang = i / (n * 2) * Math.PI * 2 + (a.id % 7) * 0.2, rr = i % 2 ? r2 : r1 * (0.85 + ((i * 37) % 10) / 40); star.push((Math.cos(ang) * rr).toFixed(1) + "," + (Math.sin(ang) * rr).toFixed(1)); }
+        for (var j = 0; j < 20; j++) { var an = j / 20 * Math.PI * 2 + 0.13; lines.push(<line key={j} x1={cx + Math.cos(an) * R * 0.16} y1={cy + Math.sin(an) * R * 0.16} x2={cx + Math.cos(an) * R} y2={cy + Math.sin(an) * R} stroke={j % 2 ? "#3f2a1d" : "#fff"} strokeWidth={j % 3 ? 2 : 3.5} strokeLinecap="round" />); }
+        return (<div key={"pow-" + a.id} aria-hidden style={{ position: "absolute", inset: 0, zIndex: 9, pointerEvents: "none" }}>
+          <svg width={W} height={H} style={{ position: "absolute", inset: 0, transformOrigin: cx + "px " + cy + "px", animation: "actionLines 0.45s ease-out forwards" }}>{lines}</svg>
+          {(a.big || a.perfect || phase === "finale") && (<div style={{ position: "absolute", inset: 0, background: "#fff", animation: "hitFlash 0.18s ease-out forwards" }} />)}
+          <svg width={r1 * 2.4} height={r1 * 2.4} viewBox={(-r1 * 1.2) + " " + (-r1 * 1.2) + " " + (r1 * 2.4) + " " + (r1 * 2.4)} style={{ position: "absolute", left: cx - r1 * 1.2, top: cy - r1 * 1.2, overflow: "visible", animation: "powPop 0.75s ease-out forwards" }}>
+            <polygon points={star.join(" ")} fill={a.perfect ? "#fde047" : a.youWon ? "#facc15" : "#fb7185"} stroke="#3f2a1d" strokeWidth={3.5} strokeLinejoin="round" />
+            <polygon points={star.join(" ")} fill="none" stroke="#fff" strokeWidth={1.5} strokeLinejoin="round" transform="scale(0.8)" opacity="0.7" />
+          </svg>
+          {a.word && (<div style={{ position: "absolute", left: cx, top: cy, fontFamily: "'Fredoka', 'Nunito', sans-serif", fontSize: (a.perfect ? 30 : a.big ? 27 : 22) * Math.max(1, k * 0.9), fontWeight: 700, letterSpacing: 1, whiteSpace: "nowrap", color: "#fff", textShadow: "-2px -2px 0 #3f2a1d, 2px -2px 0 #3f2a1d, -2px 2px 0 #3f2a1d, 2px 2px 0 #3f2a1d, 0 4px 0 #3f2a1d", animation: "comicPop 0.75s ease-out forwards" }}>{a.word}</div>)}
+        </div>);
+      })()}
       {/* light and depth over the scene: warm sun from above, a soft vignette at the edges */}
       <div aria-hidden style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 8, background: "radial-gradient(120% 90% at 30% 0%, rgba(255,244,214,0.28) 0%, rgba(255,244,214,0) 55%)", boxShadow: "inset 0 0 34px rgba(40,25,10,0.32)" }} />
     </div>
