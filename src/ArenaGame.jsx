@@ -40,7 +40,7 @@ import { buildIssue, buildSpecialEdition, rankMap } from "./engine/news";
 import { tallyTournament, checkAchievements } from "./engine/achievements";
 import { updateRival, rivalRecord } from "./engine/rivalry";
 import { uniqueNames, needsUniqueNames, toPts3, needsPts3, retitle, needsTitles, renameWorld, needsWorldNames } from "./engine/migrate";
-import { ageCap, riderCap, toAge, needsAge, retirementPlan, hofReason, RETIRE_FROM, causeText } from "./engine/aging";
+import { ageCap, riderCap, toAge, needsAge, retirementPlan, hofReason, hofScore, hofLine, HOF_BAR, HOF_CANDIDATE, RETIRE_FROM, causeText } from "./engine/aging";
 import { weekEvents, lowestTierFor, stepDownTier, dropsLeft, DROP_LIMIT } from "./engine/events";
 import { ACHIEVEMENTS } from "./engine/achievements";
 import AchievementsSheet, { AchToast, achCount } from "./components/Achievements";
@@ -115,6 +115,17 @@ function kitBonus(S, cond, tier) {
   return { tier: tier, cond: cond || "classic", bo: (TIERS[tier] && TIERS[tier].bo) || 3,
     rank: function (p) { return rm[p.id] || 1000; },
     kit: function (p) { if (!p || p.isP) return null; if (!cache[p.id]) cache[p.id] = kitOfNpc(S, p, cond, tier, rm[p.id]); return cache[p.id]; } };
+}
+/* Hall of Fame standing of an active rider (yours from your own titles), and everyone on tour who's a candidate */
+function hofOf(S, p) {
+  var isP = p.isP || p.id === 1, b = isP ? Object.assign({}, S.player.best, { tt: playerTitles(S) }) : p.best;
+  var sc = hofScore(b, S.yearEnd, S.champs, isP ? 1 : p.id), why = hofReason(b, S.yearEnd, isP ? 1 : p.id, S.champs);
+  return { pts: sc.pts, line: hofLine(sc), bound: !!why, bar: HOF_BAR, candidate: !!why || sc.pts >= HOF_CANDIDATE };
+}
+function hofCandidates(S) {
+  var out = S.npcs.map(function (n) { return Object.assign({ id: n.id, name: n.name, emoji: n.emoji, y: n.y }, hofOf(S, n)); });
+  out.push(Object.assign({ id: 1, isP: true, name: S.pName, y: S.player.y }, hofOf(S, S.player)));
+  return out.filter(function (x) { return x.candidate; }).sort(function (a, b) { return b.pts - a.pts; }).slice(0, 8);
 }
 function kitIcons(k) { return k && (k.lance !== "broom" || k.saddle !== "teacosy") ? (GEAR_ID[k.lance].icon + GEAR_ID[k.saddle].icon) : null; }
 /* A rider's lance and saddle for the tale of the tape: names, and what they do in today's lanes */
@@ -875,7 +886,7 @@ export default function Arena(props) {
         var b = S.player.best || {}, y = S.player.y || S.sNum, myRank = 1001; ranked2.forEach(function(p, i){ if (p.isP) myRank = i + 1; });
         var peak = Math.min.apply(null, [b.rank || 1001, myRank].concat((S.player.rankHist || []).filter(function(x){ return x > 0; })));
         var fam = (S.family || []).length;
-        return { y: y, hof: hofReason(b, S2.yearEnd, 1), career: { y: y, s0: Math.max(1, S.sNum - y + 1), s1: S.sNum, peak: peak, titles: b.titles || 0, gs: b.gsTitles || 0, mst: playerTitles(S)[4] || 0, hof: hofReason(b, S2.yearEnd, 1) },
+        return { y: y, hof: hofReason(Object.assign({}, b, { rank: peak, tt: playerTitles(S) }), S2.yearEnd, 1, S2.champs), career: { y: y, s0: Math.max(1, S.sNum - y + 1), s1: S.sNum, peak: peak, titles: b.titles || 0, gs: b.gsTitles || 0, mst: playerTitles(S)[4] || 0, hof: hofReason(Object.assign({}, b, { rank: peak, tt: playerTitles(S) }), S2.yearEnd, 1, S2.champs) },
           kit: S.player.kit || null, generation: fam ? (fam === 1 ? "the granny" : "the " + fam + " grannies") : null };
       })() : null
     });
@@ -1012,7 +1023,7 @@ export default function Arena(props) {
     var pid = prof ? (prof.p.isP ? 1 : prof.p.id) : null;
     return (
       <>
-        {prof && (<Profile player={prof.p} rank={prof.rank} me={S.player} myRank={pRank} myTitles={playerTitles(S)} roosterName={S.player.roosterName} onRenameRooster={renameRooster} onRenamePlayer={renamePlayer} isRival={!!(S.player.rival && prof.p.id === S.player.rival.id)} playerName={S.pName} h2h={!prof.p.isP && S.player.h2h ? (S.player.h2h[prof.p.id] || []) : null} timeline={prof.p.isP ? (S.player.timeline || []) : null}
+        {prof && (<Profile hof={hofOf(S, prof.p)} player={prof.p} rank={prof.rank} me={S.player} myRank={pRank} myTitles={playerTitles(S)} roosterName={S.player.roosterName} onRenameRooster={renameRooster} onRenamePlayer={renamePlayer} isRival={!!(S.player.rival && prof.p.id === S.player.rival.id)} playerName={S.pName} h2h={!prof.p.isP && S.player.h2h ? (S.player.h2h[prof.p.id] || []) : null} timeline={prof.p.isP ? (S.player.timeline || []) : null}
           weeks={riderWeeks(S.hist, pid)} past={riderPast(S.hist, pid)} onTree={function(w){ setTreeView({ s: w.s, c: w.c, idx: w.idx, focus: pid }); }} onClose={function(){setProf(null)}} />)}
         {weekView && (<WeekEvents week={wkV} nameOf={riderRef} riders={riderList} hasPrev={wi > 0} hasNext={wi >= 0 && wi < allW.length - 1} onPrev={function(){ goW(wi - 1); }} onNext={function(){ goW(wi + 1); }}
           onRider={function(id){ setWeekView(null); openProfileOf(id); }} onOpen={function(idx){ setTreeView({ s: wkV.s, c: wkV.c, idx: idx, focus: 1 }); }} onClose={function(){ setWeekView(null); }} />)}
@@ -1062,7 +1073,7 @@ export default function Arena(props) {
         {gala && (<SeasonGala S={S} champ={gala.champ} runnerUp={gala.runnerUp} champRank={gala.champRank} awards={gala.awards} you={gala.you} hall={gala.hall} goal={gala.goal} farewell={gala.farewell} retire={gala.retire} pName={S.pName} onDone={finishGala} />)}
         {achQ.length > 0 && (<AchToast queue={achQ} onShown={function(){ setAchQ(function(q){ return q.slice(1); }); }} onOpen={function(){ setAchQ([]); setShowAch(true); }} />)}
         {showAch && (<AchievementsSheet S={S} onClose={function(){ setShowAch(false); }} />)}
-        {showFamily && (<FamilyWall S={S} myMasters={playerTitles(S)[4] || 0} onClose={function(){ setShowFamily(false); }} />)}
+        {showFamily && (<FamilyWall S={S} myMasters={playerTitles(S)[4] || 0} candidates={hofCandidates(S)} onClose={function(){ setShowFamily(false); }} />)}
         {showGuide && (<GameGuide onClose={function(){ setShowGuide(false); }} />)}
         {showLb && createPortal(
           <div style={{position:"fixed",inset:0,zIndex:960,background:"#f8fafc",overflowY:"auto"}}>

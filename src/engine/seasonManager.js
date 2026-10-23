@@ -104,7 +104,7 @@ export function passTheLance(N, prev, name) {
   var rec = { name: prev.pName, s0: Math.max(1, (prev.sNum || 1) - y + 1), s1: prev.sNum || 1, y: y, peak: peak, titles: b.titles || 0, gsTitles: b.gsTitles || 0, mst: tt[4] || 0 };
   if (b.gsSet) rec.gsSet = b.gsSet;
   if (P.kit) rec.kit = P.kit;
-  var why = hofReason(b, prev.yearEnd, 1); if (why) rec.hof = why;
+  var why = hofReason(Object.assign({}, b, { rank: peak, tt: tt }), prev.yearEnd, 1, prev.champs); if (why) rec.hof = why;
   var zeros = []; for (var i = 0; i < TOTAL_EVENTS; i++) zeros.push(0);
   var player = { id: 1, isP: true, y: 1, ageSeed: 1 + Math.floor(Math.random() * 1e9), sp: 0, ap: 0, tr: { r: 0, p: 0, f: 0, s: 0, g: 0, tp: 0 }, best: { rank: 1001, peakS: 0, titles: 0, gsTitles: 0, finals: 0 },
     def: zeros, res: zeros.slice(), money: 0, seasonMoney: 0, rankHist: [], h2h: {}, timeline: [{ type: "start", s: N.sNum, w: 0 }], startPts: 10 };

@@ -43,7 +43,7 @@ export default function FamilyWall(props) {
         </div>
 
         <div style={Object.assign(label(C.textSoft), { marginTop: 14 })}>🏛️ The Hall of Fame</div>
-        <div style={{ fontSize: 12, color: C.textMuted, margin: "2px 0 8px" }}>Very hard to enter: {HOF_RULE}. Riders are inducted when they retire — you too.</div>
+        <div style={{ fontSize: 12, color: C.textMuted, margin: "2px 0 8px" }}>Very hard to enter: {HOF_RULE}. Riders are inducted when they retire — you too — and stay here for good.</div>
         {hof.length ? hof.map(function (g, i) {
           return (
             <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, padding: "7px 9px", marginBottom: 4, borderRadius: 10, background: g.isP ? C.goldSoft : "#fff", border: "1.5px solid " + C.line }}>
@@ -56,6 +56,23 @@ export default function FamilyWall(props) {
             </div>
           );
         }) : (<div style={{ fontSize: 13, color: C.textSoft, fontStyle: "italic" }}>Nobody has made it yet.</div>)}
+
+        {/* who is on course now */}
+        {(props.candidates || []).length > 0 && (<>
+          <div style={Object.assign(label(C.textSoft), { marginTop: 14 })}>On course for the Hall</div>
+          {props.candidates.map(function (g) {
+            return (
+              <div key={g.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "6px 9px", marginTop: 4, borderRadius: 10, background: g.isP ? C.goldSoft : "#fff", border: "1.5px dashed " + C.line }}>
+                {g.isP ? (<Face palette={withKit(PLAYER_PALETTE, props.S.player.kit)} size={34} />) : (<Face palette={paletteFor(g.id, 1)} size={34} />)}
+                <div style={{ minWidth: 0, flex: 1 }}>
+                  <div style={{ fontSize: 13.5, fontWeight: 900, color: C.text }}>{g.emoji || ""} {g.name}{g.isP ? " · you" : ""} <span style={{ fontWeight: 700, color: C.textMuted, fontSize: 11.5 }}>· {g.y} seasons on tour</span></div>
+                  <div style={{ fontSize: 11.5, color: C.textSoft }}>{g.line}</div>
+                </div>
+                <div style={{ fontSize: 12.5, fontWeight: 900, color: g.bound ? C.greenInk : C.goldInk, whiteSpace: "nowrap" }}>{g.bound ? "✓ bound" : g.pts + "/" + g.bar}</div>
+              </div>
+            );
+          })}
+        </>)}
       </div>
     </div>
   );

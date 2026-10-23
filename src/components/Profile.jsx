@@ -203,6 +203,14 @@ export default function Profile(props) {
           })}
         </div>
         {(function () { var mix = titleMix(p.isP ? (props.myTitles || {}) : npcTitles(p)); return mix ? (<div style={{ fontSize: 12.5, fontWeight: 800, color: "#92400e", textAlign: "center", marginTop: 6 }}>{mix}</div>) : null; })()}
+        {/* Hall of Fame standing: only shown once a career is in the conversation */}
+        {props.hof && props.hof.candidate && (
+          <div style={{ marginTop: 8, padding: "9px 11px", borderRadius: 12, background: "linear-gradient(180deg,#fffbeb,#fef3c7)", border: "1.5px solid #fcd34d", textAlign: "center" }}>
+            <div style={{ fontSize: 14, fontWeight: 900, color: "#92400e" }}>🏛️ {props.hof.bound ? "Hall of Fame bound" : "Hall of Fame candidate"}</div>
+            <div style={{ fontSize: 12.5, fontWeight: 800, color: "#57534e", marginTop: 2 }}>{props.hof.bound ? (p.isP ? "You'll be inducted when you retire." : "She'll be inducted when she retires.") : props.hof.pts + " of " + props.hof.bar + " Hall of Fame points so far"}</div>
+            {props.hof.line && (<div style={{ fontSize: 12, color: "#78716c", marginTop: 2 }}>{props.hof.line}</div>)}
+          </div>
+        )}
         {/* Week by week: every tournament she rode (tour history), tap one for its draw */}
         <WeekByWeek weeks={props.weeks || []} past={props.past || []} onTree={props.onTree} isMe={p.isP} />
         {/* Head-to-Head */}

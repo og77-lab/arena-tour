@@ -435,7 +435,21 @@ A top rider's five stats together (out of 100), typically:
 3. Your career goes up on the **family wall** (More tab): your portrait, best world rank, Grand Slams and Masters titles.
 4. The next granny of your family starts from nothing, in the same tour with the same rivals: #1000, first season, 10 starting points. Your badges stay yours.
 
-**The Hall of Fame.** Very hard to enter: all four Grand Slams, or 8 Grand Slams, or year-end No. 1 three seasons running. Riders are judged when they retire — rivals and you alike. The Hall is on the More tab, next to the family wall.
+**The Hall of Fame.** Very hard to enter. A career is counted in Hall of Fame points:
+
+| Achievement | Points |
+|---|---|
+| Grand Slam title | 10 |
+| World title (Season Finals) | 8 |
+| Year-end world No. 1 | 8 |
+| Masters title | 3 |
+| Tour 500 title | 1 |
+| All four Grand Slams | +15 |
+| Reached world No. 1 | +5 |
+
+1. **80 points** gets a rider in. So do all four Grand Slams, 8 Grand Slams, or year-end No. 1 three seasons running, on their own.
+2. From **45 points** an active rider is a **Hall of Fame candidate**: her profile (and yours) says so, with her points so far. Once she has enough, it says **Hall of Fame bound**.
+3. Riders are inducted when they retire — rivals and you alike — and stay in the Hall for good. The Hall is on the More tab, next to the family wall, with everyone on course for it listed underneath.
 
 > 🧠 **Why it works this way.** A career should rise, peak and fade, and no two should fade alike. That's why each stat ages on its own schedule and at its own pace, drawn when the granny starts, so one keeps her Reflexes and loses her Aim and the next the other way round. The ceiling starts at the level she holds, so potential drops first and the levels follow. Retirements (about 50 a year) and newcomers keep the tour moving instead of freezing at the top. Your own career can end too, but the game doesn't: the family torch passes to the next granny, in the same world, so your history stays part of it. The farewells are deliberately dull, formal notices, because that's the joke. And the Hall of Fame is very hard to enter on purpose, so it means something. The game doesn't give you a hidden potential: your real potential is your own hands, and the game already measures those.
 

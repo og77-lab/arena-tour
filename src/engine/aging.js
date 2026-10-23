@@ -116,14 +116,44 @@ export function no1Streak(yearEnd, id) {
   });
   return best;
 }
-export function hofReason(best, yearEnd, id) {
+/* A career in points, for the Hall of Fame: a Grand Slam 10, a world title (the Season Finals) 8, a year-end No. 1
+   8, a Masters 3, a Tour 500 1; winning all four Slams +15, ever reaching world No. 1 +5. The bar is HOF_BAR; from
+   HOF_CANDIDATE up an active rider is a candidate. The three old routes (all four Slams, eight Slams, year-end No. 1
+   three seasons running) still get you in on their own. Same for every rider, you included. */
+export var HOF_BAR = 80, HOF_CANDIDATE = 45;
+export var HOF_POINTS = { gs: 10, world: 8, no1: 8, masters: 3, t500: 1, careerSlam: 15, peak1: 5 };
+export function hofScore(best, yearEnd, champs, id) {
+  best = best || {};
+  var tt = best.tt || {}, P = HOF_POINTS;
+  var parts = {
+    gs: best.gsTitles || 0,
+    world: (champs || []).filter(function (c) { return c && (id === 1 ? !!c.isP : !c.isP && c.id === id); }).length,
+    no1: (yearEnd || []).filter(function (e) { return e.id === id; }).length,
+    masters: tt[4] || 0, t500: tt[3] || 0,
+    careerSlam: bits(best.gsSet || 0) >= 4 ? 1 : 0, peak1: best.rank === 1 ? 1 : 0
+  };
+  var pts = 0; Object.keys(P).forEach(function (k) { pts += (parts[k] || 0) * P[k]; });
+  return { pts: pts, parts: parts };
+}
+/* the career in a few words, for the plaque */
+export function hofLine(sc) {
+  var p = sc.parts, out = [];
+  if (p.gs) out.push(p.gs + (p.gs === 1 ? " Grand Slam" : " Grand Slams") + (p.careerSlam ? " (all four)" : ""));
+  if (p.world) out.push(p.world + (p.world === 1 ? " world title" : " world titles"));
+  if (p.no1) out.push("year-end No. 1 " + (p.no1 === 1 ? "once" : p.no1 + " times"));
+  if (p.masters) out.push(p.masters + " Masters");
+  return out.join(", ");
+}
+export function hofReason(best, yearEnd, id, champs) {
   best = best || {};
   if (bits(best.gsSet || 0) >= 4) return "Won all four Grand Slams";
   if ((best.gsTitles || 0) >= 8) return best.gsTitles + " Grand Slam titles";
   if (no1Streak(yearEnd, id) >= 3) return "Year-end world No. 1, " + no1Streak(yearEnd, id) + " seasons running";
+  var sc = hofScore(best, yearEnd, champs, id);
+  if (sc.pts >= HOF_BAR) return hofLine(sc);
   return null;
 }
-export var HOF_RULE = "all four Grand Slams, or 8 Grand Slams, or year-end No. 1 three seasons running";
+export var HOF_RULE = "a career worth " + HOF_BAR + " Hall of Fame points (a Grand Slam 10, a world title 8, a year-end No. 1 8, a Masters 3, a Tour 500 1, all four Slams +15, reaching No. 1 +5) — or all four Grand Slams, or 8 Grand Slams, or year-end No. 1 three seasons running";
 
 /* Decided at the gala, so the ceremony can say goodbye; the new season then carries it out */
 export function retirementPlan(S, rnd) {
@@ -135,7 +165,7 @@ export function retirementPlan(S, rnd) {
         titles: b.titles || 0, gsTitles: b.gsTitles || 0, cause: Math.floor(rnd() * 1000) };
       if (b.tt) g.tt = b.tt;
       if (b.gsSet) g.gsSet = b.gsSet;
-      var why = hofReason(b, S.yearEnd, n.id); if (why) g.hof = why;
+      var why = hofReason(b, S.yearEnd, n.id, S.champs); if (why) g.hof = why;
       gone.push(g);
     }
   });

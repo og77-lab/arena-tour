@@ -378,7 +378,7 @@ function body(id) {
         <span key="c">The next granny of your family starts from nothing, in the same tour with the same rivals: #1000, first season, 10 starting points. Your badges stay yours.</span>
       ]} />
       <H>The Hall of Fame</H>
-      <P>Very hard to enter: {HOF_RULE}. Riders are judged when they retire, rivals and you alike. The Hall is on the More tab, next to the family wall.</P>
+      <P>Very hard to enter: {HOF_RULE}. From 45 points an active rider is a Hall of Fame candidate, and her profile (yours too) shows her points so far; with enough, it says Hall of Fame bound. Riders are inducted when they retire, rivals and you alike, and stay in the Hall for good. The Hall is on the More tab, next to the family wall, with everyone on course for it listed underneath.</P>
     </>);
 
     case "settings": return (<>
