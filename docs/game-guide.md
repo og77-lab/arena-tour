@@ -342,7 +342,7 @@ Lances and saddles from Mavis's shop are bought on the Get ready screen and don'
 
 ## 13. Crowd love, Knitter & the press
 
-Your **crowd love** (❤️, 0–100, starting at 20) is a score of how much the crowd loves you — not a head count; your Knitter **followers** are the people. The **Crowd love & Knitter** card on Home (tap ❤️ Crowd at the top to jump to it) shows your crowd love, how much they moved this week and why (*riding +6 · interview +3 · weekly drift −1*), and your Knitter followers.
+Your **crowd love** (❤️, 0–100, starting at 0) is a score of how much the crowd loves you — not a head count; your Knitter **followers** are the people. The **Crowd love & Knitter** card on Home (tap ❤️ Crowd at the top to jump to it) shows your crowd love, how much they moved this week and why (*riding +6 · interview +3 · weekly drift −1*), and your Knitter followers.
 
 **What crowd love gives you** (the card shows each in numbers, and 📜 opens all the rules)
 - **Sponsors:** one training point every week for each 10 ❤️.
@@ -354,7 +354,7 @@ Your **crowd love** (❤️, 0–100, starting at 20) is a score of how much the
 - **Interviews:** see below.
 - **Promises:** a bold answer is a promise for the next tournament — reach the semifinals and it's +6; fall short and it's −5.
 - **Revenge:** beating your rival +3.
-- **Drift:** each week fans drift a little towards a baseline set by your fame (30 for most, up to 60 in the top 10) — **raised by your Knitter followers** (1K followers +3, 10K +6, 100K +9).
+- **Drift:** each week fans drift a little towards a baseline set by your fame (0 outside the top 500, 30 inside it, up to 60 in the top 10) — **raised by your Knitter followers** (1K followers +3, 10K +6, 100K +9).
 
 **🧶 Knitter** is the granny social network, where posts are called *knits*. Everyone on tour has followers. Yours grow with wins, titles (a Slam title brings thousands), well-liked interviews and viral moments, faster the more famous you are. Read them on **Home → Knitter**: the newest knits show there, and a tap opens the whole feed with selfies, replies and what's trending. The paper points there each week.
 

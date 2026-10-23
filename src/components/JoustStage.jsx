@@ -9,6 +9,9 @@ import * as React from "react";
 import { Rider, Feathers } from "./Rider";
 import { REDUCED_MOTION } from "./fx";
 import ArenaBackdrop from "./ArenaBackdrop";
+import { ARENA_GROUND } from "./artSprites";
+import ArtRider, { artFiles, gloveReach } from "./ArtRider";
+import ArtStands from "./ArtStands";
 
 const { useState, useEffect, useRef } = React;
 
@@ -54,6 +57,13 @@ export default function JoustStage(props) {
     ro.observe(ref.current);
     return function () { ro.disconnect(); };
   }, []);
+  /* fetch every picture both riders need before the first clash, so no pose blinks in late */
+  var preKey = [props.youArt, props.foeArt, JSON.stringify(props.youKit || {}), JSON.stringify(props.foeKit || {})].join("|");
+  useEffect(function () {
+    if (typeof Image === "undefined") return;
+    artFiles(props.youArt, props.youKit).concat(artFiles(props.foeArt, props.foeKit)).forEach(function (src) { var im = new Image(); im.src = src; });
+  }, [preKey]);
+  var art = !!(props.youArt && props.foeArt);
 
   /* The frame: a big stage, riders nearly half its width, as tall as the screen allows (at most 40% of it, so the
      bar and the STRIKE button always fit below and never move); the lane starts at 60% of the height */
@@ -79,9 +89,16 @@ export default function JoustStage(props) {
   var s = rw / 140, GLOVE = Math.hypot(59, 6), BASE = Math.atan2(-6, 59), CHEST = [58, 50];
   function youPt(dx, vx, vy) { return { x: IDLE_X + dx + vx * s, y: youFeet - rh + vy * s }; }
   function foePt(dx, vx, vy) { return { x: W - IDLE_X - dx - vx * s * FOE_SCALE, y: foeFeet - (112 - vy) * s * FOE_SCALE }; }
-  var hit = null;
-  if (a && (phase === "impact" || phase === "finale")) {
-    var tgt, gy, len, dy, D, aimRad;
+  var hit = null, tgt;
+  /* the painted riders hold the lance level, the glove on the right edge of the picture a third of the way down: the
+     winner rides in until it touches the loser's chest */
+  var ART_CHEST = [64, 44];
+  function artGlove(key) { return gloveReach(key) * 140; }
+  if (art && a && (phase === "impact" || phase === "finale")) {
+    if (a.youWon) { tgt = foePt(travel, ART_CHEST[0], ART_CHEST[1]); hit = { youDx: tgt.x - IDLE_X - artGlove(props.youArt) * s, foeDx: travel, aim: 0, at: tgt }; }
+    else { tgt = youPt(travel, ART_CHEST[0], ART_CHEST[1]); hit = { youDx: travel, foeDx: W - IDLE_X - artGlove(props.foeArt) * s * FOE_SCALE - tgt.x, aim: 0, at: tgt }; }
+  } else if (a && (phase === "impact" || phase === "finale")) {
+    var gy, len, dy, D, aimRad;
     if (a.youWon) {
       tgt = foePt(travel, CHEST[0], CHEST[1]); gy = youFeet - rh + 56 * s; len = GLOVE * s; dy = tgt.y - gy;
       D = Math.sqrt(Math.max(len * len * 0.3, len * len - dy * dy)); aimRad = Math.atan2(dy, D) - BASE;
@@ -154,6 +171,7 @@ export default function JoustStage(props) {
   var gb = GROUND_BG[cond] || GROUND_BG.classic;
   var dust = cond === "mud" ? "rgba(74,53,25,0.7)" : cond === "green" ? "rgba(132,204,22,0.4)" : "rgba(196,160,104,0.7)";
 
+  function rankHat(pal) { var L = (pal && pal.look) || {}; return L.crown ? "crown" : L.hat === "golden" ? "golden" : null; }
   function riderBox(isYou, st, pal) {
     var side = isYou ? { left: IDLE_X } : { right: IDLE_X };
     var dz = dizzy && dizzy.who === (isYou ? "you" : "foe");
@@ -174,7 +192,8 @@ export default function JoustStage(props) {
           return (<div key={"s" + i} aria-hidden style={{ position: "absolute", top: rh * (0.25 + i * 0.18), [isYou ? "left" : "right"]: -rw * 0.28, width: rw * (0.3 - i * 0.05), height: 2.5, borderRadius: 2, background: "rgba(255,255,255,0.85)", boxShadow: "0 0 0 1px rgba(63,42,29,0.25)" }} />);
         })}
         <div style={{ animation: dz ? "dizzyWobble 0.6s ease-in-out infinite" : "none", transformOrigin: isYou ? "40% 100%" : "60% 100%" }}>
-          <Rider palette={pal} width={rw} flip={!isYou} pose={st.pose} aim={st.aim} running={st.running} hatOff={st.hatOff} lance={((isYou ? props.youKit : props.foeKit) || {}).lance || "broom"} saddle={((isYou ? props.youKit : props.foeKit) || {}).saddle || "teacosy"} />
+          {art ? (<div style={{ animation: st.running && !REDUCED_MOTION ? "riderBob 0.28s ease-in-out infinite" : "none" }}><ArtRider art={isYou ? props.youArt : props.foeArt} pose={st.pose} width={rw} flip={!isYou} lance={((isYou ? props.youKit : props.foeKit) || {}).lance} saddle={((isYou ? props.youKit : props.foeKit) || {}).saddle} hat={rankHat(pal)} /></div>) :
+          <Rider palette={pal} width={rw} flip={!isYou} pose={st.pose} aim={st.aim} running={st.running} hatOff={st.hatOff} lance={((isYou ? props.youKit : props.foeKit) || {}).lance || "broom"} saddle={((isYou ? props.youKit : props.foeKit) || {}).saddle || "teacosy"} />}
         </div>
         {dz && (
           <div aria-hidden style={{ position: "absolute", left: (isYou ? 56 * s : rw - 56 * s) - 22 * k, top: -4 * k, width: 44 * k, height: 16 * k, pointerEvents: "none" }}>
@@ -196,6 +215,10 @@ export default function JoustStage(props) {
      <div style={{ position: "absolute", inset: 0, transform: "scale(" + cam.z + ")", transformOrigin: camOrigin, transition: cam.t, willChange: "transform" }}>{/* its own GPU layer: zooming costs nothing to redraw */}
      {/* everything inside shakes on a big clash */}
      <div style={{ position: "absolute", inset: 0, animation: shake }}>
+      {/* The painted arena with its live crowd, sized so its lane starts where ours does, and centred */}
+      {props.arenaArt && (function () { var ah = Math.max(H, laneTop / ARENA_GROUND), aw = ah * 1.25; return (
+        <div aria-hidden style={{ position: "absolute", left: (W - aw) / 2, top: laneTop - ah * ARENA_GROUND, width: aw, height: ah, transform: "scale(" + standZ + ")", transformOrigin: (cam.x - (W - aw) / 2) + "px " + (cam.y - laneTop + ah * ARENA_GROUND) + "px", transition: cam.t, willChange: "transform" }}><ArtStands arena={props.arenaArt} width={aw} height={ah} cheer={cheer} fill={props.crowd} /></div>); })()}
+      {!props.arenaArt && (<>
       {/* The stands, drawn for a smaller lane and enlarged; further back, so they move less with the camera */}
       <div style={{ position: "absolute", left: 0, top: 0, width: W, height: laneTop, transform: "scale(" + standZ + ")", transformOrigin: camOrigin, transition: cam.t, willChange: "transform" }}>
         <div style={{ position: "absolute", left: 0, top: 0, width: W / bs, height: BACKDROP_GROUND, transform: "scale(" + bs + ")", transformOrigin: "0 0" }}>
@@ -215,6 +238,7 @@ export default function JoustStage(props) {
       {cond === "mud" && [0.08, 0.3, 0.5, 0.7, 0.9].map(function (x, i) { var y = i % 2 ? H - 18 * k : railY + 6; return (<div key={x} aria-hidden style={{ position: "absolute", left: (x * 100) + "%", top: y, width: (40 - (i % 2) * 12) * k, height: 9 * k, borderRadius: "50%", zIndex: 1, background: "radial-gradient(ellipse at 40% 35%,#e2e8f0 0%,#94a3b8 45%,#475569 100%)", border: "1.5px solid #3b2a14", boxShadow: "inset 0 -2px 0 rgba(30,41,59,0.4)" }} />); })}
       {cond === "green" && [0.04, 0.17, 0.3, 0.43, 0.56, 0.69, 0.82, 0.95].map(function (x, i) { var y = i % 2 ? H - 14 * k : laneTop + 6; return (<div key={x} aria-hidden style={{ position: "absolute", left: (x * 100) + "%", top: y, width: 8 * k, height: 8 * k, borderRadius: "50%", zIndex: 1, background: "radial-gradient(circle,#facc15 0 30%,#fff 32% 100%)", boxShadow: "0 0 0 1px rgba(63,98,18,0.5)" }} />); })}
       {cond === "heat" && (<div aria-hidden style={{ position: "absolute", left: 0, right: 0, top: laneTop, bottom: 0, background: "linear-gradient(180deg,rgba(255,237,213,0.25),rgba(214,176,115,0.0))" }} />)}
+      </>)}
 
       <Tilt W={W} y={railY} h={railH} color={props.tierColor} />
       {riderBox(false, foe, props.foe)}

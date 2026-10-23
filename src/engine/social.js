@@ -3,7 +3,7 @@
    higher the crowd love your fans settle back to each week. In the stands, the crowd backs whichever rider it loves
    more — a small, steady edge (a slightly wider gold zone) for the crowd favourite, doubled on match-point strikes. */
 
-import { fanBaseline, fansOf } from "./fans";
+import { fanBaseline, playerBaseline, fansOf } from "./fans";
 import { KNITS, REPLIES, HASHTAGS, PLACES } from "./knitPool";
 
 export var NETWORK = { name: "Knitter", icon: "🧶", post: "knit" };
@@ -113,7 +113,7 @@ export function weekKnits(o) {
 
 /* The whole chain in numbers, for Home and the paper: followers → the level fans settle at → fans → what fans do */
 export function fanChain(player, rank) {
-  var r = Math.max(1, rank || 1000), fol = followersOf(Object.assign({}, player, { isP: true })), lift = followersLift(fol), base = fanBaseline(r), fans = fansOf(player);
+  var r = Math.max(1, rank || 1000), fol = followersOf(Object.assign({}, player, { isP: true })), lift = followersLift(fol), base = playerBaseline(r), fans = fansOf(player);
   var typFol = (200 + 420000 / Math.pow(r, 1.12)) * 1.1, typLove = Math.max(5, Math.min(95, base + followersLift(typFol)));
   return { fol: fol, lift: lift, base: base, settle: base + lift, fans: fans, tp: Math.floor(fans / 10), typLove: typLove, edge: crowdEdge(fans, typLove).d };
 }

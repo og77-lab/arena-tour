@@ -11,7 +11,7 @@ import Icon from "./Icons";
 const { useState } = React;
 
 export var COACH_NAME = "Coach Hettie";
-var COACH_PAL = paletteFor(4242, 1);
+var COACH_PAL = Object.assign({}, paletteFor(4242, 1), { art: "coach" });
 
 /* Each tip: one or more pages. {name} and {rival} are filled in by the caller */
 export var TIPS = {

@@ -9,7 +9,8 @@ import MatchIntro from "./MatchIntro";
 import MatchOutro from "./MatchOutro";
 import SetBreak from "./SetBreak";
 import JoustStage from "./JoustStage";
-import { PLAYER_PALETTE, paletteFor, withKit } from "./Rider";
+import { PLAYER_PALETTE, PLAYER_LOOK, paletteFor, withKit } from "./Rider";
+import { playerArt, rivalArt, arenaName } from "./artSprites";
 import { crowdEdge } from "../engine/social";
 import { CoachBubble } from "./Coach";
 import FinalOutro from "./FinalOutro";
@@ -525,7 +526,7 @@ export default function PowerBar(props) {
           </span>
         </div>
 
-        <JoustStage tier={props.tier} cond={props.cond} youKit={props.gear || null} foeKit={props.oppGear || null} you={youPal} foe={foePal} action={joust} verdict={isDone ? (res.w ? "won" : "lost") : null} tierColor={tierColor} />
+        <JoustStage tier={props.tier} cond={props.cond} youArt={playerArt(PLAYER_LOOK)} foeArt={rivalArt(props.oppId)} arenaArt={arenaName(props.tier, props.cond)} crowd={props.crowd == null ? 1 : props.crowd} youKit={props.gear || null} foeKit={props.oppGear || null} you={youPal} foe={foePal} action={joust} verdict={isDone ? (res.w ? "won" : "lost") : null} tierColor={tierColor} />
 
         <div style={{ display: "flex", justifyContent: "space-around", alignItems: "flex-start", gap: 4, marginTop: 4, marginBottom: 6 }}>
           <Fighter isYou={true} name={youName} emoji={youEmoji} strikes={myH} other={opH} verdict={isDone ? (res.w ? "won" : "lost") : null} />

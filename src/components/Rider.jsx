@@ -4,6 +4,8 @@
 import * as React from "react";
 import { motion } from "framer-motion";
 import { REDUCED_MOTION } from "./fx";
+import { ART_ON, playerArt, rivalArt, portraitSrc } from "./artSprites";
+import ArtRider from "./ArtRider";
 
 const { useRef, useId } = React;
 
@@ -25,10 +27,12 @@ export var PLAYER_LOOKS = [
   { dress: "#1f2937", shawl: "#ef4444", plume: "#f97316", chicken: { body: "#57534e", wing: "#44403c", tail: "#0c0a09" },
     look: { skin: "#b97a56", hair: "#dc2626", hairStyle: "bob", glasses: "square", brows: "fierce", hat: "helmet", hatColor: "#94a3b8", acc: "scarf" } }
 ];
+PLAYER_LOOKS.forEach(function (p, i) { p.art = playerArt(i); });
 export var LOOK_NAMES = ["The original", "The general", "The disco nan", "The gardener", "The church lady", "The biker"];
 /* the look of the granny you're playing now (ArenaGame sets it from S.player.look before drawing anything) */
 export var PLAYER_PALETTE = PLAYER_LOOKS[0];
-export function setPlayerLook(i) { PLAYER_PALETTE = PLAYER_LOOKS[i] || PLAYER_LOOKS[0]; }
+export var PLAYER_LOOK = 0;
+export function setPlayerLook(i) { PLAYER_LOOK = PLAYER_LOOKS[i] ? i : 0; PLAYER_PALETTE = PLAYER_LOOKS[PLAYER_LOOK]; }
 export function lookPalette(i) { return PLAYER_LOOKS[i] || PLAYER_LOOKS[0]; }
 
 var DRESSES = ["#be123c", "#15803d", "#7c3aed", "#0e7490", "#c2410c", "#4d7c0f", "#9d174d", "#334155", "#b45309", "#1d4ed8"];
@@ -63,7 +67,7 @@ export function paletteFor(id, rank) {
     brows: pick(BROWS, id, 6), hat: pick(HATS, id, 7), hatColor: pick(HAT_COLORS, id, 8), acc: pick(ACCS, id, 9)
   };
   if (rank && rank <= 10) { look.hat = "golden"; look.crown = rank === 1; }
-  return { dress: DRESSES[c], shawl: SHAWLS[(c + 3) % SHAWLS.length], plume: PLUMES[c % PLUMES.length], chicken: pick(CHICKENS, id, 10), look: look };
+  return { dress: DRESSES[c], shawl: SHAWLS[(c + 3) % SHAWLS.length], plume: PLUMES[c % PLUMES.length], chicken: pick(CHICKENS, id, 10), look: look, art: rivalArt(id) };
 }
 
 var LANCE_ANGLE = { idle: -24, charge: 0, deflect: -38, knocked: -45, fallen: 30, cheer: -62 };
@@ -292,6 +296,12 @@ export function Rider(props) {
   var hatGone = props.hatOff || pose === "fallen";
   var look = props.crown ? Object.assign({}, L, { hat: "colander" }) : L;
   var id = useId().replace(/[^a-zA-Z0-9]/g, "");
+  /* the painted rider, when there is one: the same picture for the same pose, mirrored for the far side */
+  if (ART_ON && p.art && !props.svg) return (
+    <span aria-hidden style={{ position: "relative", display: "block", width: w, height: h, animation: run ? "riderBob 0.28s ease-in-out infinite" : "none" }}>
+      <ArtRider art={p.art} pose={pose} width={w} flip={props.flip} lance={lance} saddle={saddle} hat={L.crown ? "crown" : L.hat === "golden" ? "golden" : null} />
+    </span>
+  );
   function clip(n) { return "url(#" + n + id + ")"; }
   var dress = L.knit ? "#6b3f5a" : p.dress, top = p.dress;
   var TORSO = "M43 66 C42 52 47 41 57 41 C67 41 72 52 71 66 Z";
@@ -434,6 +444,12 @@ export function withKit(pal, kit) { return kit ? Object.assign({}, pal, { kit: {
 /* Round head-and-shoulders crop of a rider, for lists and news photos */
 export function Face(props) {
   var s = props.size || 34, w = s * 2.7, h = w * 112 / 140;
+  var pp = props.palette || PLAYER_PALETTE;
+  if (ART_ON && pp.art) return (
+    <span aria-hidden style={{ position: "relative", display: "inline-block", width: s, height: s, borderRadius: "50%", overflow: "hidden", flexShrink: 0, background: props.bg || "linear-gradient(180deg,#e0f2fe,#fef3c7)", border: "1.5px solid " + INK }}>
+      <img src={portraitSrc(pp.art)} alt="" draggable={false} loading="lazy" style={{ display: "block", width: "100%", height: "100%", objectFit: "cover" }} />
+    </span>
+  );
   return (
     <span aria-hidden style={{ position: "relative", display: "inline-block", width: s, height: s, borderRadius: "50%", overflow: "hidden", flexShrink: 0, background: props.bg || "linear-gradient(180deg,#e0f2fe,#fef3c7)", border: "1.5px solid " + INK }}>
       <span style={{ position: "absolute", left: s / 2 - w * 57 / 140, top: s * 0.58 - h * 24 / 112 }}>{/* centred on her (big) head */}

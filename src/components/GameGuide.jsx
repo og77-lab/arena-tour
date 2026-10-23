@@ -301,7 +301,7 @@ function body(id) {
     </>);
 
     case "fans": return (<>
-      <P><B>Crowd love</B> (❤️, 0–100, starting at 20) is a score of how much the crowd loves you, not a head count. Your Knitter followers are the people.</P>
+      <P><B>Crowd love</B> (❤️, 0–100, starting at 0) is a score of how much the crowd loves you, not a head count. Your Knitter followers are the people.</P>
       <FanRules />
       <H>🧶 Knitter</H>
       <P>The granny social network (posts are <i>knits</i>). Everyone has followers; yours grow with wins, titles, liked interviews and viral moments, faster the more famous you are. They lift the level your crowd love settles at. Read the feed on <B>Home → Knitter</B>: the newest knits show there, and a tap opens the whole feed (selfies, replies, what's trending).</P>
