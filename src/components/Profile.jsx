@@ -163,7 +163,7 @@ export default function Profile(props) {
               <span style={{ fontSize: 14 }}>
                 <span style={{ color: "#0f172a", fontWeight: 800 }}>{Math.round(p.skill||0)}</span>
                 <span style={{ color: "#94a3b8" }}> / </span>
-                <span style={{ color: "#f59e0b", fontWeight: 700 }}>{p.pot||92}</span>
+                <span style={{ color: "#f59e0b", fontWeight: 700 }}>{Math.round(p.pot||92)}</span>
                 <span style={{ color: "#94a3b8", fontSize: 13, marginLeft: 3 }}>potential</span>
               </span>
             </div>

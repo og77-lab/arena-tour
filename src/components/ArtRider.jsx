@@ -20,6 +20,9 @@ var HAT_W = 0.2, HAT_SINK = 0.11;
 /* the lance: its length (share of the width) and where along it the fist holds it; in the lance pictures the lance
    itself runs from 25.5% to 74.5% of the width, the glove at the right end */
 var LANCE_LEN = 1.0, LANCE_GRIP = 0.62, LANCE_FROM = 0.255, LANCE_SPAN = 0.49;
+/* where the shaft runs in each lance picture at the grip (share of its height), so it passes through her fist and not
+   just above it: the yarn ball and the glove make the pictures taller than the shaft is centred */
+var SHAFT_Y = { broom: 0.476, needle: 0.42, baguette: 0.464, oak: 0.468, bamboo: 0.504 };
 function rigOf(key, pose) { var r = RIGS[key]; return r && r.poses[pose] ? r : null; }
 /* how far right of her picture the glove reaches when she charges (in the flat pictures it's the right edge) */
 export function gloveReach(key) { var r = rigOf(key, "charge"); return r ? r.poses.charge.fist[0] + LANCE_LEN * (1 - LANCE_GRIP) : 1; }
@@ -47,7 +50,7 @@ export default function ArtRider(props) {
       <img src={"/art/layers/rooster-" + name + "-" + f + ".webp"} alt="" draggable={false} style={Object.assign({}, img, { left: 0, top: 0, width: w, height: h, filter: props.tint && props.tint !== "none" ? props.tint : undefined })} />
       <img src={"/art/saddle-" + saddle + ".webp"} alt="" draggable={false} style={Object.assign({}, img, { left: rig.seat[0] * w - sw / 2, top: rig.seat[1] * h - sh * 0.4, width: sw, height: sh })} />
       <img src={"/art/layers/rider-" + name + "-" + f + ".webp"} alt="" draggable={false} style={Object.assign({}, img, { left: 0, top: 0, width: w, height: h })} />
-      <img src={"/art/lance-" + lance + ".webp"} alt="" draggable={false} style={Object.assign({}, img, { left: at[0] * w - lw * gripAt, top: at[1] * h - lh / 2, width: lw, height: lh, transformOrigin: (gripAt * 100) + "% 50%", transform: "rotate(" + rig.tilt + "deg)" })} />
+      <img src={"/art/lance-" + lance + ".webp"} alt="" draggable={false} style={Object.assign({}, img, { left: at[0] * w - lw * gripAt, top: at[1] * h - lh * (SHAFT_Y[lance] || 0.5), width: lw, height: lh, transformOrigin: (gripAt * 100) + "% " + ((SHAFT_Y[lance] || 0.5) * 100) + "%", transform: "rotate(" + rig.tilt + "deg)" })} />
       {hat}
     </span>
   );

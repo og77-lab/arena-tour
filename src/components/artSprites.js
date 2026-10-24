@@ -22,35 +22,26 @@ export function rivalTint(id) { return ART_ON && id != null ? ROOSTER_TINTS[mix(
 export function portraitSrc(key) { return key === "coach" ? "/art/coach-portrait.webp" : "/art/portrait-" + key + ".webp"; }
 export function riderSrc(key, pose) { return "/art/granny-" + key + "-" + (POSE[pose] || "idle") + ".webp"; }
 
-/* ── The ground ── every event rides at a ground that fits its name and its level: a fete on a village green with one
-   bench, a county showground, a seaside town, a city stadium, a giant Masters arena, and a stadium of its own for each
-   Grand Slam and the Season Finals. Each kind lists the grounds it may use, best first; a ground is used once its
-   picture is in (HAVE), so new grounds slot in by name. Where a kind has several, the place name picks one, so the
-   same event always rides at the same ground. The weather plays over it; only a muddy week at a small event moves it
-   to the muddy ground. */
-var HAVE = { futures: 1, challenger: 1, tour500: 1, masters: 1, grandslam: 1, muddy: 1, green: 1, heatwave: 1, coast: 1 };
-var BY_SUFFIX = [
-  ["Fete Cup", [["fete", "futures"]]], ["Village Classic", [["village", "green"]]], ["Garden Party Joust", [["garden", "green"]]],
-  ["Allotment Open", [["allotment", "futures"]]], ["Bake-Off Trophy", [["bakeoff", "futures"]]],
-  ["County Cup", [["county", "challenger"]]], ["Market Day Trophy", [["market", "challenger"]]], ["Harvest Challenger", [["harvest", "challenger"]]], ["Challenger", [["challenger"]]],
-  ["Seaside Classic", [["seaside", "coast"]]], ["Open", [["town-open", "heatwave"]]], ["Trophy", [["town-trophy", "heatwave"]]],
-  ["Championships", [["city", "tour500"], ["city-night", "tour500"]]], ["Grand Prix", [["grandprix", "tour500"]]],
-  ["Masters", [["masters"], ["masters-night", "masters"], ["masters-dome", "masters"]]]
-];
-var SLAM_GROUND = { "The Coop Open": ["slam-coop", "grandslam"], "The Swamp Slam": ["slam-swamp", "grandslam"], "Wimblehen-on-Wold": ["slam-wimblehen", "grandslam"], "The Gale Cup": ["slam-gale", "grandslam"] };
-var TIER_GROUND = [["futures"], ["challenger"], ["heatwave"], ["tour500"], ["masters"], ["grandslam"], ["finals", "grandslam"]];
-function firstHave(list) { for (var i = 0; i < list.length; i++) if (HAVE[list[i]]) return list[i]; return null; }
+/* ── The ground ── every event rides at a ground of its own level, built from two pictures: the stands (a backdrop,
+   transparent below its front rail) and the riding surface under them. Futures ride at village grounds (a bench, a
+   fete, an allotment), Challengers at small local stands, Tour 250s at town grounds, Tour 500s at big city stadiums,
+   Masters at giant televised arenas; each Grand Slam and the Season Finals has a complete arena of its own. The
+   event's name picks which stands, so the same event always rides at the same ground and the week's other events at
+   others. The surface follows the weather (dry, mud, grass, baked hot; wind blows over dry ground), rustic for the
+   two small levels and groomed above them. Returns { key, full } or { key, backdrop, lane }: files in /art/grounds. */
+var STANDS = [["futures", 8], ["challenger", 8], ["tour250", 8], ["tour500", 6], ["masters", 6]];
+var SLAM_ARENA = { "The Coop Open": "slam-coop", "The Swamp Slam": "slam-swamp", "Wimblehen-on-Wold": "slam-wimblehen", "The Gale Cup": "slam-gale" };
+/* names that promise a kind of place keep to stands that fit it (the numbers of those backdrops) */
+var THEMED = [["Seaside Classic", [1, 7]], ["Harvest Challenger", [3, 1]], ["Market Day Trophy", [2, 8]], ["Garden Party Joust", [3, 1]], ["Allotment Open", [4, 6]], ["Bake-Off Trophy", [5, 1]]];
+var SURFACE = { classic: "dry", wind: "dry", mud: "mud", green: "grass", heat: "hot" };
 export function arenaName(tier, cond, eventName) {
   if (!ART_ON) return null;
   var name = String(eventName || "").replace(/ II$/, "");
-  if (tier >= 6) return firstHave(TIER_GROUND[6]);
-  if (SLAM_GROUND[name]) return firstHave(SLAM_GROUND[name]);
-  if (cond === "mud" && tier <= 2) return "muddy";
-  for (var i = 0; i < BY_SUFFIX.length; i++) {
-    var sfx = BY_SUFFIX[i][0];
-    if (name.slice(-sfx.length) === sfx) { var opts = BY_SUFFIX[i][1]; return firstHave(opts[mix("ground/" + name) % opts.length]) || firstHave(TIER_GROUND[tier] || []) || "futures"; }
-  }
-  return firstHave(TIER_GROUND[tier] || []) || "futures";
+  if (tier >= 6) return { key: "finals", full: "arena-finals-empty" };
+  if (tier === 5) { var sl = SLAM_ARENA[name] || "slam-coop"; return { key: sl, full: "arena-" + sl + "-empty" }; }
+  var st = STANDS[Math.max(0, Math.min(4, tier || 0))], pickN = mix("stands/" + name + "/" + tier), n = 1 + (pickN % st[1]);
+  for (var i = 0; i < THEMED.length; i++) if (name.slice(-THEMED[i][0].length) === THEMED[i][0]) n = THEMED[i][1][pickN % THEMED[i][1].length];
+  return { key: st[0] + "-" + n, backdrop: "backdrop-" + st[0] + "-" + n, lane: "lane-" + (tier <= 1 ? "rustic" : "groomed") + "-" + (SURFACE[cond] || "dry") };
 }
 /* where the stands meet the lane in the arena pictures (share of the height) */
 export var ARENA_GROUND = 0.5;
