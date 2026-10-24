@@ -192,7 +192,7 @@ export default function JoustStage(props) {
           return (<div key={"s" + i} aria-hidden style={{ position: "absolute", top: rh * (0.25 + i * 0.18), [isYou ? "left" : "right"]: -rw * 0.28, width: rw * (0.3 - i * 0.05), height: 2.5, borderRadius: 2, background: "rgba(255,255,255,0.85)", boxShadow: "0 0 0 1px rgba(63,42,29,0.25)" }} />);
         })}
         <div style={{ animation: dz ? "dizzyWobble 0.6s ease-in-out infinite" : "none", transformOrigin: isYou ? "40% 100%" : "60% 100%" }}>
-          {art ? (<div style={{ animation: st.running && !REDUCED_MOTION ? "riderBob 0.28s ease-in-out infinite" : "none" }}><ArtRider art={isYou ? props.youArt : props.foeArt} pose={st.pose} width={rw} flip={!isYou} lance={((isYou ? props.youKit : props.foeKit) || {}).lance} saddle={((isYou ? props.youKit : props.foeKit) || {}).saddle} hat={rankHat(pal)} /></div>) :
+          {art ? (<div style={{ animation: st.running && !REDUCED_MOTION ? "riderBob 0.28s ease-in-out infinite" : "none" }}><ArtRider art={isYou ? props.youArt : props.foeArt} tint={pal && pal.tint} pose={st.pose} width={rw} flip={!isYou} lance={((isYou ? props.youKit : props.foeKit) || {}).lance} saddle={((isYou ? props.youKit : props.foeKit) || {}).saddle} hat={rankHat(pal)} /></div>) :
           <Rider palette={pal} width={rw} flip={!isYou} pose={st.pose} aim={st.aim} running={st.running} hatOff={st.hatOff} lance={((isYou ? props.youKit : props.foeKit) || {}).lance || "broom"} saddle={((isYou ? props.youKit : props.foeKit) || {}).saddle || "teacosy"} />}
         </div>
         {dz && (

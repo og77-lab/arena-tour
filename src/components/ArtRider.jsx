@@ -44,7 +44,7 @@ export default function ArtRider(props) {
   var at = rig.fist || rig.drop;
   return (
     <span style={base}>
-      <img src={"/art/layers/rooster-" + name + "-" + f + ".webp"} alt="" draggable={false} style={Object.assign({}, img, { left: 0, top: 0, width: w, height: h })} />
+      <img src={"/art/layers/rooster-" + name + "-" + f + ".webp"} alt="" draggable={false} style={Object.assign({}, img, { left: 0, top: 0, width: w, height: h, filter: props.tint && props.tint !== "none" ? props.tint : undefined })} />
       <img src={"/art/saddle-" + saddle + ".webp"} alt="" draggable={false} style={Object.assign({}, img, { left: rig.seat[0] * w - sw / 2, top: rig.seat[1] * h - sh * 0.4, width: sw, height: sh })} />
       <img src={"/art/layers/rider-" + name + "-" + f + ".webp"} alt="" draggable={false} style={Object.assign({}, img, { left: 0, top: 0, width: w, height: h })} />
       <img src={"/art/lance-" + lance + ".webp"} alt="" draggable={false} style={Object.assign({}, img, { left: at[0] * w - lw * gripAt, top: at[1] * h - lh / 2, width: lw, height: lh, transformOrigin: (gripAt * 100) + "% 50%", transform: "rotate(" + rig.tilt + "deg)" })} />

@@ -4,31 +4,34 @@
 import * as React from "react";
 import { motion } from "framer-motion";
 import { REDUCED_MOTION } from "./fx";
-import { ART_ON, playerArt, rivalArt, portraitSrc } from "./artSprites";
+import { ART_ON, playerArt, rivalArt, rivalTint, portraitSrc } from "./artSprites";
 import ArtRider from "./ArtRider";
 
 const { useRef, useId } = React;
 
 var INK = "#3f2a1d";
 
-/* The player's granny: six starting looks to pick from (a new career, and every new granny of the family; S.player.look).
+/* The player's granny: seven starting looks to pick from, one per painted granny (artSprites.PLAYER_ART); the colours
+   here match each painting's rooster and dress, for the feathers on a hit and wherever she's drawn without the painting (a new career, and every new granny of the family; S.player.look).
    The first matches the game icon: floral bike helmet, round glasses, knit cardigan + pauldron, rainbow rooster. */
 export var PLAYER_LOOKS = [
   { dress: "#c4a27c", shawl: "#7c5c3b", plume: "#facc15", chicken: { body: "#0e7490", neck: "#f97316", wing: "#ea580c", tail: "#1e3a8a" },
     look: { skin: "#f6d5bd", hair: "#f5f5f4", hairStyle: "bun", glasses: "round", brows: "fierce", hat: "floral", hatColor: "#14b8a6", acc: "pauldron", knit: true } },
-  { dress: "#1e3a8a", shawl: "#cbd5e1", plume: "#ef4444", chicken: { body: "#f8fafc", wing: "#cbd5e1", tail: "#334155" },
+  { dress: "#f9a8d4", shawl: "#4d7c0f", plume: "#ef4444", chicken: { body: "#0e7490", neck: "#f97316", wing: "#ea580c", tail: "#1e3a8a" },
     look: { skin: "#f3cfb3", hair: "#d6d3d1", hairStyle: "bob", glasses: "monocle", brows: "fierce", hat: "colander", hatColor: "#94a3b8", acc: "pauldron" } },
-  { dress: "#7c3aed", shawl: "#f0abfc", plume: "#ec4899", chicken: { body: "#fcd34d", wing: "#f59e0b", tail: "#7c3aed" },
+  { dress: "#c4b5fd", shawl: "#f0abfc", plume: "#ec4899", chicken: { body: "#1d4ed8", neck: "#dc2626", wing: "#dc2626", tail: "#1e3a8a" },
     look: { skin: "#eac0a0", hair: "#c4b5fd", hairStyle: "curls", glasses: "cat", brows: "surprised", hat: "beanie", hatColor: "#f472b6", acc: "earrings" } },
-  { dress: "#15803d", shawl: "#fef08a", plume: "#84cc16", chicken: { body: "#c2410c", wing: "#9a3412", tail: "#14532d" },
+  { dress: "#4d7c0f", shawl: "#facc15", plume: "#84cc16", chicken: { body: "#e5e7eb", wing: "#1f2937", tail: "#111827" },
     look: { skin: "#d9a07b", hair: "#9ca3af", hairStyle: "braid", glasses: "square", brows: "sweet", hat: "beanie", hatColor: "#4ade80", acc: "flower" } },
-  { dress: "#db2777", shawl: "#fbcfe8", plume: "#f472b6", chicken: { body: "#fffbeb", wing: "#e7e5e4", tail: "#a8a29e" },
+  { dress: "#7c3aed", shawl: "#fbcfe8", plume: "#9f1239", chicken: { body: "#14532d", wing: "#0f172a", tail: "#064e3b" },
     look: { skin: "#f6d5bd", hair: "#f5f5f4", hairStyle: "bun", glasses: "round", brows: "sweet", hat: "tophat", hatColor: "#f9a8d4", acc: "pearls" } },
-  { dress: "#1f2937", shawl: "#ef4444", plume: "#f97316", chicken: { body: "#57534e", wing: "#44403c", tail: "#0c0a09" },
-    look: { skin: "#b97a56", hair: "#dc2626", hairStyle: "bob", glasses: "square", brows: "fierce", hat: "helmet", hatColor: "#94a3b8", acc: "scarf" } }
+  { dress: "#dc2626", shawl: "#1d4ed8", plume: "#f97316", chicken: { body: "#f59e0b", wing: "#b45309", tail: "#0f172a" },
+    look: { skin: "#f3cfb3", hair: "#f5f5f4", hairStyle: "bob", glasses: "square", brows: "fierce", hat: "beanie", hatColor: "#1d4ed8", acc: "scarf" } },
+  { dress: "#991b1b", shawl: "#fde68a", plume: "#ef4444", chicken: { body: "#f8fafc", wing: "#94a3b8", tail: "#334155" },
+    look: { skin: "#f6d5bd", hair: "#d6d3d1", hairStyle: "bun", glasses: "round", brows: "sweet", hat: "helmet", hatColor: "#94a3b8", acc: "pearls" } }
 ];
 PLAYER_LOOKS.forEach(function (p, i) { p.art = playerArt(i); });
-export var LOOK_NAMES = ["The original", "The general", "The disco nan", "The gardener", "The church lady", "The biker"];
+export var LOOK_NAMES = ["The original", "The colander", "The night owl", "The kitchen general", "The Sunday best", "The sporty nan", "The tweed lady"];
 /* the look of the granny you're playing now (ArenaGame sets it from S.player.look before drawing anything) */
 export var PLAYER_PALETTE = PLAYER_LOOKS[0];
 export var PLAYER_LOOK = 0;
@@ -67,7 +70,7 @@ export function paletteFor(id, rank) {
     brows: pick(BROWS, id, 6), hat: pick(HATS, id, 7), hatColor: pick(HAT_COLORS, id, 8), acc: pick(ACCS, id, 9)
   };
   if (rank && rank <= 10) { look.hat = "golden"; look.crown = rank === 1; }
-  return { dress: DRESSES[c], shawl: SHAWLS[(c + 3) % SHAWLS.length], plume: PLUMES[c % PLUMES.length], chicken: pick(CHICKENS, id, 10), look: look, art: rivalArt(id) };
+  return { dress: DRESSES[c], shawl: SHAWLS[(c + 3) % SHAWLS.length], plume: PLUMES[c % PLUMES.length], chicken: pick(CHICKENS, id, 10), look: look, art: rivalArt(id), tint: rivalTint(id) };
 }
 
 var LANCE_ANGLE = { idle: -24, charge: 0, deflect: -38, knocked: -45, fallen: 30, cheer: -62 };
@@ -299,7 +302,7 @@ export function Rider(props) {
   /* the painted rider, when there is one: the same picture for the same pose, mirrored for the far side */
   if (ART_ON && p.art && !props.svg) return (
     <span aria-hidden style={{ position: "relative", display: "block", width: w, height: h, animation: run ? "riderBob 0.28s ease-in-out infinite" : "none" }}>
-      <ArtRider art={p.art} pose={pose} width={w} flip={props.flip} lance={lance} saddle={saddle} hat={L.crown ? "crown" : L.hat === "golden" ? "golden" : null} />
+      <ArtRider art={p.art} tint={p.tint} pose={pose} width={w} flip={props.flip} lance={lance} saddle={saddle} hat={L.crown ? "crown" : L.hat === "golden" ? "golden" : null} />
     </span>
   );
   function clip(n) { return "url(#" + n + id + ")"; }
@@ -429,7 +432,7 @@ export function LookPicker(props) {
         {PLAYER_LOOKS.map(function (pal, i) {
           return (<button key={i} type="button" onClick={function () { props.onChange(i); }} aria-label={LOOK_NAMES[i]}
             style={{ padding: 1, borderRadius: "50%", border: "2px solid " + (i === v ? "#f59e0b" : "transparent"), background: "none", cursor: "pointer", lineHeight: 0 }}>
-            <Face palette={pal} size={props.size || 32} />
+            <Face palette={pal} size={props.size || 30} />
           </button>);
         })}
       </div>
