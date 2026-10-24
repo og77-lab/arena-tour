@@ -147,7 +147,7 @@ function body(id) {
         ["Challenger", "301–700", "Best of 3", champTotal(1).toLocaleString(), "$16K"],
         ["Tour 250", "101–400", "Best of 3", champTotal(2).toLocaleString(), "$64K"],
         ["Tour 500", "31–200", "Best of 3", champTotal(3).toLocaleString(), "$162K"],
-        ["Masters", "1–100", "Best of 5", champTotal(4).toLocaleString(), "$460K"],
+        ["Masters", "1–64", "Best of 5", champTotal(4).toLocaleString(), "$460K"],
         ["Grand Slam", "1–64", "Best of 5", champTotal(5).toLocaleString(), "$1.6M"]
       ]} />
       <P>Each tournament is a knockout bracket (32 riders, 64 at a Slam). Every round you win adds points and prize money; the totals above are for winning the whole thing. Lose and your week is over. Every step up is a real step: <B>winning a tier is worth about reaching the quarterfinal of the tier above</B>, and winning one round at a Masters is worth a quarterfinal or semifinal at a Tour 500. Points you hold once you reach each round — reach the final and lose it, you keep the F number; win it, you get the Win number (shown on every tournament card):</P>

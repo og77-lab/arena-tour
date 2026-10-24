@@ -56,7 +56,7 @@ Tap **Choose tournament** on Home or Season. Your rank decides which tiers are o
 | Challenger | 301–700 | Best of 3 | 80 | $16K |
 | Tour 250 | 101–400 | Best of 3 | 300 | $64K |
 | Tour 500 | 31–200 | Best of 3 | 1,200 | $162K |
-| Masters | 1–100 | Best of 5 | 5,000 | $460K |
+| Masters | 1–64 | Best of 5 | 5,000 | $460K |
 | Grand Slam | 1–64 | Best of 5 | 10,000 | $1.6M |
 
 Each tournament is a knockout bracket (32 riders, 64 at a Slam). Every round you win adds points and prize money; the totals above are for winning the whole thing. Lose and your week is over.

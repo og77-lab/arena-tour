@@ -30,7 +30,7 @@ export const TIERS = [
   { name: "Challenger", short: "CHL", col: "#22c55e", size: 32, rounds: 5, bo: 3, pts: [7,13,16,20,24], tp: [20,25,45,60,100], money: [200,500,1500,4000,10000], rankRange: [301,700] },
   { name: "Tour 250", short: "250", col: "#0ea5e9", size: 32, rounds: 5, bo: 3, pts: [27,48,60,75,90], tp: [40,50,90,120,200], money: [800,2000,6000,15000,40000], rankRange: [101,400] },
   { name: "Tour 500", short: "500", col: "#8b5cf6", size: 32, rounds: 5, bo: 3, pts: [108,192,240,300,360], tp: [80,100,180,240,400], money: [2000,5000,15000,40000,100000], rankRange: [31,200] },
-  { name: "Masters", short: "MST", col: "#ec4899", size: 32, rounds: 5, bo: 5, pts: [450,800,1000,1250,1500], tp: [160,200,360,480,800], money: [5000,15000,40000,100000,300000], rankRange: [1,100] },
+  { name: "Masters", short: "MST", col: "#ec4899", size: 32, rounds: 5, bo: 5, pts: [450,800,1000,1250,1500], tp: [160,200,360,480,800], money: [5000,15000,40000,100000,300000], rankRange: [1,64] },
   { name: "Grand Slam", short: "GS", col: "#f59e0b", size: 64, rounds: 6, bo: 5, pts: [400,600,1500,2000,2500,3000], tp: [160,160,400,720,960,1600], money: [10000,25000,60000,150000,400000,1000000], rankRange: [1,64] }
 ];
 

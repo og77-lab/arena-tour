@@ -46,7 +46,7 @@ export var DROP_LIMIT = 4, STEP_TIRED = 45;
 /* Lowest tier whose rank range holds this rank (the game's own fallback when none does) */
 export function lowestTierFor(rank) {
   for (var i = 0; i <= 4; i++) if (rank >= TIERS[i].rankRange[0] && rank <= TIERS[i].rankRange[1]) return i;
-  return rank > 700 ? 0 : rank > 400 ? 1 : rank > 200 ? 2 : rank > 100 ? 3 : 4;
+  return rank > 700 ? 0 : rank > 400 ? 1 : rank > 200 ? 2 : rank > 64 ? 3 : 4;
 }
 /* The tier just below her range, or -1 at the bottom */
 export function stepDownTier(rank) { return lowestTierFor(rank) - 1; }
