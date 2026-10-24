@@ -11,6 +11,34 @@ import RankSparkline from "./RankSparkline";
 import { FitnessCard, FansCard } from "./Fitness";
 import FarewellNotice from "./FarewellNotice";
 import DefendBox from "./Defending";
+import { rookieClass } from "../engine/rookies";
+
+/* Fresh blood: in a season's first five weeks, the newcomers with the highest potential (engine/rookies); tap one for her profile */
+function FreshBlood(props) {
+  var S = props.S;
+  if ((S.sNum || 1) < 2 || S.calIdx >= 5) return null;
+  var cls = rookieClass(S);
+  if (!cls.length) return null;
+  return (
+    <div style={card2({ padding: "11px 12px", background: "linear-gradient(180deg,#fff 0%,#f0fdf4 100%)" })}>
+      <span style={Object.assign(cap2("#15803d"), { display: "block", fontSize: 11 })}>Fresh blood</span>
+      <span style={Object.assign(title2(16), { display: "block" })}>{cls.length} newcomers on tour this season</span>
+      <span style={{ display: "block", fontSize: 12.5, color: C.textSoft, fontWeight: 700, marginTop: 1 }}>The highest potential in the class:</span>
+      {cls.slice(0, 3).map(function (r) {
+        return (
+          <button key={r.id} onClick={function () { if (props.onOpen) props.onOpen(r.id); }} style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", marginTop: 8, padding: 0, border: "none", background: "none", cursor: "pointer", textAlign: "left", fontFamily: BODY }}>
+            <Face palette={paletteFor(r.id, r.rank)} size={36} />
+            <span style={{ flex: 1, minWidth: 0 }}>
+              <span style={{ display: "block", fontSize: 14, fontWeight: 900, color: C.text, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{r.emoji} {r.name}{r.loud ? " · 📣 outspoken" : ""}</span>
+              <span style={{ display: "block", fontSize: 12.5, color: C.textSoft, fontWeight: 700 }}>#{r.rank} · talent {r.talent} · potential {r.pot}</span>
+            </span>
+            <span aria-hidden style={{ color: "#15803d", fontWeight: 900 }}>›</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
 
 function Bunting(props) {
   var n = 18, flags = [];
@@ -137,6 +165,7 @@ export default function HomeTab(props) {
       <FitnessCard player={S.player} roosterName={S.player.roosterName} onTrain={props.onTrain} />
       <div id="fans-card"><FansCard player={S.player} rank={props.pRank} /></div>
       <KnitterPreview issues={S.news || []} kit={S.player.kit} onOpen={props.onKnitter} />
+      <FreshBlood S={S} onOpen={props.onOpenRider} />
 
       {/* Training nudge when points are waiting */}
       {(tr.tp || 0) >= 15 && (<Row onClick={props.onTrain} icon="dumbbell" tint="#e0e7ff" title={tr.tp + " training points to spend"} sub="Every level makes your own bar easier" />)}

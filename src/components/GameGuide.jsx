@@ -316,6 +316,8 @@ function body(id) {
         <span key="b"><B>Your week:</B> points, prize money, your best win, who knocked you out, and your interview quote with the crowd's verdict.</span>,
         <span key="c"><B>The feud:</B> what your rival did this week and your head-to-head.</span>,
         <span key="d"><B>Around your ranking:</B> who's climbing and falling near you, and gym gossip.</span>,
+        <span key="d2"><B>Fresh blood:</B> from season 2, the first issue of a season introduces the newcomers (one joins for every granny who retired) and the four with the highest potential. After that, <B>Rookie watch</B> reports on a rookie when there's news: a title, a first break into the top 300, 200, 100 or 50, or a climb of 60 places or more. For a season's first five weeks, Home shows the three newcomers with the highest potential; tap one for her profile.</span>,
+        <span key="d3">About one rookie in three is <B>outspoken</B>: when she's in the news she says what she thinks on Knitter, about you if she's anywhere near your ranking, otherwise about the world No. 1.</span>,
         <span key="e"><B>World tour:</B> the top five and the week's biggest title.</span>
       ]} />
       <P>When it opens after a tournament, tap <B>Fold the paper</B> to put it away.</P>

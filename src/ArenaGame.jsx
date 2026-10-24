@@ -14,6 +14,7 @@ import { shapePotentials, liftTalent } from "./engine/npcGenerator";
 import StartTalent from "./components/StartTalent";
 import { KnitterSheet } from "./components/KnitterFeed";
 import { followersOf, followersGain, followersLift, crowdLove, weekKnits, fmtFollowers, fanChain } from "./engine/social";
+import { rookieClass, rookieWatch, rookieKnit } from "./engine/rookies";
 import { mkSeason, passTheLance } from "./engine/seasonManager";
 import PowerBar from "./components/PowerBar";
 import Profile from "./components/Profile";
@@ -820,6 +821,23 @@ export default function Arena(props) {
           }
           issue.knits = extraK.concat(issue.knits || []);
         }
+        /* Fresh blood (engine/rookies): the season's new class in its first week, then the week's rookie story, if any;
+           the rookie in the story posts, and an outspoken one names someone: you if she's anywhere near you, else the No. 1 */
+        if (S.sNum > 1) {
+          var rk1 = rankMap(afterS);
+          if (S.calIdx === 0) { var cls = rookieClass(afterS); if (cls.length) issue.rookieClass = { s: S.sNum, count: cls.length, top: cls.slice(0, 4) }; }
+          else { var rw = rookieWatch(S, afterS, parallelResults); if (rw) issue.rookie = rw; }
+          var rStar = issue.rookie || (issue.rookieClass && (issue.rookieClass.top.filter(function(r){ return r.loud; })[0] || issue.rookieClass.top[0]));
+          var rWho = rStar ? (rStar.p || rStar) : null, rNpc = rWho ? afterS.npcs.filter(function(n){ return n.id === rWho.id; })[0] : null;
+          if (rNpc) {
+            var rRank = rk1[rNpc.id] || 1000, top1 = getRanked(afterS).filter(function(p){ return !p.isP; })[0];
+            var target = rStar.loud ? (Math.abs(rRank - (rk1[1] || 1000)) < 250 ? S.pName : top1 ? top1.name : null) : null;
+            var rSeed = (S.sNum * 7919 + S.calIdx * 131 + rNpc.id) >>> 0;
+            var rk = { name: rNpc.name, isP: false, fan: false, id: rNpc.id, rank: rRank, emoji: rNpc.emoji || "", text: rookieKnit({ loud: rStar.loud, to: rRank }, target, S.sNum, rSeed), likes: 120 + (rSeed % 900), followers: followersOf(rNpc, rRank) };
+            if (target === S.pName && (rSeed >>> 3) % 2 === 0) rk.reply = { name: sh(S.pName), text: ["We'll see, dear.", "Bring a cushion.", "I've got cardigans older than you.", "Lovely. See you on the lanes."][(rSeed >>> 5) % 4] };
+            var ks = issue.knits || []; issue.knits = ks.slice(0, 1).concat([rk], ks.slice(1));
+          }
+        }
         var ch = fanChain(newP, curRank); issue.fanChain = { fol: ch.fol, lift: ch.lift, settle: ch.settle, fans: ch.fans, tp: ch.tp, edge: Math.round(ch.edge * 10) / 10 };
       } catch (e) { console.error("knits", e); }
       /* The feud column: your rival's week, and what happened if you met */
@@ -1105,6 +1123,7 @@ export default function Arena(props) {
               rival={S.player.rival ? { p: S.player.rival, rank: rankMap(S)[S.player.rival.id], rec: rivalRecord(S.player) } : null}
               onRival={function(){ var rp = S.npcs.filter(function(n){ return n.id === S.player.rival.id; })[0]; if (rp) setProf({ p: rp, rank: rankMap(S)[rp.id] }); }}
               onTrain={function(){ goTab("train"); }}
+              onOpenRider={function(id){ var rp = S.npcs.filter(function(n){ return n.id === id; })[0]; if (rp) setProf({ p: rp, rank: rankMap(S)[rp.id] }); }}
               onOpenProfile={function(){ setProf({ p: Object.assign({}, S.player, { name: S.pName, emoji: "👵" }), rank: pRank }); }} />
           )}
 

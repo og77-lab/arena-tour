@@ -427,6 +427,44 @@ export function CluckPaper(props) {
           );
         })()}
 
+        {/* Fresh blood: the season's new class (first week of a season), then the week's rookie story (engine/rookies) */}
+        {is.rookieClass && (
+          <section>
+            <Kicker col="#15803d">Fresh blood</Kicker>
+            <Headline>{pk(["The class of Season " + is.rookieClass.s + " rides in", "New faces at the stables", "Make room: the rookies have arrived", "Fresh blood on the tour", "Season " + is.rookieClass.s + "'s new arrivals", "A new generation saddles up"], v, 5)}</Headline>
+            <Body>{is.rookieClass.count} newcomers joined the tour this off-season, one for every granny who hung up her lance. They all start near the bottom. These {is.rookieClass.top.length} have the highest potential in the class:</Body>
+            {is.rookieClass.top.map(function (r) {
+              return (
+                <div key={r.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "5px 0", borderBottom: "1px dotted " + RULE }}>
+                  <Face palette={paletteFor(r.id, r.rank)} size={34} />
+                  <div style={{ fontFamily: SERIF, fontSize: 13.5, flex: 1, minWidth: 0, lineHeight: 1.3 }}>
+                    <b>{r.emoji} {r.name}</b>{r.loud ? (<span style={{ marginLeft: 5, fontSize: 11, fontWeight: 900, color: "#b91c1c" }}>📣 OUTSPOKEN</span>) : null}<br />
+                    <span style={{ color: SOFT }}>#{r.rank} · talent {r.talent} · potential {r.pot}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </section>
+        )}
+        {is.rookie && (function () {
+          var R = is.rookie, n = sh(R.p.name);
+          var hd = R.kind === "title" ? pk([n + " wins the " + (R.event || TIERS[R.tier].name) + " in her first season", "Rookie champion! " + n + " takes the " + (R.event || TIERS[R.tier].name), "First season, first trophy: " + n], v, 6)
+            : R.kind === "mark" ? pk([n + " breaks into the top " + R.mark, "Top " + R.mark + " for rookie " + n, "Rookie " + n + " crashes the top " + R.mark], v, 6)
+            : pk([n + " is on the rise", "Rookie on the move: " + n, n + " climbs " + (R.from - R.to) + " places"], v, 6);
+          return (
+            <section>
+              <Kicker col="#15803d">Rookie watch</Kicker>
+              <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+                <Face palette={paletteFor(R.p.id, R.to)} size={46} />
+                <div style={{ minWidth: 0, flex: 1 }}>
+                  <Headline>{hd}</Headline>
+                  <Body>{R.p.emoji} <b>{R.p.name}</b>, in her first season on tour, is now world <b>#{R.to}</b>{R.from && R.from !== R.to ? " (from #" + R.from + ")" : ""}. Talent {R.talent}, potential {R.pot}.{R.loud ? " She hasn't been shy about saying so, either: see her latest on Knitter." : ""}</Body>
+                </div>
+              </div>
+            </section>
+          );
+        })()}
+
         {/* Riders at your level */}
         {(pe.climber || pe.faller || pe.gym) && (
           <section>

@@ -369,6 +369,8 @@ A new issue prints after every tournament, and you can read it any time in the N
 - **Your week:** points, prize money, your best win, who knocked you out, and your interview quote with the crowd's verdict.
 - **The feud:** what your rival did this week and your head-to-head.
 - **Around your ranking:** who's climbing and falling near you, and gym gossip.
+- **Fresh blood:** from season 2, the first issue of a season introduces the newcomers (one joins for every granny who retired) and the four with the highest potential. After that, **Rookie watch** reports on a rookie when there's news: a title, a first break into the top 300, 200, 100 or 50, or a climb of 60 places or more. For a season's first five weeks, Home shows the three newcomers with the highest potential; tap one for her profile.
+- About one rookie in three is **outspoken**: when she's in the news she says what she thinks on Knitter, about you if she's anywhere near your ranking, otherwise about the world No. 1.
 - **World tour:** the top five and the week's biggest title.
 - Every story names the actual tournament — *"won the Puddleby Fete Cup as an outsider"* — and the photos show each rider's kit.
 
