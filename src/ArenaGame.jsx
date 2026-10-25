@@ -1088,7 +1088,7 @@ export default function Arena(props) {
         {histLayer()}
         {showKnitter && (<KnitterSheet issues={S.news || []} kit={S.player.kit} onClose={function(){ setShowKnitter(false); }} />)}
         {S.player.startPts > 0 && (<StartTalent points={S.player.startPts} tr={S.player.tr} onDone={function(add){ var t = Object.assign({}, S.player.tr || {}); Object.keys(add).forEach(function(k){ t[k] = (t[k] || 0) + add[k]; }); var np = Object.assign({}, S.player, { tr: t }); delete np.startPts; save(Object.assign({}, S, { player: np })); }} />)}
-        {showHelp && (<HelpScreen onClose={function(){setHelp(false)}} />)}
+        {showHelp && (<HelpScreen S={S} onClose={function(){setHelp(false)}} />)}
         {hubTip && (<CoachCard key={hubTip} id={hubTip} vars={{ name: S.pName, rival: S.player.rival ? S.player.rival.name : null }} onDone={function(all){ markTip(hubTip, all); }} />)}
         {picking && !seasonDone && (<TierSheet available={avTiers} wildcard={wildcardTier(S)} rank={pRank} paid={paidEntryTier(S)} stepDown={{ tier: stepDownTier(pRank), left: dropsLeft(S.player), limit: DROP_LIMIT }}
           entry={(function(){ var top = Math.max.apply(null, availableTiers(S, true)), ti = top + 1; if (ti > 4 || paidEntryTier(S) >= 0) return null; var fee = entryFee(ti); return { tier: ti, fee: fee, used: !!weekInvestment(S), can: !weekInvestment(S) && (S.player.money || 0) >= fee, cash: S.player.money || 0 }; })()}
@@ -1428,7 +1428,7 @@ export default function Arena(props) {
         <style dangerouslySetInnerHTML={{__html:CSS}} />
         {confetti && (<Confetti />)}
         {histLayer()}
-        {showHelp && (<HelpScreen onClose={function(){setHelp(false)}} />)}
+        {showHelp && (<HelpScreen S={S} onClose={function(){setHelp(false)}} />)}
         {showBracket && (<BracketView ts={ts} playerName={S.pName} onClose={function(){setShowBracket(false)}} />)}
         {showScout && scoutT && pm && ts.alive && (<ScoutSheet scout={scoutT} onClose={function(){setShowScout(false)}} />)}
         <div style={{maxWidth:520,margin:"0 auto",textAlign:"left"}}>

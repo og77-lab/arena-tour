@@ -18,6 +18,11 @@ var ROWS = [
 ];
 /* the giant grounds have a third tier: one more row higher up */
 var TOP_ROW = { file: "crowd-back", scale: 0.3, up: 0.16, beat: 2.1 };
+/* the big stadiums (Tour 500 up) fill their upper tiers too: small, far-off rows, a little dimmer */
+var FAR = [
+  { file: "crowd-middle", scale: 0.22, up: 0.22, beat: 2.4, far: true },
+  { file: "crowd-back", scale: 0.18, up: 0.29, beat: 2.7, far: true }
+];
 /* a small event: a few locals dotted about the benches, in their own strips */
 var SPARSE = [
   { file: "crowd-sparse-back", scale: 0.42, up: 0.06, beat: 1.8 },
@@ -43,6 +48,7 @@ export default function ArtStands(props) {
   var fill = props.fill == null ? 1 : props.fill;
   var big = tier >= 4, rows = fill < SPARSE_BELOW ? SPARSE : big ? [TOP_ROW].concat(ROWS) : ROWS;
   var fills = rows.length === 4 ? ROW_FILL : ROW_FILL.slice(1);
+  if (tier >= 3 && rows !== SPARSE) { rows = FAR.concat(rows); fills = [0.5, 0.45].concat(fills); }
   var still = REDUCED_MOTION;
   var img = { position: "absolute", display: "block", maxWidth: "none", pointerEvents: "none", userSelect: "none" };
   return (
@@ -57,18 +63,21 @@ export default function ArtStands(props) {
       {/* a Slam's airship, far off behind the stands */}
       {tier === 5 && (<img src="/art/grounds/prop-blimp.webp" alt="" style={Object.assign({}, img, { left: -aw * 0.18, top: ah * 0.03, width: aw * 0.16, height: aw * 0.08, animation: still ? "none" : "blimpDrift 46s linear infinite" })} />)}
       {rows.map(function (row, r) {
-        var rw = aw * row.scale, rh = rw * 0.24, bottom = rail - row.up * ah + 2, gw = aw / GROUPS;
+        var rw = aw * row.scale, rh = rw * 0.24, bottom = rail - row.up * ah + 2, gw = aw / GROUPS, pad = gw * 0.22;
+        var fade = "linear-gradient(90deg, transparent 0, #000 " + (pad * 1.6) + "px, #000 calc(100% - " + (pad * 1.6) + "px), transparent 100%)";
         var src = "/art/layers/" + (happy && row.cheer ? row.cheer : row.file) + ".webp";
         return Array.from({ length: GROUPS }, function (_, g) {
           if (rows !== SPARSE && seat(G.key || "", r, g) >= fill * fills[r]) return null;
+          if (row.far && G.full && g >= 2 && g <= 5) return null;   /* a Slam's or the Finals' sign sits up there, in the middle */
           var anim = still ? "none"
             : happy ? "crowdCheer " + (0.42 + ((g * 7 + r) % 4) * 0.05) + "s ease-in-out " + (((g * 3 + r) % 5) * 0.06) + "s " + (mood === "party" ? "infinite" : "3")
             : mood === "groan" ? "crowdGroan 0.9s ease-out " + (((g + r) % 3) * 0.08) + "s 1 both"
             : "crowdBob " + (row.beat + (g % 3) * 0.23) + "s ease-in-out " + (-(g * 0.37 + r * 0.5)) + "s infinite";
           return (
-            <div key={r + "-" + g + (happy ? "h" : "")} style={{ position: "absolute", left: g * gw, top: bottom - rh, width: gw + 1, height: rh,
+            <div key={r + "-" + g + (happy ? "h" : "")} style={{ position: "absolute", left: g * gw - pad, top: bottom - rh, width: gw + 2 * pad, height: rh,
               backgroundImage: "url(" + src + ")", backgroundSize: rw + "px " + rh + "px", backgroundRepeat: "repeat-x",
-              backgroundPosition: (-(g * gw) + r * rw * 0.31) + "px 0", animation: anim, transformOrigin: "50% 100%" }} />
+              backgroundPosition: (-(g * gw - pad) + r * rw * 0.31 + (row.far ? rw * 0.47 : 0)) + "px 0", animation: row.far && !happy ? "crowdBob " + row.beat + "s ease-in-out " + (-g * 0.4) + "s infinite" : anim, transformOrigin: "50% 100%",
+              WebkitMaskImage: fade, maskImage: fade, filter: row.far ? "brightness(0.78) saturate(0.85)" : undefined }} />
           );
         });
       })}

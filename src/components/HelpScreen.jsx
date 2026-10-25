@@ -3,6 +3,8 @@
 
 import { STATS, TIERS, champTotal } from "../models/constants";
 import FanRules from "./FanRules";
+import { tierLadder } from "../engine/ladder";
+import { useMemo } from "react";
 import Icon, { IconTile, StatIcon } from "./Icons";
 import { C, FONT } from "../ui/theme";
 
@@ -35,6 +37,8 @@ function Rows(props) {
 
 export default function HelpScreen(props) {
   var groups = [["granny", "Granny"], ["rooster", "Rooster"], ["recovery", "Both"]];
+  /* the rivals of your own world, measured on the match engine (engine/ladder) */
+  var ladder = useMemo(function () { try { return props.S ? tierLadder(props.S) : null; } catch (e) { return null; } }, [props.S && props.S.sNum, props.S && props.S.calIdx]);
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(28,25,23,0.5)", zIndex: 999, overflowY: "auto", padding: 14, fontFamily: FONT }} onClick={props.onClose}>
       <div style={{ maxWidth: 380, margin: "0 auto", background: "#ffffff", borderRadius: 22, padding: "16px 16px 18px", boxShadow: "0 10px 30px rgba(0,0,0,0.25)" }} onClick={function (e) { e.stopPropagation(); }}>
@@ -56,8 +60,15 @@ export default function HelpScreen(props) {
         </Section>
 
         <Section icon="lances" tint="#e0f2fe" title="Your rival">
-          <Text>She rides on <B>her own bar</B>, built from her own levels, kit and tiredness, by the same rules as yours. Where she stops comes from her <B>accuracy</B> (her talent), with a form for the day. Typical set averages in round 1 of each tier:</Text>
-          <Rows rows={[["Futures", "about 84"], ["Challenger", "about 87"], ["Tour 250", "about 88"], ["Tour 500", "about 88"], ["Masters", "about 87"], ["The three strongest", "about 93–95, a 100+ one set in six to eight"]]} />
+          <Text>She rides on <B>her own bar</B>, built from her own levels, kit and tiredness, by the same rules as yours. Where she stops comes from her <B>accuracy</B> (her talent), with a form for the day.</Text>
+          {ladder ? (<>
+            <Text>The rivals in your world right now, by tier. Each tier up, the bar gets harder for both of you (smaller gold, faster bar), so her typical set on <B>her tier&apos;s bar</B> stays about level while she gets much better. The last column puts them all on <B>one Futures bar</B>, so you can compare:</Text>
+            <div style={{ background: "#fffbeb", borderRadius: 14, padding: "4px 10px", margin: "4px 0 6px", fontSize: 13 }}>
+              <div style={{ display: "flex", gap: 6, padding: "5px 0", color: C.textMuted, fontWeight: 800, fontSize: 11.5 }}><span style={{ flex: 1.4 }}>Tier</span><span style={{ flex: 1, textAlign: "right" }}>Talent</span><span style={{ flex: 1.2, textAlign: "right" }}>Her tier&apos;s bar</span><span style={{ flex: 1.2, textAlign: "right" }}>Futures bar</span></div>
+              {ladder.map(function (r) { return (<div key={r.tier} style={{ display: "flex", gap: 6, padding: "5px 0", borderTop: "1px solid #f3ead3", alignItems: "baseline" }}><span style={{ flex: 1.4, color: C.textSoft }}>{r.name}</span><b style={{ flex: 1, textAlign: "right", fontFamily: HF, fontWeight: 600 }}>{r.talent}</b><b style={{ flex: 1.2, textAlign: "right", fontFamily: HF, fontWeight: 600 }}>{r.own}</b><b style={{ flex: 1.2, textAlign: "right", fontFamily: HF, fontWeight: 600, color: C.greenInk }}>{r.common}</b></div>); })}
+            </div>
+          </>) : (<Text>Each tier up, the bar gets harder for both of you (smaller gold, faster bar), so a rival's typical set looks about level from tier to tier while the riders get much better.</Text>)}
+          <Rows rows={[["The three strongest", "about 93–95, a 100+ one set in six to eight"]]} />
         </Section>
 
         <Section icon="chart" tint="#ede9fe" title="What gets harder">
