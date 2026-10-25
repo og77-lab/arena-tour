@@ -217,7 +217,7 @@ export default function JoustStage(props) {
      <div style={{ position: "absolute", inset: 0, animation: shake }}>
       {/* The painted arena with its live crowd, sized so its lane starts where ours does, and centred */}
       {props.arenaArt && (function () { var ah = Math.max(H, laneTop / ARENA_GROUND), aw = ah * 1.25; return (
-        <div aria-hidden style={{ position: "absolute", left: (W - aw) / 2, top: laneTop - ah * ARENA_GROUND, width: aw, height: ah, transform: "scale(" + standZ + ")", transformOrigin: (cam.x - (W - aw) / 2) + "px " + (cam.y - laneTop + ah * ARENA_GROUND) + "px", transition: cam.t, willChange: "transform" }}><ArtStands arena={props.arenaArt} width={aw} height={ah} cheer={cheer} fill={props.crowd} /></div>); })()}
+        <div aria-hidden style={{ position: "absolute", left: (W - aw) / 2, top: laneTop - ah * ARENA_GROUND, width: aw, height: ah, transform: "scale(" + standZ + ")", transformOrigin: (cam.x - (W - aw) / 2) + "px " + (cam.y - laneTop + ah * ARENA_GROUND) + "px", transition: cam.t, willChange: "transform" }}><ArtStands arena={props.arenaArt} tier={props.tier} width={aw} height={ah} cheer={cheer} fill={props.crowd} /></div>); })()}
       {!props.arenaArt && (<>
       {/* The stands, drawn for a smaller lane and enlarged; further back, so they move less with the camera */}
       <div style={{ position: "absolute", left: 0, top: 0, width: W, height: laneTop, transform: "scale(" + standZ + ")", transformOrigin: camOrigin, transition: cam.t, willChange: "transform" }}>
