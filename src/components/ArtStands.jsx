@@ -11,17 +11,21 @@ import { REDUCED_MOTION } from "./fx";
 /* where the top of the front rail is, as a share of the height (the crowd stands just behind it), by kind of ground */
 var RAIL = { futures: 0.44, challenger: 0.41, tour250: 0.43, tour500: 0.42, masters: 0.44 };
 var RAIL_FULL = 0.44;
+/* the near rows are whole strips of 14 spectators laid side by side (they tile without cutting anyone); there are
+   twelve different casts (crowd-a … crowd-l, each with a cheering twin), and each strip in a row is a different cast,
+   chosen by the ground, so the faces don't repeat along a row or from one ground to the next */
+var CASTS = "abcdefghijkl".split("");
 var ROWS = [
-  { file: "crowd-back", scale: 0.36, up: 0.1, beat: 1.9 },
-  { file: "crowd-middle", scale: 0.42, up: 0.05, beat: 1.6 },
-  { file: "crowd-front", scale: 0.5, up: 0, beat: 1.35, cheer: "crowd-front-cheer" }
+  { scale: 0.36, up: 0.1, beat: 1.9 },
+  { scale: 0.42, up: 0.05, beat: 1.6 },
+  { scale: 0.5, up: 0, beat: 1.35 }
 ];
 /* the giant grounds have a third tier: one more row higher up */
-var TOP_ROW = { file: "crowd-back", scale: 0.3, up: 0.16, beat: 2.1 };
-/* the big stadiums (Tour 500 up) fill their upper tiers too: small, far-off rows, a little dimmer */
+var TOP_ROW = { scale: 0.3, up: 0.16, beat: 2.1 };
+/* the big stadiums (Tour 500 up) fill their upper tiers too, with distant crowds: rows of tiny far-off spectators */
 var FAR = [
-  { file: "crowd-middle", scale: 0.22, up: 0.22, beat: 2.4, far: true },
-  { file: "crowd-back", scale: 0.18, up: 0.29, beat: 2.7, far: true }
+  { file: "crowd-far-1", scale: 0.55, up: 0.15, beat: 2.4, far: true },
+  { file: "crowd-far-2", scale: 0.48, up: 0.2, beat: 2.7, far: true }
 ];
 /* a small event: a few locals dotted about the benches, in their own strips */
 var SPARSE = [
@@ -63,7 +67,22 @@ export default function ArtStands(props) {
       {/* a Slam's airship, far off behind the stands */}
       {tier === 5 && (<img src="/art/grounds/prop-blimp.webp" alt="" style={Object.assign({}, img, { left: -aw * 0.18, top: ah * 0.03, width: aw * 0.16, height: aw * 0.08, animation: still ? "none" : "blimpDrift 46s linear infinite" })} />)}
       {rows.map(function (row, r) {
-        var rw = aw * row.scale, rh = rw * 0.24, bottom = rail - row.up * ah + 2, gw = aw / GROUPS, pad = gw * 0.22;
+        if (!row.far && !row.file) {
+          /* a near row: whole strips, a different cast each, starting a little off the left edge */
+          var tw = aw * row.scale, th = tw * 0.24, tb = rail - row.up * ah + 2, n = Math.ceil(aw / tw) + 1, x0 = -seat(G.key || "", r, 99) * tw * 0.6, prev = -1, used = {};
+          return Array.from({ length: n }, function (_, i) {
+            var ci = Math.floor(seat(G.key || "", r, "c" + i) * CASTS.length), tries = 0;
+            while ((ci === prev || used[ci]) && tries++ < CASTS.length) ci = (ci + 1) % CASTS.length;
+            prev = ci; used[ci] = 1;
+            if (seat(G.key || "", r, i) >= fill * fills[r]) return null;
+            var anim = still ? "none"
+              : happy ? "crowdCheer " + (0.42 + ((i * 7 + r) % 4) * 0.05) + "s ease-in-out " + (((i * 3 + r) % 5) * 0.06) + "s " + (mood === "party" ? "infinite" : "3")
+              : mood === "groan" ? "crowdGroan 0.9s ease-out " + (((i + r) % 3) * 0.08) + "s 1 both"
+              : "crowdBob " + (row.beat + (i % 3) * 0.23) + "s ease-in-out " + (-(i * 0.37 + r * 0.5)) + "s infinite";
+            return (<img key={r + "-" + i + (happy ? "h" : "")} src={"/art/layers/crowd-" + CASTS[ci] + (happy ? "-cheer" : "") + ".webp"} alt="" style={Object.assign({}, img, { left: x0 + i * tw, top: tb - th, width: tw, height: th, animation: anim, transformOrigin: "50% 100%" })} />);
+          });
+        }
+        var rw = aw * row.scale, rh = rw * (row.far ? 0.2 : 0.24), bottom = rail - row.up * ah + 2, gw = aw / GROUPS, pad = gw * 0.22;
         var fade = "linear-gradient(90deg, transparent 0, #000 " + (pad * 1.6) + "px, #000 calc(100% - " + (pad * 1.6) + "px), transparent 100%)";
         var src = "/art/layers/" + (happy && row.cheer ? row.cheer : row.file) + ".webp";
         return Array.from({ length: GROUPS }, function (_, g) {
@@ -77,7 +96,7 @@ export default function ArtStands(props) {
             <div key={r + "-" + g + (happy ? "h" : "")} style={{ position: "absolute", left: g * gw - pad, top: bottom - rh, width: gw + 2 * pad, height: rh,
               backgroundImage: "url(" + src + ")", backgroundSize: rw + "px " + rh + "px", backgroundRepeat: "repeat-x",
               backgroundPosition: (-(g * gw - pad) + r * rw * 0.31 + (row.far ? rw * 0.47 : 0)) + "px 0", animation: row.far && !happy ? "crowdBob " + row.beat + "s ease-in-out " + (-g * 0.4) + "s infinite" : anim, transformOrigin: "50% 100%",
-              WebkitMaskImage: fade, maskImage: fade, filter: row.far ? "brightness(0.78) saturate(0.85)" : undefined }} />
+              WebkitMaskImage: fade, maskImage: fade, filter: row.far ? "brightness(0.95)" : undefined }} />
           );
         });
       })}
