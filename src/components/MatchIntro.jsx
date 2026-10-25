@@ -193,16 +193,19 @@ export default function MatchIntro(props) {
             {props.coach && (
               <div style={{ width: "min(100%, 440px)", display: "flex", alignItems: "center", gap: 8, background: "rgba(15,23,42,0.92)", color: "#fff", border: "1.5px solid #fde68a", borderRadius: 12, padding: "7px 10px", fontSize: 13, fontWeight: 800, lineHeight: 1.35, boxSizing: "border-box" }}>
                 <span aria-hidden style={{ fontSize: 20 }}>📣</span>
-                <span>Coach Hettie: size her up first. Green numbers are where you're stronger, red where she is. Then send the riders out!</span>
+                <span>Coach Hettie: green is where you're stronger, red where she is.</span>
               </div>
             )}
             <TaleOfTape scout={props.scout} you={props.you} foe={props.foe} />
+            {/* the start button stays on screen however long the report runs: it sticks to the bottom while the rest scrolls */}
+            <div style={{ position: "sticky", bottom: -12, zIndex: 2, width: "calc(100% + 24px)", margin: "0 -12px", padding: "14px 12px 12px", boxSizing: "border-box", display: "flex", flexDirection: "column", alignItems: "center", gap: 8, background: "linear-gradient(180deg, rgba(11,17,32,0) 0%, rgba(11,17,32,0.92) 30%, #0b1120 100%)" }}>
             <motion.button onClick={function (e) { e.stopPropagation(); startShow(); }} onPointerDown={function (e) { e.stopPropagation(); }}
               initial={{ y: 20, scale: 0.9 }} animate={{ y: 0, scale: 1 }} transition={{ delay: 0.15, type: "spring", stiffness: 380, damping: 18 }}
               style={{ flexShrink: 0, background: "linear-gradient(180deg,#f87171,#dc2626)", color: "#fff", border: "2px solid #450a0a", boxShadow: "0 5px 0 #450a0a", borderRadius: 14, padding: "13px 30px", fontWeight: 900, fontSize: 18, letterSpacing: 2, cursor: "pointer", fontFamily: "inherit", animation: REDUCED_MOTION ? "none" : "pulse 1.3s ease infinite 0.6s" }}>
               {props.isFinal ? "🏆 TO THE FINAL!" : "⚔️ TO THE LANES!"}
             </motion.button>
             <div style={{ fontSize: 11, color: "rgba(255,255,255,0.75)", fontWeight: 700, letterSpacing: 1.5, flexShrink: 0 }}>TAP THE BUTTON OR PRESS SPACE</div>
+            </div>
           </div>
         </div>
       )}
