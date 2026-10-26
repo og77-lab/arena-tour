@@ -174,7 +174,7 @@ function body(id) {
         <span key="b">You choose when. It's marked <B>STEP DOWN</B> in the tournament list, with how many you have left.</span>,
         <span key="c">Rivals follow the same limit. A rival steps down only when she's worn (under {STEP_TIRED}% on either meter) or carrying an injury.</span>
       ]} />
-      <P>During a tournament, the header shows the tier, the round, best-of and the bracket path. The <B>⋯</B> button opens a small menu: her full report, the tournament draw, and how to play.</P>
+      <P>During a tournament, the header shows the tier, the round, best-of and the bracket path.</P>
     </>);
 
     case "match": return (<>

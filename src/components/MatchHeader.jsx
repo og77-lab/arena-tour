@@ -1,19 +1,16 @@
-/* ═══ MatchHeader ═══ Where am I? Tournament, round, format, and the road through the bracket */
+/* ═══ MatchHeader ═══ Where am I? Tournament, round, format, and the road through the bracket. Nothing to tap: during
+   a match the screen is the match; her report, the draw and the rules are there between matches. */
 
 import { C, FONT, display, label, card, button } from "../ui/theme";
 import { conditionOf } from "../engine/events";
 import { BY_ID } from "../engine/gear";
 import { FitnessMini } from "./Fitness";
-import { useState } from "react";
 
 var SHORT = { "Round of 64": "R64", "Round of 32": "R32", "Round of 16": "R16", "Quarterfinals": "QF", "Semifinals": "SF", "Final": "F", "Group Stage": "Groups", "Semifinal": "SF", "World Final": "Final" };
 
 export default function MatchHeader(props) {
   var rounds = props.rounds || [];
   var name = props.tierName || "", cd = props.cond ? conditionOf(props.cond) : null;
-  /* the opponent's report, the draw and the rules live behind one small button, so the screen stays on the match */
-  var _m = useState(false), menu = _m[0], setMenu = _m[1];
-  var items = [props.onScout && ["🔎 Her report", props.onScout], props.onBracket && ["📋 The draw", props.onBracket], props.onHelp && ["❔ How to play", props.onHelp]].filter(Boolean);
   return (
     <div style={card({ padding: "10px 12px 10px", marginBottom: 8, fontFamily: FONT, textAlign: "left" })}>
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8 }}>
@@ -34,12 +31,6 @@ export default function MatchHeader(props) {
             </div>
           )}
         </div>
-        {items.length > 0 && (<div style={{ position: "relative", flexShrink: 0 }}>
-          <button onClick={function () { setMenu(!menu); }} aria-label="More" aria-expanded={menu} style={button("ghost", { padding: "4px 11px", fontSize: 18, lineHeight: 1, letterSpacing: 1 })}>⋯</button>
-          {menu && (<div style={{ position: "absolute", right: 0, top: "calc(100% + 6px)", zIndex: 50, background: C.card, border: "1.5px solid " + C.line, borderRadius: 12, boxShadow: "0 8px 24px rgba(0,0,0,0.18)", padding: 4, minWidth: 160 }}>
-            {items.map(function (it) { return (<button key={it[0]} onClick={function () { setMenu(false); it[1](); }} style={{ display: "block", width: "100%", textAlign: "left", padding: "9px 10px", border: "none", background: "none", borderRadius: 8, fontFamily: FONT, fontSize: 14, fontWeight: 800, color: C.text, cursor: "pointer" }}>{it[0]}</button>); })}
-          </div>)}
-        </div>)}
       </div>
       {rounds.length > 1 && (
         <div style={{ display: "flex", gap: 4, marginTop: 9 }}>
