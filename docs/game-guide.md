@@ -109,7 +109,7 @@ Grand Slam weeks have a single named Slam (The Coop Open, The Swamp Slam, Wimble
 ![Choose your tournament: tiers by rank, events, points per round](guide-img/picker.jpg)
 ![Compare the 5 lanes: what each one does to both riders](guide-img/lanes.jpg)
 
-During a tournament the header shows the tier, the round, best-of and the bracket path. **Scout** opens the opponent's full report; 🌐 opens the bracket.
+During a tournament the header shows the tier, the round, best-of and the bracket path. The **⋯** button opens a small menu: her full report, the tournament draw, and how to play.
 
 ## 5. Reading the screens
 

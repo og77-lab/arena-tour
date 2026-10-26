@@ -20,13 +20,16 @@ var ROWS = [
   { scale: 0.42, up: 0.05, beat: 1.6 },
   { scale: 0.5, up: 0, beat: 1.35 }
 ];
-/* the giant grounds have a third tier: one more row higher up */
-var TOP_ROW = { scale: 0.3, up: 0.16, beat: 2.1 };
-/* the big stadiums (Tour 500 up) fill their upper tiers too, with distant crowds: rows of tiny far-off spectators */
-var FAR = [
-  { file: "crowd-far-1", scale: 0.55, up: 0.15, beat: 2.4, far: true },
-  { file: "crowd-far-2", scale: 0.48, up: 0.2, beat: 2.7, far: true }
-];
+/* the upper tiers of the big grounds, measured on each picture: [top, bottom] as shares of its height, and the part
+   of the width kept clear where a sign or a royal box sits in the middle. Each tier is filled with a distant crowd
+   (crowd-far-1…3), clipped to the tier, so it sits in the seats and never floats over the roof or the screens */
+var BANDS = {
+  "tour500-1": [[0.17, 0.25]], "tour500-2": [[0.11, 0.19]], "tour500-3": [[0.16, 0.22]], "tour500-4": [[0.16, 0.21]], "tour500-5": [[0.10, 0.18]], "tour500-6": [],
+  "masters-1": [[0.13, 0.19], [0.20, 0.27]], "masters-2": [[0.08, 0.17], [0.20, 0.26]], "masters-3": [[0.09, 0.15], [0.17, 0.25]],
+  "masters-4": [[0.04, 0.10], [0.12, 0.18], [0.20, 0.28]], "masters-5": [[0.06, 0.12], [0.14, 0.20], [0.21, 0.27]], "masters-6": [[0.13, 0.18], [0.19, 0.26]],
+  "slam-coop": [[0.20, 0.27]], "slam-swamp": [[0.18, 0.25, 0.38, 0.62]], "slam-wimblehen": [[0.20, 0.28, 0.36, 0.64]], "slam-gale": [[0.18, 0.24, 0.30, 0.70]],
+  "finals": [[0.18, 0.24, 0.36, 0.64]]
+};
 /* a small event: a few locals dotted about the benches, in their own strips */
 var SPARSE = [
   { file: "crowd-sparse-back", scale: 0.42, up: 0.06, beat: 1.8 },
@@ -50,9 +53,10 @@ export default function ArtStands(props) {
   var mood = props.cheer;   /* "cheer" | "big" | "party" | "groan" | null */
   var happy = mood === "cheer" || mood === "big" || mood === "party";
   var fill = props.fill == null ? 1 : props.fill;
-  var big = tier >= 4, rows = fill < SPARSE_BELOW ? SPARSE : big ? [TOP_ROW].concat(ROWS) : ROWS;
-  var fills = rows.length === 4 ? ROW_FILL : ROW_FILL.slice(1);
-  if (tier >= 3 && rows !== SPARSE) { rows = FAR.concat(rows); fills = [0.5, 0.45].concat(fills); }
+  /* a row is there or not, never a strip on its own: the front row first, then the middle, then the back as the
+     stands fill up; from Tour 500 up every row is full and the upper tiers are full too */
+  var big = tier >= 4, rows = fill < SPARSE_BELOW ? SPARSE : ROWS.filter(function (_, r) { return tier >= 3 || fill >= [0.7, 0.55, 0][r]; });
+  var bands = tier >= 3 ? BANDS[G.key] || [] : [];
   var still = REDUCED_MOTION;
   var img = { position: "absolute", display: "block", maxWidth: "none", pointerEvents: "none", userSelect: "none" };
   return (
@@ -66,6 +70,16 @@ export default function ArtStands(props) {
       )}
       {/* a Slam's airship, far off behind the stands */}
       {tier === 5 && (<img src="/art/grounds/prop-blimp.webp" alt="" style={Object.assign({}, img, { left: -aw * 0.18, top: ah * 0.03, width: aw * 0.16, height: aw * 0.08, animation: still ? "none" : "blimpDrift 46s linear infinite" })} />)}
+      {bands.map(function (b, k) {
+        var bh = (b[1] - b[0]) * ah, th = bh * 1.15, tw = th * 5, clear = b.length > 2;
+        var gap = clear ? "linear-gradient(90deg, #000 0, #000 " + (b[2] * 100 - 3) + "%, transparent " + (b[2] * 100) + "%, transparent " + (b[3] * 100) + "%, #000 " + (b[3] * 100 + 3) + "%, #000 100%)" : null;
+        return (
+          <div key={"band" + k} style={{ position: "absolute", left: 0, top: b[0] * ah, width: aw, height: bh, overflow: "hidden", WebkitMaskImage: gap || undefined, maskImage: gap || undefined }}>
+            <div style={{ position: "absolute", left: -tw * 0.5, right: -tw * 0.5, bottom: -2, height: th, backgroundImage: "url(/art/layers/crowd-far-" + (1 + (k % 3)) + ".webp)", backgroundSize: tw + "px " + th + "px", backgroundRepeat: "repeat-x", backgroundPosition: (seat(G.key || "", "band", k) * tw) + "px 100%",
+              animation: still ? "none" : happy ? "crowdCheer 0.5s ease-in-out " + (k * 0.07) + "s 3" : "crowdBob " + (2.3 + k * 0.4) + "s ease-in-out " + (-k * 0.6) + "s infinite", transformOrigin: "50% 100%" }} />
+          </div>
+        );
+      })}
       {rows.map(function (row, r) {
         if (!row.far && !row.file) {
           /* a near row: whole strips, a different cast each, starting a little off the left edge */
@@ -74,7 +88,6 @@ export default function ArtStands(props) {
             var ci = Math.floor(seat(G.key || "", r, "c" + i) * CASTS.length), tries = 0;
             while ((ci === prev || used[ci]) && tries++ < CASTS.length) ci = (ci + 1) % CASTS.length;
             prev = ci; used[ci] = 1;
-            if (seat(G.key || "", r, i) >= fill * fills[r]) return null;
             var anim = still ? "none"
               : happy ? "crowdCheer " + (0.42 + ((i * 7 + r) % 4) * 0.05) + "s ease-in-out " + (((i * 3 + r) % 5) * 0.06) + "s " + (mood === "party" ? "infinite" : "3")
               : mood === "groan" ? "crowdGroan 0.9s ease-out " + (((i + r) % 3) * 0.08) + "s 1 both"
@@ -86,8 +99,6 @@ export default function ArtStands(props) {
         var fade = "linear-gradient(90deg, transparent 0, #000 " + (pad * 1.6) + "px, #000 calc(100% - " + (pad * 1.6) + "px), transparent 100%)";
         var src = "/art/layers/" + (happy && row.cheer ? row.cheer : row.file) + ".webp";
         return Array.from({ length: GROUPS }, function (_, g) {
-          if (rows !== SPARSE && seat(G.key || "", r, g) >= fill * fills[r]) return null;
-          if (row.far && G.full && g >= 2 && g <= 5) return null;   /* a Slam's or the Finals' sign sits up there, in the middle */
           var anim = still ? "none"
             : happy ? "crowdCheer " + (0.42 + ((g * 7 + r) % 4) * 0.05) + "s ease-in-out " + (((g * 3 + r) % 5) * 0.06) + "s " + (mood === "party" ? "infinite" : "3")
             : mood === "groan" ? "crowdGroan 0.9s ease-out " + (((g + r) % 3) * 0.08) + "s 1 both"
