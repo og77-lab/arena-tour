@@ -11,7 +11,7 @@ import { fatigueFx } from "./fitness";
 /* What one training level does (before the lanes weight it) */
 export var LV = { r: 0.03, s: 0.07, p: 0.4, f: 0.5, g: 1.5, gs: 0.05 };   /* tuned so a level of each is worth about the same (sim) */
 /* The bar of a rider with no training, in round difficulty `diff` (tier + round; see roundDiff) */
-export var BASE = { zone: 12, zonePerDiff: 0.8, speed: 2.4, speedPerDiff: 0.2, accel: 0.45 };
+export var BASE = { zone: 14, zonePerDiff: 0.8, speed: 2.4, speedPerDiff: 0.2, accel: 0.45 };
 export var CTR = 72;
 /* Levels give a little less the higher they go: level 5 works like 4.3, 10 like 7.6, 20 like 11.4 (K = 16) */
 export var SAT = 16;
@@ -54,7 +54,7 @@ export function landScore(d, bar, jitter) {
    Anchored to how precisely people stop a moving marker: a beginner (~65 ms, 9.4) reads 25, an average practised player
    (~40 ms, 6.5) 55, and the tour's elite talent 90 is ~3.1 (~21 ms). Your hands are measured on this same scale.
    (a was 11.35 until season 8, then 12.8; 11.8 since the ability ladder — rivals and your reading move together.) */
-export var HANDS = { a: 11.8, b: 0.097 };
+export var HANDS = { a: 12.6, b: 0.097 };
 export function handsOf(talent) { return Math.max(1, HANDS.a - (talent || 50) * HANDS.b); }
 export function talentOfHands(h) { return Math.max(0, Math.min(100, (HANDS.a - h) / HANDS.b)); }
 function gauss(rnd) { var u = 0, v = 0; while (!u) u = rnd(); while (!v) v = rnd(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
@@ -80,7 +80,7 @@ export function handsTalent(hm) { return hm && hm.n >= 30 ? Math.round(talentOfH
    the stronger one's gold grows and the weaker one's shrinks, by GAP.c % of the bar per point of difference, at most
    GAP.cap % in all (split between them). Two riders of a level feel nothing; a qualifier facing a top-3 legend feels it.
    The weaker rider's part fades with every set she wins. Same rule for you (your measured hands) and every rival. */
-export var GAP = { c: 0.3, cap: 5 };
+export var GAP = { c: 0.3, cap: 7 };
 export function abilityRating(tr, talent) {
   var bar = riderBar({ tr: tr, diff: 3, cond: "classic", kit: null, fit: { g: 100, r: 100 } });
   return landScore(0.73 * handsOf(talent) * bar.speed / BASE.speed, bar).total;
