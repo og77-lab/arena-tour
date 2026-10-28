@@ -154,6 +154,11 @@ function toTal4(d) {
     return Object.assign({}, x, { tr: old ? x.tr : retrainAtNewPrices(x.tr), skill: s, pot: Math.max(x.pot || 60, Math.round(s + 4)) });
   })), tal: 4 });
 }
+/* S.tal = 5: a steeper talent ladder — every few dozen places down the tour is a bigger step weaker, so a top-50
+   really outreads a rank-200. Existing high ceilings are brought down to the new ladder; low ones stay put. */
+function toTal5(d) {
+  return Object.assign({}, d, { npcs: shapePotentials(d.npcs.map(function (x) { return Object.assign({}, x); })), tal: 5 });
+}
 
 /* Season finals between rivals: the finals' own round difficulty (groups 3, semis 4, final 5) */
 /* How full the stands are: a village Futures opens to a handful of locals, a Grand Slam is packed from the first
@@ -227,7 +232,8 @@ export default function Arena(props) {
       if (needsTitles(d)) { d = retitle(d); try { sSet(d); } catch (e) {} }
       if (needsWorldNames(d)) { d = renameWorld(d); try { sSet(d); } catch (e) {} }
       if (!d.eng || d.eng < 2) { d = toEngine2(d); try { sSet(d); } catch (e) {} }
-      if (d.npcs && d.tal !== 4) { d = toTal4(d); try { sSet(d); } catch (e) {} }
+      if (d.npcs && (d.tal == null || d.tal < 4)) { d = toTal4(d); try { sSet(d); } catch (e) {} }
+      if (d.npcs && (d.tal == null || d.tal < 5)) { d = toTal5(d); try { sSet(d); } catch (e) {} }
       /* Points from before the current table: converted once, and rivals' points start dropping off like yours */
       if (needsPts3(d)) { d = toPts3(d); try { sSet(d); } catch (e) {} } /* older tables first, then the current one (engine/migrate) */
       /* Ages: rivals spread over 1–16 seasons on tour, you counted from season 1 (engine/aging) */
@@ -263,7 +269,7 @@ export default function Arena(props) {
     queueCloudSave(userId, snap, saveGameToCloud);
   }, [ts, fs]);
   function exportSave() { if (!S) return; var b = new Blob([JSON.stringify(pack(S))],{type:"application/json"}); var u = URL.createObjectURL(b); var a = document.createElement("a"); a.href = u; a.download = "arena-"+S.pName+"-s"+S.sNum+".json"; a.click(); URL.revokeObjectURL(u); }
-  function importSave(e) { var f = e.target.files && e.target.files[0]; if (!f) return; var r = new FileReader(); r.onload = function(ev){ try { var d = unpack(JSON.parse(ev.target.result)); if (d && d.player) { if (!d.eng || d.eng < 2) d = toEngine2(d); if (d.tal !== 4) d = toTal4(d); save(renameWorld(toAge(toPts3(retitle(uniqueNames(d)))))); setScr("hub"); } } catch(err){} }; r.readAsText(f); }
+  function importSave(e) { var f = e.target.files && e.target.files[0]; if (!f) return; var r = new FileReader(); r.onload = function(ev){ try { var d = unpack(JSON.parse(ev.target.result)); if (d && d.player) { if (!d.eng || d.eng < 2) d = toEngine2(d); if (d.tal == null || d.tal < 4) d = toTal4(d); if (d.tal == null || d.tal < 5) d = toTal5(d); save(renameWorld(toAge(toPts3(retitle(uniqueNames(d)))))); setScr("hub"); } } catch(err){} }; r.readAsText(f); }
   var _syncing = useState(false), syncing = _syncing[0], setSyncing = _syncing[1];
   var _syncMsg = useState(""), syncMsg = _syncMsg[0], setSyncMsg = _syncMsg[1];
   var _mutedState = useState(isMuted()), mutedState = _mutedState[0], setMutedState = _mutedState[1];

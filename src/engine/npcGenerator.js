@@ -10,7 +10,7 @@ import { placePts } from "./migrate";
    (87.5 − √place: about 82 at the 30th, 77.5 at the 100th, 70 at the 300th), so every few dozen places down the
    tour is a step weaker, instead of hundreds sharing one ceiling. Talent never passes potential. */
 var ELITE_POT = [94, 92.5, 91];
-export var LADDER = { top: 87.5, k: 1.0 };
+export var LADDER = { top: 87.5, k: 1.4 };
 /* The talent floor: a rider who made the tour can hold a lance — what used to be 15–64 is squeezed into 60–64,
    order kept, and no ceiling sits below 62, so even the 1000th is a real match for a fresh granny */
 export var FLOOR = 60;

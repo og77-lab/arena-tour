@@ -54,7 +54,7 @@ export function landScore(d, bar, jitter) {
    Anchored to how precisely people stop a moving marker: a beginner (~65 ms, 9.4) reads 25, an average practised player
    (~40 ms, 6.5) 55, and the tour's elite talent 90 is ~3.1 (~21 ms). Your hands are measured on this same scale.
    (a was 11.35 until season 8, then 12.8; 11.8 since the ability ladder — rivals and your reading move together.) */
-export var HANDS = { a: 12.6, b: 0.097 };
+export var HANDS = { a: 13.3, b: 0.097 };
 export function handsOf(talent) { return Math.max(1, HANDS.a - (talent || 50) * HANDS.b); }
 export function talentOfHands(h) { return Math.max(0, Math.min(100, (HANDS.a - h) / HANDS.b)); }
 function gauss(rnd) { var u = 0, v = 0; while (!u) u = rnd(); while (!v) v = rnd(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
