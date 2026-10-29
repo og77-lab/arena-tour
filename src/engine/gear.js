@@ -69,16 +69,17 @@ export function kitFx(kit, cond) {
 export function fxLines(fx) {
   var out = [];
   function pct(m) { return Math.round(Math.abs(m - 1) * 100); }
-  if (fx.zone) out.push({ good: fx.zone > 0, text: zoneText(fx.zone) });
+  function r1(x) { return Math.round(Math.abs(x) * 10) / 10; }
+  if (Math.abs(fx.zone) >= 0.05) out.push({ good: fx.zone > 0, text: zoneText(fx.zone) });
   if (fx.speed && fx.speed !== 1) out.push({ good: fx.speed < 1, text: "Bar starts " + pct(fx.speed) + "% " + (fx.speed < 1 ? "slower" : "faster") });
   if (fx.accel && fx.accel !== 1) out.push({ good: fx.accel < 1, text: "Speeds up " + pct(fx.accel) + "% " + (fx.accel < 1 ? "less" : "more") + " each strike" });
-  if (fx.floor) out.push({ good: fx.floor > 0, text: "Misses score " + (fx.floor > 0 ? "+" : "−") + Math.abs(fx.floor) + " (floor)" });
-  if (fx.aim) out.push({ good: fx.aim > 0, text: (fx.aim > 0 ? "+" : "−") + Math.abs(fx.aim) + " points every strike" });
-  if (fx.miss) out.push({ good: fx.miss > 0, text: (fx.miss > 0 ? "+" : "−") + Math.abs(fx.miss) + " points on misses" });
-  if (fx.gold) out.push({ good: fx.gold > 0, text: (fx.gold > 0 ? "+" : "−") + Math.abs(fx.gold) + " points on gold hits" });
+  if (Math.abs(fx.floor) >= 0.5) out.push({ good: fx.floor > 0, text: "Misses score " + (fx.floor > 0 ? "+" : "−") + Math.round(Math.abs(fx.floor)) + " (floor)" });
+  if (Math.abs(fx.aim) >= 0.5) out.push({ good: fx.aim > 0, text: (fx.aim > 0 ? "+" : "−") + Math.round(Math.abs(fx.aim)) + " points every strike" });
+  if (Math.abs(fx.miss) >= 0.5) out.push({ good: fx.miss > 0, text: (fx.miss > 0 ? "+" : "−") + Math.round(Math.abs(fx.miss)) + " points on misses" });
+  if (Math.abs(fx.gold) >= 0.5) out.push({ good: fx.gold > 0, text: (fx.gold > 0 ? "+" : "−") + Math.round(Math.abs(fx.gold)) + " points on gold hits" });
   return out;
 }
-export function zoneText(z) { return "Gold zone " + Math.abs(z) + "% " + (z > 0 ? "wider" : "narrower"); }
+export function zoneText(z) { return "Gold zone " + (Math.round(Math.abs(z) * 10) / 10) + "% " + (z > 0 ? "wider" : "narrower"); }
 
 /* How each lane changes an item, in words (only the lanes that change it) */
 export var COND_LABEL = { classic: "☀️ Classic", mud: "🌧️ Mud", wind: "🌬️ Wind", heat: "🔥 Heat", green: "🌼 Green" };
