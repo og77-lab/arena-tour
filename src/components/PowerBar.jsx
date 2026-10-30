@@ -20,6 +20,7 @@ import { kitFx } from "../engine/gear"
 import { fatigueFx } from "../engine/fitness";
 import { riderBar, speedAt, landScore, npcMiss, dayForm, nerves, abilityRating, gapEdge, goldBase, handsSample, CTR } from "../engine/joust";
 import { enterMatch, leaveMatch, startBattle, stopBattle } from "../music";
+import StudioOverlay from "./StudioOverlay";
 
 const { useState, useEffect, useRef } = React;
 
@@ -174,7 +175,11 @@ export default function PowerBar(props) {
   var init = props.initialProgress || { sets: [], my: [], op: [] };
   var initRes = matchResult(init.sets, need);
 
-  var _p = useState(initRes ? "done" : "intro"), ph = _p[0], setPh = _p[1];
+  /* Studio pre-match segment: shown once before the Tale-of-the-Tape intro, when nothing's been played yet and the
+     player hasn't turned it off. Auto-skips after a few plays per session (handled inside StudioOverlay). */
+  var studioEnabled = (function () { try { return localStorage.getItem("studioOff") !== "1"; } catch (e) { return true; } })();
+  var fresh = !initRes && (init.sets || []).length === 0 && (init.my || []).length === 0;
+  var _p = useState(initRes ? "done" : (fresh && studioEnabled ? "studio" : "intro")), ph = _p[0], setPh = _p[1];
   var _sets = useState(init.sets), sets = _sets[0], setSets = _sets[1];
   var _my = useState(init.my), myH = _my[0], setMyH = _my[1];
   var _op = useState(init.op), opH = _op[0], setOpH = _op[1];
@@ -417,7 +422,7 @@ export default function PowerBar(props) {
   /* Battle music: on once the opening animation is over, off when the match is decided (the outro has its own fanfare) */
   useEffect(function () {
     if (ph === "done") stopBattle();
-    else if (ph !== "intro") startBattle();
+    else if (ph !== "intro" && ph !== "studio") startBattle();
   }, [ph]);
 
   var story = null;
@@ -476,6 +481,9 @@ export default function PowerBar(props) {
 
   return (
     <div style={{ position: "relative", padding: "4px 0" }}>
+      {ph === "studio" && (
+        <StudioOverlay onDone={function () { setPh("intro"); }} />
+      )}
       {ph === "intro" && (
         <MatchIntro
           you={{ name: youName, emoji: youEmoji, sub: props.youSub, palette: youPal }}
