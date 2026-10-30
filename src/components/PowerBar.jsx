@@ -175,9 +175,10 @@ export default function PowerBar(props) {
   var init = props.initialProgress || { sets: [], my: [], op: [] };
   var initRes = matchResult(init.sets, need);
 
-  /* Studio pre-match segment: shown once before the Tale-of-the-Tape intro, when nothing's been played yet and the
-     player hasn't turned it off. Auto-skips after a few plays per session (handled inside StudioOverlay). */
-  var studioEnabled = (function () { try { return localStorage.getItem("studioOff") !== "1"; } catch (e) { return true; } })();
+  /* Studio pre-match segment: dormant for now while we build out the full dynamic dialogue (names, ranks, stats,
+     head-to-head, condition, upsets) and the post-match recap. The code, art and audio stay in the tree; set
+     localStorage.studioOn = "1" in devtools to preview the prototype on this device. */
+  var studioEnabled = (function () { try { return localStorage.getItem("studioOn") === "1"; } catch (e) { return false; } })();
   var fresh = !initRes && (init.sets || []).length === 0 && (init.my || []).length === 0;
   var _p = useState(initRes ? "done" : (fresh && studioEnabled ? "studio" : "intro")), ph = _p[0], setPh = _p[1];
   var _sets = useState(init.sets), sets = _sets[0], setSets = _sets[1];
