@@ -102,9 +102,9 @@ export default function StudioOverlay(props) {
   }, []);
 
   return (
-    <div style={{ position: "relative", maxWidth: 520, margin: "0 auto 8px", borderRadius: 18, overflow: "hidden", boxShadow: "0 4px 14px rgba(0,0,0,0.3), 0 0 0 3px #78350f" }}>
+    <div style={{ position: "fixed", inset: 0, zIndex: 1000, background: "#070b14", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "12px", boxSizing: "border-box", touchAction: "manipulation", userSelect: "none", WebkitUserSelect: "none" }}>
       <audio ref={audioRef} src={AUDIO_SRC} preload="auto" />
-      <div style={{ position: "relative", width: "100%", aspectRatio: CANVAS_W + "/" + CANVAS_H, background: "#000" }}>
+      <div style={{ position: "relative", width: "100%", maxWidth: 760, aspectRatio: CANVAS_W + "/" + CANVAS_H, background: "#000", borderRadius: 18, overflow: "hidden", boxShadow: "0 4px 24px rgba(0,0,0,0.5), 0 0 0 3px #78350f" }}>
         {/* booth (back layer) */}
         <img src={BOOTH} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", display: "block" }} draggable={false} />
         {/* characters, behind the desk */}
@@ -128,7 +128,7 @@ export default function StudioOverlay(props) {
         {done && (<div style={{ position: "absolute", bottom: 8, left: 0, right: 0, textAlign: "center", color: "#86efac", fontSize: 10, fontWeight: 900, letterSpacing: 1, zIndex: 3 }}>… AND NOW TO THE LANES</div>)}
       </div>
       {/* progress */}
-      <div style={{ height: 3, background: "#0b0b0b" }}>
+      <div style={{ width: "100%", maxWidth: 760, height: 3, background: "#0b0b0b", marginTop: 6, borderRadius: 2, overflow: "hidden" }}>
         <div style={{ width: pctDone + "%", height: "100%", background: "#fde68a", transition: "width 150ms linear" }} />
       </div>
     </div>
