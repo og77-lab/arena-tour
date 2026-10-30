@@ -24,7 +24,7 @@ var ROWS = [
    of the width kept clear where a sign or a royal box sits in the middle. Each tier is filled with a distant crowd
    (crowd-far-1…3), clipped to the tier, so it sits in the seats and never floats over the roof or the screens */
 var BANDS = {
-  "tour500-1": [[0.17, 0.25]], "tour500-2": [[0.11, 0.19]], "tour500-3": [[0.16, 0.22]], "tour500-4": [[0.16, 0.21]], "tour500-5": [[0.10, 0.18]], "tour500-6": [],
+  "tour500-1": [[0.17, 0.25]], "tour500-2": [[0.11, 0.19]], "tour500-3": [[0.16, 0.22]], "tour500-4": [[0.16, 0.21]], "tour500-5": [[0.10, 0.18]], "tour500-6": [[0.21, 0.29], [0.36, 0.43]],
   "masters-1": [[0.13, 0.19], [0.20, 0.27]], "masters-2": [[0.08, 0.17], [0.20, 0.26]], "masters-3": [[0.09, 0.15], [0.17, 0.25]],
   "masters-4": [[0.04, 0.10], [0.12, 0.18], [0.20, 0.28]], "masters-5": [[0.06, 0.12], [0.14, 0.20], [0.21, 0.27]], "masters-6": [[0.13, 0.18], [0.19, 0.26]],
   "slam-coop": [[0.20, 0.27]], "slam-swamp": [[0.18, 0.25, 0.38, 0.62]], "slam-wimblehen": [[0.20, 0.28, 0.36, 0.64]], "slam-gale": [[0.18, 0.24, 0.30, 0.70]],
