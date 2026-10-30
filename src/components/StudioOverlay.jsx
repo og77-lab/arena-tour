@@ -1,15 +1,17 @@
 /* ═══ StudioOverlay ═══ Two old men in a dark broadcast booth who open every match: Sir Barry Pecksworth (dry BBC
-   broadcaster) and Reggie Clutter (gruff Northern ex-champion), sitting at a desk with microphones and the
-   "KNITTING CLUB LIVE" ribbon over them. One pre-rendered audio file carries the whole pre-match segment; the
-   component maps time windows to the active speaker so his mouth opens on cue and the other sits still. Random
-   blinks and a tiny head sway on both so they feel alive. Skip button top-right and the SPACE key dismiss the
-   segment; after three full plays in a session it auto-skips. The next time the real match intro picks up.
-   This is a prototype on one hard-coded file; later the lines are picked and stitched per-match. */
+   broadcaster) and Reggie Clutter (gruff Northern ex-champion), sitting at a desk with microphones under the
+   KNITTING CLUB BROADCASTING sign. One pre-rendered audio file carries the whole pre-match segment; the component
+   maps time windows to the active speaker so his portrait swaps between the neutral and talking stills while his
+   partner holds still. Tiny head sway on both so they feel alive. Skip button top-right and Space/Enter/Escape
+   dismiss the segment; after three full plays in a session it auto-skips. The next time the real match intro picks
+   up. Characters sit BEHIND the desk strip: the bottom slice of the booth image is redrawn on top so the microphones
+   and desk edge cover the busts. */
 
 import * as React from "react";
 import { REDUCED_MOTION } from "./fx";
 
 var AUDIO_SRC = "/sounds/studio/pre-match-demo.mp3";
+var BOOTH = "/art/studio/studio-booth.png";
 /* Each segment: when (seconds) the current speaker's turn ENDS. Values measured from the stitched mp3. */
 var TIMINGS = [
   { speaker: "barry",  end: 16.19 },
@@ -23,99 +25,43 @@ var TIMINGS = [
   { speaker: "barry",  end: 60.51 },
   { speaker: "reggie", end: 63.47 }
 ];
+/* The booth art canvas is 1792×1024. Characters live on the same canvas at the coords the artist specified.
+   Reggie faces image-right so he sits on the LEFT; Barry faces image-left so he sits on the RIGHT. The lower
+   274 px of the booth is redrawn on top so the microphones and desk edge sit in front of the busts. */
+var CANVAS_W = 1792, CANVAS_H = 1024;
+var REGGIE_BOX = { x: 100, y: 315, w: 680, h: 680 };
+var BARRY_BOX  = { x: 1012, y: 315, w: 680, h: 680 };
+var DESK_TOP = 750, DESK_H = CANVAS_H - DESK_TOP;
 var PLAY_KEY = "studioPlayCount";
 var AUTOSKIP_AFTER = 3;
 
-function speakerAt(t) {
-  for (var i = 0; i < TIMINGS.length; i++) if (t < TIMINGS[i].end) return TIMINGS[i].speaker;
-  return null;
-}
+function pct(a, b) { return (a / b) * 100 + "%"; }
+function speakerAt(t) { for (var i = 0; i < TIMINGS.length; i++) if (t < TIMINGS[i].end) return TIMINGS[i].speaker; return null; }
 
-/* One commentator at the desk. mouthOpen 0..1 drives the mouth; blink is a 0..1 pulse (1 = eyes shut). */
-function Head(props) {
-  var p = props.palette, name = props.name, role = props.role;
-  var mouth = Math.max(0.08, Math.min(1, props.mouthOpen || 0.08));
-  var blink = props.blink || 0;
-  var eyeH = 2.4 * (1 - blink);
-  var sway = props.sway || 0;
+function Portrait(props) {
+  var box = props.box, open = props.open, neutralSrc = props.neutralSrc, talkingSrc = props.talkingSrc, sway = props.sway;
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flex: 1, minWidth: 0 }}>
-      <div style={{ transform: "translateY(" + (sway * 1.5).toFixed(2) + "px) rotate(" + (sway * 1.2).toFixed(2) + "deg)", transformOrigin: "50% 100%", transition: REDUCED_MOTION ? "none" : "transform 220ms ease" }}>
-        <svg viewBox="0 0 120 150" width="112" height="140" aria-hidden style={{ display: "block" }}>
-          {/* shoulder & suit */}
-          <path d={"M 10 150 Q 10 110 60 108 Q 110 110 110 150 Z"} fill={p.suit} stroke="#1a0f06" strokeWidth="1.6" />
-          <rect x="56" y="112" width="8" height="24" fill={p.tie} stroke="#1a0f06" strokeWidth="0.8" />
-          {/* neck */}
-          <rect x="50" y="92" width="20" height="18" fill={p.skin} stroke="#1a0f06" strokeWidth="1.2" />
-          {/* head */}
-          <ellipse cx="60" cy="60" rx="36" ry="42" fill={p.skin} stroke="#1a0f06" strokeWidth="2" />
-          {/* hair */}
-          {p.hair === "bald" ? (
-            <>
-              <path d={"M 24 46 Q 60 10 96 46 Q 92 32 60 24 Q 28 32 24 46 Z"} fill="transparent" />
-              <path d={"M 24 54 Q 32 70 24 86"} fill="none" stroke={p.hairCol} strokeWidth="4" strokeLinecap="round" />
-              <path d={"M 96 54 Q 88 70 96 86"} fill="none" stroke={p.hairCol} strokeWidth="4" strokeLinecap="round" />
-            </>
-          ) : (
-            <path d={"M 20 50 Q 30 14 60 14 Q 90 14 100 50 Q 94 36 60 28 Q 28 34 20 50 Z"} fill={p.hairCol} stroke="#1a0f06" strokeWidth="1.6" />
-          )}
-          {/* ears */}
-          <ellipse cx="22" cy="62" rx="5" ry="8" fill={p.skin} stroke="#1a0f06" strokeWidth="1.2" />
-          <ellipse cx="98" cy="62" rx="5" ry="8" fill={p.skin} stroke="#1a0f06" strokeWidth="1.2" />
-          {/* glasses */}
-          {p.glasses && (<g stroke="#1a0f06" strokeWidth="1.5" fill="none">
-            <circle cx="44" cy="58" r="9" fill="rgba(255,255,255,0.14)" />
-            <circle cx="76" cy="58" r="9" fill="rgba(255,255,255,0.14)" />
-            <line x1="53" y1="58" x2="67" y2="58" />
-          </g>)}
-          {/* eyebrows */}
-          <path d={"M 36 46 Q 44 42 52 46"} fill="none" stroke={p.brow} strokeWidth="2.6" strokeLinecap="round" transform={p.browAngle ? "rotate(" + p.browAngle + " 44 46)" : ""} />
-          <path d={"M 68 46 Q 76 42 84 46"} fill="none" stroke={p.brow} strokeWidth="2.6" strokeLinecap="round" transform={p.browAngle ? "rotate(" + (-p.browAngle) + " 76 46)" : ""} />
-          {/* eyes */}
-          <ellipse cx="44" cy="58" rx="3.2" ry={eyeH} fill="#1a0f06" />
-          <ellipse cx="76" cy="58" rx="3.2" ry={eyeH} fill="#1a0f06" />
-          {blink > 0.5 && (<>
-            <line x1="40" y1="58" x2="48" y2="58" stroke="#1a0f06" strokeWidth="1.6" strokeLinecap="round" />
-            <line x1="72" y1="58" x2="80" y2="58" stroke="#1a0f06" strokeWidth="1.6" strokeLinecap="round" />
-          </>)}
-          {/* nose */}
-          <path d={"M 60 60 Q 58 72 60 78 Q 64 78 62 72 Z"} fill={p.noseShade} stroke="#1a0f06" strokeWidth="1" />
-          {/* moustache */}
-          {p.moustache && (<path d={"M 40 86 Q 60 92 80 86 Q 72 94 60 92 Q 48 94 40 86 Z"} fill={p.hairCol} stroke="#1a0f06" strokeWidth="1.2" />)}
-          {/* mouth */}
-          <g transform="translate(60 94)">
-            <ellipse cx="0" cy="0" rx={5 + mouth * 2} ry={1.5 + mouth * 5} fill="#2a1a10" stroke="#1a0f06" strokeWidth="1.2" />
-            {mouth > 0.3 && (<rect x={-3} y={-mouth * 2.5} width="6" height={mouth * 2.2} rx="1" fill="#f7e4c0" opacity="0.85" />)}
-          </g>
-          {/* chin shadow */}
-          <path d={"M 36 86 Q 60 100 84 86"} fill="none" stroke={p.noseShade} strokeWidth="1.2" opacity="0.5" />
-        </svg>
-      </div>
-      {/* mic */}
-      <div style={{ marginTop: -14, display: "flex", flexDirection: "column", alignItems: "center" }}>
-        <div style={{ width: 14, height: 20, borderRadius: "7px 7px 3px 3px", background: "linear-gradient(180deg,#4b5563,#1f2937)", border: "1px solid #0f172a", boxShadow: "inset 0 2px 0 rgba(255,255,255,0.08)" }} />
-        <div style={{ width: 2, height: 14, background: "#334155" }} />
-      </div>
-      <div style={{ marginTop: 6, textAlign: "center", color: "#fde68a", fontWeight: 900, fontSize: 12, letterSpacing: 1, textTransform: "uppercase", textShadow: "0 1px 0 #000" }}>{name}</div>
-      <div style={{ marginTop: 1, color: "#94a3b8", fontSize: 9.5, fontWeight: 700, letterSpacing: 0.6, textTransform: "uppercase" }}>{role}</div>
+    <div style={{
+      position: "absolute", left: pct(box.x, CANVAS_W), top: pct(box.y, CANVAS_H),
+      width: pct(box.w, CANVAS_W), height: pct(box.h, CANVAS_H),
+      transform: "translateY(" + (sway * 0.4).toFixed(2) + "%) rotate(" + (sway * 0.6).toFixed(2) + "deg)",
+      transformOrigin: "50% 100%", transition: REDUCED_MOTION ? "none" : "transform 260ms ease", zIndex: 1
+    }}>
+      <img src={neutralSrc} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "contain", opacity: open ? 0 : 1 }} draggable={false} />
+      <img src={talkingSrc} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "contain", opacity: open ? 1 : 0 }} draggable={false} />
     </div>
   );
 }
-
-var BARRY = { suit: "#1f2937", tie: "#7f1d1d", skin: "#e8c6a4", noseShade: "#b4845e", hair: "ring", hairCol: "#e5e7eb", brow: "#9ca3af", glasses: true, moustache: false };
-var REGGIE = { suit: "#3b2d1f", tie: "#047857", skin: "#d9a07b", noseShade: "#8b5a3b", hair: "bald", hairCol: "#78716c", brow: "#44403c", glasses: false, moustache: true, browAngle: 10 };
 
 export default function StudioOverlay(props) {
   var audioRef = React.useRef(null);
   var _t = React.useState(0), t = _t[0], setT = _t[1];
   var _done = React.useState(false), done = _done[0], setDone = _done[1];
-  var _blink = React.useState({ barry: 0, reggie: 0 }), blink = _blink[0], setBlink = _blink[1];
+  var _mouth = React.useState(false), mouth = _mouth[0], setMouth = _mouth[1];
   var _sway = React.useState({ barry: 0, reggie: 0 }), sway = _sway[0], setSway = _sway[1];
-  var _mouth = React.useState(0.1), mouth = _mouth[0], setMouth = _mouth[1];
   var _ready = React.useState(false), ready = _ready[0], setReady = _ready[1];
 
   React.useEffect(function () {
-    /* auto-skip after a few full plays this session */
     var n = 0; try { n = parseInt(sessionStorage.getItem(PLAY_KEY) || "0", 10) || 0; } catch (e) {}
     if (n >= AUTOSKIP_AFTER) { props.onDone && props.onDone(); return; }
     var a = audioRef.current; if (!a) return;
@@ -126,40 +72,28 @@ export default function StudioOverlay(props) {
     return function () { a.removeEventListener("timeupdate", onTime); a.removeEventListener("ended", onEnd); a.removeEventListener("canplay", onCan); try { a.pause(); } catch (e) {} };
   }, []);
 
-  /* fake lip-sync: oscillate mouth height every ~110ms while audio is playing */
+  /* Lip sync by portrait swap: toggle active speaker between neutral and talking at ~140ms, random. */
   React.useEffect(function () {
     if (REDUCED_MOTION) return;
     var id = setInterval(function () {
-      var a = audioRef.current; if (!a || a.paused) { setMouth(0.1); return; }
-      setMouth(0.25 + Math.random() * 0.7);
-    }, 110);
+      var a = audioRef.current; if (!a || a.paused) { setMouth(false); return; }
+      setMouth(Math.random() > 0.35);
+    }, 140);
     return function () { clearInterval(id); };
   }, []);
 
-  /* independent random blinks */
+  /* Slow head sway on both heads, independent timers so they don't move in lockstep. */
   React.useEffect(function () {
     if (REDUCED_MOTION) return;
-    var tm = { barry: null, reggie: null };
-    function schedule(who) {
-      tm[who] = setTimeout(function () {
-        setBlink(function (b) { var n = {}; n.barry = b.barry; n.reggie = b.reggie; n[who] = 1; return n; });
-        setTimeout(function () { setBlink(function (b) { var n = {}; n.barry = b.barry; n.reggie = b.reggie; n[who] = 0; return n; }); schedule(who); }, 110);
-      }, 2200 + Math.random() * 3800);
-    }
-    schedule("barry"); schedule("reggie");
-    return function () { if (tm.barry) clearTimeout(tm.barry); if (tm.reggie) clearTimeout(tm.reggie); };
-  }, []);
-
-  /* slow head sway */
-  React.useEffect(function () {
-    if (REDUCED_MOTION) return;
-    var id = setInterval(function () { setSway({ barry: (Math.random() - 0.5) * 2, reggie: (Math.random() - 0.5) * 2 }); }, 1800);
-    return function () { clearInterval(id); };
+    var id1 = setInterval(function () { setSway(function (s) { return { barry: (Math.random() - 0.5) * 1.6, reggie: s.reggie }; }); }, 1700);
+    var id2 = setInterval(function () { setSway(function (s) { return { barry: s.barry, reggie: (Math.random() - 0.5) * 1.6 }; }); }, 2100);
+    return function () { clearInterval(id1); clearInterval(id2); };
   }, []);
 
   var active = speakerAt(t);
-  var mB = active === "barry" ? mouth : 0.08, mR = active === "reggie" ? mouth : 0.08;
-  var pct = Math.min(100, (t / TIMINGS[TIMINGS.length - 1].end) * 100);
+  var barryOpen = active === "barry" && mouth;
+  var reggieOpen = active === "reggie" && mouth;
+  var pctDone = Math.min(100, (t / TIMINGS[TIMINGS.length - 1].end) * 100);
 
   function skip() { try { if (audioRef.current) audioRef.current.pause(); } catch (e) {} props.onDone && props.onDone(); }
   React.useEffect(function () {
@@ -168,30 +102,35 @@ export default function StudioOverlay(props) {
   }, []);
 
   return (
-    <div style={{ position: "relative", borderRadius: 18, overflow: "hidden", background: "radial-gradient(ellipse at 50% 30%,#1e293b 0%,#0b1120 60%,#000 100%)", border: "3px solid #78350f", boxShadow: "inset 0 0 60px rgba(0,0,0,0.6), 0 4px 14px rgba(0,0,0,0.3)", padding: "14px 10px 10px", maxWidth: 520, margin: "0 auto 8px" }}>
+    <div style={{ position: "relative", maxWidth: 520, margin: "0 auto 8px", borderRadius: 18, overflow: "hidden", boxShadow: "0 4px 14px rgba(0,0,0,0.3), 0 0 0 3px #78350f" }}>
       <audio ref={audioRef} src={AUDIO_SRC} preload="auto" />
-      {/* ribbon */}
-      <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 22, background: "linear-gradient(90deg,#b91c1c,#dc2626,#b91c1c)", color: "#fde68a", fontSize: 10, fontWeight: 900, letterSpacing: 2, textAlign: "center", lineHeight: "22px", textTransform: "uppercase", borderBottom: "1px solid #78350f" }}>
-        <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-          <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#fde68a", boxShadow: "0 0 6px #fde68a", animation: REDUCED_MOTION ? "none" : "pulse 1s steps(2) infinite" }} />
-          Knitting Club Live · Pre-Match
-        </span>
+      <div style={{ position: "relative", width: "100%", aspectRatio: CANVAS_W + "/" + CANVAS_H, background: "#000" }}>
+        {/* booth (back layer) */}
+        <img src={BOOTH} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", display: "block" }} draggable={false} />
+        {/* characters, behind the desk */}
+        <Portrait box={REGGIE_BOX} open={reggieOpen} neutralSrc="/art/studio/reggie-neutral.png" talkingSrc="/art/studio/reggie-talking.png" sway={sway.reggie} />
+        <Portrait box={BARRY_BOX}  open={barryOpen}  neutralSrc="/art/studio/barry-neutral.png"  talkingSrc="/art/studio/barry-talking.png"  sway={sway.barry} />
+        {/* desk strip redrawn on top so busts sit BEHIND the microphones and desk edge */}
+        <div style={{
+          position: "absolute", left: 0, right: 0, top: pct(DESK_TOP, CANVAS_H), height: pct(DESK_H, CANVAS_H),
+          backgroundImage: "url(" + BOOTH + ")", backgroundSize: "100% " + pct(CANVAS_H, DESK_H),
+          backgroundPosition: "bottom", backgroundRepeat: "no-repeat", pointerEvents: "none", zIndex: 2
+        }} />
+        {/* LIVE pill */}
+        <div style={{ position: "absolute", top: 8, left: 10, zIndex: 3, display: "inline-flex", alignItems: "center", gap: 5, background: "rgba(185,28,28,0.92)", color: "#fde68a", fontSize: 10, fontWeight: 900, letterSpacing: 2, padding: "3px 8px", borderRadius: 10, textTransform: "uppercase", boxShadow: "0 2px 6px rgba(0,0,0,0.3)" }}>
+          <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#fde68a", boxShadow: "0 0 6px #fde68a", animation: REDUCED_MOTION ? "none" : "pulse 1s steps(2) infinite" }} />
+          LIVE · PRE-MATCH
+        </div>
+        {/* skip */}
+        <button onClick={skip} aria-label="Skip pre-match"
+          style={{ position: "absolute", top: 8, right: 8, zIndex: 3, padding: "5px 11px", borderRadius: 10, background: "rgba(0,0,0,0.55)", color: "#fde68a", border: "1px solid rgba(253,230,138,0.5)", fontSize: 11, fontWeight: 900, letterSpacing: 1, cursor: "pointer", textTransform: "uppercase" }}>Skip ⟩⟩</button>
+        {!ready && (<div style={{ position: "absolute", bottom: 8, left: 0, right: 0, textAlign: "center", color: "#fde68a", fontSize: 10, fontWeight: 900, letterSpacing: 1, zIndex: 3 }}>Cueing up…</div>)}
+        {done && (<div style={{ position: "absolute", bottom: 8, left: 0, right: 0, textAlign: "center", color: "#86efac", fontSize: 10, fontWeight: 900, letterSpacing: 1, zIndex: 3 }}>… AND NOW TO THE LANES</div>)}
       </div>
-      {/* skip */}
-      <button onClick={skip} aria-label="Skip pre-match"
-        style={{ position: "absolute", top: 28, right: 10, zIndex: 2, padding: "4px 10px", borderRadius: 10, background: "rgba(255,255,255,0.1)", color: "#fde68a", border: "1px solid rgba(253,230,138,0.4)", fontSize: 11, fontWeight: 900, letterSpacing: 1, cursor: "pointer", textTransform: "uppercase" }}>Skip ⟩⟩</button>
-      {/* desk */}
-      <div style={{ marginTop: 24, display: "flex", justifyContent: "center", alignItems: "flex-end", gap: 16, padding: "6px 4px 0" }}>
-        <Head name="Sir Barry Pecksworth" role="Lead broadcaster" palette={BARRY} mouthOpen={mB} blink={blink.barry} sway={sway.barry} />
-        <Head name="Reggie Clutter" role="Colour · ex-champion" palette={REGGIE} mouthOpen={mR} blink={blink.reggie} sway={sway.reggie} />
-      </div>
-      <div style={{ height: 14, background: "linear-gradient(180deg,#78350f 0%,#451a03 100%)", borderTop: "1px solid #92400e", marginTop: 4, borderRadius: "0 0 8px 8px", boxShadow: "inset 0 2px 0 rgba(255,255,255,0.08)" }} />
       {/* progress */}
-      <div style={{ marginTop: 8, height: 3, background: "rgba(255,255,255,0.08)", borderRadius: 3, overflow: "hidden" }}>
-        <div style={{ width: pct + "%", height: "100%", background: "#fde68a", transition: "width 150ms linear" }} />
+      <div style={{ height: 3, background: "#0b0b0b" }}>
+        <div style={{ width: pctDone + "%", height: "100%", background: "#fde68a", transition: "width 150ms linear" }} />
       </div>
-      {!ready && (<div style={{ textAlign: "center", color: "#94a3b8", fontSize: 10, marginTop: 4, fontWeight: 700, letterSpacing: 1 }}>Cueing up…</div>)}
-      {done && (<div style={{ textAlign: "center", color: "#86efac", fontSize: 10, marginTop: 4, fontWeight: 900, letterSpacing: 1 }}>…AND NOW TO THE LANES</div>)}
     </div>
   );
 }
