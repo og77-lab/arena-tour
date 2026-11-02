@@ -103,7 +103,7 @@ export default function StudioOverlay(props) {
         }} />
         <div style={{ position: "absolute", top: 8, left: 10, zIndex: 3, display: "inline-flex", alignItems: "center", gap: 5, background: "rgba(185,28,28,0.92)", color: "#fde68a", fontSize: 10, fontWeight: 900, letterSpacing: 2, padding: "3px 8px", borderRadius: 10, textTransform: "uppercase", boxShadow: "0 2px 6px rgba(0,0,0,0.3)" }}>
           <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#fde68a", boxShadow: "0 0 6px #fde68a", animation: REDUCED_MOTION ? "none" : "pulse 1s steps(2) infinite" }} />
-          LIVE · PRE-MATCH
+          LIVE · {props.phase === "post" ? "POST-MATCH" : props.phase === "between" ? "BETWEEN SETS" : "PRE-MATCH"}
         </div>
         <button onClick={skip} aria-label="Skip pre-match"
           style={{ position: "absolute", top: 8, right: 8, zIndex: 3, padding: "5px 11px", borderRadius: 10, background: "rgba(0,0,0,0.55)", color: "#fde68a", border: "1px solid rgba(253,230,138,0.5)", fontSize: 11, fontWeight: 900, letterSpacing: 1, cursor: "pointer", textTransform: "uppercase" }}>Skip ⟩⟩</button>

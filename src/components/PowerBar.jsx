@@ -21,7 +21,7 @@ import { fatigueFx } from "../engine/fitness";
 import { riderBar, speedAt, landScore, npcMiss, dayForm, nerves, abilityRating, gapEdge, goldBase, handsSample, CTR } from "../engine/joust";
 import { enterMatch, leaveMatch, startBattle, stopBattle } from "../music";
 import StudioOverlay from "./StudioOverlay";
-import { buildPreMatch, buildBetweenSets, buildPostMatch } from "../engine/commentary";
+import { buildPreMatch, buildPostMatch } from "../engine/commentary";
 
 const { useState, useEffect, useRef } = React;
 
@@ -506,22 +506,20 @@ export default function PowerBar(props) {
     round: 0
   } : null;
 
-  /* Between-sets studio: on each new "setbreak" we insert a short booth read before the SetBreak card. */
-  var showBetweenStudio = studioEnabled && ph === "setbreak" && studioCommentedSet < sets.length - 1 && sets.length > 0 && sets.length < need;
+  /* Between-sets studio: dormant for now. The engine still builds the lines, but a full overlay between
+     every set is a hard pause the player didn't want. Later this will be a background audio quip from the
+     booth (half a sentence) with no visible overlay. */
+  var showBetweenStudio = false;
   /* Post-match studio: after done, before the MatchOutro. */
   var showPostStudio = studioEnabled && ph === "done" && res && !postStudioDone;
 
   return (
     <div style={{ position: "relative", padding: "4px 0" }}>
       {ph === "studio" && (
-        <StudioOverlay onDone={function () { setPh("intro"); }} commentary={buildPreMatch(studioCtx)} />
-      )}
-      {showBetweenStudio && (
-        <StudioOverlay onDone={function () { setStudioCommentedSet(sets.length - 1); }}
-          commentary={buildBetweenSets(studioCtx, { sets: sets, need: need })} />
+        <StudioOverlay phase="pre" onDone={function () { setPh("intro"); }} commentary={buildPreMatch(studioCtx)} />
       )}
       {showPostStudio && (
-        <StudioOverlay onDone={function () { setPostStudioDone(true); }}
+        <StudioOverlay phase="post" onDone={function () { setPostStudioDone(true); }}
           commentary={buildPostMatch(studioCtx, res)} />
       )}
       {ph === "intro" && (
