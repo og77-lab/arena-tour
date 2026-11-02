@@ -492,10 +492,15 @@ export default function PowerBar(props) {
         <StudioOverlay onDone={function () { setPh("intro"); }} commentary={buildPreMatch({
           playerName: props.playerName, oppName: props.oppName,
           playerRank: props.myRank, oppRank: props.oppRank,
+          playerTr: tr, oppTr: otr,
+          playerTalent: props.myTalent, oppTalent: props.oppSkill,
+          playerFit: props.fit, oppFit: props.oppFit,
+          condKey: props.cond, condW: COND.w || {}, condName: COND.name || "classic",
           tierName: props.tierName, tierIdx: props.tier, roundLabel: props.roundLabel,
-          bestOf: bestOf, cond: props.cond,
+          bestOf: bestOf,
           venue: (props.eventName || props.tierName || "the ground").split(" ")[0],
-          firstMeeting: true, h2hWins: 0, h2hLosses: 0,
+          firstMeeting: !props.h2h, h2hWins: (props.h2h && props.h2h.w) || 0, h2hLosses: (props.h2h && props.h2h.l) || 0,
+          oppCareer: props.oppCareer || {}, playerCareer: props.playerCareer || {},
           isFinal: !!props.isFinal, isSlam: (props.tier || 0) >= 5, isMasters: props.tier === 4,
           round: 0
         })} />
