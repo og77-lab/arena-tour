@@ -21,6 +21,7 @@ import { fatigueFx } from "../engine/fitness";
 import { riderBar, speedAt, landScore, npcMiss, dayForm, nerves, abilityRating, gapEdge, goldBase, handsSample, CTR } from "../engine/joust";
 import { enterMatch, leaveMatch, startBattle, stopBattle } from "../music";
 import StudioOverlay from "./StudioOverlay";
+import { buildPreMatch } from "../engine/commentary";
 
 const { useState, useEffect, useRef } = React;
 
@@ -483,7 +484,16 @@ export default function PowerBar(props) {
   return (
     <div style={{ position: "relative", padding: "4px 0" }}>
       {ph === "studio" && (
-        <StudioOverlay onDone={function () { setPh("intro"); }} />
+        <StudioOverlay onDone={function () { setPh("intro"); }} commentary={buildPreMatch({
+          playerName: props.playerName, oppName: props.oppName,
+          playerRank: props.myRank, oppRank: props.oppRank,
+          tierName: props.tierName, tierIdx: props.tier, roundLabel: props.roundLabel,
+          bestOf: bestOf, cond: props.cond,
+          venue: (props.eventName || props.tierName || "the ground").split(" ")[0],
+          firstMeeting: true, h2hWins: 0, h2hLosses: 0,
+          isFinal: !!props.isFinal, isSlam: (props.tier || 0) >= 5, isMasters: props.tier === 4,
+          round: 0
+        })} />
       )}
       {ph === "intro" && (
         <MatchIntro
