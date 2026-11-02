@@ -179,7 +179,12 @@ export default function PowerBar(props) {
   /* Studio pre-match segment: dormant for now while we build out the full dynamic dialogue (names, ranks, stats,
      head-to-head, condition, upsets) and the post-match recap. The code, art and audio stay in the tree; set
      localStorage.studioOn = "1" in devtools to preview the prototype on this device. */
-  var studioEnabled = (function () { try { return localStorage.getItem("studioOn") === "1"; } catch (e) { return false; } })();
+  var studioEnabled = (function () {
+    try {
+      if (typeof location !== "undefined" && location.search && location.search.indexOf("studio=1") !== -1) { try { localStorage.setItem("studioOn", "1"); } catch (e) {} return true; }
+      return localStorage.getItem("studioOn") === "1";
+    } catch (e) { return false; }
+  })();
   var fresh = !initRes && (init.sets || []).length === 0 && (init.my || []).length === 0;
   var _p = useState(initRes ? "done" : (fresh && studioEnabled ? "studio" : "intro")), ph = _p[0], setPh = _p[1];
   var _sets = useState(init.sets), sets = _sets[0], setSets = _sets[1];
