@@ -21,7 +21,7 @@ import { fatigueFx } from "../engine/fitness";
 import { riderBar, speedAt, landScore, npcMiss, dayForm, nerves, abilityRating, gapEdge, goldBase, handsSample, CTR } from "../engine/joust";
 import { enterMatch, leaveMatch, startBattle, stopBattle } from "../music";
 import StudioOverlay from "./StudioOverlay";
-import { buildPreMatch } from "../engine/commentary";
+import { buildPreMatch, buildBetweenSets, buildPostMatch } from "../engine/commentary";
 
 const { useState, useEffect, useRef } = React;
 
@@ -187,6 +187,9 @@ export default function PowerBar(props) {
   })();
   var fresh = !initRes && (init.sets || []).length === 0 && (init.my || []).length === 0;
   var _p = useState(initRes ? "done" : (fresh && studioEnabled ? "studio" : "intro")), ph = _p[0], setPh = _p[1];
+  /* Which sets we've already covered on-air: index of the latest set that's had its between-sets commentary. */
+  var _studioSet = useState(-1), studioCommentedSet = _studioSet[0], setStudioCommentedSet = _studioSet[1];
+  var _postDone = useState(false), postStudioDone = _postDone[0], setPostStudioDone = _postDone[1];
   var _sets = useState(init.sets), sets = _sets[0], setSets = _sets[1];
   var _my = useState(init.my), myH = _my[0], setMyH = _my[1];
   var _op = useState(init.op), opH = _op[0], setOpH = _op[1];
@@ -486,24 +489,40 @@ export default function PowerBar(props) {
   var redAlert = deciding || !!banner;
   var lastSet = sets[sets.length - 1];
 
+  /* The context the commentary engine reads from — rebuilt per render so it reflects the latest sets. */
+  var studioCtx = studioEnabled ? {
+    playerName: props.playerName, oppName: props.oppName,
+    playerRank: props.myRank, oppRank: props.oppRank,
+    playerTr: tr, oppTr: otr,
+    playerTalent: props.myTalent, oppTalent: props.oppSkill,
+    playerFit: props.fit, oppFit: props.oppFit,
+    condKey: props.cond, condW: COND.w || {}, condName: COND.name || "classic",
+    tierName: props.tierName, tierIdx: props.tier, roundLabel: props.roundLabel,
+    bestOf: bestOf,
+    venue: (props.eventName || props.tierName || "the ground").split(" ")[0],
+    firstMeeting: !props.h2h, h2hWins: (props.h2h && props.h2h.w) || 0, h2hLosses: (props.h2h && props.h2h.l) || 0,
+    oppCareer: props.oppCareer || {}, playerCareer: props.playerCareer || {},
+    isFinal: !!props.isFinal, isSlam: (props.tier || 0) >= 5, isMasters: props.tier === 4,
+    round: 0
+  } : null;
+
+  /* Between-sets studio: on each new "setbreak" we insert a short booth read before the SetBreak card. */
+  var showBetweenStudio = studioEnabled && ph === "setbreak" && studioCommentedSet < sets.length - 1 && sets.length > 0 && sets.length < need;
+  /* Post-match studio: after done, before the MatchOutro. */
+  var showPostStudio = studioEnabled && ph === "done" && res && !postStudioDone;
+
   return (
     <div style={{ position: "relative", padding: "4px 0" }}>
       {ph === "studio" && (
-        <StudioOverlay onDone={function () { setPh("intro"); }} commentary={buildPreMatch({
-          playerName: props.playerName, oppName: props.oppName,
-          playerRank: props.myRank, oppRank: props.oppRank,
-          playerTr: tr, oppTr: otr,
-          playerTalent: props.myTalent, oppTalent: props.oppSkill,
-          playerFit: props.fit, oppFit: props.oppFit,
-          condKey: props.cond, condW: COND.w || {}, condName: COND.name || "classic",
-          tierName: props.tierName, tierIdx: props.tier, roundLabel: props.roundLabel,
-          bestOf: bestOf,
-          venue: (props.eventName || props.tierName || "the ground").split(" ")[0],
-          firstMeeting: !props.h2h, h2hWins: (props.h2h && props.h2h.w) || 0, h2hLosses: (props.h2h && props.h2h.l) || 0,
-          oppCareer: props.oppCareer || {}, playerCareer: props.playerCareer || {},
-          isFinal: !!props.isFinal, isSlam: (props.tier || 0) >= 5, isMasters: props.tier === 4,
-          round: 0
-        })} />
+        <StudioOverlay onDone={function () { setPh("intro"); }} commentary={buildPreMatch(studioCtx)} />
+      )}
+      {showBetweenStudio && (
+        <StudioOverlay onDone={function () { setStudioCommentedSet(sets.length - 1); }}
+          commentary={buildBetweenSets(studioCtx, { sets: sets, need: need })} />
+      )}
+      {showPostStudio && (
+        <StudioOverlay onDone={function () { setPostStudioDone(true); }}
+          commentary={buildPostMatch(studioCtx, res)} />
       )}
       {ph === "intro" && (
         <MatchIntro
@@ -514,16 +533,16 @@ export default function PowerBar(props) {
           skipSignal={skip}
           onDone={function () { setPh(sets.length > 0 && myH.length === 0 ? "setintro" : "go"); if (sets.length > 0 && myH.length === 0) setTimeout(function () { setPh("go"); }, 1100); }} />
       )}
-      {ph === "setbreak" && lastSet && (
+      {ph === "setbreak" && lastSet && !showBetweenStudio && (
         <SetBreak set={lastSet} setNum={sets.length} need={need} setsWon={setsWon} setsLost={setsLost}
           youName={youName} foeName={oppName} eliminated={props.eliminated !== false}
           continueSignal={cont} onContinue={startNextSet} />
       )}
-      {isDone && props.isFinal && !finalOutDone && (
+      {isDone && props.isFinal && !finalOutDone && !showPostStudio && (
         <FinalOutro won={res.w} tierName={props.tierName} youPalette={youPal} foePalette={foePal} foeName={oppName}
           pts={props.titleStakes ? props.titleStakes.pts : null} money={props.titleStakes ? props.titleStakes.money : null} onDone={function () { setFinalOutDone(true); }} />
       )}
-      {isDone && (!props.isFinal || finalOutDone) && (
+      {isDone && (!props.isFinal || finalOutDone) && !showPostStudio && (
         <MatchOutro
           won={res.w} champion={res.w && !!props.isFinal} eliminated={!res.w && props.eliminated !== false}
           pa={res.pa} oa={res.oa} sets={res.sets} setsWon={res.setsWon} setsLost={res.setsLost}

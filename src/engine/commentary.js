@@ -331,10 +331,169 @@ export function buildPreMatch(ctx) {
   return { lines: out, totalMs: acc, analysis: a };
 }
 
-/* ── 6 · Context builder for PowerBar/ArenaGame to call ─────────────────────── */
-/* Thin wrapper that assembles ctx from the pieces PowerBar's props already carry, plus S for career data.
-   NOT the full state; keep it portable so PowerBar can call it without plumbing S all the way through. */
-export function buildCommentaryContext(opts) {
-  /* opts: everything the engine needs, cherry-picked by the caller. See buildPreMatch(ctx) above. */
-  return opts;
+/* ── 6 · Between-sets commentary ───────────────────────────────────────────── */
+/* Shorter — 2–3 lines, ~6 seconds. Called after each set finishes except the last. The caller passes:
+     setsCtx = { sets: [{ my:[strikes], op:[strikes], won }…], need, youLeading, perfectCount } */
+
+/* How we read the latest set */
+var SET_CLOSE_WIN   = ["Set to {player}, but by a whisker — {setGapAbs} points in it. {opp} will be furious with herself.", "{player} edges it. {setGapAbs}-point margin. The crowd barely breathed.", "A tight one, Barry. {player} by {setGapAbs}. These sets are being paid for."];
+var SET_WIDE_WIN    = ["Set to {player}, and by a mile — {setGapAbs} points. {opp} wasn't in it.", "A clean set from {player}. {setGapAbs}-point gap says it all.", "Dominant, Barry. {player} runs away with it by {setGapAbs}."];
+var SET_CLOSE_LOSS  = ["Set to {opp}, {setGapAbs} points. {player} will know she had chances.", "A hard one for {player} — {setGapAbs} points short. The margins are vicious."];
+var SET_WIDE_LOSS   = ["{opp} takes it, Barry — {setGapAbs} points clear. {player} needs to find something.", "A rough set for {player}. {setGapAbs}-point beating. The scoreboard reads a story."];
+
+/* Pattern reads over all sets so far */
+var MOMENTUM_STREAK_PLAYER = ["Two on the trot for {player}. The booth smells blood.", "{player} is in a rhythm now, Barry. Hard to stop a granny once she starts.", "That's two straight. {opp}'s head is somewhere else."];
+var MOMENTUM_STREAK_OPP = ["Two in a row for {opp}. {player}'s running out of road.", "{opp} building a wall. {player} has to break something to come back.", "Trouble for {player}. Two sets down and the bar getting faster."];
+var MOMENTUM_SWING = ["Trading sets, Barry. One each. This is what we came for.", "Set apiece. The next one tips it.", "Even now. Pick your side and hold on."];
+
+/* Perfect-strike call-outs */
+var PERFECT_HAIL_PLAYER = ["Three gold strikes in that set from {player}. Three. On this bar. Reggie, that's not jousting, that's clockwork.", "A flawless set from {player}, Barry. Every strike on the line.", "{player} with a perfect set. On {condName} day. She's reading the bar like a book."];
+var PERFECT_HAIL_OPP = ["{opp} just posted a flawless set. {player}'s got to go up a gear or go home.", "Three straight gold for {opp}. That'll be in the papers.", "A clean sheet from {opp} that set. Ominous for {player}."];
+
+/* Decider framing (if next set is match-decider) */
+var DECIDER_INCOMING = ["Deciding set up next, Barry. Everything on this one.", "Here we go — all or nothing from here.", "The decider. If {player} wants this, she takes it now."];
+
+/* Flat read (if nothing dramatic to say) */
+var FLAT_SET = ["Set done. {player} leads {setsWon}–{setsLost}.", "One more in the books. {setsWon}–{setsLost} on the scorecard.", "Set to {setWinner}. Score reads {setsWon}–{setsLost}."];
+
+export function buildBetweenSets(ctx, setsCtx) {
+  ctx = ctx || {}; setsCtx = setsCtx || {};
+  var sets = setsCtx.sets || [], need = setsCtx.need || 2;
+  var lastSet = sets[sets.length - 1];
+  if (!lastSet) return { lines: [], totalMs: 0 };
+  var youWonLast = !!lastSet.won;
+  var lastMy = Math.round((lastSet.my || []).reduce(function(s,x){return s+x;},0) / Math.max(1, (lastSet.my || []).length));
+  var lastOp = Math.round((lastSet.op || []).reduce(function(s,x){return s+x;},0) / Math.max(1, (lastSet.op || []).length));
+  var setGap = lastMy - lastOp, setGapAbs = Math.abs(setGap);
+  var close = setGapAbs <= 4, wide = setGapAbs >= 10;
+  var setsWon = sets.filter(function (s) { return s.won; }).length;
+  var setsLost = sets.length - setsWon;
+  var youLeading = setsWon > setsLost, matchTied = setsWon === setsLost;
+  var deciderNext = setsWon === need - 1 && setsLost === need - 1;
+
+  /* Streak: last two sets same winner */
+  var streak = sets.length >= 2 && sets[sets.length - 1].won === sets[sets.length - 2].won;
+  var flawless = (lastSet.my || []).length >= 3 && (lastSet.my || []).every(function (s) { return s >= 85; });
+  var oppFlawless = (lastSet.op || []).length >= 3 && (lastSet.op || []).every(function (s) { return s >= 85; });
+
+  var seed = (ctx.playerRank || 1) * 10007 + (ctx.oppRank || 1) * 97 + sets.length * 1013;
+  var rnd = rng(seed);
+  var extCtx = Object.assign({}, ctx, {
+    setGapAbs: setGapAbs, setsWon: setsWon, setsLost: setsLost,
+    setWinner: youWonLast ? (ctx.playerName || "the player") : (ctx.oppName || "the challenger")
+  });
+  var a = analyseMatchup(ctx);
+  var out = [];
+
+  /* 1. Score the set */
+  var bank;
+  if (youWonLast && close) bank = SET_CLOSE_WIN;
+  else if (youWonLast && wide) bank = SET_WIDE_WIN;
+  else if (youWonLast) bank = SET_CLOSE_WIN;
+  else if (!youWonLast && close) bank = SET_CLOSE_LOSS;
+  else if (!youWonLast && wide) bank = SET_WIDE_LOSS;
+  else bank = SET_CLOSE_LOSS;
+  out.push({ speaker: "barry", text: fill(pickFresh(bank, "setScore", rnd), extCtx, a) });
+
+  /* 2. Flawless call-out, else streak/momentum, else flat */
+  if (flawless) out.push({ speaker: "reggie", text: fill(pickFresh(PERFECT_HAIL_PLAYER, "flawP", rnd), extCtx, a) });
+  else if (oppFlawless) out.push({ speaker: "reggie", text: fill(pickFresh(PERFECT_HAIL_OPP, "flawO", rnd), extCtx, a) });
+  else if (streak && youLeading) out.push({ speaker: "reggie", text: fill(pickFresh(MOMENTUM_STREAK_PLAYER, "momP", rnd), extCtx, a) });
+  else if (streak && !youLeading) out.push({ speaker: "reggie", text: fill(pickFresh(MOMENTUM_STREAK_OPP, "momO", rnd), extCtx, a) });
+  else if (matchTied) out.push({ speaker: "reggie", text: fill(pickFresh(MOMENTUM_SWING, "momE", rnd), extCtx, a) });
+  else out.push({ speaker: "reggie", text: fill(pickFresh(FLAT_SET, "flat", rnd), extCtx, a) });
+
+  /* 3. Decider framing if the next one is match-point */
+  if (deciderNext) out.push({ speaker: "barry", text: fill(pickFresh(DECIDER_INCOMING, "decide", rnd), extCtx, a) });
+
+  var acc = 0;
+  out.forEach(function (l) { l.durMs = estimateMs(l.text); l.startMs = acc; acc += l.durMs; });
+  return { lines: out, totalMs: acc };
+}
+
+/* ── 7 · Post-match commentary ─────────────────────────────────────────────── */
+/* 4–5 lines, ~12 seconds. result shape:
+     { won, setsWon, setsLost, pa, oa, sets: [{my,op,won}…], myStrikes:[…] } (what PowerBar's res carries) */
+
+/* Opening frame */
+var POST_WIN_EASY = ["{player} comes through, Barry. {setsWon}–{setsLost}, and little drama with it.", "A workmanlike win from {player}. {setsWon}–{setsLost}, business done.", "{player} runs out {setsWon}–{setsLost} winner. Rarely in doubt."];
+var POST_WIN_TIGHT = ["{player} edges it, {setsWon}–{setsLost}. The scorecard says comfortable, the match said anything but.", "A gritty win for {player}. {setsWon}–{setsLost}, every set a scrap.", "{player} finds a way. {setsWon}–{setsLost}, and she'll know she was in a fight."];
+var POST_WIN_UPSET = ["Upset at {venue}, Barry. {player} ranked {playerRank}, {opp} ranked {oppRank}, and the lower rank wins. The ladder shook today.", "{player} knocks out {opp}! The {oppRankOrd} in the world goes home. That'll be a bruise on {opp}'s season.", "{player} with the shock of the round. {setsWon}–{setsLost} against the number {oppRank}. Reggie, I need a seat."];
+var POST_LOSS_TIGHT = ["{opp} takes it, {setsWon}–{setsLost}. {player} fought every point. On another day, Barry.", "A hard one for {player} — {setsWon}–{setsLost} to {opp}. She was a strike away in two of those sets.", "{player} loses the tight one. {setsWon}–{setsLost}. The crowd stays on their feet for her."];
+var POST_LOSS_BLOWOUT = ["{opp} rolls through, Barry. {setsWon}–{setsLost}. {player} never found her bar.", "A tough afternoon for {player}. {setsWon}–{setsLost} and never on terms.", "{player} outclassed today. {setsWon}–{setsLost}. Back to the training lanes."];
+var POST_LOSS_UPSET = ["{player} out at the hands of {opp} — ranked {oppRank}, Barry. The ladder bites back.", "Shock in the booth: {player} beaten by {opp}. {setsWon}–{setsLost} the wrong way for the favourite."];
+
+/* The tactical read of the match (Reggie) — ties to the pre-match analysis */
+var POST_READ_STAT_WON = ["Her {playerBestLabel} did the work, Barry. Level {playerBestLv}, and it showed every strike.", "{player}'s {playerBestLabel} was always going to decide this — level {playerBestLv}, written on the scoreboard.", "You said it before the match: {playerBestLabel}. And there it was."];
+var POST_READ_COND_WON = ["The {condName} did half the job for {player}. Her kit lined up with the ground.", "{player} was built for this ground, Barry. {condName} rewarded {playerBestLabel} and she had it."];
+var POST_READ_UPSET_WHY = ["{opp}'s {oppWorstLabel} came home to roost, Barry. Level {oppWorstLv} — {player} found the door and walked through.", "The upset was in the stats. {opp}'s {oppWorstLabel} level {oppWorstLv}. On these lanes that's a crack, and {player} swung the hammer."];
+var POST_READ_LOSS_STAT = ["{opp}'s {oppBestLabel} level {oppBestLv} was the match, Barry. {player} didn't have an answer.", "You can see where it went: {opp}'s {oppBestLabel}. Level {oppBestLv}. Not many on tour have more."];
+var POST_READ_LOSS_FITNESS = ["{player}'s legs went in the third set, Barry. The bar runs away from a tired granny.", "{player} ran out of road, Barry. Fitness told in the end."];
+
+/* The strike pattern — perfects / flawless etc. */
+var POST_PATTERN_FLAWLESS = ["{flawlessSets} flawless sets from {player}, Barry. {perfectStrikes} perfect strikes. That's going in the paper.", "A tidy card: {perfectStrikes} perfect strikes. {player} was reading the bar like a map."];
+var POST_PATTERN_CLUTCH = ["She found it when she had to, Barry. {perfectStrikes} perfect strikes, most in the sets that mattered.", "The {playerBestLabel} came out at the right time. {perfectStrikes} perfects over the match."];
+
+/* Closer — hand off to Interview */
+var POST_CLOSERS = [
+  { s: "barry",  t: "And we'll hear from {player} in the interview room. Over to you." },
+  { s: "reggie", t: "Right, pass me the kettle. Over to the presser." },
+  { s: "barry",  t: "That's your match. Interviews next." },
+  { s: "reggie", t: "I'll be surprised if she doesn't thank her rooster." },
+  { s: "barry",  t: "A word from the winner coming up." }
+];
+
+export function buildPostMatch(ctx, result) {
+  ctx = ctx || {}; result = result || {};
+  var won = !!result.won, setsWon = result.setsWon || 0, setsLost = result.setsLost || 0;
+  var sets = result.sets || [];
+  /* Was it tight or a blowout? Tight = decider or margin of 1 */
+  var tight = Math.abs(setsWon - setsLost) <= 1;
+  var upset = (ctx.playerRank && ctx.oppRank) ? (won ? (ctx.playerRank > ctx.oppRank + 80) : (ctx.playerRank + 80 < ctx.oppRank)) : false;
+
+  /* Pattern reads */
+  var flawlessSets = sets.filter(function (s) { return s.my && s.my.length >= 3 && s.my.every(function (x) { return x >= 85; }); }).length;
+  var perfectStrikes = (result.myStrikes || []).filter(function (s) { return s >= 85; }).length;
+
+  var a = analyseMatchup(ctx);
+  var seed = (ctx.playerRank || 1) * 10007 + (ctx.oppRank || 1) * 97 + (won ? 1 : 2) * 1009 + setsWon * 13 + setsLost;
+  var rnd = rng(seed);
+  var extCtx = Object.assign({}, ctx, {
+    setsWon: setsWon, setsLost: setsLost,
+    flawlessSets: flawlessSets, perfectStrikes: perfectStrikes
+  });
+  var out = [];
+
+  /* 1. Opening frame — win/loss × upset/tight/easy */
+  var frameBank;
+  if (won && upset) frameBank = POST_WIN_UPSET;
+  else if (won && tight) frameBank = POST_WIN_TIGHT;
+  else if (won) frameBank = POST_WIN_EASY;
+  else if (!won && upset) frameBank = POST_LOSS_UPSET;
+  else if (!won && tight) frameBank = POST_LOSS_TIGHT;
+  else frameBank = POST_LOSS_BLOWOUT;
+  out.push({ speaker: "barry", text: fill(pickFresh(frameBank, "postFrame", rnd), extCtx, a) });
+
+  /* 2. Tactical read tied to the pre-match analysis */
+  var readBank;
+  if (won && upset) readBank = POST_READ_UPSET_WHY;
+  else if (won && a.condFavoursPlayer) readBank = POST_READ_COND_WON;
+  else if (won) readBank = POST_READ_STAT_WON;
+  else if (!won && (a.pFit === "tired" || a.pFit === "ragged")) readBank = POST_READ_LOSS_FITNESS;
+  else readBank = POST_READ_LOSS_STAT;
+  out.push({ speaker: "reggie", text: fill(pickFresh(readBank, "postRead", rnd), extCtx, a) });
+
+  /* 3. Strike pattern — flawless or clutch, only if there's something to say */
+  if (perfectStrikes >= 5 || flawlessSets >= 1) {
+    var patBank = flawlessSets >= 1 ? POST_PATTERN_FLAWLESS : POST_PATTERN_CLUTCH;
+    out.push({ speaker: "barry", text: fill(pickFresh(patBank, "postPat", rnd), extCtx, a) });
+  }
+
+  /* 4. Closer handoff to interview */
+  var cl = pickFresh(POST_CLOSERS, "postClose", rnd);
+  out.push({ speaker: cl.s, text: fill(cl.t, extCtx, a) });
+
+  var acc = 0;
+  out.forEach(function (l) { l.durMs = estimateMs(l.text); l.startMs = acc; acc += l.durMs; });
+  return { lines: out, totalMs: acc };
 }
