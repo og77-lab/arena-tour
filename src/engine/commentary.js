@@ -114,27 +114,30 @@ export function analyseMatchup(ctx) {
 /* Each line is a text template referencing the ctx and analysis fields. Keep lines short — ~2 sentences max. */
 
 /* OPENER — one line sets the scene (Barry) */
+/* Openers — Phase 1 of the finite-audio refactor. No placeholders at all: no names, no rank numbers, no venue,
+   tier, round or best-of in the template itself. Barry sets the scene generically; the match-specific detail
+   lives in the lines that follow. One recording per voice, forever. */
 var OPENERS = [
-  "Right. {round} here at {venue}. {player} drawn against {opp} — number {oppRank} in the world.",
-  "Welcome back to {venue}, {round} of the {tier}. Best of {bestOf}, {player} and {opp}.",
-  "Here we are, {round}, {venue}. {player}, {playerRankOrd}, versus {opp}, {oppRankOrd}.",
-  "{round}, {venue}. {player} against {opp}. Lanes look fast.",
-  "Good evening from {venue}. {round}, {player} and {opp} on the warm-up.",
-  "Afternoon all. {round} of the {tier} at {venue}. {player} and {opp} up next.",
-  "The lanes are chalked, Barry. {round}, {venue}, {player} against {opp}.",
-  "You're very welcome back. {round}, {venue}. {player} versus {opp}, {oppRankOrd} in the world.",
-  "Hello from {venue}, where the {round} brings us {player} and {opp}. Best of {bestOf}.",
-  "The grannies are warming up, Barry. {round} at {venue}. {player} and {opp}.",
-  "Full house at {venue}. {round} of the {tier}, {player} and {opp}, lances up any minute.",
-  "The roosters are out, Barry. {round}, {venue}, {player} against the number {oppRank}.",
-  "From {venue}, this is the {round}. {player}, {playerRankOrd}, drawn against {opp}, {oppRankOrd}.",
-  "Good to see you back with us at {venue}. {round}, {player} v {opp}, best of {bestOf}.",
-  "The sun's up at {venue}, Barry, and so are the grannies. {round}: {player} and {opp}.",
-  "A warm hello from the booth at {venue}. {round}, {player} drawn against {opp}, {oppRankOrd} in the world.",
-  "The crowd is in, the roosters are fed. {round} at {venue} — {player} v {opp}.",
-  "Settle in, Barry. {round}, {venue}, {player} and {opp} about to be announced.",
-  "Here we go. {round} of the {tier}, {venue}. {player} versus {opp}.",
-  "The umpire's at the line, the grannies are mounted. {round}, {venue}: {player} and {opp}."
+  "Right. Welcome back to the booth. Two riders on the warm-up and plenty to talk about.",
+  "A warm hello from the booth. The lanes are chalked, the crowd is in, and we have a match on the way.",
+  "Good afternoon. The grannies are mounted, the roosters are fed, and we're a few minutes from first strike.",
+  "You're very welcome back, Barry. The umpire's at the line and both lances are up.",
+  "Hello from the booth. The courses look fast, the crowd is settling, and the two riders are about to be announced.",
+  "Settle in, Barry. The chairs are warm, the kettle's on, and the match is about to start.",
+  "The sun's up over the ground, and the grannies are warming up. A short wait before the first strike.",
+  "Good to see you back with us. The lanes are honest, the stands are full, and both riders are ready.",
+  "Right then. The booth is open, the mics are warm, and the first strike is a few minutes off.",
+  "Here we go. The ground is set, the lances are up, and the booth is yours for the next half hour.",
+  "A warm hello from the box. A proper afternoon of jousting coming up, if the lanes behave.",
+  "The crowd is in good voice, Barry. The grannies are stretching, and we have a match in a minute.",
+  "Welcome back, you're among friends. The booth has a view and the lanes have a story.",
+  "Afternoon all. Two riders about to come out, and I'm not going to spoil it before the walk-out.",
+  "The roosters are preened, the lances are chalked, and the booth is where it needs to be.",
+  "Right. The umpire's in position, the chairs are oiled, and we're seconds from the ride.",
+  "A proper broadcast afternoon, Barry. Two riders, one ground, one of them walking away a winner.",
+  "Hello from the box. The programme is set, the lanes are swept, and the first ride is on its way.",
+  "You're very welcome. The booth's a tidy perch and the ground's a good one today.",
+  "Right then, from the booth. The air is clean, the lanes are open, and we have a match about to start."
 ];
 
 /* STRENGTH FOCUS — Reggie zeroes in on one of the player's or opponent's top stats */
