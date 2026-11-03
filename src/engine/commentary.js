@@ -553,7 +553,15 @@ function fill(text, ctx, a) {
     .replace(/{playerSeasonPlural}/g, (ctx.playerSeasons || 1) === 1 ? "" : "s")
     .replace(/{oppRooster}/g, ctx.oppRooster || "her rooster")
     .replace(/{oppTrait}/g, ctx.oppTrait || "")
-    .replace(/{playerPeak}/g, String((ctx.playerCareer || {}).peakRank || 999));
+    .replace(/{playerPeak}/g, String((ctx.playerCareer || {}).peakRank || 999))
+    /* Set-score, between-sets and post-match placeholders */
+    .replace(/{setsWon}/g, String(ctx.setsWon != null ? ctx.setsWon : "?"))
+    .replace(/{setsLost}/g, String(ctx.setsLost != null ? ctx.setsLost : "?"))
+    .replace(/{setGapAbs}/g, String(ctx.setGapAbs != null ? ctx.setGapAbs : "?"))
+    .replace(/{setWinner}/g, ctx.setWinner || "")
+    .replace(/{flawlessSets}/g, String(ctx.flawlessSets != null ? ctx.flawlessSets : "?"))
+    .replace(/{perfectStrikes}/g, String(ctx.perfectStrikes != null ? ctx.perfectStrikes : "?"))
+    .replace(/{playerLead}/g, String(Math.max(ctx.h2hWins || 0, ctx.h2hLosses || 0)));
 }
 
 /* ── 5 · Composer ──────────────────────────────────────────────────────────── */
