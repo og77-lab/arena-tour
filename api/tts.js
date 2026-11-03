@@ -18,7 +18,10 @@ const VOICES = {
   reggie: "jGQrEnhgmrVxLUXiPjIz"
 };
 
-const MODEL_ID = "eleven_v3";
+/* eleven_flash_v2_5 is ElevenLabs' low-latency model — ~1s per short line, versus 3-5s on eleven_v3. The
+   expressiveness drop is minor on the two British elderly voices and the UX win is dramatic. We'll flip back to
+   v3 for the one-time batch generation of the final sound bank; this is the dev model. */
+const MODEL_ID = "eleven_flash_v2_5";
 /* How long to let the ElevenLabs call run before we give up and return an error (the client falls back to
    subtitles-only timing). */
 const TTS_TIMEOUT_MS = 15000;
