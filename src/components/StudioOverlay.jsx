@@ -1,9 +1,12 @@
-/* ═══ StudioOverlay ═══ Two old men in a dark broadcast booth who open each match: Sir Barry Pecksworth (dry BBC
-   broadcaster) and Reggie Clutter (gruff Northern ex-champion). This is the TEXT-FIRST prototype: the dialogue is
-   picked by the commentary engine (engine/commentary.js) from the real match data and shown as subtitles, no
-   audio yet. The active speaker's portrait swaps between neutral and talking so he looks like he's actually
-   saying it; the other sits still. Skip button, Space/Enter/Escape dismiss. The code and art ride ready for
-   the TTS batch when we're happy with the shortlist of lines. */
+/* ═══ StudioOverlay ═══ Two old men in a dark broadcast booth who open and close each match: Sir Barry Pecksworth
+   (dry BBC broadcaster) and Reggie Clutter (gruff Northern ex-champion). The dialogue is picked by the commentary
+   engine from the real match data; this component plays it as real audio with lip-synced portraits.
+
+   Audio flow: on mount, each line's text + voice is sent to /api/tts (Vercel serverless → ElevenLabs → cached in
+   Vercel Blob). The response is an mp3 URL. All lines are fetched in parallel; the first audio starts as soon as
+   its own URL arrives, and each next line starts when the previous one ends. If a line's audio fails or times out,
+   the component falls back to the pre-estimated duration so the sequence always moves forward. Subtitles stay on
+   screen under the booth throughout — accessible and a backstop while audio loads. Skip and auto-skip survive. */
 
 import * as React from "react";
 import { REDUCED_MOTION } from "./fx";
@@ -33,44 +36,86 @@ function Portrait(props) {
   );
 }
 
+/* Fire /api/tts for one line. Returns {url} on success, {error} otherwise. */
+function fetchTts(text, voice) {
+  return fetch("/api/tts", {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ text: text, voice: voice })
+  }).then(function (r) { return r.ok ? r.json() : r.json().then(function (j) { return { error: j && j.error || ("http " + r.status) }; }); })
+    .catch(function (e) { return { error: String(e) }; });
+}
+
 export default function StudioOverlay(props) {
   var lines = (props.commentary && props.commentary.lines) || [];
   var totalMs = (props.commentary && props.commentary.totalMs) || 1;
   var _idx = React.useState(0), idx = _idx[0], setIdx = _idx[1];
-  var _elapsed = React.useState(0), elapsed = _elapsed[0], setElapsed = _elapsed[1];
   var _mouth = React.useState(false), mouth = _mouth[0], setMouth = _mouth[1];
   var _sway = React.useState({ barry: 0, reggie: 0 }), sway = _sway[0], setSway = _sway[1];
-  var startRef = React.useRef(0);
+  var _urls = React.useState([]), urls = _urls[0], setUrls = _urls[1];
+  var audioRef = React.useRef(null);
+  var fallbackTimer = React.useRef(null);
+  var startedAt = React.useRef(0);
 
+  /* On mount: fire all TTS requests in parallel. Each resolves to a url (or null for fallback). */
   React.useEffect(function () {
     var n = 0; try { n = parseInt(sessionStorage.getItem(PLAY_KEY) || "0", 10) || 0; } catch (e) {}
     if (n >= AUTOSKIP_AFTER || lines.length === 0) { props.onDone && props.onDone(); return; }
-    startRef.current = Date.now();
-    var id = setInterval(function () {
-      var e = Date.now() - startRef.current;
-      setElapsed(e);
-      /* which line we're on */
-      var acc = 0, next = 0;
-      for (var i = 0; i < lines.length; i++) { if (e < acc + lines[i].durMs) { next = i; break; } acc += lines[i].durMs; if (i === lines.length - 1) next = lines.length; }
-      if (next >= lines.length) {
-        try { sessionStorage.setItem(PLAY_KEY, String(n + 1)); } catch (ee) {}
-        clearInterval(id);
-        setTimeout(function () { props.onDone && props.onDone(); }, 500);
-      } else {
-        setIdx(next);
-      }
-    }, 60);
-    return function () { clearInterval(id); };
+    try { sessionStorage.setItem(PLAY_KEY, String(n + 1)); } catch (ee) {}
+    startedAt.current = Date.now();
+    var cancelled = false;
+    Promise.all(lines.map(function (l) { return fetchTts(l.text, l.speaker); }))
+      .then(function (res) { if (cancelled) return; setUrls(res.map(function (r) { return r && r.url ? r.url : null; })); });
+    return function () { cancelled = true; if (audioRef.current) { try { audioRef.current.pause(); } catch (e) {} audioRef.current = null; } if (fallbackTimer.current) clearTimeout(fallbackTimer.current); };
   }, []);
 
-  /* fake lip sync while a line is "being spoken" */
+  /* Whenever idx changes OR urls arrive, start the current line. */
+  React.useEffect(function () {
+    if (!lines.length) return;
+    if (idx >= lines.length) {
+      /* All lines done — hand back to the game. Small beat for the final subtitle to be read. */
+      var done = setTimeout(function () { props.onDone && props.onDone(); }, 400);
+      return function () { clearTimeout(done); };
+    }
+    var line = lines[idx];
+    var url = urls[idx];
+    /* Stop any previous audio first. */
+    if (audioRef.current) { try { audioRef.current.pause(); } catch (e) {} audioRef.current = null; }
+    if (fallbackTimer.current) { clearTimeout(fallbackTimer.current); fallbackTimer.current = null; }
+
+    function advance() { setIdx(function (i) { return i + 1; }); }
+
+    if (url) {
+      var a = new Audio(url);
+      audioRef.current = a;
+      a.addEventListener("ended", advance, { once: true });
+      a.addEventListener("error", function () {
+        /* Audio broke mid-way — fall back to the estimated duration from here. */
+        fallbackTimer.current = setTimeout(advance, line.durMs);
+      }, { once: true });
+      a.play().catch(function () {
+        /* autoplay blocked or similar — timed fallback keeps the segment moving. */
+        fallbackTimer.current = setTimeout(advance, line.durMs);
+      });
+    } else if (urls.length > 0) {
+      /* URL resolved but was null (TTS failed): use the estimated duration. */
+      fallbackTimer.current = setTimeout(advance, line.durMs);
+    }
+    /* urls not yet resolved: hold on the subtitle; this effect re-runs when `urls` updates. */
+  }, [idx, urls]);
+
+  /* Fake lip sync — oscillate every ~140ms while audio is playing OR we're mid-line with no audio. */
   React.useEffect(function () {
     if (REDUCED_MOTION) return;
-    var id = setInterval(function () { setMouth(Math.random() > 0.35); }, 140);
+    var id = setInterval(function () {
+      var a = audioRef.current;
+      if (a && !a.paused) { setMouth(Math.random() > 0.3); return; }
+      /* No audio yet but we're on an active line: still mouth-mime so the booth feels alive. */
+      if (idx < lines.length && urls.length === 0) setMouth(Math.random() > 0.4);
+      else setMouth(false);
+    }, 140);
     return function () { clearInterval(id); };
-  }, []);
+  }, [idx, urls.length]);
 
-  /* slow head sway */
   React.useEffect(function () {
     if (REDUCED_MOTION) return;
     var id1 = setInterval(function () { setSway(function (s) { return { barry: (Math.random() - 0.5) * 1.6, reggie: s.reggie }; }); }, 1700);
@@ -82,9 +127,11 @@ export default function StudioOverlay(props) {
   var active = current ? current.speaker : null;
   var barryOpen = active === "barry" && mouth;
   var reggieOpen = active === "reggie" && mouth;
-  var pctDone = Math.min(100, (elapsed / totalMs) * 100);
+  /* Overall progress: elapsed vs estimated. Audio may run shorter or longer, so this is approximate. */
+  var pctDone = Math.min(100, ((Date.now() - startedAt.current) / Math.max(1, totalMs)) * 100);
+  var loading = urls.length === 0 && lines.length > 0;
 
-  function skip() { props.onDone && props.onDone(); }
+  function skip() { if (audioRef.current) { try { audioRef.current.pause(); } catch (e) {} } props.onDone && props.onDone(); }
   React.useEffect(function () {
     function onKey(e) { if (e.code === "Space" || e.code === "Enter" || e.code === "Escape") { e.preventDefault(); skip(); } }
     window.addEventListener("keydown", onKey); return function () { window.removeEventListener("keydown", onKey); };
@@ -115,9 +162,10 @@ export default function StudioOverlay(props) {
             <div style={{ fontSize: 15, lineHeight: 1.35, fontWeight: 600 }}>{current.text}</div>
           </div>
         )}
+        {loading && (<div style={{ position: "absolute", top: 36, left: 10, zIndex: 3, color: "#94a3b8", fontSize: 10, fontWeight: 700, letterSpacing: 1 }}>Cueing voices…</div>)}
       </div>
       <div style={{ width: "100%", maxWidth: 760, height: 3, background: "#0b0b0b", marginTop: 6, borderRadius: 2, overflow: "hidden" }}>
-        <div style={{ width: pctDone + "%", height: "100%", background: "#fde68a", transition: "width 60ms linear" }} />
+        <div style={{ width: pctDone + "%", height: "100%", background: "#fde68a", transition: "width 150ms linear" }} />
       </div>
     </div>
   );
