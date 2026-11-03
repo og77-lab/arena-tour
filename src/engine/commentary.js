@@ -281,6 +281,46 @@ var H2H_LEVEL = [
   "You can't separate them on the record: {h2hWins} apiece. The crowd is in for a scrap."
 ];
 
+/* FLAVOUR: experience / seasons on tour (Reggie or Barry) */
+var VETERAN_OPP = [
+  "{opp}'s in her {oppSeasonsOrd} season on tour, Barry. She's seen every ground on the calendar.",
+  "A veteran, {opp}. {oppSeasons} seasons up. Youth in her kit left years ago.",
+  "{oppSeasons} seasons on tour for {opp}. She knows what every bar does before it moves.",
+  "The experience is {opp}'s, Barry — {oppSeasons} seasons in the saddle. {player} will have to be sharper."
+];
+var VETERAN_PLAYER = [
+  "{player} has {playerSeasons} seasons on tour behind her now, Barry. That's a working career.",
+  "{playerSeasons} seasons in and still going. {player}'s not here by accident."
+];
+var ROOKIE_OPP = [
+  "{opp}'s only in her {oppSeasonsOrd} season on tour. Promise and nerves in equal measure.",
+  "Fresh legs, {opp} — only {oppSeasons} season{oppSeasonPlural} up. Experience may bite today."
+];
+var ROOKIE_PLAYER = [
+  "{playerSeasons} season{playerSeasonPlural} on tour for {player}, Barry. Everything to prove.",
+  "{player}'s a fresh name, Barry — {oppSeasonsOrd} season in. Hungry eyes."
+];
+
+/* FLAVOUR: match stakes (final / Slam / Masters) */
+var STAKES_SLAM = [
+  "A Slam, Barry. Four of these a year, and {opp} knows what it means.",
+  "The {tier}. Hearts rate higher on these courses, Reggie, you know it.",
+  "Grand Slam weather. Everything in a career either passes through here or it doesn't."
+];
+var STAKES_FINAL = [
+  "The final, Barry. Nothing bigger than this in the next month.",
+  "A title on the line here. Four weeks of training points for the winner, pride for the loser.",
+  "The {round} — all week's work in the next hour."
+];
+var STAKES_MASTERS = [
+  "{tier} points up for grabs, Barry. These are the matches careers are measured on.",
+  "A Masters round. Rankings move after these."
+];
+var STAKES_EARLY = [
+  "{round}, early days of the tournament. Winners go on, losers go home.",
+  "Still the opening rounds, Barry. {player} wants no slips here."
+];
+
 /* CLOSER (hand off to the lanes) */
 var CLOSERS = [
   { s: "barry",  t: "Right then. Over to the lanes." },
@@ -336,7 +376,13 @@ function fill(text, ctx, a) {
     .replace(/{oppTitles}/g, String((ctx.oppCareer || {}).titles || 0))
     .replace(/{oppGs}/g, String((ctx.oppCareer || {}).gsTitles || 0))
     .replace(/{oppPeak}/g, String((ctx.oppCareer || {}).peakRank || 999))
-    .replace(/{playerTitles}/g, String((ctx.playerCareer || {}).titles || 0));
+    .replace(/{playerTitles}/g, String((ctx.playerCareer || {}).titles || 0))
+    .replace(/{oppSeasonsOrd}/g, ord(ctx.oppSeasons || 1))
+    .replace(/{playerSeasonsOrd}/g, ord(ctx.playerSeasons || 1))
+    .replace(/{oppSeasons}/g, String(ctx.oppSeasons || 1))
+    .replace(/{playerSeasons}/g, String(ctx.playerSeasons || 1))
+    .replace(/{oppSeasonPlural}/g, (ctx.oppSeasons || 1) === 1 ? "" : "s")
+    .replace(/{playerSeasonPlural}/g, (ctx.playerSeasons || 1) === 1 ? "" : "s");
 }
 
 /* ── 5 · Composer ──────────────────────────────────────────────────────────── */
@@ -377,9 +423,14 @@ export function buildPreMatch(ctx) {
     out.push({ speaker: "reggie", text: fill(pickFresh(wBank, "weak", rnd), ctx, a) });
   }
 
-  /* 5. One flavour line — pick what the context actually gives us, in priority order */
-  var flavour = null, flavourBank = null, flavourKey = null;
-  if (a.oFit === "ragged" || a.oFit === "tired") { flavourBank = FITNESS_OPP_TIRED; flavourKey = "fitOpp"; }
+  /* 5. One flavour line — pick what the context actually gives us, in priority order:
+        · Slam/final stakes come first (biggest matches get the biggest nods)
+        · Then fitness if someone is tired, then h2h with meaningful history
+        · Then career titles, veteran/rookie seasons, first meeting, or a sharp rank gap */
+  var flavourBank = null, flavourKey = null;
+  if (ctx.isSlam) { flavourBank = STAKES_SLAM; flavourKey = "stakSlam"; }
+  else if (ctx.isFinal) { flavourBank = STAKES_FINAL; flavourKey = "stakFinal"; }
+  else if (a.oFit === "ragged" || a.oFit === "tired") { flavourBank = FITNESS_OPP_TIRED; flavourKey = "fitOpp"; }
   else if (a.pFit === "ragged" || a.pFit === "tired") { flavourBank = FITNESS_PLAYER_TIRED; flavourKey = "fitPlayer"; }
   else if (!ctx.firstMeeting && (ctx.h2hWins || 0) + (ctx.h2hLosses || 0) >= 2) {
     if ((ctx.h2hWins || 0) > (ctx.h2hLosses || 0)) { flavourBank = H2H_LEAD_PLAYER; flavourKey = "h2hP"; }
@@ -387,6 +438,10 @@ export function buildPreMatch(ctx) {
     else { flavourBank = H2H_LEVEL; flavourKey = "h2hL"; }
   }
   else if (((ctx.oppCareer || {}).titles || 0) >= 3) { flavourBank = CAREER_OPP_TITLED; flavourKey = "carOpp"; }
+  else if ((ctx.oppSeasons || 0) >= 10) { flavourBank = VETERAN_OPP; flavourKey = "vetOpp"; }
+  else if ((ctx.oppSeasons || 99) <= 2) { flavourBank = ROOKIE_OPP; flavourKey = "rookOpp"; }
+  else if ((ctx.playerSeasons || 99) <= 2) { flavourBank = ROOKIE_PLAYER; flavourKey = "rookP"; }
+  else if (ctx.isMasters) { flavourBank = STAKES_MASTERS; flavourKey = "stakM"; }
   else if (ctx.firstMeeting) { flavourBank = H2H_FIRST; flavourKey = "h2hFirst"; }
   else if (Math.abs(a.rankGap) >= 100) {
     flavourBank = a.rankGap > 0 ? RANK_UPSET_WATCH : RANK_CLASS_GAP;

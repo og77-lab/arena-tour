@@ -502,6 +502,7 @@ export default function PowerBar(props) {
     venue: (props.eventName || props.tierName || "the ground").split(" ")[0],
     firstMeeting: !props.h2h, h2hWins: (props.h2h && props.h2h.w) || 0, h2hLosses: (props.h2h && props.h2h.l) || 0,
     oppCareer: props.oppCareer || {}, playerCareer: props.playerCareer || {},
+    oppSeasons: props.oppSeasons || 1, playerSeasons: props.playerSeasons || 1,
     isFinal: !!props.isFinal, isSlam: (props.tier || 0) >= 5, isMasters: props.tier === 4,
     round: 0
   } : null;
