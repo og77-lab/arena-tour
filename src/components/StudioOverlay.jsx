@@ -118,8 +118,8 @@ export default function StudioOverlay(props) {
       /* URL resolved as null (TTS failed for this line): use the estimated duration. */
       fallbackTimer.current = setTimeout(advance, line.durMs);
     }
-    /* url === undefined: not fetched yet. Hold on the subtitle. Effect re-runs when urls updates. */
-  }, [idx, urls]);
+    /* url === undefined: not fetched yet. Hold on the subtitle. Effect re-runs when THIS slot resolves. */
+  }, [idx, urls[idx]]);
 
   /* Fake lip sync — oscillate every ~140ms whenever we're mid-line: audio playing, audio still loading,
      or audio failed and we're reading the subtitle instead. The mouth stays closed only after the segment ends. */
