@@ -12,6 +12,14 @@ import * as React from "react";
 import { REDUCED_MOTION } from "./fx";
 
 var BOOTH = "/art/studio/studio-booth.png";
+/* Bed music that loops under the dialogue — energetic for pre-match, triumph/mournful for post, neutral between
+   sets. Ducked to ~15% so the voices sit on top. One file per mood, loaded by phase. */
+var BED = {
+  pre:     "/sounds/studio/bed-energetic.mp3",
+  post:    "/sounds/studio/bed-neutral.mp3",
+  between: "/sounds/studio/bed-neutral.mp3"
+};
+var BED_VOLUME = 0.18;
 var CANVAS_W = 1792, CANVAS_H = 1024;
 var REGGIE_BOX = { x: 100, y: 315, w: 680, h: 680 };
 var BARRY_BOX  = { x: 1012, y: 315, w: 680, h: 680 };
@@ -64,8 +72,21 @@ export default function StudioOverlay(props) {
   var _sway = React.useState({ barry: 0, reggie: 0 }), sway = _sway[0], setSway = _sway[1];
   var _urls = React.useState([]), urls = _urls[0], setUrls = _urls[1];
   var audioRef = React.useRef(null);
+  var bedRef = React.useRef(null);
   var fallbackTimer = React.useRef(null);
   var startedAt = React.useRef(0);
+
+  /* Bed music: a short tune loops under the dialogue, ducked low so voices stay forward. The player kicks off
+     silently if autoplay is blocked — the first voice-audio click unblocks the browser's audio policy too. */
+  React.useEffect(function () {
+    var src = BED[props.phase] || BED.pre;
+    var bed = new Audio(src);
+    bed.loop = true;
+    bed.volume = BED_VOLUME;
+    bedRef.current = bed;
+    bed.play().catch(function () {});
+    return function () { try { bed.pause(); } catch (e) {} bedRef.current = null; };
+  }, []);
 
   /* On mount: fetch TTS one line at a time so free/Creator ElevenLabs tiers don't 429 on concurrent calls.
      Each URL lands in state as it resolves; the player starts the first line as soon as its URL is in. */
