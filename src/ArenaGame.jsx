@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { syncAchievements, saveGameToCloud, loadGameFromCloud } from "./firebase";
 import { playTitle, playRankUp, isMuted, setMuted } from "./sounds";
 import { isMusicOn, setMusicOn } from "./music";
+import { isStudioOn, setStudioOn } from "./engine/commentary";
 import { W, CSS, EMO, TIERS, RN5, RN6, HN, HC, HI, TOTAL_EVENTS, FINALS_BO, STATS, STAT_GROUPS, screenAnim, ptsLadder, champTotal } from "./models/constants";
 import { sh, bs, nW, pRankOf, getRanked, getARanked, trainCost, weeklyTP, trainPts, spreadPts, retrainAtNewPrices } from "./models/formulas";
 import { sSet, sGet, stamp, pickNewest, queueCloudSave, cancelCloudSave } from "./engine/persistence";
@@ -276,6 +277,8 @@ export default function Arena(props) {
   function toggleMute() { var n = !mutedState; setMuted(n); setMutedState(n); }
   var _musicOn = useState(isMusicOn()), musicOn = _musicOn[0], setMusicOnState = _musicOn[1];
   function toggleMusic() { var n = !musicOn; setMusicOn(n); setMusicOnState(n); }
+  var _studioOn = useState(isStudioOn()), studioOn = _studioOn[0], setStudioOnState = _studioOn[1];
+  function toggleStudio() { var n = !studioOn; setStudioOn(n); setStudioOnState(n); }
   var _confetti = useState(false), confetti = _confetti[0], setConfetti = _confetti[1];
   var _showBracket = useState(false), showBracket = _showBracket[0], setShowBracket = _showBracket[1];
   var _fam = useState(false), showFamily = _fam[0], setShowFamily = _fam[1]; /* the family wall and the Hall of Fame */
@@ -1392,6 +1395,10 @@ export default function Arena(props) {
                 <button onClick={toggleMute} style={rowStyle}>
                   <div style={{display:"flex",alignItems:"center",gap:12,minWidth:0}}><IconTile name={mutedState?"mute":"speaker"} tint="#fef3c7" size={40} /><div style={{minWidth:0}}><div style={labelStyle}>Sound Effects</div><div style={hintStyle}>Clucks, clangs, fanfares</div></div></div>
                   <span style={{color:mutedState?C.redInk:C.greenInk,fontSize:14,fontWeight:900,letterSpacing:0.5}}>{mutedState?"OFF":"ON"}</span>
+                </button>
+                <button onClick={toggleStudio} style={rowStyle}>
+                  <div style={{display:"flex",alignItems:"center",gap:12,minWidth:0}}><IconTile name="paper" tint="#fce7f3" size={40} /><div style={{minWidth:0}}><div style={labelStyle}>Studio commentary</div><div style={hintStyle}>Sir Barry and Reggie before and after each match — Skip is always on the overlay</div></div></div>
+                  <span style={{color:studioOn?C.greenInk:C.redInk,fontSize:14,fontWeight:900,letterSpacing:0.5}}>{studioOn?"ON":"OFF"}</span>
                 </button>
                 {userId && (
                   <button onClick={function(){doSync(S)}} disabled={syncing} style={Object.assign({},rowStyle,{opacity:syncing?0.6:1})}>

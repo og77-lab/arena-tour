@@ -21,7 +21,7 @@ import { fatigueFx } from "../engine/fitness";
 import { riderBar, speedAt, landScore, npcMiss, dayForm, nerves, abilityRating, gapEdge, goldBase, handsSample, CTR } from "../engine/joust";
 import { enterMatch, leaveMatch, startBattle, stopBattle } from "../music";
 import StudioOverlay from "./StudioOverlay";
-import { buildPreMatch, buildPostMatch } from "../engine/commentary";
+import { buildPreMatch, buildPostMatch, isStudioOn } from "../engine/commentary";
 import { roosterName, trait } from "../models/persona";
 
 const { useState, useEffect, useRef } = React;
@@ -177,15 +177,9 @@ export default function PowerBar(props) {
   var init = props.initialProgress || { sets: [], my: [], op: [] };
   var initRes = matchResult(init.sets, need);
 
-  /* Studio pre-match segment: dormant for now while we build out the full dynamic dialogue (names, ranks, stats,
-     head-to-head, condition, upsets) and the post-match recap. The code, art and audio stay in the tree; set
-     localStorage.studioOn = "1" in devtools to preview the prototype on this device. */
-  var studioEnabled = (function () {
-    try {
-      if (typeof location !== "undefined" && location.search && location.search.indexOf("studio=1") !== -1) { try { localStorage.setItem("studioOn", "1"); } catch (e) {} return true; }
-      return localStorage.getItem("studioOn") === "1";
-    } catch (e) { return false; }
-  })();
+  /* Studio pre-match + post-match booth reads: default ON, players can turn them off in Settings. The engine's
+     isStudioOn() reads localStorage and respects ?studio=0 / ?studio=1 URL overrides. */
+  var studioEnabled = isStudioOn();
   var fresh = !initRes && (init.sets || []).length === 0 && (init.my || []).length === 0;
   var _p = useState(initRes ? "done" : (fresh && studioEnabled ? "studio" : "intro")), ph = _p[0], setPh = _p[1];
   /* Which sets we've already covered on-air: index of the latest set that's had its between-sets commentary. */
