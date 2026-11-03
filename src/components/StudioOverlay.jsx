@@ -16,8 +16,7 @@ var CANVAS_W = 1792, CANVAS_H = 1024;
 var REGGIE_BOX = { x: 100, y: 315, w: 680, h: 680 };
 var BARRY_BOX  = { x: 1012, y: 315, w: 680, h: 680 };
 var DESK_TOP = 750, DESK_H = CANVAS_H - DESK_TOP;
-var PLAY_KEY = "studioPlayCount";
-var AUTOSKIP_AFTER = 3;
+/* Settings → Studio commentary · OFF is the way to disable the booth; no per-session auto-skip counter. */
 
 function pct(a, b) { return (a / b) * 100 + "%"; }
 
@@ -58,9 +57,7 @@ export default function StudioOverlay(props) {
 
   /* On mount: fire all TTS requests in parallel. Each resolves to a url (or null for fallback). */
   React.useEffect(function () {
-    var n = 0; try { n = parseInt(sessionStorage.getItem(PLAY_KEY) || "0", 10) || 0; } catch (e) {}
-    if (n >= AUTOSKIP_AFTER || lines.length === 0) { props.onDone && props.onDone(); return; }
-    try { sessionStorage.setItem(PLAY_KEY, String(n + 1)); } catch (ee) {}
+    if (lines.length === 0) { props.onDone && props.onDone(); return; }
     startedAt.current = Date.now();
     var cancelled = false;
     Promise.all(lines.map(function (l) { return fetchTts(l.text, l.speaker); }))
