@@ -228,7 +228,7 @@ var WEAKNESS_PLAYER = [
 
 /* CONDITION TILT — who does the ground reward */
 var COND_TILT_PLAYER = [
-  "And it's a {condName} day. That rewards {playerBestLabel}, Barry, and look who's got it: the home rider at level {playerBestLv}.",
+  "And it's a {condName} day. That rewards {playerBestLabel}, Barry, and look who's got it.",
   "The {condName} will do half the work for the home rider. Her kit is built for this.",
   "The opponent picked a bad week for {condName}, Barry. The home rider's stats line up like a prayer.",
   "{condName} on the lanes — a gift to the home rider's {playerBestLabel}. The ground doubles its weight.",
@@ -250,7 +250,7 @@ var COND_TILT_PLAYER = [
   "On {condName}, the home rider's {playerBestLabel} is a two-for-one. The opponent is on the back foot."
 ];
 var COND_TILT_OPP = [
-  "The {condName} suits the opponent, Barry. Her stat line matches the day — {oppBestLabel} level {oppBestLv} and it counts double.",
+  "The {condName} suits the opponent, Barry. Her {oppBestLabel} counts double today.",
   "The home rider has to fight the ground AND the woman today. {condName} is the opponent's weather.",
   "This {condName} is on the opponent's side. The home rider needed anything but this.",
   "The {condName} just handed the opponent a dividend, Barry. Her {oppBestLabel} gets paid twice.",
@@ -267,7 +267,7 @@ var COND_TILT_OPP = [
   "A {condName} day for the opponent, Reggie — her {oppBestLabel} rules the lanes.",
   "The opponent's on home turf today, Barry — not literally, but {condName} may as well be her living room.",
   "The ground is tilted against the home rider, Reggie. {condName} rewards the opponent's {oppBestLabel} every strike.",
-  "The opponent came in with a smile. {condName} will do that to you when you've got {oppBestLabel} level {oppBestLv}.",
+  "The opponent came in with a smile. {condName} will do that to you when you've got the right stats.",
   "The home rider's task doubles today, Barry. Beat the opponent AND beat the {condName}.",
   "The opponent's {oppBestLabel} on {condName} is a hard thing to stop, Barry. The home rider knows it."
 ];
@@ -302,36 +302,36 @@ var COND_CLASSIC_LINES = [
 
 /* MATCHUP EDGE — the sharp tactical read when one rider's lead on the key stat is clear */
 var EDGE_PLAYER = [
-  "The number to watch: {edgeStat}. The home rider has it {edgeDiff} levels above the opponent. On these lanes, that's the match.",
-  "Look at {edgeStat}, Barry. The home rider is {edgeDiff} levels up — and the condition doubles its weight. Game over on paper.",
-  "The home rider wins this on {edgeStat} alone, Barry. {edgeDiff} levels of edge, doubled by the ground.",
-  "The single number that matters today: {edgeStat}. The home rider is {edgeDiff} ahead. Match over before it starts.",
-  "If the home rider loses this, Barry, write me out of the booth. {edgeStat} is {edgeDiff} levels in her favour and doubled.",
-  "The home rider's {edgeStat} lead is {edgeDiff} levels, Barry. On a {condName} day that's not a lead, that's a chasm.",
-  "There's your match-winner, Barry: {edgeStat}. The home rider by {edgeDiff}, and the lanes make it count twice.",
-  "The {edgeStat} gap is {edgeDiff} in the home rider's favour, Reggie. The {condName} day decides this one before the bar runs.",
-  "The home rider has {edgeStat} by {edgeDiff} and {condName} rewards it. The scoreboard is drawn before the first strike.",
-  "If you want the one stat that wins this, Barry — {edgeStat}. The home rider is {edgeDiff} up and the ground pays double.",
-  "{edgeDiff} levels of {edgeStat} in the home rider's pocket, Barry. {condName} doubles the yield.",
-  "The lanes and the kit are both on the home rider's side today. {edgeStat} by {edgeDiff}. The opponent is cooked.",
-  "A {edgeDiff}-level advantage in {edgeStat} on a {condName} day, Reggie — that's the match done.",
-  "I've seen smaller edges win titles, Barry. The home rider's {edgeStat} is {edgeDiff} up and doubled."
+  "The number to watch: {edgeStat}. The home rider has the edge on these lanes.",
+  "Look at {edgeStat}, Barry. The home rider is up — and the condition doubles its weight. Game over on paper.",
+  "The home rider wins this on {edgeStat} alone, Barry. Edge, and doubled by the ground.",
+  "The single stat that matters today: {edgeStat}. The home rider leads. Match over before it starts.",
+  "If the home rider loses this, Barry, write me out of the booth. {edgeStat} is in her favour and doubled.",
+  "The home rider's {edgeStat} lead is clear, Barry. On a {condName} day that's not a lead, that's a chasm.",
+  "There's your match-winner, Barry: {edgeStat}. The lanes make it count twice.",
+  "The {edgeStat} gap is in the home rider's favour, Reggie. The {condName} day decides this one before the bar runs.",
+  "The home rider has {edgeStat} and {condName} rewards it. The scoreboard is drawn before the first strike.",
+  "If you want the one stat that wins this, Barry — {edgeStat}. The ground pays double.",
+  "A clear {edgeStat} advantage in the home rider's pocket, Barry. {condName} doubles the yield.",
+  "The lanes and the kit are both on the home rider's side today. The opponent is cooked.",
+  "A real advantage in {edgeStat} on a {condName} day, Reggie — that's the match done.",
+  "I've seen smaller edges win titles, Barry. The home rider's {edgeStat} is up and doubled."
 ];
 var EDGE_OPP = [
-  "The opponent's got the edge where it matters: {edgeStat}, {edgeDiff} levels above the home rider. And doubled today.",
-  "{edgeStat} is the opponent's. {edgeDiff} levels, counted twice. The home rider will have to be clever.",
-  "The edge is the opponent's, Barry — {edgeStat} is {edgeDiff} above the home rider, and the {condName} doubles it. The home rider needs an upset in the hands.",
-  "Watch {edgeStat}, Barry. The opponent is {edgeDiff} up and the ground pays twice. The home rider is on the back foot before the bar runs.",
-  "The opponent's {edgeStat} dominance is {edgeDiff} levels. On {condName}, that's the whole match.",
-  "The one stat that matters today: {edgeStat}, the opponent by {edgeDiff}. The {condName} doesn't help the home rider.",
-  "A {edgeDiff}-level {edgeStat} edge for the opponent, Barry. On a {condName} day that's a mountain.",
-  "The opponent has {edgeStat} by {edgeDiff}. The home rider has to be perfect in the hands to overcome it.",
-  "The ground and the stats both back the opponent, Barry. {edgeStat} edge of {edgeDiff}. The home rider's task is steep.",
-  "{edgeDiff} in {edgeStat} is the opponent's cushion today, Reggie — and {condName} tells you it counts double.",
-  "The opponent's advantage is where the ground pays: {edgeStat}. {edgeDiff} up and doubled.",
-  "You can see the scoreboard already, Barry — the opponent's {edgeStat} edge of {edgeDiff} on a {condName} day.",
-  "The home rider needs a miracle in the hands today, Barry. The opponent has {edgeStat} by {edgeDiff}, doubled.",
-  "The whole analysis today is one number: {edgeStat}, the opponent by {edgeDiff}. {condName} seals it."
+  "The opponent's got the edge where it matters: {edgeStat}. And doubled today.",
+  "{edgeStat} is the opponent's. The home rider will have to be clever.",
+  "The edge is the opponent's, Barry — {edgeStat}, and the {condName} doubles it. The home rider needs an upset in the hands.",
+  "Watch {edgeStat}, Barry. The opponent is up and the ground pays twice. The home rider is on the back foot before the bar runs.",
+  "The opponent's {edgeStat} dominance is real. On {condName}, that's the whole match.",
+  "The one stat that matters today: {edgeStat}, the opponent's. The {condName} doesn't help the home rider.",
+  "A clear {edgeStat} edge for the opponent, Barry. On a {condName} day that's a mountain.",
+  "The opponent has {edgeStat}. The home rider has to be perfect in the hands to overcome it.",
+  "The ground and the stats both back the opponent, Barry. The home rider's task is steep.",
+  "The opponent's cushion today is {edgeStat}, Reggie — and {condName} tells you it counts double.",
+  "The opponent's advantage is where the ground pays: {edgeStat}. Doubled.",
+  "You can see the scoreboard already, Barry — the opponent's {edgeStat} on a {condName} day.",
+  "The home rider needs a miracle in the hands today, Barry. The opponent has {edgeStat}, doubled.",
+  "The whole analysis today is one number: {edgeStat}, the opponent's. {condName} seals it."
 ];
 
 /* FITNESS NOTE — only if someone is ragged or tired */
@@ -353,29 +353,29 @@ var FITNESS_PLAYER_TIRED = [
 
 /* RANK GAP (short, for underdog energy — only when ranks diverge sharply) */
 var RANK_UPSET_WATCH = [
-  "{gap} places between them, Barry. On paper it's not a match. Then again, we don't play on paper.",
-  "An upset here would make the Monday paper. The opponent is {gap} rungs below.",
+  "A wide gap between them, Barry. On paper it's not a match. Then again, we don't play on paper.",
+  "An upset here would make the Monday paper. The opponent is well below in the rankings.",
   "The opponent shouldn't be close. If she is, that's the story of the day."
 ];
-var RANK_CLASS_GAP = [ /* when player is far favourite */
-  "The home rider doesn't lose this one, Barry. Not with {gap} places between them.",
-  "The opponent is here to make up the numbers. The gap is {gap} places."
+var RANK_CLASS_GAP = [
+  "The home rider doesn't lose this one, Barry. Not with the gap between them.",
+  "The opponent is here to make up the numbers. The gap is wide."
 ];
 
 /* FLAVOUR: career nod (Reggie) */
 var CAREER_OPP_TITLED = [
-  "Mind, the opponent isn't just any granny. {oppTitles} tour titles in her kit, Barry.",
-  "The opponent's got {oppTitles} titles and {oppGs} Slams behind her. Not a woman to take lightly.",
-  "A past world number {oppPeak}, this one. Days gone, but she remembers.",
-  "The opponent with {oppTitles} titles already, Barry. That's not an opponent, that's a résumé.",
-  "She's done it before, the opponent. {oppGs} Slams in the cabinet. The home rider meets history today.",
-  "Don't be fooled by the current rank — the opponent peaked at {oppPeak}. The talent's still in there.",
-  "The opponent's got {oppTitles} titles and the scars to go with them. The home rider has her hands full."
+  "Mind, the opponent isn't just any granny. A proper résumé in the cabinet, Barry.",
+  "The opponent's got silverware behind her, Barry. Not a woman to take lightly.",
+  "A past world top-tenner, this one. Days gone, but she remembers.",
+  "She's done it before, the opponent. Slams in the cabinet. The home rider meets history today.",
+  "Don't be fooled by the current rank — the opponent peaked much higher. The talent's still in there.",
+  "The opponent's got titles and the scars to go with them. The home rider has her hands full.",
+  "A former top rider, the opponent. The rank today doesn't tell the whole story."
 ];
 var CAREER_PLAYER_CAMPAIGN = [
-  "The home rider's chasing her {playerTitles}-plus-first title today. Shall we see?",
+  "The home rider's chasing her next title today. Shall we see?",
   "A Slam for the home rider's record this would be, Barry. One to add to the lot.",
-  "The home rider's already got {playerTitles} titles, Barry. The appetite's clearly intact."
+  "The home rider's cabinet is filling up nicely, Barry. The appetite's clearly intact."
 ];
 
 /* FLAVOUR: head-to-head (Reggie) */
@@ -406,31 +406,31 @@ var H2H_LEVEL = [
 
 /* FLAVOUR: form — peak rank vs current rank */
 var FORM_OPP_HOT = [
-  "The opponent's climbing fast, Barry. Peaked at {oppPeak}, back near it now at {oppRank}.",
-  "The opponent is in form — her peak was {oppPeak}, and she's knocking on the door again.",
-  "A hot run from the opponent, Reggie. The world's seen her at {oppPeak} and she's getting there once more."
+  "The opponent's climbing fast, Barry. Back near her peak.",
+  "The opponent is in form — knocking on the door of her peak again.",
+  "A hot run from the opponent, Reggie. The world's seen her higher and she's getting there once more."
 ];
 var FORM_OPP_SLUMPING = [
-  "The opponent isn't the woman she was, Barry. Peaked at {oppPeak}, sitting {oppRank} now. The years catch everyone.",
-  "A long way down for the opponent — from {oppPeak} to {oppRank}. Still dangerous, but not what she was.",
-  "The decline is on the opponent, Reggie. Peak rank {oppPeak}, now down at {oppRank}. The home rider should press."
+  "The opponent isn't the woman she was, Barry. The years catch everyone.",
+  "A long way down for the opponent — still dangerous, but not what she was.",
+  "The decline is on the opponent, Reggie. The home rider should press."
 ];
 var FORM_PLAYER_HOT = [
-  "The home rider is climbing, Barry. Her peak is {playerPeak}, and she's close enough to see it.",
-  "The home rider's in form, Reggie. The world has her at {playerRank}, with a peak of {playerPeak}. The direction is clear."
+  "The home rider is climbing, Barry. Her peak is close enough to see.",
+  "The home rider's in form, Reggie. The direction is clear."
 ];
 
 /* FLAVOUR: rooster and personal trait */
 var ROOSTER_TRAIT = [
-  "The opponent's rooster today is {oppRooster}, Barry. {oppTrait} — fitting, isn't it.",
-  "You know the opponent? {oppTrait}. And her rooster {oppRooster} is as odd as she is.",
-  "{oppRooster} in the saddle for the opponent. {oppTrait}. The booth loves this pairing.",
-  "The opponent on {oppRooster} — a famous pairing, Reggie. {oppTrait}.",
-  "Keep an eye on the opponent's mount, Barry — {oppRooster}. Not a bird to be underestimated."
+  "The opponent's rooster is a famous one, Barry. The pairing is well known on tour.",
+  "You know the opponent — a character in her own right. And the rooster is as odd as she is.",
+  "A classic pairing of granny and rooster in the saddle today. The booth loves this one.",
+  "The opponent on her usual mount — a famous pairing, Reggie.",
+  "Keep an eye on the opponent's mount, Barry. Not a bird to be underestimated."
 ];
 var ROOSTER_PLAIN = [
-  "The opponent rides out on {oppRooster} today. A steady bird, from what the stable says.",
-  "{oppRooster} is the opponent's mount, Barry. They've been together a few seasons."
+  "The opponent rides out on her usual mount today. A steady bird, from what the stable says.",
+  "The opponent's rooster is her partner for the season, Barry. They've been together a while."
 ];
 
 /* FLAVOUR: specific gear references (lance + saddle). Keyed by item id. */
@@ -451,22 +451,22 @@ var GEAR_SADDLE = {
 
 /* FLAVOUR: experience / seasons on tour (Reggie or Barry) */
 var VETERAN_OPP = [
-  "The opponent's in her {oppSeasonsOrd} season on tour, Barry. She's seen every ground on the calendar.",
-  "A veteran, the opponent. {oppSeasons} seasons up. Youth in her kit left years ago.",
-  "{oppSeasons} seasons on tour for the opponent. She knows what every bar does before it moves.",
-  "The experience is the opponent's, Barry — {oppSeasons} seasons in the saddle. The home rider will have to be sharper."
+  "The opponent's been on tour a long time, Barry. She's seen every ground on the calendar.",
+  "A veteran, the opponent. Youth in her kit left years ago.",
+  "Many seasons on tour for the opponent. She knows what every bar does before it moves.",
+  "The experience is the opponent's, Barry. The home rider will have to be sharper."
 ];
 var VETERAN_PLAYER = [
-  "The home rider has {playerSeasons} seasons on tour behind her now, Barry. That's a working career.",
-  "{playerSeasons} seasons in and still going. The home rider's not here by accident."
+  "The home rider has a working career behind her now, Barry.",
+  "Many seasons in and still going. The home rider's not here by accident."
 ];
 var ROOKIE_OPP = [
-  "The opponent's only in her {oppSeasonsOrd} season on tour. Promise and nerves in equal measure.",
-  "Fresh legs, the opponent — only {oppSeasons} season{oppSeasonPlural} up. Experience may bite today."
+  "The opponent's new on tour, Barry. Promise and nerves in equal measure.",
+  "Fresh legs, the opponent. Experience may bite today."
 ];
 var ROOKIE_PLAYER = [
-  "{playerSeasons} season{playerSeasonPlural} on tour for the home rider, Barry. Everything to prove.",
-  "The home rider's a fresh name, Barry — {oppSeasonsOrd} season in. Hungry eyes."
+  "A fresh season on tour for the home rider, Barry. Everything to prove.",
+  "The home rider's a fresh name, Barry. Hungry eyes."
 ];
 
 /* FLAVOUR: match stakes (final / Slam / Masters) */
@@ -481,11 +481,11 @@ var STAKES_FINAL = [
   "The {round} — all week's work in the next hour."
 ];
 var STAKES_MASTERS = [
-  "{tier} points up for grabs, Barry. These are the matches careers are measured on.",
+  "Big points up for grabs, Barry. These are the matches careers are measured on.",
   "A Masters round. Rankings move after these."
 ];
 var STAKES_EARLY = [
-  "{round}, early days of the tournament. Winners go on, losers go home.",
+  "Early days of the tournament. Winners go on, losers go home.",
   "Still the opening rounds, Barry. The home rider wants no slips here."
 ];
 
@@ -514,76 +514,57 @@ var CLOSERS = [
 ];
 
 /* ── 4 · Placeholder filler ────────────────────────────────────────────────── */
+/* Fill: only the finite dimensions (five stats, five conditions, four fitness states) get real substitutions.
+   Every other placeholder — ranks, level numbers, set scores, head-to-head counts, career totals, venue,
+   round, rooster name, trait — is stripped by the scrub pass below. The audio bank stays finite, the booth
+   says "the opponent" and "the home rider" verbatim (that's a feature of the architecture, not a bug), and
+   the surrounding grammar is normalised so sentences never read "ranked , and" or " — ." */
 function fill(text, ctx, a) {
   if (!text) return "";
+  var statLbl = function (k) { return (STAT_INFO[k] || {}).label || ""; };
+  var statWhat = function (k) { return (STAT_INFO[k] || {}).what || ""; };
   return text
-    .replace(/the home rider/g, ctx.playerName || "the player")
-    .replace(/the opponent/g, ctx.oppName || "the challenger")
-    .replace(/{playerRankOrd}/g, ord(ctx.playerRank || 999))
-    .replace(/{oppRankOrd}/g, ord(ctx.oppRank || 999))
-    .replace(/{playerRank}/g, String(ctx.playerRank || "?"))
-    .replace(/{oppRank}/g, String(ctx.oppRank || "?"))
-    .replace(/{venue}/g, ctx.venue || "the ground")
-    .replace(/{tier}/g, ctx.tierName || "tournament")
-    .replace(/{round}/g, ctx.roundLabel || "Match")
-    .replace(/{bestOf}/g, String(ctx.bestOf || 3))
     .replace(/{condName}/g, ctx.condName || "classic")
-    .replace(/{gap}/g, String(Math.abs((ctx.playerRank || 0) - (ctx.oppRank || 0))))
-    .replace(/{playerBestLabel}/g, (STAT_INFO[a.player.best.k] || {}).label || "")
-    .replace(/{playerBestLv}/g, String(a.player.best.v))
-    .replace(/{playerBestWhat}/g, (STAT_INFO[a.player.best.k] || {}).what || "")
-    .replace(/{playerWorstLabel}/g, (STAT_INFO[a.player.worst.k] || {}).label || "")
-    .replace(/{playerWorstLv}/g, String(a.player.worst.v))
-    .replace(/{playerWorstWhat}/g, (STAT_INFO[a.player.worst.k] || {}).what || "")
-    .replace(/{oppBestLabel}/g, (STAT_INFO[a.opp.best.k] || {}).label || "")
-    .replace(/{oppBestLv}/g, String(a.opp.best.v))
-    .replace(/{oppBestWhat}/g, (STAT_INFO[a.opp.best.k] || {}).what || "")
-    .replace(/{oppWorstLabel}/g, (STAT_INFO[a.opp.worst.k] || {}).label || "")
-    .replace(/{oppWorstLv}/g, String(a.opp.worst.v))
-    .replace(/{oppWorstWhat}/g, (STAT_INFO[a.opp.worst.k] || {}).what || "")
-    .replace(/{edgeStat}/g, a.edgeNote ? (STAT_INFO[a.edgeNote.stat] || {}).label || "" : "")
-    .replace(/{edgeDiff}/g, a.edgeNote ? String(a.edgeNote.diff) : "")
-    .replace(/{pFit}/g, a.pFit || "fresh").replace(/{oFit}/g, a.oFit || "fresh")
-    .replace(/{h2hWins}/g, String(ctx.h2hWins || 0))
-    .replace(/{h2hLosses}/g, String(ctx.h2hLosses || 0))
-    .replace(/{h2hTotal}/g, String((ctx.h2hWins || 0) + (ctx.h2hLosses || 0)))
-    .replace(/{oppTitles}/g, String((ctx.oppCareer || {}).titles || 0))
-    .replace(/{oppGs}/g, String((ctx.oppCareer || {}).gsTitles || 0))
-    .replace(/{oppPeak}/g, String((ctx.oppCareer || {}).peakRank || 999))
-    .replace(/{playerTitles}/g, String((ctx.playerCareer || {}).titles || 0))
-    .replace(/{oppSeasonsOrd}/g, ord(ctx.oppSeasons || 1))
-    .replace(/{playerSeasonsOrd}/g, ord(ctx.playerSeasons || 1))
-    .replace(/{oppSeasons}/g, String(ctx.oppSeasons || 1))
-    .replace(/{playerSeasons}/g, String(ctx.playerSeasons || 1))
-    .replace(/{oppSeasonPlural}/g, (ctx.oppSeasons || 1) === 1 ? "" : "s")
-    .replace(/{playerSeasonPlural}/g, (ctx.playerSeasons || 1) === 1 ? "" : "s")
-    .replace(/{oppRooster}/g, ctx.oppRooster || "her rooster")
-    .replace(/{oppTrait}/g, ctx.oppTrait || "")
-    .replace(/{playerPeak}/g, String((ctx.playerCareer || {}).peakRank || 999))
-    /* Set-score, between-sets and post-match placeholders */
-    .replace(/{setsWon}/g, String(ctx.setsWon != null ? ctx.setsWon : "?"))
-    .replace(/{setsLost}/g, String(ctx.setsLost != null ? ctx.setsLost : "?"))
-    .replace(/{setGapAbs}/g, String(ctx.setGapAbs != null ? ctx.setGapAbs : "?"))
-    .replace(/{setWinner}/g, ctx.setWinner || "")
-    .replace(/{flawlessSets}/g, String(ctx.flawlessSets != null ? ctx.flawlessSets : "?"))
-    .replace(/{perfectStrikes}/g, String(ctx.perfectStrikes != null ? ctx.perfectStrikes : "?"))
-    .replace(/{playerLead}/g, String(Math.max(ctx.h2hWins || 0, ctx.h2hLosses || 0)))
-    /* Phase 1 scrub: any unknown or variable placeholder left behind (ranks, levels, sets scores, venue, round,
-       career counts, rooster name, trait, etc.) is dropped so the audio bank stays finite. Then clean up the
-       whitespace and dangling punctuation the deletion leaves behind. */
-    .replace(/\s*(?:level|Level|at)\s+\{[a-zA-Z]+(?:Lv|Rank|RankOrd)\}/g, "")
-    .replace(/\{[a-zA-Z]+\}[–\-]\{[a-zA-Z]+\}/g, "")
-    .replace(/\{[a-zA-Z]+\}/g, "")
-    .replace(/\s+—\s+\./g, ".")
-    .replace(/\s+,/g, ",")
+    .replace(/{playerBestLabel}/g, statLbl(a && a.player && a.player.best && a.player.best.k))
+    .replace(/{playerBestWhat}/g,  statWhat(a && a.player && a.player.best && a.player.best.k))
+    .replace(/{playerWorstLabel}/g, statLbl(a && a.player && a.player.worst && a.player.worst.k))
+    .replace(/{playerWorstWhat}/g,  statWhat(a && a.player && a.player.worst && a.player.worst.k))
+    .replace(/{oppBestLabel}/g, statLbl(a && a.opp && a.opp.best && a.opp.best.k))
+    .replace(/{oppBestWhat}/g,  statWhat(a && a.opp && a.opp.best && a.opp.best.k))
+    .replace(/{oppWorstLabel}/g, statLbl(a && a.opp && a.opp.worst && a.opp.worst.k))
+    .replace(/{oppWorstWhat}/g,  statWhat(a && a.opp && a.opp.worst && a.opp.worst.k))
+    .replace(/{edgeStat}/g, a && a.edgeNote ? statLbl(a.edgeNote.stat) : "")
+    .replace(/{pFit}/g, (a && a.pFit) || "fresh")
+    .replace(/{oFit}/g, (a && a.oFit) || "fresh")
+    /* Scrub pass: drop every other placeholder (`{foo}`, `{h2hWins}`, …) and the "level …" / "ranked …" /
+       "…-…" scaffolding around it, then normalise whitespace and dangling punctuation. */
+    .replace(/\s*(?:at\s+level|at\s+Level|level|Level|at|ranked|peaked at)\s+\{\w+\}/g, "")
+    .replace(/\s+(?:at|at level|ranked|peaked at|by)\s*(?=[.,!?])/g, "")
+    .replace(/\{\w+\}[–\-]\{\w+\}/g, "")
+    .replace(/\{\w+\}-point/g, "narrow")
+    .replace(/\{\w+\}-plus-first/g, "next")
+    .replace(/\{\w+\}/g, "")
+    /* Em-dash and dangling punctuation cleanup must come BEFORE whitespace cleanup so the leftover
+       space before a period gets collapsed too. */
+    .replace(/—\s*(?=[.,!?])/g, "")
+    .replace(/\s+—\s+(?=[.,!?])/g, "")
+    .replace(/—\s*—/g, "—")
     .replace(/,\s*,/g, ",")
+    .replace(/\.,/g, ".")
+    .replace(/,\s*\./g, ".")
+    .replace(/\s+,/g, ",")
     .replace(/\s*\(\s*\)/g, "")
+    .replace(/:\s*and\.?/g, ".")
+    .replace(/:\s*\./g, ".")
+    .replace(/\?\./g, "?")
     .replace(/\s{2,}/g, " ")
     .replace(/\s+\./g, ".")
     .replace(/\s+\?/g, "?")
     .replace(/\s+!/g, "!")
-    .replace(/—\s*\./g, ".")
-    .replace(/,\s*\./g, ".")
+    .replace(/\s+'s\b/g, "'s")
+    .replace(/\.\s*\./g, ".")
+    .replace(/^\s*[\.,!?—]+\s*/g, "")
+    .replace(/\.\s+([a-z])/g, function (_, c) { return ". " + c.toUpperCase(); })
     .trim();
 }
 
@@ -683,92 +664,92 @@ export function buildPreMatch(ctx) {
 
 /* How we read the latest set */
 var SET_CLOSE_WIN = [
-  "Set to the home rider, by a whisker — {setGapAbs} points.",
-  "The home rider edges it. {setGapAbs}-point margin.",
-  "A tight one — the home rider by {setGapAbs}.",
-  "The home rider nicks it, {setGapAbs} points.",
-  "{setGapAbs} points, the home rider takes it.",
-  "Hold on, the home rider has it — {setGapAbs} points.",
-  "The home rider by a hair, {setGapAbs} points.",
-  "The thinnest of sets — the home rider by {setGapAbs}.",
-  "The home rider with a scrappy set win, {setGapAbs} points.",
-  "The margins hold for the home rider, {setGapAbs} points.",
-  "{setGapAbs} points separates them — the home rider's set.",
-  "The home rider finds enough — {setGapAbs} points.",
-  "A nervy set win for the home rider, {setGapAbs} points.",
-  "The home rider grinds the set out, {setGapAbs} points.",
-  "{setGapAbs} points the right way — the home rider's set.",
-  "Just enough from the home rider, {setGapAbs} points.",
-  "The home rider snatches the set, {setGapAbs} points.",
-  "The whisker belongs to the home rider, {setGapAbs} points.",
-  "A close-run set for the home rider, {setGapAbs} points.",
-  "The home rider on the right side, {setGapAbs} points."
+  "Set to the home rider, by a whisker.",
+  "The home rider edges it. The thinnest of margins.",
+  "A tight one — the home rider takes it.",
+  "The home rider nicks it. The crowd barely breathed.",
+  "Hold on — the home rider has it.",
+  "The home rider by a hair.",
+  "The thinnest of sets to the home rider.",
+  "The home rider with a scrappy set win.",
+  "The margins hold for the home rider.",
+  "The home rider finds enough.",
+  "A nervy set win for the home rider.",
+  "The home rider grinds the set out.",
+  "That's the right way for the home rider.",
+  "Just enough from the home rider.",
+  "The home rider snatches the set.",
+  "The whisker belongs to the home rider.",
+  "A close-run set for the home rider.",
+  "The home rider on the right side of the margins.",
+  "A nail-biter — set to the home rider.",
+  "The home rider holds her nerve."
 ];
 var SET_WIDE_WIN = [
-  "Set to the home rider, by a mile — {setGapAbs} points.",
-  "A clean set, the home rider by {setGapAbs}.",
-  "Dominant — the home rider by {setGapAbs}.",
-  "The home rider with a statement set, {setGapAbs} clear.",
-  "The opponent wasn't invited — the home rider by {setGapAbs}.",
-  "The home rider dismantles her, {setGapAbs} points.",
-  "A clinic from the home rider, {setGapAbs} points.",
-  "The home rider runs away with it, {setGapAbs}.",
-  "No contest — the home rider by {setGapAbs}.",
-  "The opponent had no answer, the home rider by {setGapAbs}.",
-  "The home rider with a crushing set, {setGapAbs}.",
-  "A total set for the home rider, {setGapAbs} points.",
-  "The opponent fell apart — the home rider by {setGapAbs}.",
-  "The home rider showing why she's seeded, {setGapAbs} up.",
-  "A proper hiding — the home rider by {setGapAbs}.",
-  "The home rider with the air of a champion, {setGapAbs} clear.",
-  "{setGapAbs} points of daylight — the home rider's set.",
-  "A set to remember from the home rider, {setGapAbs} ahead.",
-  "The opponent's rooster never got off the mark — the home rider by {setGapAbs}.",
-  "A statement, Barry — the home rider by {setGapAbs}."
+  "Set to the home rider, by a mile.",
+  "A clean set from the home rider.",
+  "Dominant from the home rider.",
+  "The home rider with a statement set.",
+  "The opponent wasn't invited to that set.",
+  "The home rider dismantles her.",
+  "A clinic from the home rider.",
+  "The home rider runs away with it.",
+  "No contest — the home rider's set.",
+  "The opponent had no answer.",
+  "The home rider with a crushing set.",
+  "A total set for the home rider.",
+  "The opponent fell apart in that set.",
+  "The home rider showing why she's seeded.",
+  "A proper hiding — the home rider rolls.",
+  "The home rider with the air of a champion.",
+  "Daylight — that's the home rider's set.",
+  "A set to remember from the home rider.",
+  "The opponent's rooster never got off the mark.",
+  "A statement, Barry — the home rider at her best."
 ];
 var SET_CLOSE_LOSS = [
-  "Set to the opponent, {setGapAbs} points. The home rider had chances.",
-  "A hard one for the home rider, {setGapAbs} short.",
-  "The opponent by {setGapAbs}. The home rider within touching distance.",
-  "A thin set lost — {setGapAbs} points.",
-  "{setGapAbs} the wrong way for the home rider.",
-  "A nervy set to the opponent, {setGapAbs} points.",
-  "The home rider loses on fine margins, {setGapAbs}.",
-  "A frustrating set for the home rider, {setGapAbs} short.",
-  "The opponent edges it, {setGapAbs} points.",
-  "The whisker belongs to the opponent — {setGapAbs}.",
-  "The home rider with a set that got away, {setGapAbs}.",
-  "A close set in the opponent's column, {setGapAbs}.",
-  "The home rider will replay that one — {setGapAbs} short.",
-  "A thin loss for the home rider, {setGapAbs} points.",
-  "The opponent on the right side, {setGapAbs} up.",
-  "The home rider within a strike or two — set gone, {setGapAbs}.",
-  "A set lost by nothing much, {setGapAbs}.",
-  "The opponent grinds it out, {setGapAbs} points.",
-  "A tight set to the opponent, {setGapAbs} the margin.",
-  "The margins beat the home rider, {setGapAbs} points."
+  "Set to the opponent. The home rider had chances.",
+  "A hard one for the home rider — nothing in it.",
+  "The opponent takes it. The home rider within touching distance.",
+  "A thin set lost by the home rider.",
+  "The wrong way for the home rider.",
+  "A nervy set to the opponent.",
+  "The home rider loses on fine margins.",
+  "A frustrating set for the home rider.",
+  "The opponent edges it.",
+  "The whisker belongs to the opponent.",
+  "The home rider with a set that got away.",
+  "A close set in the opponent's column.",
+  "The home rider will replay that one.",
+  "A thin loss for the home rider.",
+  "The opponent on the right side of the margins.",
+  "The home rider within a strike or two — set gone.",
+  "A set lost by nothing much.",
+  "The opponent grinds it out.",
+  "A tight set to the opponent.",
+  "The margins beat the home rider."
 ];
 var SET_WIDE_LOSS = [
-  "The opponent takes it, {setGapAbs} clear. The home rider needs an answer.",
-  "A rough set, {setGapAbs}-point beating.",
-  "The opponent with a dominant set, {setGapAbs} points.",
-  "That's a hiding — the opponent by {setGapAbs}.",
-  "A reality-check set for the home rider, {setGapAbs} down.",
-  "The opponent with a clinic, {setGapAbs} ahead.",
-  "A one-way set for the opponent, {setGapAbs} points.",
-  "The home rider needs to regroup — {setGapAbs} the margin.",
-  "The opponent rolls, {setGapAbs} points.",
-  "A set to put away quickly — {setGapAbs} down.",
-  "The home rider outclassed in that set, {setGapAbs}.",
-  "The opponent by {setGapAbs}, Barry. The home rider's rooster is unsettled.",
-  "A tough set for the home rider, {setGapAbs} points.",
-  "The opponent runs the ground, {setGapAbs} ahead.",
-  "The home rider needs an answer in the next, {setGapAbs} down.",
-  "A proper beating of a set — {setGapAbs}.",
-  "The opponent's set, no question. {setGapAbs} points.",
-  "The home rider in trouble now — {setGapAbs} down this set.",
-  "A wide one to the opponent, {setGapAbs} points clear.",
-  "The opponent dominates, {setGapAbs} points. The home rider must reset."
+  "The opponent takes it clean. The home rider needs an answer.",
+  "A rough set for the home rider.",
+  "The opponent with a dominant set.",
+  "That's a hiding from the opponent.",
+  "A reality-check set for the home rider.",
+  "The opponent with a clinic.",
+  "A one-way set for the opponent.",
+  "The home rider needs to regroup.",
+  "The opponent rolls through.",
+  "A set to put away quickly.",
+  "The home rider outclassed in that set.",
+  "A rough set for the home rider. The rooster is unsettled.",
+  "A tough set for the home rider.",
+  "The opponent runs the ground.",
+  "The home rider needs an answer in the next.",
+  "A proper beating of a set.",
+  "The opponent's set, no question.",
+  "The home rider in trouble now.",
+  "A wide one to the opponent.",
+  "The opponent dominates. The home rider must reset."
 ];
 
 /* Pattern reads over all sets so far */
@@ -905,131 +886,131 @@ export function buildBetweenSets(ctx, setsCtx) {
 
 /* Opening frame */
 var POST_WIN_EASY = [
-  "The home rider comes through, Barry. {setsWon}–{setsLost}, and little drama with it.",
-  "A workmanlike win from the home rider. {setsWon}–{setsLost}, business done.",
-  "The home rider runs out {setsWon}–{setsLost} winner. Rarely in doubt.",
-  "A tidy performance from the home rider, Barry. {setsWon}–{setsLost}. No alarms.",
-  "The home rider does the job. {setsWon}–{setsLost} on the scorecard, and off to the next round.",
-  "A win in the diary for the home rider, {setsWon}–{setsLost}. Nothing much to review.",
-  "Business as usual for the home rider. {setsWon}–{setsLost}. Next.",
-  "Clean work from the home rider, Barry — {setsWon}–{setsLost} and off.",
-  "The home rider does what she had to. {setsWon}–{setsLost}. The seeds hold.",
-  "A win without a sweat, Barry — the home rider by {setsWon}–{setsLost}.",
-  "The home rider with the professional job. {setsWon}–{setsLost}, see you tomorrow.",
-  "No scare for the home rider today, Barry. {setsWon}–{setsLost} on the card.",
-  "The home rider's through, {setsWon}–{setsLost}. The crowd barely needed to shout.",
-  "A straightforward {setsWon}–{setsLost} for the home rider. Rest the lance and move on.",
-  "The home rider ticks the box, Barry. {setsWon}–{setsLost}. Nothing to detain us.",
-  "The seed holds — the home rider by {setsWon}–{setsLost}. Clean.",
-  "Routine win for the home rider, {setsWon}–{setsLost}. The next round is where the test begins.",
-  "The home rider does her job and leaves, Barry. {setsWon}–{setsLost}.",
-  "An expected result, delivered on time: the home rider {setsWon}–{setsLost}.",
-  "The home rider with a cruise, Reggie. {setsWon}–{setsLost} and the energy saved."
+  "The home rider comes through, Barry. Little drama with it.",
+  "A workmanlike win from the home rider. Business done.",
+  "The home rider runs out winner, Barry. Rarely in doubt.",
+  "A tidy performance from the home rider. No alarms.",
+  "The home rider does the job. Off to the next round.",
+  "A win in the diary for the home rider. Nothing much to review.",
+  "Business as usual for the home rider. Next.",
+  "Clean work from the home rider, Barry — and off.",
+  "The home rider does what she had to. The seeds hold.",
+  "A win without a sweat, Barry — the home rider through.",
+  "The home rider with the professional job. See you tomorrow.",
+  "No scare for the home rider today, Barry.",
+  "The home rider's through. The crowd barely needed to shout.",
+  "A straightforward win for the home rider. Rest the lance and move on.",
+  "The home rider ticks the box, Barry. Nothing to detain us.",
+  "The seed holds — the home rider through. Clean.",
+  "Routine win for the home rider. The next round is where the test begins.",
+  "The home rider does her job and leaves, Barry.",
+  "An expected result, delivered on time.",
+  "The home rider with a cruise, Reggie. Energy saved."
 ];
 var POST_WIN_TIGHT = [
-  "The home rider edges it, {setsWon}–{setsLost}. The scorecard says comfortable, the match said anything but.",
-  "A gritty win for the home rider. {setsWon}–{setsLost}, every set a scrap.",
-  "The home rider finds a way. {setsWon}–{setsLost}, and she'll know she was in a fight.",
-  "The hard way home for the home rider — {setsWon}–{setsLost}. The opponent earned every point.",
-  "The home rider on the right side of a close one, Barry. {setsWon}–{setsLost}. The booth needs a sit-down.",
-  "A proper fight. The home rider takes it {setsWon}–{setsLost}. We earned our tea on that one.",
-  "The home rider wins the dogfight, Barry — {setsWon}–{setsLost}. The margins were nothing.",
-  "A nervy {setsWon}–{setsLost} for the home rider. She'll take it and move on.",
-  "The home rider grinds it out, Barry. {setsWon}–{setsLost} and the crowd is spent.",
-  "A win on fine margins, Reggie — the home rider by {setsWon}–{setsLost}.",
-  "The home rider with a result from the trenches, Barry. {setsWon}–{setsLost}.",
-  "Four or five strikes decided this one, Barry. The home rider by {setsWon}–{setsLost}.",
-  "The home rider outlasted the opponent, Barry. {setsWon}–{setsLost}. Both of them should sit down.",
-  "A hard-earned {setsWon}–{setsLost} for the home rider. On another day she loses this.",
-  "The result is in the home rider's column, Barry — {setsWon}–{setsLost}. The match deserved more drama.",
-  "The home rider with the sort of win that builds a career, Barry. {setsWon}–{setsLost} the hard way.",
-  "A proper tussle. The home rider takes it {setsWon}–{setsLost}. Hats off to both.",
-  "The home rider on the edge of her saddle for most of that one. {setsWon}–{setsLost} and relief.",
-  "{setsWon}–{setsLost} to the home rider, Barry — a brawler of a match.",
-  "A gritty one for the home rider. {setsWon}–{setsLost}. Nothing came easy."
+  "The home rider edges it. The scorecard says comfortable, the match said anything but.",
+  "A gritty win for the home rider. Every set a scrap.",
+  "The home rider finds a way, and she'll know she was in a fight.",
+  "The hard way home for the home rider. The opponent earned every point.",
+  "The home rider on the right side of a close one, Barry. The booth needs a sit-down.",
+  "A proper fight. The home rider takes it. We earned our tea on that one.",
+  "The home rider wins the dogfight, Barry. The margins were nothing.",
+  "A nervy win for the home rider. She'll take it and move on.",
+  "The home rider grinds it out, Barry. The crowd is spent.",
+  "A win on fine margins, Reggie — the home rider through.",
+  "The home rider with a result from the trenches, Barry.",
+  "A handful of strikes decided this one, Barry. The home rider through.",
+  "The home rider outlasted the opponent, Barry. Both of them should sit down.",
+  "A hard-earned win for the home rider. On another day she loses this.",
+  "The result is in the home rider's column, Barry. The match deserved more drama.",
+  "The home rider with the sort of win that builds a career, Barry. The hard way.",
+  "A proper tussle. The home rider takes it. Hats off to both.",
+  "The home rider on the edge of her saddle for most of that one. Relief at the end.",
+  "A win for the home rider, Barry — a brawler of a match.",
+  "A gritty one for the home rider. Nothing came easy."
 ];
 var POST_WIN_UPSET = [
-  "Upset at {venue}, Barry. The home rider ranked {playerRank}, the opponent ranked {oppRank}, and the lower rank wins. The ladder shook today.",
-  "The home rider knocks out the opponent! The {oppRankOrd} in the world goes home. That'll be a bruise on the opponent's season.",
-  "The home rider with the shock of the round. {setsWon}–{setsLost} against the number {oppRank}. Reggie, I need a seat.",
-  "The giant falls. The home rider beats the opponent — the {oppRankOrd}-ranked woman in the world.",
-  "A result that'll run in the papers tomorrow: the home rider by {setsWon}–{setsLost} over the opponent.",
-  "Not many saw this coming, Barry. The home rider dismisses the opponent, who was {oppRankOrd} in the world.",
-  "An upset for the ages. The home rider, ranked {playerRank}, finishes off the opponent, number {oppRank}. {setsWon}–{setsLost}.",
-  "Someone wake the editors — the home rider just beat the opponent, Barry. The {oppRankOrd} in the world is out.",
-  "The booth is on its feet, Barry. The home rider, {playerRankOrd}, dumps the opponent out of the tournament.",
-  "The opponent will not sleep tonight. The home rider with the upset, {setsWon}–{setsLost}.",
+  "Upset in the booth, Barry. The home rider beats the opponent. The ladder shook today.",
+  "The home rider knocks out the opponent! That'll be a bruise on the opponent's season.",
+  "The home rider with the shock of the round. Reggie, I need a seat.",
+  "The giant falls. The home rider beats the opponent — a top-ranked rider going home.",
+  "A result that'll run in the papers tomorrow: the home rider over the opponent.",
+  "Not many saw this coming, Barry. The home rider dismisses the opponent.",
+  "An upset for the ages. The home rider finishes off the opponent.",
+  "Someone wake the editors — the home rider just beat the opponent, Barry. The favourite is out.",
+  "The booth is on its feet, Barry. The home rider dumps the opponent out of the tournament.",
+  "The opponent will not sleep tonight. The home rider with the upset.",
   "A result that writes itself: the home rider over the opponent, Barry. The ladder got a shake.",
-  "The press box is scribbling. The home rider, ranked {playerRank}, with the win over the opponent the {oppRankOrd}.",
-  "A moment, Barry — the home rider just beat a top-{oppRank} rider. That doesn't happen every week.",
-  "The the opponent machine breaks down against the home rider, Barry. {setsWon}–{setsLost}. Nobody expected it.",
-  "What a story. The home rider, {playerRankOrd} in the world, dispatches the opponent, the {oppRankOrd}. {setsWon}–{setsLost}.",
-  "If you weren't watching, Barry, you missed one. The home rider knocks over the opponent, {setsWon}–{setsLost}.",
-  "The underdog bites. The home rider beats the opponent at {venue}. The season just got interesting.",
-  "The opponent's weekend is ruined, Barry. The home rider with the shock result, {setsWon}–{setsLost}.",
-  "A career-making win for the home rider: {setsWon}–{setsLost} over the opponent, the {oppRankOrd} in the world.",
+  "The press box is scribbling. The home rider with the famous win.",
+  "A moment, Barry — the home rider just beat a top rider. That doesn't happen every week.",
+  "The opponent's machine breaks down against the home rider, Barry. Nobody expected it.",
+  "What a story. The home rider dispatches the opponent.",
+  "If you weren't watching, Barry, you missed one. The home rider knocks over the opponent.",
+  "The underdog bites. The home rider beats the opponent. The season just got interesting.",
+  "The opponent's weekend is ruined, Barry. The home rider with the shock result.",
+  "A career-making win for the home rider over a top-ranked opponent.",
   "The crowd is making noise, Barry. The home rider just beat the opponent and the whole venue knows it."
 ];
 var POST_LOSS_TIGHT = [
-  "The opponent takes it, {setsWon}–{setsLost}. The home rider fought every point. On another day, Barry.",
-  "A hard one for the home rider — {setsWon}–{setsLost} to the opponent. She was a strike away in two of those sets.",
-  "The home rider loses the tight one. {setsWon}–{setsLost}. The crowd stays on their feet for her.",
-  "The opponent gets the W, {setsWon}–{setsLost}. The home rider will not have slept well on that defeat.",
-  "The thinnest of losses for the home rider, Barry. {setsWon}–{setsLost}. The margins ate her alive.",
-  "The home rider did everything but win, {setsWon}–{setsLost}. Pride intact, Barry.",
-  "A heartbreaking {setsWon}–{setsLost} for the home rider, Barry. Nothing to blame but the margins.",
-  "The opponent with the W by the slimmest of margins, {setsWon}–{setsLost}. The home rider's head will be spinning.",
-  "The booth hurts for the home rider. {setsWon}–{setsLost}. Any one of those sets could have flipped.",
-  "The home rider loses a scrap, Barry — {setsWon}–{setsLost}. Both of them deserved to win.",
-  "Three points across three sets, Barry — and the home rider loses {setsWon}–{setsLost}. Brutal.",
-  "A match that could've gone either way, and the home rider's on the wrong side of it, {setsWon}–{setsLost}.",
-  "The opponent by {setsWon}–{setsLost} the hard way, Barry. The home rider's campaign ends here.",
-  "The home rider rode well enough to win most days, Barry. Not this one. {setsWon}–{setsLost}.",
-  "A photo-finish loss for the home rider, Reggie. {setsWon}–{setsLost}. The ground was unkind.",
-  "The hands held, the margins didn't. The home rider out {setsWon}–{setsLost}.",
-  "A hard one on the clipboard: the home rider {setsWon}–{setsLost}. Earned nothing but respect.",
-  "{setsWon}–{setsLost} to the opponent, and the home rider will be rehearsing those two strikes in her sleep.",
-  "The opponent just about takes it, {setsWon}–{setsLost}. The home rider's head will take a while to clear.",
-  "A loss that'll sting for weeks, Barry. The home rider by {setsWon}–{setsLost}, four points over the match."
+  "The opponent takes it. The home rider fought every point. On another day, Barry.",
+  "A hard one for the home rider. She was a strike away in two of those sets.",
+  "The home rider loses the tight one. The crowd stays on their feet for her.",
+  "The opponent gets the W. The home rider will not have slept well on that defeat.",
+  "The thinnest of losses for the home rider, Barry. The margins ate her alive.",
+  "The home rider did everything but win. Pride intact, Barry.",
+  "A heartbreaking loss for the home rider, Barry. Nothing to blame but the margins.",
+  "The opponent with the W by the slimmest of margins. The home rider's head will be spinning.",
+  "The booth hurts for the home rider. Any one of those sets could have flipped.",
+  "The home rider loses a scrap, Barry. Both of them deserved to win.",
+  "A handful of points across the match — and the home rider loses. Brutal.",
+  "A match that could've gone either way, and the home rider's on the wrong side of it.",
+  "The opponent the hard way, Barry. The home rider's campaign ends here.",
+  "The home rider rode well enough to win most days, Barry. Not this one.",
+  "A photo-finish loss for the home rider, Reggie. The ground was unkind.",
+  "The hands held, the margins didn't. The home rider out.",
+  "A hard one on the clipboard. Earned nothing but respect.",
+  "A tight loss to the opponent, and the home rider will be rehearsing those strikes in her sleep.",
+  "The opponent just about takes it. The home rider's head will take a while to clear.",
+  "A loss that'll sting for weeks, Barry. The home rider on the wrong side of a few points."
 ];
 var POST_LOSS_BLOWOUT = [
-  "The opponent rolls through, Barry. {setsWon}–{setsLost}. The home rider never found her bar.",
-  "A tough afternoon for the home rider. {setsWon}–{setsLost} and never on terms.",
-  "The home rider outclassed today. {setsWon}–{setsLost}. Back to the training lanes.",
-  "The opponent with a message, Barry — {setsWon}–{setsLost}. The home rider will want to forget this one.",
-  "A one-sided result. {setsWon}–{setsLost} to the opponent. The home rider's rooster never got going.",
-  "A heavy loss for the home rider, {setsWon}–{setsLost}. The opponent was on another level.",
-  "{setsWon}–{setsLost} to the opponent, Barry — a hiding, in old money.",
-  "The home rider outclassed, Barry. {setsWon}–{setsLost}. There'll be a long walk back to the stables.",
-  "A proper beating, Reggie. The opponent by {setsWon}–{setsLost}.",
-  "The home rider never had a sniff, Barry. {setsWon}–{setsLost} and the match was over by set two.",
-  "A heavy afternoon for the home rider, Barry. {setsWon}–{setsLost}. Nothing worked.",
-  "The opponent with the clinic, Barry. {setsWon}–{setsLost}. The home rider will replay nothing fondly.",
-  "A one-way match, Reggie. {setsWon}–{setsLost} to the opponent. The home rider's season takes a hit.",
-  "{setsWon}–{setsLost} the wrong way, Barry. The home rider was second to every strike.",
-  "The opponent on another level today, Reggie. {setsWon}–{setsLost}.",
-  "A loss that'll leave a mark, Barry. The home rider {setsWon}–{setsLost}. The scouts will have noted everything.",
-  "No contest in the end, Barry. The opponent by {setsWon}–{setsLost}.",
-  "The home rider was outplayed from the first strike, Reggie. {setsWon}–{setsLost} to the opponent.",
-  "A result to put away quickly, Barry — the home rider by {setsWon}–{setsLost}. Nothing to review.",
-  "The opponent rode a clinic, Barry. {setsWon}–{setsLost}. The home rider's coach has work to do."
+  "The opponent rolls through, Barry. The home rider never found her bar.",
+  "A tough afternoon for the home rider. Never on terms.",
+  "The home rider outclassed today. Back to the training lanes.",
+  "The opponent with a message, Barry. The home rider will want to forget this one.",
+  "A one-sided result. The home rider's rooster never got going.",
+  "A heavy loss for the home rider. The opponent was on another level.",
+  "A hiding, in old money. The home rider has nothing to review.",
+  "The home rider outclassed, Barry. There'll be a long walk back to the stables.",
+  "A proper beating, Reggie. The opponent runs the show.",
+  "The home rider never had a sniff, Barry. The match was over by set two.",
+  "A heavy afternoon for the home rider, Barry. Nothing worked.",
+  "The opponent with the clinic, Barry. The home rider will replay nothing fondly.",
+  "A one-way match, Reggie. The home rider's season takes a hit.",
+  "The wrong way, Barry. The home rider was second to every strike.",
+  "The opponent on another level today, Reggie.",
+  "A loss that'll leave a mark, Barry. The scouts will have noted everything.",
+  "No contest in the end, Barry.",
+  "The home rider was outplayed from the first strike, Reggie.",
+  "A result to put away quickly, Barry. Nothing to review.",
+  "The opponent rode a clinic, Barry. The home rider's coach has work to do."
 ];
 var POST_LOSS_UPSET = [
-  "The home rider out at the hands of the opponent — ranked {oppRank}, Barry. The ladder bites back.",
-  "Shock in the booth: the home rider beaten by the opponent. {setsWon}–{setsLost} the wrong way for the favourite.",
-  "The opponent with the upset of the day. The home rider, {playerRankOrd} in the world, bows out.",
-  "The {oppRank}-ranked the opponent knocks over the home rider. One for the paper.",
-  "The home rider loses to the opponent, {setsWon}–{setsLost}. The {oppRankOrd} woman wins a famous one.",
-  "A dark day for the home rider, Barry. The opponent, ranked {oppRank}, takes the match {setsWon}–{setsLost}.",
-  "Nobody expected this — the opponent, the {oppRankOrd} in the world, beats the home rider. {setsWon}–{setsLost}.",
-  "The home rider out at {venue}, Barry. The opponent with the career win of her month, {setsWon}–{setsLost}.",
-  "The underdog bites hard. The opponent dumps the home rider, {playerRankOrd} in the world, {setsWon}–{setsLost}.",
-  "A result the home rider will want to forget: beaten by the opponent, ranked {oppRank}. {setsWon}–{setsLost}.",
-  "The ladder shook, Barry — the opponent knocks the home rider, {playerRankOrd}, out of the tournament.",
-  "The home rider's day ends early at the hands of the opponent, the {oppRankOrd}. {setsWon}–{setsLost}.",
-  "A banana skin for the home rider, Barry. The opponent ranked {oppRank}, now ranked 'victor'.",
-  "The press is already asking what happened. The home rider out to the opponent, {setsWon}–{setsLost}.",
-  "The opponent will dine out on this one for years. The home rider, {playerRankOrd}, beaten {setsWon}–{setsLost}."
+  "The home rider out at the hands of a lower-ranked opponent. The ladder bites back.",
+  "Shock in the booth: the home rider beaten. The wrong way for the favourite.",
+  "The opponent with the upset of the day. The home rider bows out.",
+  "A lower-ranked opponent knocks over the home rider. One for the paper.",
+  "The home rider loses to the opponent. A famous win for the underdog.",
+  "A dark day for the home rider, Barry. The opponent takes the match.",
+  "Nobody expected this — the opponent beats the home rider.",
+  "The home rider out, Barry. The opponent with a career win.",
+  "The underdog bites hard. The opponent dumps the home rider out of the tournament.",
+  "A result the home rider will want to forget: beaten by a lower-ranked opponent.",
+  "The ladder shook, Barry. The opponent knocks the home rider out.",
+  "The home rider's day ends early at the hands of the opponent.",
+  "A banana skin for the home rider, Barry. A lower-ranked opponent ends her run.",
+  "The press is already asking what happened. The home rider out.",
+  "The opponent will dine out on this one for years."
 ];
 
 /* The tactical read of the match (Reggie) — ties to the pre-match analysis */
@@ -1047,10 +1028,10 @@ var POST_READ_COND_WON = [
   "The home rider prayed for {condName} this morning, Barry. Looks like someone was listening."
 ];
 var POST_READ_UPSET_WHY = [
-  "The opponent's {oppWorstLabel} came home to roost, Barry. Level {oppWorstLv} — the home rider found the door and walked through.",
-  "The upset was in the stats. The opponent's {oppWorstLabel} level {oppWorstLv}. On these lanes that's a crack, and the home rider swung the hammer.",
-  "The opponent got away with {oppWorstLabel} level {oppWorstLv} for too long, Barry. The home rider punished it.",
-  "The crack in the opponent's armour: {oppWorstLabel}, level {oppWorstLv}. The home rider saw it and rode through."
+  "The opponent's {oppWorstLabel} came home to roost, Barry. The home rider found the door and walked through.",
+  "The upset was in the stats. The opponent's {oppWorstLabel} is a weakness, and the home rider swung the hammer.",
+  "The opponent got away with {oppWorstLabel} for too long, Barry. The home rider punished it.",
+  "The crack in the opponent's armour was {oppWorstLabel}. The home rider saw it and rode through."
 ];
 var POST_READ_LOSS_STAT = [
   "The opponent's {oppBestLabel} level {oppBestLv} was the match, Barry. The home rider didn't have an answer.",
@@ -1067,16 +1048,16 @@ var POST_READ_LOSS_FITNESS = [
 
 /* The strike pattern — perfects / flawless etc. */
 var POST_PATTERN_FLAWLESS = [
-  "{flawlessSets} flawless sets from the home rider, Barry. {perfectStrikes} perfect strikes. That's going in the paper.",
-  "A tidy card: {perfectStrikes} perfect strikes. The home rider was reading the bar like a map.",
-  "{flawlessSets} flawless sets. {perfectStrikes} perfect strikes. The home rider was in another gear today, Barry.",
-  "Ice in her hands, the home rider. {flawlessSets} flawless sets and {perfectStrikes} perfects."
+  "Flawless sets from the home rider, Barry. Perfect strikes stacked up. That's going in the paper.",
+  "A tidy card from the home rider. She was reading the bar like a map.",
+  "Flawless work. The home rider was in another gear today, Barry.",
+  "Ice in her hands, the home rider. Flawless sets and perfect strikes to spare."
 ];
 var POST_PATTERN_CLUTCH = [
-  "She found it when she had to, Barry. {perfectStrikes} perfect strikes, most in the sets that mattered.",
-  "The {playerBestLabel} came out at the right time. {perfectStrikes} perfects over the match.",
-  "{perfectStrikes} perfect strikes, Barry — and most on the big points. A nerveless performance.",
-  "The hands held, the home rider. {perfectStrikes} perfects when it counted."
+  "She found it when she had to, Barry. Perfect strikes in the sets that mattered.",
+  "The {playerBestLabel} came out at the right time. Perfects over the match.",
+  "Perfect strikes, Barry — and most on the big points. A nerveless performance.",
+  "The hands held, the home rider. Perfects when it counted."
 ];
 
 /* Closer — hand off to Interview */
@@ -1156,4 +1137,122 @@ export function buildPostMatch(ctx, result) {
   var acc = 0;
   out.forEach(function (l) { l.durMs = estimateMs(l.text); l.startMs = acc; acc += l.durMs; });
   return { lines: out, totalMs: acc };
+}
+
+/* ── 8 · Enumerate every final text for the one-time batch TTS generation ────── */
+/* Walks every bank, expands every placeholder that still varies (stat labels, condition name, fitness state)
+   against its full value set, and yields the Cartesian product. The result is the complete, finite set of
+   sentences the booth can ever say — ready to feed to ElevenLabs once, then cache in Vercel Blob.
+   Returns [{ voice, text, bank, templateIndex, choice }…]. */
+var FITNESS_STATES = ["fresh", "serviceable", "tired", "ragged"];
+var COND_KEYS = ["classic", "mud", "wind", "heat", "green"];
+
+function fillForEnumeration(template, choice) {
+  var ctx = { condName: choice.cond || "classic" };
+  var a = {
+    player: { best: { k: choice.bestStat || "r", v: 10 }, worst: { k: choice.worstStat || "r", v: 10 }, favour: 0, talent: 70 },
+    opp:    { best: { k: choice.bestStat || "r", v: 10 }, worst: { k: choice.worstStat || "r", v: 10 }, favour: 0, talent: 70 },
+    rankGap: 0, condFavoursPlayer: false, condFavoursOpp: false,
+    pFit: choice.pFit || "fresh", oFit: choice.oFit || "fresh",
+    edgeNote: choice.edgeStat ? { who: "player", stat: choice.edgeStat, diff: 5 } : null
+  };
+  return fill(template, ctx, a);
+}
+
+function dimChoices(dims) {
+  var options = { bestStat: STAT_KEYS, worstStat: STAT_KEYS, edgeStat: STAT_KEYS, cond: COND_KEYS, pFit: FITNESS_STATES, oFit: FITNESS_STATES };
+  var sets = dims.map(function (d) { return options[d]; });
+  if (sets.length === 0) return [{}];
+  var out = [{}];
+  dims.forEach(function (d, i) {
+    var next = [];
+    out.forEach(function (prefix) { sets[i].forEach(function (v) { var o = Object.assign({}, prefix); o[d] = v; next.push(o); }); });
+    out = next;
+  });
+  return out;
+}
+
+function allBanks() {
+  return [
+    { bank: "OPENERS",              lines: OPENERS,              speaker: "barry",  dims: [] },
+    { bank: "STRENGTHS_OPP",        lines: STRENGTHS_OPP,        speaker: "reggie", dims: ["bestStat"] },
+    { bank: "STRENGTHS_PLAYER",     lines: STRENGTHS_PLAYER,     speaker: "reggie", dims: ["bestStat"] },
+    { bank: "WEAKNESS_OPP",         lines: WEAKNESS_OPP,         speaker: "reggie", dims: ["worstStat"] },
+    { bank: "WEAKNESS_PLAYER",      lines: WEAKNESS_PLAYER,      speaker: "reggie", dims: ["worstStat"] },
+    { bank: "COND_TILT_PLAYER",     lines: COND_TILT_PLAYER,     speaker: "barry",  dims: ["cond", "bestStat"] },
+    { bank: "COND_TILT_OPP",        lines: COND_TILT_OPP,        speaker: "barry",  dims: ["cond", "bestStat"] },
+    { bank: "COND_TILT_EVEN",       lines: COND_TILT_EVEN,       speaker: "barry",  dims: ["cond"] },
+    { bank: "COND_CLASSIC_LINES",   lines: COND_CLASSIC_LINES,   speaker: "barry",  dims: [] },
+    { bank: "EDGE_PLAYER",          lines: EDGE_PLAYER,          speaker: "reggie", dims: ["edgeStat", "cond"] },
+    { bank: "EDGE_OPP",             lines: EDGE_OPP,             speaker: "reggie", dims: ["edgeStat", "cond"] },
+    { bank: "FITNESS_OPP_TIRED",    lines: FITNESS_OPP_TIRED,    speaker: "reggie", dims: ["oFit"] },
+    { bank: "FITNESS_PLAYER_TIRED", lines: FITNESS_PLAYER_TIRED, speaker: "reggie", dims: ["pFit"] },
+    { bank: "CAREER_OPP_TITLED",    lines: CAREER_OPP_TITLED,    speaker: "reggie", dims: [] },
+    { bank: "CAREER_PLAYER_CAMPAIGN", lines: CAREER_PLAYER_CAMPAIGN, speaker: "reggie", dims: [] },
+    { bank: "H2H_FIRST",            lines: H2H_FIRST,            speaker: "reggie", dims: [] },
+    { bank: "H2H_LEAD_PLAYER",      lines: H2H_LEAD_PLAYER,      speaker: "reggie", dims: [] },
+    { bank: "H2H_LEAD_OPP",         lines: H2H_LEAD_OPP,         speaker: "reggie", dims: [] },
+    { bank: "H2H_LEVEL",            lines: H2H_LEVEL,            speaker: "reggie", dims: [] },
+    { bank: "FORM_OPP_HOT",         lines: FORM_OPP_HOT,         speaker: "reggie", dims: [] },
+    { bank: "FORM_OPP_SLUMPING",    lines: FORM_OPP_SLUMPING,    speaker: "reggie", dims: [] },
+    { bank: "FORM_PLAYER_HOT",      lines: FORM_PLAYER_HOT,      speaker: "reggie", dims: [] },
+    { bank: "ROOSTER_TRAIT",        lines: ROOSTER_TRAIT,        speaker: "reggie", dims: [] },
+    { bank: "ROOSTER_PLAIN",        lines: ROOSTER_PLAIN,        speaker: "reggie", dims: [] },
+    { bank: "VETERAN_OPP",          lines: VETERAN_OPP,          speaker: "reggie", dims: [] },
+    { bank: "VETERAN_PLAYER",       lines: VETERAN_PLAYER,       speaker: "reggie", dims: [] },
+    { bank: "ROOKIE_OPP",           lines: ROOKIE_OPP,           speaker: "reggie", dims: [] },
+    { bank: "ROOKIE_PLAYER",        lines: ROOKIE_PLAYER,        speaker: "reggie", dims: [] },
+    { bank: "STAKES_SLAM",          lines: STAKES_SLAM,          speaker: "reggie", dims: [] },
+    { bank: "STAKES_FINAL",         lines: STAKES_FINAL,         speaker: "reggie", dims: [] },
+    { bank: "STAKES_MASTERS",       lines: STAKES_MASTERS,       speaker: "reggie", dims: [] },
+    { bank: "STAKES_EARLY",         lines: STAKES_EARLY,         speaker: "reggie", dims: [] },
+    { bank: "RANK_UPSET_WATCH",     lines: RANK_UPSET_WATCH,     speaker: "reggie", dims: [] },
+    { bank: "RANK_CLASS_GAP",       lines: RANK_CLASS_GAP,       speaker: "reggie", dims: [] },
+    { bank: "SET_CLOSE_WIN",        lines: SET_CLOSE_WIN,        speaker: "barry",  dims: [] },
+    { bank: "SET_WIDE_WIN",         lines: SET_WIDE_WIN,         speaker: "barry",  dims: [] },
+    { bank: "SET_CLOSE_LOSS",       lines: SET_CLOSE_LOSS,       speaker: "barry",  dims: [] },
+    { bank: "SET_WIDE_LOSS",        lines: SET_WIDE_LOSS,        speaker: "barry",  dims: [] },
+    { bank: "MOMENTUM_STREAK_PLAYER", lines: MOMENTUM_STREAK_PLAYER, speaker: "reggie", dims: [] },
+    { bank: "MOMENTUM_STREAK_OPP",  lines: MOMENTUM_STREAK_OPP,  speaker: "reggie", dims: [] },
+    { bank: "MOMENTUM_SWING",       lines: MOMENTUM_SWING,       speaker: "reggie", dims: [] },
+    { bank: "COMEBACK_PLAYER",      lines: COMEBACK_PLAYER,      speaker: "reggie", dims: [] },
+    { bank: "COMEBACK_OPP",         lines: COMEBACK_OPP,         speaker: "reggie", dims: [] },
+    { bank: "PERFECT_HAIL_PLAYER",  lines: PERFECT_HAIL_PLAYER,  speaker: "reggie", dims: ["cond"] },
+    { bank: "PERFECT_HAIL_OPP",     lines: PERFECT_HAIL_OPP,     speaker: "reggie", dims: [] },
+    { bank: "DECIDER_INCOMING",     lines: DECIDER_INCOMING,     speaker: "barry",  dims: [] },
+    { bank: "FLAT_SET",             lines: FLAT_SET,             speaker: "barry",  dims: [] },
+    { bank: "CLOSERS",              lines: CLOSERS.map(function (c) { return c.t; }), speaker: null, speakerArr: CLOSERS.map(function (c) { return c.s; }), dims: [] },
+    { bank: "POST_WIN_EASY",        lines: POST_WIN_EASY,        speaker: "barry",  dims: [] },
+    { bank: "POST_WIN_TIGHT",       lines: POST_WIN_TIGHT,       speaker: "barry",  dims: [] },
+    { bank: "POST_WIN_UPSET",       lines: POST_WIN_UPSET,       speaker: "barry",  dims: [] },
+    { bank: "POST_LOSS_TIGHT",      lines: POST_LOSS_TIGHT,      speaker: "barry",  dims: [] },
+    { bank: "POST_LOSS_BLOWOUT",    lines: POST_LOSS_BLOWOUT,    speaker: "barry",  dims: [] },
+    { bank: "POST_LOSS_UPSET",      lines: POST_LOSS_UPSET,      speaker: "barry",  dims: [] },
+    { bank: "POST_READ_STAT_WON",   lines: POST_READ_STAT_WON,   speaker: "reggie", dims: ["bestStat"] },
+    { bank: "POST_READ_COND_WON",   lines: POST_READ_COND_WON,   speaker: "reggie", dims: ["cond", "bestStat"] },
+    { bank: "POST_READ_UPSET_WHY",  lines: POST_READ_UPSET_WHY,  speaker: "reggie", dims: ["worstStat"] },
+    { bank: "POST_READ_LOSS_STAT",  lines: POST_READ_LOSS_STAT,  speaker: "reggie", dims: ["bestStat"] },
+    { bank: "POST_READ_LOSS_FITNESS", lines: POST_READ_LOSS_FITNESS, speaker: "reggie", dims: [] },
+    { bank: "POST_PATTERN_FLAWLESS", lines: POST_PATTERN_FLAWLESS, speaker: "barry", dims: [] },
+    { bank: "POST_PATTERN_CLUTCH",  lines: POST_PATTERN_CLUTCH,  speaker: "barry",  dims: ["bestStat"] },
+    { bank: "POST_CLOSERS",         lines: POST_CLOSERS.map(function (c) { return c.t; }), speaker: null, speakerArr: POST_CLOSERS.map(function (c) { return c.s; }), dims: [] }
+  ];
+}
+
+export function enumerateAllFinals() {
+  var out = [], seen = {};
+  allBanks().forEach(function (b) {
+    var choices = dimChoices(b.dims);
+    b.lines.forEach(function (tpl, i) {
+      var speaker = b.speaker || (b.speakerArr && b.speakerArr[i]) || "barry";
+      choices.forEach(function (choice) {
+        var text = fillForEnumeration(tpl, choice);
+        if (!text) return;
+        var key = speaker + "|" + text;
+        if (seen[key]) return; seen[key] = 1;
+        out.push({ voice: speaker, text: text, bank: b.bank, templateIndex: i, choice: choice });
+      });
+    });
+  });
+  return out;
 }
