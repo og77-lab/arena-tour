@@ -281,6 +281,51 @@ var H2H_LEVEL = [
   "You can't separate them on the record: {h2hWins} apiece. The crowd is in for a scrap."
 ];
 
+/* FLAVOUR: form — peak rank vs current rank */
+var FORM_OPP_HOT = [
+  "{opp}'s climbing fast, Barry. Peaked at {oppPeak}, back near it now at {oppRank}.",
+  "{opp} is in form — her peak was {oppPeak}, and she's knocking on the door again.",
+  "A hot run from {opp}, Reggie. The world's seen her at {oppPeak} and she's getting there once more."
+];
+var FORM_OPP_SLUMPING = [
+  "{opp} isn't the woman she was, Barry. Peaked at {oppPeak}, sitting {oppRank} now. The years catch everyone.",
+  "A long way down for {opp} — from {oppPeak} to {oppRank}. Still dangerous, but not what she was.",
+  "The decline is on {opp}, Reggie. Peak rank {oppPeak}, now down at {oppRank}. {player} should press."
+];
+var FORM_PLAYER_HOT = [
+  "{player} is climbing, Barry. Her peak is {playerPeak}, and she's close enough to see it.",
+  "{player}'s in form, Reggie. The world has her at {playerRank}, with a peak of {playerPeak}. The direction is clear."
+];
+
+/* FLAVOUR: rooster and personal trait */
+var ROOSTER_TRAIT = [
+  "{opp}'s rooster today is {oppRooster}, Barry. {oppTrait} — fitting, isn't it.",
+  "You know {opp}? {oppTrait}. And her rooster {oppRooster} is as odd as she is.",
+  "{oppRooster} in the saddle for {opp}. {oppTrait}. The booth loves this pairing.",
+  "{opp} on {oppRooster} — a famous pairing, Reggie. {oppTrait}.",
+  "Keep an eye on {opp}'s mount, Barry — {oppRooster}. Not a bird to be underestimated."
+];
+var ROOSTER_PLAIN = [
+  "{opp} rides out on {oppRooster} today. A steady bird, from what the stable says.",
+  "{oppRooster} is {opp}'s mount, Barry. They've been together a few seasons."
+];
+
+/* FLAVOUR: specific gear references (lance + saddle). Keyed by item id. */
+var GEAR_LANCE = {
+  needle:   ["{opp} on the Knitting-Needle Lance today — small gold bonus but mean on misses.", "The Knitting-Needle on {opp}, Barry. Expensive kit, every strike counts.", "{opp} brought the Knitting-Needle Lance. A statement, Reggie."],
+  oak:      ["The Grandpa's Oak Lance on {opp} — durable, heavy, no apologies.", "{opp} rides with the Oak Lance. Old school. Never let her down."],
+  bamboo:   ["{opp} on the Featherlight Bamboo — fast swing, generous zone.", "The Bamboo on {opp}, Barry. Fastest lance in the lanes."],
+  baguette: ["A Day-Old Baguette on {opp}, Barry. Novelty, or genius?", "{opp} rode in on a Baguette lance. Reggie, that's confidence or madness."],
+  broom:    ["{opp} on the basic Broom-Handle. Trust and tradition."]
+};
+var GEAR_SADDLE = {
+  foam:     ["{opp} on the Memory-Foam Cushion — a wider gold, Barry, but the bar starts faster.", "The Memory-Foam Cushion is {opp}'s pick. Comfort has a price."],
+  racing:   ["{opp} on the Racing Saddle today — leaning into speed, giving up accuracy.", "The Racing Saddle on {opp}. She wants a fast bar."],
+  rocking:  ["{opp} rides a Rocking-Chair Saddle, Reggie. The gold stays wide all match.", "The Rocking-Chair on {opp}. She came for a long one."],
+  skates:   ["Roller-Skate Saddle on {opp} — Barry, I never thought I'd say those words.", "{opp} on skates. The crowd is laughing. The bar is terrified."],
+  teacosy:  ["Basic Tea-Cosy for {opp}. No tricks, no spend."]
+};
+
 /* FLAVOUR: experience / seasons on tour (Reggie or Barry) */
 var VETERAN_OPP = [
   "{opp}'s in her {oppSeasonsOrd} season on tour, Barry. She's seen every ground on the calendar.",
@@ -382,7 +427,10 @@ function fill(text, ctx, a) {
     .replace(/{oppSeasons}/g, String(ctx.oppSeasons || 1))
     .replace(/{playerSeasons}/g, String(ctx.playerSeasons || 1))
     .replace(/{oppSeasonPlural}/g, (ctx.oppSeasons || 1) === 1 ? "" : "s")
-    .replace(/{playerSeasonPlural}/g, (ctx.playerSeasons || 1) === 1 ? "" : "s");
+    .replace(/{playerSeasonPlural}/g, (ctx.playerSeasons || 1) === 1 ? "" : "s")
+    .replace(/{oppRooster}/g, ctx.oppRooster || "her rooster")
+    .replace(/{oppTrait}/g, ctx.oppTrait || "")
+    .replace(/{playerPeak}/g, String((ctx.playerCareer || {}).peakRank || 999));
 }
 
 /* ── 5 · Composer ──────────────────────────────────────────────────────────── */
@@ -442,6 +490,22 @@ export function buildPreMatch(ctx) {
   else if ((ctx.oppSeasons || 99) <= 2) { flavourBank = ROOKIE_OPP; flavourKey = "rookOpp"; }
   else if ((ctx.playerSeasons || 99) <= 2) { flavourBank = ROOKIE_PLAYER; flavourKey = "rookP"; }
   else if (ctx.isMasters) { flavourBank = STAKES_MASTERS; flavourKey = "stakM"; }
+  /* Form: opp sitting notably below her peak (slumping), or climbing back toward it (hot) */
+  else if ((ctx.oppCareer || {}).peakRank && ctx.oppRank && ctx.oppRank - (ctx.oppCareer.peakRank || 999) >= 60) {
+    flavourBank = FORM_OPP_SLUMPING; flavourKey = "formSl";
+  }
+  else if ((ctx.oppCareer || {}).peakRank && ctx.oppRank && ctx.oppRank - (ctx.oppCareer.peakRank || 999) <= 10 && (ctx.oppCareer.peakRank || 999) > 1) {
+    flavourBank = FORM_OPP_HOT; flavourKey = "formHot";
+  }
+  /* Specific gear: lance of the opponent, if it's not the basic broom */
+  else if (ctx.oppLance && ctx.oppLance !== "broom" && GEAR_LANCE[ctx.oppLance]) {
+    flavourBank = GEAR_LANCE[ctx.oppLance]; flavourKey = "lance" + ctx.oppLance;
+  }
+  else if (ctx.oppSaddle && ctx.oppSaddle !== "teacosy" && GEAR_SADDLE[ctx.oppSaddle]) {
+    flavourBank = GEAR_SADDLE[ctx.oppSaddle]; flavourKey = "sad" + ctx.oppSaddle;
+  }
+  /* Rooster trait — colour nod when the opponent has a memorable mount/personality */
+  else if (ctx.oppRooster) { flavourBank = ROOSTER_TRAIT; flavourKey = "rooster"; }
   else if (ctx.firstMeeting) { flavourBank = H2H_FIRST; flavourKey = "h2hFirst"; }
   else if (Math.abs(a.rankGap) >= 100) {
     flavourBank = a.rankGap > 0 ? RANK_UPSET_WATCH : RANK_CLASS_GAP;

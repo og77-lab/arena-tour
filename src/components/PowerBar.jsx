@@ -22,6 +22,7 @@ import { riderBar, speedAt, landScore, npcMiss, dayForm, nerves, abilityRating, 
 import { enterMatch, leaveMatch, startBattle, stopBattle } from "../music";
 import StudioOverlay from "./StudioOverlay";
 import { buildPreMatch, buildPostMatch } from "../engine/commentary";
+import { roosterName, trait } from "../models/persona";
 
 const { useState, useEffect, useRef } = React;
 
@@ -503,6 +504,12 @@ export default function PowerBar(props) {
     firstMeeting: !props.h2h, h2hWins: (props.h2h && props.h2h.w) || 0, h2hLosses: (props.h2h && props.h2h.l) || 0,
     oppCareer: props.oppCareer || {}, playerCareer: props.playerCareer || {},
     oppSeasons: props.oppSeasons || 1, playerSeasons: props.playerSeasons || 1,
+    oppRooster: props.oppId ? roosterName(props.oppId) : null,
+    oppTrait: props.oppId ? trait(props.oppId) : null,
+    oppLance: (props.oppGear && props.oppGear.lance) || null,
+    oppSaddle: (props.oppGear && props.oppGear.saddle) || null,
+    playerLance: (props.gear && props.gear.lance) || null,
+    playerSaddle: (props.gear && props.gear.saddle) || null,
     isFinal: !!props.isFinal, isSlam: (props.tier || 0) >= 5, isMasters: props.tier === 4,
     round: 0
   } : null;
