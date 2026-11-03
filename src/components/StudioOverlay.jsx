@@ -35,13 +35,25 @@ function Portrait(props) {
   );
 }
 
-/* Fire /api/tts for one line. Returns {url} on success, {error} otherwise. */
+/* Fire /api/tts for one line. Returns {url} on success, {error} otherwise. Errors are console.warn-ed so a
+   broken ElevenLabs key or missing Blob store shows up in DevTools instead of silently swallowing. */
 function fetchTts(text, voice) {
   return fetch("/api/tts", {
     method: "POST", headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ text: text, voice: voice })
-  }).then(function (r) { return r.ok ? r.json() : r.json().then(function (j) { return { error: j && j.error || ("http " + r.status) }; }); })
-    .catch(function (e) { return { error: String(e) }; });
+  }).then(function (r) {
+    return r.text().then(function (body) {
+      var j; try { j = JSON.parse(body); } catch (e) { j = { error: "not json", detail: body.slice(0, 200) }; }
+      if (!r.ok || !j.url) {
+        console.warn("[studio/tts]", r.status, j && (j.error || j.detail), "·", voice, "·", text.slice(0, 60));
+        return { error: (j && j.error) || ("http " + r.status) };
+      }
+      return j;
+    });
+  }).catch(function (e) {
+    console.warn("[studio/tts] fetch failed:", String(e));
+    return { error: String(e) };
+  });
 }
 
 export default function StudioOverlay(props) {
@@ -100,18 +112,19 @@ export default function StudioOverlay(props) {
     /* urls not yet resolved: hold on the subtitle; this effect re-runs when `urls` updates. */
   }, [idx, urls]);
 
-  /* Fake lip sync — oscillate every ~140ms while audio is playing OR we're mid-line with no audio. */
+  /* Fake lip sync — oscillate every ~140ms whenever we're mid-line: audio playing, audio still loading,
+     or audio failed and we're reading the subtitle instead. The mouth stays closed only after the segment ends. */
   React.useEffect(function () {
     if (REDUCED_MOTION) return;
     var id = setInterval(function () {
+      if (idx >= lines.length) { setMouth(false); return; }
       var a = audioRef.current;
       if (a && !a.paused) { setMouth(Math.random() > 0.3); return; }
-      /* No audio yet but we're on an active line: still mouth-mime so the booth feels alive. */
-      if (idx < lines.length && urls.length === 0) setMouth(Math.random() > 0.4);
-      else setMouth(false);
+      /* No live audio for this line (not loaded yet, or TTS failed): mime anyway. */
+      setMouth(Math.random() > 0.4);
     }, 140);
     return function () { clearInterval(id); };
-  }, [idx, urls.length]);
+  }, [idx, lines.length]);
 
   React.useEffect(function () {
     if (REDUCED_MOTION) return;
