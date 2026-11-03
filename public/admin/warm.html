@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arena Tour — Studio warm-up</title>
+  <style>
+    html, body { margin: 0; padding: 0; background: #0b1120; color: #e2e8f0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; min-height: 100vh; }
+    .wrap { max-width: 760px; margin: 0 auto; padding: 32px 20px; }
+    h1 { font-size: 22px; letter-spacing: 1px; margin: 0 0 6px; color: #fde68a; }
+    .sub { color: #94a3b8; font-size: 14px; margin-bottom: 24px; }
+    .card { background: #131b2e; border: 1px solid #334155; border-radius: 12px; padding: 20px; margin-bottom: 18px; }
+    button { background: #fde68a; color: #0b1120; border: none; padding: 12px 24px; border-radius: 8px; font-size: 15px; font-weight: 800; letter-spacing: 1px; cursor: pointer; text-transform: uppercase; }
+    button:disabled { background: #475569; color: #94a3b8; cursor: not-allowed; }
+    .row { display: flex; gap: 20px; margin-top: 12px; }
+    .stat { flex: 1; }
+    .stat-num { font-size: 28px; font-weight: 900; color: #fde68a; }
+    .stat-lbl { font-size: 11px; letter-spacing: 1.5px; color: #94a3b8; text-transform: uppercase; }
+    .bar { height: 10px; background: #0b1120; border-radius: 5px; overflow: hidden; margin-top: 10px; }
+    .bar-fill { height: 100%; background: linear-gradient(90deg, #fde68a, #22c55e); transition: width 300ms linear; }
+    .log { background: #0b1120; border: 1px solid #334155; border-radius: 8px; padding: 12px; font-family: ui-monospace, Menlo, Monaco, monospace; font-size: 11px; max-height: 320px; overflow-y: auto; margin-top: 12px; }
+    .log-ok { color: #86efac; }
+    .log-cached { color: #94a3b8; }
+    .log-err { color: #fca5a5; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>🎙️ Studio warm-up</h1>
+    <div class="sub">Pre-generate every booth sentence as audio in Vercel Blob. One run, forever cached. Leave this tab open until done.</div>
+
+    <div class="card">
+      <div id="loading">Loading enumeration…</div>
+      <div id="ready" style="display:none">
+        <div class="row">
+          <div class="stat"><div class="stat-num" id="total">—</div><div class="stat-lbl">Sentences</div></div>
+          <div class="stat"><div class="stat-num" id="chars">—</div><div class="stat-lbl">Characters</div></div>
+          <div class="stat"><div class="stat-num" id="voices">—</div><div class="stat-lbl">Voices</div></div>
+        </div>
+        <div style="margin-top:16px">
+          <button id="start">Start warm-up</button>
+          <button id="pause" style="display:none;background:#64748b;color:white">Pause</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="progressCard" style="display:none">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+        <div style="font-weight:800;color:#fde68a">Progress</div>
+        <div id="progressText" style="color:#94a3b8;font-size:13px">0 / 0</div>
+      </div>
+      <div class="bar"><div class="bar-fill" id="progressBar" style="width:0%"></div></div>
+      <div class="row" style="margin-top:14px">
+        <div class="stat"><div class="stat-num" id="okNum" style="color:#86efac">0</div><div class="stat-lbl">Done</div></div>
+        <div class="stat"><div class="stat-num" id="cachedNum" style="color:#94a3b8">0</div><div class="stat-lbl">Cached</div></div>
+        <div class="stat"><div class="stat-num" id="errNum" style="color:#fca5a5">0</div><div class="stat-lbl">Errors</div></div>
+        <div class="stat"><div class="stat-num" id="etaNum">—</div><div class="stat-lbl">ETA</div></div>
+      </div>
+      <div class="log" id="log"></div>
+    </div>
+  </div>
+
+<script>
+const DELAY_MS = 400;
+let items = [], running = false, paused = false, cursor = 0;
+let okCount = 0, cachedCount = 0, errCount = 0, start = 0;
+
+function log(line, cls) {
+  const el = document.getElementById("log");
+  const row = document.createElement("div");
+  row.className = cls || "";
+  row.textContent = line;
+  el.insertBefore(row, el.firstChild);
+  if (el.children.length > 60) el.removeChild(el.lastChild);
+}
+
+function render() {
+  const total = items.length;
+  const done = okCount + cachedCount + errCount;
+  document.getElementById("progressText").textContent = `${done} / ${total}`;
+  document.getElementById("progressBar").style.width = (done / total * 100).toFixed(1) + "%";
+  document.getElementById("okNum").textContent = okCount;
+  document.getElementById("cachedNum").textContent = cachedCount;
+  document.getElementById("errNum").textContent = errCount;
+  if (done > 0 && start) {
+    const rate = done / ((Date.now() - start) / 1000);
+    const remaining = (total - done) / Math.max(rate, 0.1);
+    document.getElementById("etaNum").textContent = Math.round(remaining / 60) + "m";
+  }
+}
+
+async function step() {
+  if (!running || paused) return;
+  if (cursor >= items.length) {
+    running = false;
+    document.getElementById("start").textContent = "Done ✓";
+    document.getElementById("start").disabled = true;
+    document.getElementById("pause").style.display = "none";
+    log(`Finished · ${okCount} new · ${cachedCount} cached · ${errCount} errors`, "log-ok");
+    return;
+  }
+  const item = items[cursor]; cursor++;
+  try {
+    const r = await fetch("/api/tts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: item.text, voice: item.voice })
+    });
+    const j = await r.json().catch(() => ({}));
+    if (r.ok && j.url) {
+      if (j.cached) { cachedCount++; } else { okCount++; log(`[${cursor}] ${item.voice} · ${item.text.slice(0, 70)}`, "log-ok"); }
+    } else {
+      errCount++;
+      log(`[${cursor}] ERR ${r.status} · ${j.error || "unknown"} · ${item.text.slice(0, 60)}`, "log-err");
+    }
+  } catch (e) {
+    errCount++;
+    log(`[${cursor}] FETCH FAIL · ${String(e).slice(0, 80)}`, "log-err");
+  }
+  render();
+  setTimeout(step, DELAY_MS);
+}
+
+async function init() {
+  try {
+    const r = await fetch("/api/enumerate");
+    const j = await r.json();
+    items = j.items || [];
+    document.getElementById("total").textContent = j.count;
+    document.getElementById("chars").textContent = j.totalChars.toLocaleString();
+    document.getElementById("voices").textContent = new Set(items.map(x => x.voice)).size;
+    document.getElementById("loading").style.display = "none";
+    document.getElementById("ready").style.display = "block";
+  } catch (e) {
+    document.getElementById("loading").textContent = "Error loading enumeration: " + e.message;
+  }
+}
+
+document.getElementById("start").addEventListener("click", () => {
+  running = true; start = Date.now();
+  document.getElementById("progressCard").style.display = "block";
+  document.getElementById("start").textContent = "Running…";
+  document.getElementById("start").disabled = true;
+  document.getElementById("pause").style.display = "inline-block";
+  step();
+});
+document.getElementById("pause").addEventListener("click", () => {
+  paused = !paused;
+  document.getElementById("pause").textContent = paused ? "Resume" : "Pause";
+  if (!paused) step();
+});
+
+init();
+</script>
+</body>
+</html>
