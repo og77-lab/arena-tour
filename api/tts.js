@@ -70,11 +70,13 @@ export default async function handler(req, res) {
     return res.status(504).json({ error: "tts timeout or network", detail: String(e).slice(0, 200) });
   } finally { clearTimeout(timer); }
 
-  /* Store in Blob under the key — later requests from any player, any device, any browser hit the cache. */
+  /* Store in Blob under the key — later requests from any player, any device, any browser hit the cache. If Blob
+     storage is unconfigured or down, fall back to a data: URL so the audio still plays this time (not cached). */
   try {
     const blob = await put(key, audioBuf, { access: "public", contentType: "audio/mpeg", addRandomSuffix: false });
     return res.status(200).json({ url: blob.url, cached: false });
   } catch (e) {
-    return res.status(500).json({ error: "blob put failed", detail: String(e).slice(0, 200) });
+    const dataUrl = "data:audio/mpeg;base64," + audioBuf.toString("base64");
+    return res.status(200).json({ url: dataUrl, cached: false, blobError: String(e).slice(0, 300) });
   }
 }

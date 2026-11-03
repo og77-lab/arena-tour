@@ -67,13 +67,24 @@ export default function StudioOverlay(props) {
   var fallbackTimer = React.useRef(null);
   var startedAt = React.useRef(0);
 
-  /* On mount: fire all TTS requests in parallel. Each resolves to a url (or null for fallback). */
+  /* On mount: fetch TTS one line at a time so free/Creator ElevenLabs tiers don't 429 on concurrent calls.
+     Each URL lands in state as it resolves; the player starts the first line as soon as its URL is in. */
   React.useEffect(function () {
     if (lines.length === 0) { props.onDone && props.onDone(); return; }
     startedAt.current = Date.now();
     var cancelled = false;
-    Promise.all(lines.map(function (l) { return fetchTts(l.text, l.speaker); }))
-      .then(function (res) { if (cancelled) return; setUrls(res.map(function (r) { return r && r.url ? r.url : null; })); });
+    setUrls(new Array(lines.length).fill(undefined));
+    (async function () {
+      for (var i = 0; i < lines.length; i++) {
+        if (cancelled) return;
+        var r = await fetchTts(lines[i].text, lines[i].speaker);
+        if (cancelled) return;
+        var url = r && r.url ? r.url : null;
+        (function (slot, v) {
+          setUrls(function (prev) { var next = prev.slice(); next[slot] = v; return next; });
+        })(i, url);
+      }
+    })();
     return function () { cancelled = true; if (audioRef.current) { try { audioRef.current.pause(); } catch (e) {} audioRef.current = null; } if (fallbackTimer.current) clearTimeout(fallbackTimer.current); };
   }, []);
 
@@ -98,18 +109,16 @@ export default function StudioOverlay(props) {
       audioRef.current = a;
       a.addEventListener("ended", advance, { once: true });
       a.addEventListener("error", function () {
-        /* Audio broke mid-way — fall back to the estimated duration from here. */
         fallbackTimer.current = setTimeout(advance, line.durMs);
       }, { once: true });
       a.play().catch(function () {
-        /* autoplay blocked or similar — timed fallback keeps the segment moving. */
         fallbackTimer.current = setTimeout(advance, line.durMs);
       });
-    } else if (urls.length > 0) {
-      /* URL resolved but was null (TTS failed): use the estimated duration. */
+    } else if (url === null) {
+      /* URL resolved as null (TTS failed for this line): use the estimated duration. */
       fallbackTimer.current = setTimeout(advance, line.durMs);
     }
-    /* urls not yet resolved: hold on the subtitle; this effect re-runs when `urls` updates. */
+    /* url === undefined: not fetched yet. Hold on the subtitle. Effect re-runs when urls updates. */
   }, [idx, urls]);
 
   /* Fake lip sync — oscillate every ~140ms whenever we're mid-line: audio playing, audio still loading,
