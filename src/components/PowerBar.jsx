@@ -180,7 +180,13 @@ export default function PowerBar(props) {
   /* Studio pre-match + post-match booth reads: default ON for Tour 250 and up (tier ≥ 2) — the lower tiers
      (Futures, Challenger) are too quick-fire for a broadcast overlay. localStorage.studioDev = "1" forces the
      booth on at every tier for development testing. Settings toggle disables everywhere. */
-  var studioDevOverride = (function () { try { return localStorage.getItem("studioDev") === "1"; } catch (e) { return false; } })();
+  var studioDevOverride = (function () {
+    try {
+      if (typeof location !== "undefined" && location.search && location.search.indexOf("studiodev=1") !== -1) { localStorage.setItem("studioDev", "1"); return true; }
+      if (typeof location !== "undefined" && location.search && location.search.indexOf("studiodev=0") !== -1) { localStorage.setItem("studioDev", "0"); return false; }
+      return localStorage.getItem("studioDev") === "1";
+    } catch (e) { return false; }
+  })();
   var studioEnabled = isStudioOn() && ((props.tier != null && props.tier >= 2) || studioDevOverride);
   var fresh = !initRes && (init.sets || []).length === 0 && (init.my || []).length === 0;
   var _p = useState(initRes ? "done" : (fresh && studioEnabled ? "studio" : "intro")), ph = _p[0], setPh = _p[1];
