@@ -489,6 +489,77 @@ var STAKES_EARLY = [
   "Still the opening rounds, Barry. The home rider wants no slips here."
 ];
 
+/* FLAVOUR: granny-sport humour — dry Barry-wit and cranky-but-fond Reggie-wit. Universal to any match, no stats,
+   no names, no numbers. One recording per voice, forever. */
+var BARRY_DRY = [
+  "The lanes are warm. The grannies, debatable.",
+  "A classic set of knees out there today, Reggie.",
+  "Two riders, four hips. Generous bookies would even the odds.",
+  "I've had my tea. The grannies have had theirs. We're all ready.",
+  "The umpire's been doing this longer than the grannies, which is saying something.",
+  "Someone's cardigan has gone missing from the stables. Pre-match rumours.",
+  "A lovely afternoon, if your definition of lovely includes two women over eighty on roosters.",
+  "The physio hasn't been seen for an hour. Always a good sign before a match.",
+  "The rules say no knitting on the lance. The rules are tested every week.",
+  "Both of them have been practising all week. Or napping. Hard to tell at this age."
+];
+var REGGIE_CRANK = [
+  "In my day we jousted uphill. Both ways. And nobody complained.",
+  "If they get through this without a hip giving out, I'll be the one surprised.",
+  "Modern kit, modern lances. Nothing modern about either of these grannies.",
+  "The two of them together have been riding for a hundred years. Combined, mind. Not each.",
+  "They've got comfortable saddles now. We used to sit on the rooster.",
+  "The grannies today — all show and no stride. Well, that one's got stride, I'll admit.",
+  "Nobody's getting younger, Barry. Especially not these two.",
+  "I'd be more scared of the queue at the post office than either of them. But a job's a job.",
+  "They've both got fifty years on the youngest rider on tour. Not a flex. A fact.",
+  "Someone remind me why we cover these again. Oh — the tea's free. Right."
+];
+var AGE_GAGS = [
+  "The home rider has been riding since before colour television, Barry.",
+  "Both of them remember the first joust. Not the first one they rode in — the first one ever.",
+  "The opponent's been on tour longer than some of the crowd have been alive.",
+  "You can hear the knees from here, Reggie.",
+  "The grannies have more surgical pins between them than the rooster has feathers.",
+  "The home rider won her first title when her grandchildren were in nappies.",
+  "The opponent's warm-up is longer than the match. Eighty-two years to loosen up.",
+  "If you stacked the years of both riders, you'd be looking back at Victoria.",
+  "The home rider has a season ticket to the physio. Earned it.",
+  "The opponent remembers when roosters cost sixpence. Yes, really."
+];
+var ROOSTER_GAGS = [
+  "The opponent's rooster is older than most of the crowd, Barry.",
+  "The home rider's rooster just yawned. These aren't young birds.",
+  "Both roosters have had second breakfast, by the look of them.",
+  "The opponent's rooster is on day three of a four-day diet. He's not pleased.",
+  "The roosters have been together more years than most marriages, Reggie.",
+  "The home rider's rooster went to bed early last night. The stable boy swears it.",
+  "There's a rumour the opponent's rooster is thinking of retirement. The rider has not been told.",
+  "The roosters out there today have seen more trophies than any rider on tour. From below, usually."
+];
+var TEA_GAGS = [
+  "I've had three cups of tea, Reggie. The booth is caffeinated.",
+  "The booth's biscuits are nearly gone. We need a quick match.",
+  "Someone sent us a tin of custard creams, Barry. I'm not sharing.",
+  "Let the record show the tea is at optimum temperature. Rare day.",
+  "The kettle's been on for twenty minutes. Someone forgot to pour.",
+  "I'd fight for the last ginger nut. Nobody in the booth should be surprised."
+];
+var BOOTH_BANTER_BARRY = [
+  "Reggie, that's unkind. — No, it's fair. Those are different.",
+  "A bit harsh, Reggie. — Not harsh. Honest.",
+  "I'd defend the grannies, Reggie, but they're grannies.",
+  "The booth has a duty to be impartial. — I'm impartial. I dislike them equally.",
+  "You've got to admire the courage, Reggie. — I'd admire a cup of tea more."
+];
+var BOOTH_BANTER_REGGIE = [
+  "Barry, you're a soft touch. — The grannies appreciate it, Reggie.",
+  "You'll say they're brave next, Barry. — They are brave. Certifiably.",
+  "I give the match ten minutes before someone naps. — Reggie, that's uncalled for.",
+  "You lot in London booths — all polish, no teeth. — Reggie, we're in the same booth.",
+  "I remember when the sport meant something. — It still does, Reggie. Just not to you."
+];
+
 /* CLOSER (hand off to the lanes) */
 var CLOSERS = [
   { s: "barry",  t: "Right then. Over to the lanes." },
@@ -579,8 +650,10 @@ export function buildPreMatch(ctx) {
   /* 1. Opener (Barry) */
   out.push({ speaker: "barry", text: fill(pickFresh(OPENERS, "opener", rnd), ctx, a) });
 
-  /* 2. Strength focus (Reggie), prefer opponent if her best stat level is higher than player's best */
-  var strOpp = a.opp.best.v >= a.player.best.v;
+  /* 2. Strength focus — randomise WHO gets the spotlight so a long run of matches with the same best stat
+     doesn't always talk about the same rider. Weighted by whose stat is actually higher but not deterministic. */
+  var oppHigher = a.opp.best.v >= a.player.best.v;
+  var strOpp = oppHigher ? rnd() < 0.7 : rnd() < 0.3;
   var strBank = strOpp ? STRENGTHS_OPP : STRENGTHS_PLAYER;
   out.push({ speaker: "reggie", text: fill(pickFresh(strBank, strOpp ? "strOpp" : "strPlayer", rnd), ctx, a) });
 
@@ -597,13 +670,21 @@ export function buildPreMatch(ctx) {
 
   /* 4. The sharp tactical edge if there is one, else weakness focus on whichever side it fits.
         Fifth slot gets a flavour layer (career / h2h / fitness / rank-gap) when the context sings. */
-  if (a.edgeNote) {
+  /* Slot 4 rotates so the booth doesn't harp on the same stat every match. 40% edge/weakness, 60% split between
+     opp-weakness and a fresh perspective on either rider. Keeps the analysis varied even when the player's
+     top stat never changes. */
+  var slot4Pick = rnd();
+  if (a.edgeNote && slot4Pick < 0.4) {
     var eBank = a.edgeNote.who === "player" ? EDGE_PLAYER : EDGE_OPP;
     out.push({ speaker: "reggie", text: fill(pickFresh(eBank, "edge" + a.edgeNote.who, rnd), ctx, a) });
-  } else {
-    /* Pick weakness depending on whose worst is more dire */
+  } else if (slot4Pick < 0.7) {
     var wBank = a.opp.worst.v <= a.player.worst.v ? WEAKNESS_OPP : WEAKNESS_PLAYER;
     out.push({ speaker: "reggie", text: fill(pickFresh(wBank, "weak", rnd), ctx, a) });
+  } else {
+    /* Swap in a granny-humour line instead of the analytical read, so the pre-match doesn't become
+       a stats-only report. */
+    var hBank = slot4Pick < 0.85 ? REGGIE_CRANK : AGE_GAGS;
+    out.push({ speaker: "reggie", text: fill(pickFresh(hBank, slot4Pick < 0.85 ? "crank" : "age", rnd), ctx, a) });
   }
 
   /* 5. One flavour line — pick what the context actually gives us, in priority order:
@@ -647,6 +728,24 @@ export function buildPreMatch(ctx) {
     flavourKey = a.rankGap > 0 ? "rankUp" : "rankCls";
   }
   if (flavourBank) out.push({ speaker: "reggie", text: fill(pickFresh(flavourBank, flavourKey, rnd), ctx, a) });
+
+  /* 5b. Humour layer — 65% of matches get a quick quip just before the closer. Barry dry-wit, Reggie cranky,
+     age/rooster/tea gags, or a short booth banter line that reads like a reaction. Keeps the segment feeling
+     like a conversation and not a scouting brief. */
+  var humRoll = rnd();
+  if (humRoll < 0.65) {
+    var humBanks = [
+      { s: "barry",  b: BARRY_DRY,         k: "bdry"  },
+      { s: "reggie", b: REGGIE_CRANK,      k: "rcrank"},
+      { s: "barry",  b: AGE_GAGS,          k: "age"   },
+      { s: "barry",  b: ROOSTER_GAGS,      k: "roost" },
+      { s: "barry",  b: TEA_GAGS,          k: "tea"   },
+      { s: "barry",  b: BOOTH_BANTER_BARRY,  k: "bbar"},
+      { s: "reggie", b: BOOTH_BANTER_REGGIE, k: "breg"}
+    ];
+    var pick = humBanks[Math.floor(rnd() * humBanks.length)];
+    out.push({ speaker: pick.s, text: fill(pickFresh(pick.b, pick.k, rnd), ctx, a) });
+  }
 
   /* 6. Closer */
   var closer = pickFresh(CLOSERS, "closer", rnd);
@@ -1208,6 +1307,13 @@ function allBanks() {
     { bank: "STAKES_EARLY",         lines: STAKES_EARLY,         speaker: "reggie", dims: [] },
     { bank: "RANK_UPSET_WATCH",     lines: RANK_UPSET_WATCH,     speaker: "reggie", dims: [] },
     { bank: "RANK_CLASS_GAP",       lines: RANK_CLASS_GAP,       speaker: "reggie", dims: [] },
+    { bank: "BARRY_DRY",            lines: BARRY_DRY,            speaker: "barry",  dims: [] },
+    { bank: "REGGIE_CRANK",         lines: REGGIE_CRANK,         speaker: "reggie", dims: [] },
+    { bank: "AGE_GAGS",             lines: AGE_GAGS,             speaker: "barry",  dims: [] },
+    { bank: "ROOSTER_GAGS",         lines: ROOSTER_GAGS,         speaker: "barry",  dims: [] },
+    { bank: "TEA_GAGS",             lines: TEA_GAGS,             speaker: "barry",  dims: [] },
+    { bank: "BOOTH_BANTER_BARRY",   lines: BOOTH_BANTER_BARRY,   speaker: "barry",  dims: [] },
+    { bank: "BOOTH_BANTER_REGGIE",  lines: BOOTH_BANTER_REGGIE,  speaker: "reggie", dims: [] },
     { bank: "SET_CLOSE_WIN",        lines: SET_CLOSE_WIN,        speaker: "barry",  dims: [] },
     { bank: "SET_WIDE_WIN",         lines: SET_WIDE_WIN,         speaker: "barry",  dims: [] },
     { bank: "SET_CLOSE_LOSS",       lines: SET_CLOSE_LOSS,       speaker: "barry",  dims: [] },
