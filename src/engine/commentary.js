@@ -489,8 +489,8 @@ var STAKES_EARLY = [
   "Still the opening rounds, Barry. The home rider wants no slips here."
 ];
 
-/* FLAVOUR: granny-sport humour — dry Barry-wit and cranky-but-fond Reggie-wit. Universal to any match, no stats,
-   no names, no numbers. One recording per voice, forever. */
+/* FLAVOUR: granny-sport humour. Dry Barry-wit, cranky-but-fond Reggie-wit, plenty of self-deprecation from
+   both of them. Universal to any match — no stats, no names, no numbers. One recording per voice, forever. */
 var BARRY_DRY = [
   "The lanes are warm. The grannies, debatable.",
   "A classic set of knees out there today, Reggie.",
@@ -501,7 +501,27 @@ var BARRY_DRY = [
   "A lovely afternoon, if your definition of lovely includes two women over eighty on roosters.",
   "The physio hasn't been seen for an hour. Always a good sign before a match.",
   "The rules say no knitting on the lance. The rules are tested every week.",
-  "Both of them have been practising all week. Or napping. Hard to tell at this age."
+  "Both of them have been practising all week. Or napping. Hard to tell at this age.",
+  "A proper afternoon of jousting ahead, assuming nobody misplaces their reading glasses.",
+  "The grannies have been briefed on the rules. They had them explained to the grannies, then to me.",
+  "I have a note from the producers. It says 'be nicer than Reggie.' Which is a low bar.",
+  "The crowd is settled. The grannies are mounted. The commentators are lightly sedated.",
+  "The lanes are chalked, the lances are wrapped, and the kettle is on. All systems go.",
+  "A handshake earlier, Barry notes — brief, because the grannies have arthritis.",
+  "The opponent's helmet is on backwards. I'll let the umpire mention it.",
+  "Someone's granddaughter in the front row is on her phone. The grandmother will have words.",
+  "A quiet word from the rulebook: no biscuits in the saddle. Ignored, as every week.",
+  "We are moments from first strike. The grannies are moments from everything.",
+  "A doctor's note from the home rider says she is fine. The doctor's note is older than I am.",
+  "The umpire has signalled 'ready'. The grannies have signalled 'in a minute, dear.'",
+  "I've been told to keep my commentary tight. I will try, though the grannies are ample.",
+  "There is a note of calm in the air. Possibly because the grannies cannot hear us.",
+  "A lovely light breeze. Perfect weather, if your bones don't object to light breezes.",
+  "The lanes have been swept, the roosters fed, and the booth is almost awake.",
+  "A long week on tour for both of them. And it's only Tuesday.",
+  "Both grannies have waved to the crowd. Both grannies are not entirely sure where the crowd is.",
+  "A reminder from the sponsors: Cluck Cola supports the sport. The sport cautiously tolerates Cluck Cola.",
+  "We've been promised a thrilling match. We've been promised that most weeks. Sometimes it's even true."
 ];
 var REGGIE_CRANK = [
   "In my day we jousted uphill. Both ways. And nobody complained.",
@@ -513,7 +533,27 @@ var REGGIE_CRANK = [
   "Nobody's getting younger, Barry. Especially not these two.",
   "I'd be more scared of the queue at the post office than either of them. But a job's a job.",
   "They've both got fifty years on the youngest rider on tour. Not a flex. A fact.",
-  "Someone remind me why we cover these again. Oh — the tea's free. Right."
+  "Someone remind me why we cover these again. Oh — the tea's free. Right.",
+  "In my day the lances were wooden and the grannies were younger. Now it's the other way round.",
+  "A rider used to walk out. Now they wheel out the chair, then they walk out.",
+  "Grannies today complain the saddle is uncomfortable. Try riding without one, girls.",
+  "I've been doing this forty years and the grannies keep getting older. Explain that to me.",
+  "There's no fight in the modern game. Not literally — there used to be, actually.",
+  "You can't do a proper joust on grass. You need gravel. And blood. Used to, anyway.",
+  "The umpires let them restart if they fall off. In my time, if you fell off, the next rider took your chicken.",
+  "A granny today asks for a cushion. A granny in my day asked for a lance.",
+  "They give out medals for turning up now. I turned up for forty years and got a watch that doesn't work.",
+  "The home rider has a sports psychologist. We had a flask of gin and a shout from the sidelines.",
+  "A moment of silence for the real jousting, which died in 1986. The rest is theatre.",
+  "The crowd clap politely now. Used to boo properly. Took skill. Lost art.",
+  "You tell me these two are competitive. I say two grannies in a row are competitive — about who sits down first.",
+  "No proper fall today, I'll wager. Just a graceful dismount and a hand from the umpire.",
+  "Even the rooster looks bored, Barry. He's seen this before.",
+  "The pensions out there are eye-watering. More than the prize money, mind.",
+  "Both grannies have had the physio in all week. We never had a physio. We had whisky.",
+  "Children these days don't play rough. Then they grow up and expect the grannies to.",
+  "Two overbooked schedules, Barry. Bingo Tuesday, joust Wednesday, back rub Thursday.",
+  "The modern joust has lost its edge. Partly because the grannies' knives are kept at reception."
 ];
 var AGE_GAGS = [
   "The home rider has been riding since before colour television, Barry.",
@@ -525,7 +565,17 @@ var AGE_GAGS = [
   "The opponent's warm-up is longer than the match. Eighty-two years to loosen up.",
   "If you stacked the years of both riders, you'd be looking back at Victoria.",
   "The home rider has a season ticket to the physio. Earned it.",
-  "The opponent remembers when roosters cost sixpence. Yes, really."
+  "The opponent remembers when roosters cost sixpence. Yes, really.",
+  "The two of them have seen eight prime ministers. Disliked seven.",
+  "The home rider learnt to joust on a draft horse. They weren't fussy back then.",
+  "The opponent's first lance was a broom. Still her favourite, by the sound of it.",
+  "Both grannies were riding before penicillin, Reggie. Imagine the recoveries.",
+  "A reminder: the home rider is older than the sport's governing body. By a lot.",
+  "The opponent's grandchildren are also grandparents. Let that settle.",
+  "You can read the home rider's age on her lance. It has rings, like a tree.",
+  "The opponent still signs cheques. Younger riders have never seen a cheque.",
+  "Both of them remember rationing. Both of them remember rations. Both of them ate biscuits.",
+  "The home rider's doctor is older than most spectators. They go on holiday together."
 ];
 var ROOSTER_GAGS = [
   "The opponent's rooster is older than most of the crowd, Barry.",
@@ -535,7 +585,14 @@ var ROOSTER_GAGS = [
   "The roosters have been together more years than most marriages, Reggie.",
   "The home rider's rooster went to bed early last night. The stable boy swears it.",
   "There's a rumour the opponent's rooster is thinking of retirement. The rider has not been told.",
-  "The roosters out there today have seen more trophies than any rider on tour. From below, usually."
+  "The roosters out there today have seen more trophies than any rider on tour. From below, usually.",
+  "Two roosters, five feathers between them. Approximately.",
+  "The home rider's rooster appears to be moulting. Not ideal before a match.",
+  "The opponent's rooster can count to three. The opponent is very proud of this.",
+  "Both roosters have been to the vet this month. Both on friendly terms with the needle.",
+  "The home rider's rooster won a county show in 1998. The trophy is in a drawer.",
+  "There's a biscuit stashed in the opponent's saddle. The rooster knows.",
+  "Both of these birds are fed better than I am, Reggie. Possibly better than you."
 ];
 var TEA_GAGS = [
   "I've had three cups of tea, Reggie. The booth is caffeinated.",
@@ -543,21 +600,129 @@ var TEA_GAGS = [
   "Someone sent us a tin of custard creams, Barry. I'm not sharing.",
   "Let the record show the tea is at optimum temperature. Rare day.",
   "The kettle's been on for twenty minutes. Someone forgot to pour.",
-  "I'd fight for the last ginger nut. Nobody in the booth should be surprised."
+  "I'd fight for the last ginger nut. Nobody in the booth should be surprised.",
+  "A fresh pot has arrived. The match can begin.",
+  "The biscuits, Reggie, are shortbread. Civilisation holds.",
+  "Darjeeling in the pot today. Barry has standards.",
+  "The intern has been dispatched for Hobnobs. The intern is ninety years old. We may be some time.",
+  "I'll have a biscuit, you have your moment. Deal?",
+  "The commentary tea has a slight thyme note. We're not sure why."
+];
+var BINGO_GAGS = [
+  "If the match ends early, both grannies can make bingo night.",
+  "I've heard it's a full house at Bramblewick tonight. Priorities, really.",
+  "The home rider calls bingo on Thursdays. The crowd is terrified of her.",
+  "The opponent would rather be at bingo. Who wouldn't.",
+  "Two fat ladies, eighty-eight. The grannies prefer not to comment.",
+  "Legs eleven, the home rider — those are not her stats, those are her bingo numbers.",
+  "I'm told a bingo hall offered the opponent sponsorship. She accepted immediately.",
+  "The joust ends, the bingo starts, the grannies run the circuit.",
+  "In the crowd today: three bingo callers, one retired. Looking for work."
+];
+var KNITTING_GAGS = [
+  "The home rider has been knitting through the week. Her scarf is longer than her career.",
+  "The opponent's cardigan today is her own work. She is undefeated in cardigans.",
+  "Both grannies could knit a jumper during the match if you gave them a longer bar.",
+  "There's a knitting needle rule in the lance regulations. Yes, there is. No, it doesn't work.",
+  "The home rider's grandchildren all wear her jumpers. Reluctantly.",
+  "Someone in the booth has had a scarf made. It is Reggie. The scarf is purple.",
+  "The opponent knits at the stables between matches. The rooster has three jumpers.",
+  "If the match goes to five sets, both grannies will have finished a hat by the end."
+];
+var COMMENTATOR_AGE = [
+  "I've been doing this match for forty years, Barry. The grannies look less tired than I feel.",
+  "Reggie and I are older than the sport. I'd like a seat next to a radiator.",
+  "A long week in the booth. My own hip has opinions about these matches.",
+  "The booth stairs are steep, Reggie. One day I won't make it up.",
+  "My own grandchildren are watching this. They'll want to know why I'm still working.",
+  "I remember when this booth had a fireplace. Health and safety took it. Not sure why.",
+  "Reggie, we've got fewer teeth between us than the grannies. I counted.",
+  "The home rider is in better shape than I am, and I'm sitting down.",
+  "I was told to lose weight before this season. The producers have given up.",
+  "There's a note on the desk saying 'don't fall asleep'. It's for me.",
+  "I've been in this booth longer than most grannies have been grannies.",
+  "My knees are offering retirement advice. The booth is louder than my knees.",
+  "A memo came round about mandatory hearing tests. I refused to open it.",
+  "The young commentators are polite. I miss being disliked.",
+  "A reminder from the physio: the booth chairs are not endorsed by chiropractors.",
+  "I passed up a golf day for this. The grannies had better justify it.",
+  "I've been covering this granny since she was middle-aged. That was decades ago.",
+  "If you pay attention, Reggie, I can retire at the end of this set.",
+  "A fact: the booth ceiling fan is older than the opponent. And more reliable.",
+  "I've been given a company pen. It doesn't work. Neither do I, really."
+];
+var GRANNY_PRAISE = [
+  "I'll say this for them, Reggie — eighty years old and still climbing on a rooster.",
+  "Credit where it's due: both of them train harder than most of the junior tour.",
+  "You can laugh, Reggie, but these grannies kept the sport alive through the lean years.",
+  "A standing ovation for both of them, Barry. From the standing, that is.",
+  "The home rider has forgotten more about jousting than you or I will ever know, Reggie.",
+  "There's dignity out there, Reggie. Grey hair, iron hands, no complaints.",
+  "Both of these grannies are legends. The sport should remember it more often.",
+  "I'd watch either of them ride any day. And I'm not easy to please, Reggie.",
+  "You tease them, Reggie, but they're out there and you're in here. Think about it.",
+  "A respectful nod from the booth. Two grandmothers at the top of the game.",
+  "Say what you like about the modern joust — these two have carried it.",
+  "There's class in both of them, Barry. Quiet class. The best kind.",
+  "I've seen younger riders come and go. These two stay. For a reason.",
+  "Two careers measured in decades, Reggie. The least we can do is behave.",
+  "Both of them stood for the national anthem earlier. Both of them stood. That counts."
+];
+var GRANNY_GENTLE_RIB = [
+  "The home rider's taken a tactical seat in the saddle. Very tactical.",
+  "The opponent is wearing a scarf. It isn't cold. It's a lifestyle.",
+  "A small adjustment to the home rider's reading glasses. The lance is now visible.",
+  "The opponent has decided to wave at the camera. The camera isn't on her.",
+  "The home rider's shoulder bag is on the saddle. The rules allow it. Barely.",
+  "The opponent's rooster has drifted sideways. The opponent hasn't noticed.",
+  "A stewardess has corrected the home rider's helmet strap. Twice.",
+  "The opponent's lance has a thank-you note taped to it. From the stable, apparently.",
+  "The home rider waved to someone in the fifth row. It was her bank manager.",
+  "The opponent has a packet of boiled sweets. Inside her gauntlet, Barry.",
+  "The home rider is seated side-saddle for the warm-up. Elegant. Impractical.",
+  "A photograph of the opponent with her grandchildren is tucked into the saddle. It falls out every match.",
+  "The home rider's cardigan is buttoned up wrong. Her coach is in despair.",
+  "A late request from the opponent for the rooster to be renamed 'Sir Peckington the Second'. Denied.",
+  "The home rider has stashed a thermos behind the saddle. The rules are mysteriously silent on thermoses.",
+  "Both grannies have waved to each other. Then forgotten which one they were fighting.",
+  "A reminder from the opponent to the umpire: she has to leave by six for her programme.",
+  "The home rider is wearing lipstick. It's a Tuesday. We don't know why.",
+  "The opponent's lance is slightly short. Nobody has the heart to mention it.",
+  "A small bag of knitting hangs from the home rider's saddle. It is almost a shawl."
 ];
 var BOOTH_BANTER_BARRY = [
   "Reggie, that's unkind. — No, it's fair. Those are different.",
   "A bit harsh, Reggie. — Not harsh. Honest.",
   "I'd defend the grannies, Reggie, but they're grannies.",
   "The booth has a duty to be impartial. — I'm impartial. I dislike them equally.",
-  "You've got to admire the courage, Reggie. — I'd admire a cup of tea more."
+  "You've got to admire the courage, Reggie. — I'd admire a cup of tea more.",
+  "Reggie, the sponsors won't like that. — The sponsors have given up on me, Barry.",
+  "Please be gentle, Reggie, these are my notes. — I'm being gentler than I'd like.",
+  "The young viewers are listening, Reggie. — They should learn something, then.",
+  "I'll have to apologise for that one later. — Not for the first time, Barry.",
+  "The producers are in your ear, Reggie. — I have the volume down.",
+  "I was hoping for a nicer line, Reggie. — I was hoping for a biscuit.",
+  "You know she's listening, Reggie. — She can't hear me. I checked.",
+  "Reggie, the mother-in-law listens to this show. — My mother-in-law has moved on, Barry.",
+  "You're getting cheeky, Reggie. — It's late. My cheekiness is up and my judgement is down.",
+  "I had a note from the network, Reggie. — I've had several. I framed the rudest one."
 ];
 var BOOTH_BANTER_REGGIE = [
   "Barry, you're a soft touch. — The grannies appreciate it, Reggie.",
   "You'll say they're brave next, Barry. — They are brave. Certifiably.",
   "I give the match ten minutes before someone naps. — Reggie, that's uncalled for.",
   "You lot in London booths — all polish, no teeth. — Reggie, we're in the same booth.",
-  "I remember when the sport meant something. — It still does, Reggie. Just not to you."
+  "I remember when the sport meant something. — It still does, Reggie. Just not to you.",
+  "You're defending them again, Barry. — Someone has to. The booth lost the vote.",
+  "Barry, you've gone soft since the hip replacement. — I was always soft, Reggie.",
+  "I've met tougher opposition in bakeries. — Reggie, the bakery lady is also a former rider.",
+  "You smile too much on camera, Barry. — Someone has to. You bring me down.",
+  "That tea's too milky, Barry. — Milky tea is a sign of civilisation, Reggie.",
+  "Your watch is wrong, Barry. — My watch is accurate. Time is wrong.",
+  "You're going to apologise for me later, Barry. — I always apologise for you later.",
+  "Say something sensible, Barry. Just once. — I did. You weren't listening.",
+  "A booth with a view, Barry. And I have to look at you. — Thank you, Reggie.",
+  "You are the sweetest man in sports, Barry. — That is not a compliment, Reggie."
 ];
 
 /* CLOSER (hand off to the lanes) */
@@ -735,13 +900,18 @@ export function buildPreMatch(ctx) {
   var humRoll = rnd();
   if (humRoll < 0.65) {
     var humBanks = [
-      { s: "barry",  b: BARRY_DRY,         k: "bdry"  },
-      { s: "reggie", b: REGGIE_CRANK,      k: "rcrank"},
-      { s: "barry",  b: AGE_GAGS,          k: "age"   },
-      { s: "barry",  b: ROOSTER_GAGS,      k: "roost" },
-      { s: "barry",  b: TEA_GAGS,          k: "tea"   },
-      { s: "barry",  b: BOOTH_BANTER_BARRY,  k: "bbar"},
-      { s: "reggie", b: BOOTH_BANTER_REGGIE, k: "breg"}
+      { s: "barry",  b: BARRY_DRY,            k: "bdry"  },
+      { s: "reggie", b: REGGIE_CRANK,         k: "rcrank"},
+      { s: "barry",  b: AGE_GAGS,             k: "age"   },
+      { s: "barry",  b: ROOSTER_GAGS,         k: "roost" },
+      { s: "barry",  b: TEA_GAGS,             k: "tea"   },
+      { s: "barry",  b: BINGO_GAGS,           k: "bingo" },
+      { s: "barry",  b: KNITTING_GAGS,        k: "knit"  },
+      { s: "barry",  b: COMMENTATOR_AGE,      k: "comAge"},
+      { s: "barry",  b: GRANNY_PRAISE,        k: "praise"},
+      { s: "barry",  b: GRANNY_GENTLE_RIB,    k: "rib"   },
+      { s: "barry",  b: BOOTH_BANTER_BARRY,   k: "bbar"  },
+      { s: "reggie", b: BOOTH_BANTER_REGGIE,  k: "breg"  }
     ];
     var pick = humBanks[Math.floor(rnd() * humBanks.length)];
     out.push({ speaker: pick.s, text: fill(pickFresh(pick.b, pick.k, rnd), ctx, a) });
@@ -1312,6 +1482,11 @@ function allBanks() {
     { bank: "AGE_GAGS",             lines: AGE_GAGS,             speaker: "barry",  dims: [] },
     { bank: "ROOSTER_GAGS",         lines: ROOSTER_GAGS,         speaker: "barry",  dims: [] },
     { bank: "TEA_GAGS",             lines: TEA_GAGS,             speaker: "barry",  dims: [] },
+    { bank: "BINGO_GAGS",           lines: BINGO_GAGS,           speaker: "barry",  dims: [] },
+    { bank: "KNITTING_GAGS",        lines: KNITTING_GAGS,        speaker: "barry",  dims: [] },
+    { bank: "COMMENTATOR_AGE",      lines: COMMENTATOR_AGE,      speaker: "barry",  dims: [] },
+    { bank: "GRANNY_PRAISE",        lines: GRANNY_PRAISE,        speaker: "barry",  dims: [] },
+    { bank: "GRANNY_GENTLE_RIB",    lines: GRANNY_GENTLE_RIB,    speaker: "barry",  dims: [] },
     { bank: "BOOTH_BANTER_BARRY",   lines: BOOTH_BANTER_BARRY,   speaker: "barry",  dims: [] },
     { bank: "BOOTH_BANTER_REGGIE",  lines: BOOTH_BANTER_REGGIE,  speaker: "reggie", dims: [] },
     { bank: "SET_CLOSE_WIN",        lines: SET_CLOSE_WIN,        speaker: "barry",  dims: [] },
