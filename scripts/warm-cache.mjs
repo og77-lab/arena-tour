@@ -32,8 +32,8 @@ const DELAY_MS = 400;  /* serialize ElevenLabs calls to stay well under tier con
 
 async function main() {
   const all = enumerateAllFinals();
-  const sorted = all.slice().sort((a, b) => (a.bank + a.text).localeCompare(b.bank + b.text));
-  const todo = LIMIT ? sorted.slice(0, LIMIT) : sorted;
+  /* Preserve the enumeration's tier order — allBanks() returns banks in priority order (common first). */
+  const todo = LIMIT ? all.slice(0, LIMIT) : all;
 
   console.log(`Total unique sentences: ${all.length}`);
   console.log(`Across ${new Set(all.map(x => x.bank)).size} banks`);
