@@ -194,17 +194,19 @@ export default function StudioOverlay(props) {
         </div>
         <button onClick={skip} aria-label="Skip pre-match"
           style={{ position: "absolute", top: 8, right: 8, zIndex: 3, padding: "5px 11px", borderRadius: 10, background: "rgba(0,0,0,0.55)", color: "#fde68a", border: "1px solid rgba(253,230,138,0.5)", fontSize: 11, fontWeight: 900, letterSpacing: 1, cursor: "pointer", textTransform: "uppercase" }}>Skip ⟩⟩</button>
-        {current && (
-          <div style={{ position: "absolute", left: "4%", right: "4%", bottom: "6%", zIndex: 4, padding: "10px 14px", background: "rgba(7,11,20,0.86)", color: "#fff", borderRadius: 10, border: "1px solid rgba(253,230,138,0.35)", boxShadow: "0 4px 14px rgba(0,0,0,0.4)" }}>
-            <div style={{ color: current.speaker === "barry" ? "#fde68a" : "#86efac", fontSize: 10, fontWeight: 900, letterSpacing: 2, textTransform: "uppercase", marginBottom: 3 }}>
-              {current.speaker === "barry" ? "Sir Barry" : "Reggie"}
-            </div>
-            <div style={{ fontSize: 15, lineHeight: 1.35, fontWeight: 600 }}>{current.text}</div>
-          </div>
-        )}
         {loading && (<div style={{ position: "absolute", top: 36, left: 10, zIndex: 3, color: "#94a3b8", fontSize: 10, fontWeight: 700, letterSpacing: 1 }}>Cueing voices…</div>)}
       </div>
-      <div style={{ width: "100%", maxWidth: 760, height: 3, background: "#0b0b0b", marginTop: 6, borderRadius: 2, overflow: "hidden" }}>
+      {/* Subtitle lives BELOW the booth image on every viewport — overlapping the characters on narrow mobiles
+          was hiding the heads entirely. Fixed height keeps the overall overlay from jumping as the text changes. */}
+      {current && (
+        <div style={{ width: "100%", maxWidth: 760, marginTop: 10, padding: "12px 14px", background: "rgba(19,27,46,0.95)", color: "#fff", borderRadius: 10, border: "1px solid rgba(253,230,138,0.35)", boxShadow: "0 4px 14px rgba(0,0,0,0.4)", boxSizing: "border-box", minHeight: 76 }}>
+          <div style={{ color: current.speaker === "barry" ? "#fde68a" : "#86efac", fontSize: 10, fontWeight: 900, letterSpacing: 2, textTransform: "uppercase", marginBottom: 4 }}>
+            {current.speaker === "barry" ? "Sir Barry" : "Reggie"}
+          </div>
+          <div style={{ fontSize: 15, lineHeight: 1.4, fontWeight: 600 }}>{current.text}</div>
+        </div>
+      )}
+      <div style={{ width: "100%", maxWidth: 760, height: 3, background: "#0b0b0b", marginTop: 8, borderRadius: 2, overflow: "hidden" }}>
         <div style={{ width: pctDone + "%", height: "100%", background: "#fde68a", transition: "width 150ms linear" }} />
       </div>
     </div>
