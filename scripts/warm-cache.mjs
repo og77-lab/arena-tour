@@ -46,8 +46,8 @@ async function main() {
   console.log("");
 
   if (DRY) {
-    sorted.slice(0, 20).forEach((x, i) => console.log(`${i+1}. [${x.voice}] (${x.bank}) ${x.text}`));
-    console.log(sorted.length > 20 ? `... and ${sorted.length - 20} more` : "");
+    todo.slice(0, 20).forEach((x, i) => console.log(`${i+1}. [${x.voice}] (${x.bank}) ${x.text}`));
+    console.log(todo.length > 20 ? `... and ${todo.length - 20} more` : "");
     return;
   }
 
