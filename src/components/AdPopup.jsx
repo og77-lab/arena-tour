@@ -3,6 +3,7 @@
    actually lock the player out). 10-second auto-dismiss if they just let it play. */
 
 import * as React from "react";
+import { enterMatch, leaveMatch } from "../music";
 const { useState, useEffect, useRef } = React;
 
 var AUTO_DISMISS_MS = 10000;
@@ -19,6 +20,9 @@ export default function AdPopup(props) {
   var doneRef = useRef(props.onDone); doneRef.current = props.onDone;
 
   useEffect(function () {
+    /* Duck the menu music while Nigel is talking — reuses the match-depth counter that enterMatch/leaveMatch
+       already drive, so the music fades out smoothly here and back in 1.2 s after the ad dismisses. */
+    enterMatch();
     var cancelled = false;
     fetch("/api/tts", {
       method: "POST",
@@ -39,6 +43,7 @@ export default function AdPopup(props) {
       clearTimeout(t);
       var a = audioRef.current;
       if (a) { try { a.pause(); a.src = ""; } catch (e) {} }
+      leaveMatch();
     };
   }, []);
 
