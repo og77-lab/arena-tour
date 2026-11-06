@@ -15,7 +15,10 @@ import crypto from "node:crypto";
    "Reggie Clutter" voices in this workspace. */
 const VOICES = {
   barry:  "N0MMaeC3jnhGtziBoB6F",
-  reggie: "jGQrEnhgmrVxLUXiPjIz"
+  reggie: "jGQrEnhgmrVxLUXiPjIz",
+  /* Nigel Parple, Voiceover Veteran — the sleazy British infomercial announcer. Reads the parody mobile
+     pop-up ads that appear between tabs. */
+  nigel:  "0nf1c1TUyMzCpCyjphIL"
 };
 
 /* eleven_flash_v2_5 is ElevenLabs' low-latency model — ~1s per short line, versus 3-5s on eleven_v3. The

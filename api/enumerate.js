@@ -2,10 +2,11 @@
    /admin/warm.html page can iterate them and warm /api/tts for each. One response, no auth, no mutation. */
 
 import { enumerateAllFinals } from "../src/engine/commentary.js";
+import { enumerateAllAds } from "../src/engine/ads.js";
 
 export default async function handler(req, res) {
   try {
-    const all = enumerateAllFinals();
+    const all = enumerateAllFinals().concat(enumerateAllAds());
     res.setHeader("Cache-Control", "no-store");
     return res.status(200).json({
       count: all.length,

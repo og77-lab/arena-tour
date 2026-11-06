@@ -6,6 +6,8 @@ import { syncAchievements, saveGameToCloud, loadGameFromCloud } from "./firebase
 import { playTitle, playRankUp, isMuted, setMuted } from "./sounds";
 import { isMusicOn, setMusicOn } from "./music";
 import { isStudioOn, setStudioOn } from "./engine/commentary";
+import { isAdsOn, setAdsOn, shouldShowAdOnTab, nextAd } from "./engine/ads";
+import AdPopup from "./components/AdPopup";
 import { W, CSS, EMO, TIERS, RN5, RN6, HN, HC, HI, TOTAL_EVENTS, FINALS_BO, STATS, STAT_GROUPS, screenAnim, ptsLadder, champTotal } from "./models/constants";
 import { sh, bs, nW, pRankOf, getRanked, getARanked, trainCost, weeklyTP, trainPts, spreadPts, retrainAtNewPrices } from "./models/formulas";
 import { sSet, sGet, stamp, pickNewest, queueCloudSave, cancelCloudSave } from "./engine/persistence";
@@ -211,6 +213,7 @@ export default function Arena(props) {
   var _scr = useState("loading"), scr = _scr[0], setScr = _scr[1];
   var _S = useState(null), S = _S[0], setS = _S[1];
   var _tab = useState("home"), tab = _tab[0], setTab = _tab[1];
+  var _activeAd = useState(null), activeAd = _activeAd[0], setActiveAd = _activeAd[1];
   var _inp = useState(""), inp = _inp[0], setInp = _inp[1];
   var _ts = useState(null), ts = _ts[0], setTS = _ts[1];
   var _fs = useState(null), fs = _fs[0], setFS = _fs[1];
@@ -279,6 +282,8 @@ export default function Arena(props) {
   function toggleMusic() { var n = !musicOn; setMusicOn(n); setMusicOnState(n); }
   var _studioOn = useState(isStudioOn()), studioOn = _studioOn[0], setStudioOnState = _studioOn[1];
   function toggleStudio() { var n = !studioOn; setStudioOn(n); setStudioOnState(n); }
+  var _adsOn = useState(isAdsOn()), adsOn = _adsOn[0], setAdsOnState = _adsOn[1];
+  function toggleAds() { var n = !adsOn; setAdsOn(n); setAdsOnState(n); }
   var _confetti = useState(false), confetti = _confetti[0], setConfetti = _confetti[1];
   var _showBracket = useState(false), showBracket = _showBracket[0], setShowBracket = _showBracket[1];
   var _fam = useState(false), showFamily = _fam[0], setShowFamily = _fam[1]; /* the family wall and the Hall of Fame */
@@ -1078,7 +1083,7 @@ export default function Arena(props) {
       return o;
     })();
     var affordable = ["r","p","f","s","g","b"].filter(function(k){ var lv = (S.player.tr[k]||0); return lv < 20 && tpNow >= trainCost(lv); }).length;
-    function goTab(t) { setScr("hub"); setTab(t); if (t === "news") { setNewsIdx(0); markNewsSeen(); } try { window.scrollTo(0, 0); } catch (e) {} }
+    function goTab(t) { setScr("hub"); setTab(t); if (t === "news") { setNewsIdx(0); markNewsSeen(); } try { window.scrollTo(0, 0); } catch (e) {} if (shouldShowAdOnTab(t)) { try { setActiveAd(nextAd()); } catch (e) {} } }
     var newsUnread = !!(S.news && S.news[0] && S.newsSeenAt !== S.news[0].at);
     var hubTip = null;
     if (!paper && !interview && !gala && !showAch && !prof && !showHelp) {
@@ -1400,6 +1405,10 @@ export default function Arena(props) {
                   <div style={{display:"flex",alignItems:"center",gap:12,minWidth:0}}><IconTile name="paper" tint="#fce7f3" size={40} /><div style={{minWidth:0}}><div style={labelStyle}>Studio commentary</div><div style={hintStyle}>Sir Barry and Reggie before and after each match — Skip is always on the overlay</div></div></div>
                   <span style={{color:studioOn?C.greenInk:C.redInk,fontSize:14,fontWeight:900,letterSpacing:0.5}}>{studioOn?"ON":"OFF"}</span>
                 </button>
+                <button onClick={toggleAds} style={rowStyle}>
+                  <div style={{display:"flex",alignItems:"center",gap:12,minWidth:0}}><IconTile name="paper" tint="#fef3c7" size={40} /><div style={{minWidth:0}}><div style={labelStyle}>Sponsor pop-ups</div><div style={hintStyle}>Occasional parody ads when you open Rankings or Tournaments — tap anywhere to dismiss</div></div></div>
+                  <span style={{color:adsOn?C.greenInk:C.redInk,fontSize:14,fontWeight:900,letterSpacing:0.5}}>{adsOn?"ON":"OFF"}</span>
+                </button>
                 {userId && (
                   <button onClick={function(){doSync(S)}} disabled={syncing} style={Object.assign({},rowStyle,{opacity:syncing?0.6:1})}>
                     <div style={{display:"flex",alignItems:"center",gap:12,minWidth:0}}><IconTile name="cloud" tint="#e0f2fe" size={40} /><div style={{minWidth:0}}><div style={labelStyle}>Sync to Leaderboard</div><div style={hintStyle}>Post your achievements to the global leaderboard</div></div></div>
@@ -1424,6 +1433,7 @@ export default function Arena(props) {
         </div>
 
         <BottomNav tab={hubTab} onTab={goTab} badges={{ train: affordable || null, news: newsUnread ? "!" : null }} />
+        {activeAd && (<AdPopup ad={activeAd} onDone={function () { setActiveAd(null); }} />)}
       </motion.div>
     );
   }

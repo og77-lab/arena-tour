@@ -20,6 +20,7 @@
    a partial failure costs nothing extra. */
 
 import { enumerateAllFinals } from "../src/engine/commentary.js";
+import { enumerateAllAds } from "../src/engine/ads.js";
 import fs from "node:fs/promises";
 import path from "node:path";
 
@@ -31,7 +32,8 @@ const PROGRESS_FILE = ".warm-cache.progress.json";
 const DELAY_MS = 400;  /* serialize ElevenLabs calls to stay well under tier concurrency */
 
 async function main() {
-  const all = enumerateAllFinals();
+  /* The 12 Nigel-voice ads come first — tiny set, one line each, generates in seconds. Then the booth corpus. */
+  const all = enumerateAllAds().concat(enumerateAllFinals());
   /* Preserve the enumeration's tier order — allBanks() returns banks in priority order (common first). */
   const todo = LIMIT ? all.slice(0, LIMIT) : all;
 
