@@ -82,6 +82,15 @@ export function shouldShowAdOnTab(tabName) {
   if (!isAdsOn()) return false;
   if (!WATCHED_TABS[tabName]) return false;
 
+  /* Dev override: ?adsdev=1 in the URL fires an ad on EVERY visit to a watched tab, with no cooldown and no
+     random throttle. Lets a tester cycle all twelve ads quickly without touching the console. */
+  var devForce = false;
+  try { devForce = typeof location !== "undefined" && /[?&]adsdev=1\b/.test(location.search); } catch (e) {}
+  if (devForce) {
+    try { localStorage.setItem(LAST_SHOWN_KEY, String(Date.now())); } catch (e) {}
+    return true;
+  }
+
   /* Count this visit. First visit to a watched tab never shows an ad — the player gets a clean look first. */
   var visitKey = VISITS_KEY_PREFIX + tabName;
   var visits = 0;
