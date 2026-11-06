@@ -53,8 +53,11 @@ export default function SlamIntro(props) {
         <motion.div initial={{ scale: 3, opacity: 0, y: 0 }} animate={st === "walkout" ? { scale: 0.62, opacity: 1, y: -150 } : { scale: 1, opacity: 1, y: 0 }}
           transition={st === "walkout" ? { duration: 0.6, ease: "easeInOut" } : { type: "spring", stiffness: 260, damping: 15 }}
           style={{ position: "absolute", left: 0, right: 0, top: "34%", display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <div style={{ position: "relative", padding: "10px 26px 12px", borderRadius: 18, background: "linear-gradient(180deg,#fde68a,#f59e0b 55%,#b45309)", border: "3px solid #78350f", boxShadow: "0 0 40px rgba(251,191,36,0.6), 0 10px 0 #451a03", overflow: "hidden" }}>
-            <div style={{ fontSize: 12, fontWeight: 900, letterSpacing: 5, color: "#451a03" }}>👑 THE BIG STAGE 👑</div>
+          <div style={{ position: "relative", padding: "10px 26px 12px", borderRadius: 18,
+            background: props.isSeasonFinals ? "linear-gradient(180deg,#fef3c7,#facc15 50%,#7f1d1d)" : "linear-gradient(180deg,#fde68a,#f59e0b 55%,#b45309)",
+            border: props.isSeasonFinals ? "3px solid #450a0a" : "3px solid #78350f",
+            boxShadow: props.isSeasonFinals ? "0 0 60px rgba(251,191,36,0.85), 0 10px 0 #450a0a" : "0 0 40px rgba(251,191,36,0.6), 0 10px 0 #451a03", overflow: "hidden" }}>
+            <div style={{ fontSize: 12, fontWeight: 900, letterSpacing: 5, color: props.isSeasonFinals ? "#7f1d1d" : "#451a03" }}>{props.isSeasonFinals ? "👑 THE WORLD FINALS 👑" : "👑 THE BIG STAGE 👑"}</div>
             <div style={{ fontSize: (props.slamLabel || "").length > 12 ? 30 : 40, fontWeight: 900, fontStyle: "italic", lineHeight: 1, color: "#fffbeb", textShadow: "0 3px 0 #92400e, 0 6px 12px rgba(0,0,0,0.4)", whiteSpace: "nowrap" }}>{String(props.slamLabel || "Grand Slam").toUpperCase()}</div>
             {!REDUCED_MOTION && (<motion.div aria-hidden initial={{ x: "-140%" }} animate={{ x: "140%" }} transition={{ delay: 0.3, duration: 0.9, ease: "easeInOut" }}
               style={{ position: "absolute", inset: 0, background: "linear-gradient(105deg,transparent 30%,rgba(255,255,255,0.8) 48%,transparent 66%)" }} />)}

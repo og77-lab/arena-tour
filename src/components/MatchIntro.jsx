@@ -210,9 +210,9 @@ export default function MatchIntro(props) {
         </div>
       )}
 
-      {stage === "slamIntro" && (<SlamIntro you={props.you} foe={props.foe} roundLabel={props.roundLabel} slamLabel={props.tierName} onDone={startCinematic} />)}
+      {stage === "slamIntro" && (<SlamIntro you={props.you} foe={props.foe} roundLabel={props.roundLabel} slamLabel={props.tierName} isSeasonFinals={props.tier >= 6} onDone={startCinematic} />)}
       {stage === "mastersIntro" && (<MastersIntro you={props.you} foe={props.foe} roundLabel={props.roundLabel} eventLabel={props.tierName} onDone={startCinematic} />)}
-      {stage === "final" && (<FinalReveal you={props.you} foe={props.foe} scout={props.scout} road={props.road} tierName={props.tierName} oppId={props.oppId} onDone={startCinematic} />)}
+      {stage === "final" && (<FinalReveal you={props.you} foe={props.foe} scout={props.scout} road={props.road} tierName={props.tierName} tier={props.tier} oppId={props.oppId} onDone={startCinematic} />)}
 
       {/* 2 · The cinematic, mounted fresh so every animation plays from the start */}
       {stage !== "scout" && stage !== "final" && stage !== "slamIntro" && stage !== "mastersIntro" && (

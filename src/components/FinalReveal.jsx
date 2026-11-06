@@ -28,17 +28,26 @@ export default function FinalReveal(props) {
   var doneRef = useRef(props.onDone); doneRef.current = props.onDone;
   function later(fn, ms) { timers.current.push(setTimeout(fn, ms)); }
 
+  /* Prestige tiers: 4 = Masters final (basic), 5 = Slam final (grand), 6 = World Final (maximum). */
+  var tier = Math.max(4, Math.min(6, props.tier == null ? 4 : props.tier));
+  var isWorld = tier >= 6, isSlam = tier === 5;
+  /* Grander finals linger longer on each stage so the drama builds; World Final gets the biggest beat. */
+  var beat = isWorld ? 1.25 : isSlam ? 1.12 : 1;
+  var superTitle = isWorld ? "WORLD FINAL" : isSlam ? "GRAND SLAM FINAL" : "THE FINAL";
+  var superColor = isWorld ? "#fff" : isSlam ? "#fef3c7" : "#fef3c7";
+
   useEffect(function () {
     var t = 0;
-    playWhoosh(); later(playHeartbeat, 300); later(playHeartbeat, 1200); later(function () { playClang(); }, 1700);
-    t = 3500;
-    if (road.length) { later(function () { setSt("road"); playWhoosh(); }, t); t += 1800 + road.length * 650; }
+    playWhoosh(); later(playHeartbeat, 300 * beat); later(playHeartbeat, 1200 * beat); later(function () { playClang(); }, 1700 * beat);
+    if (isWorld) later(playClang, 2100);
+    t = 3500 * beat;
+    if (road.length) { later(function () { setSt("road"); playWhoosh(); }, t); t += (1800 + road.length * 650) * beat; }
     later(function () { setSt("shadow"); playHeartbeat(); }, t);
     later(playHeartbeat, t + 900);
     later(playHeartbeat, t + 1600);
     later(function () { setSt("reveal"); playImpact(true); playClang(); vibrate([40, 60, 80]); }, t + 2300);
     later(playTitle, t + 2700);
-    later(function () { doneRef.current(); }, t + 6800);
+    later(function () { doneRef.current(); }, t + (isWorld ? 7800 : isSlam ? 7200 : 6800));
     return function () { timers.current.forEach(clearTimeout); };
   }, []);
 
@@ -46,22 +55,52 @@ export default function FinalReveal(props) {
   var words = quote(props.oppId, 3);
 
   return (
-    <div style={{ position: "absolute", inset: 0, zIndex: 8, overflow: "hidden", background: "radial-gradient(circle at 50% 40%,#1c1917 0%,#0c0a09 70%)", color: CREAM, textAlign: "center" }}>
+    <div style={{ position: "absolute", inset: 0, zIndex: 8, overflow: "hidden",
+      background: isWorld
+        ? "radial-gradient(circle at 50% 40%,#2d1b4e 0%,#0a0514 72%), radial-gradient(circle at 50% 100%, rgba(251,191,36,0.15), transparent 40%)"
+        : isSlam
+          ? "radial-gradient(circle at 50% 40%,#1e1b4b 0%,#0b0a1f 72%)"
+          : "radial-gradient(circle at 50% 40%,#1c1917 0%,#0c0a09 70%)",
+      color: CREAM, textAlign: "center" }}>
+      {/* World Final: confetti ribbons rain from the top throughout the whole segment */}
+      {isWorld && !REDUCED_MOTION && Array.from({ length: 28 }).map(function (_, i) {
+        var colors = ["#fbbf24", "#f472b6", "#60a5fa", "#86efac", "#fde68a", "#fff"];
+        return (<div key={"cnf" + i} aria-hidden style={{ position: "absolute", left: (3 + (i * 37) % 94) + "%", top: "-5%", width: 6, height: 14, background: colors[i % colors.length], opacity: 0.85, transform: "rotate(" + (i * 23 % 60 - 30) + "deg)",
+          animation: "confetti-fall " + (3.6 + (i % 5) * 0.5) + "s linear " + ((i * 0.18) % 2.5) + "s infinite" }} />);
+      })}
+      {/* Slam & World: laurel wreath frames the crest */}
+      {(isWorld || isSlam) && (
+        <div aria-hidden style={{ position: "absolute", left: "50%", top: "33%", width: 340, height: 340, marginLeft: -170, marginTop: -170, border: "3px solid rgba(251,191,36,0.35)", borderRadius: "50%", boxShadow: "inset 0 0 40px rgba(251,191,36,0.2), 0 0 40px rgba(251,191,36,0.2)" }} />
+      )}
       <AnimatePresence mode="wait">
         {st === "trophy" && (
           <motion.div key="trophy" exit={{ opacity: 0, scale: 1.1 }} transition={{ duration: 0.35 }} style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
             {!REDUCED_MOTION && <Rays />}
-            {/* Fireworks over the trophy */}
-            <div style={{ position: "absolute", left: "26%", top: "22%" }}><Sparks count={26} spread={170} delay={1.7} colors={["#fbbf24", "#fde68a", "#ffffff"]} zIndex={1} /></div>
-            <div style={{ position: "absolute", right: "26%", top: "18%" }}><Sparks count={26} spread={170} delay={2.3} colors={["#f472b6", "#fbbf24", "#ffffff"]} zIndex={1} /></div>
-            <div style={{ position: "absolute", left: "50%", top: "30%" }}><Sparks count={30} spread={220} delay={2.9} colors={["#60a5fa", "#fbbf24", "#ffffff"]} zIndex={1} /></div>
+            {/* Fireworks over the trophy — more and brighter for higher tiers */}
+            <div style={{ position: "absolute", left: "26%", top: "22%" }}><Sparks count={isWorld ? 48 : isSlam ? 36 : 26} spread={isWorld ? 240 : isSlam ? 200 : 170} delay={1.7} colors={["#fbbf24", "#fde68a", "#ffffff"]} zIndex={1} /></div>
+            <div style={{ position: "absolute", right: "26%", top: "18%" }}><Sparks count={isWorld ? 48 : isSlam ? 36 : 26} spread={isWorld ? 240 : isSlam ? 200 : 170} delay={2.3} colors={["#f472b6", "#fbbf24", "#ffffff"]} zIndex={1} /></div>
+            <div style={{ position: "absolute", left: "50%", top: "30%" }}><Sparks count={isWorld ? 54 : isSlam ? 40 : 30} spread={isWorld ? 300 : isSlam ? 250 : 220} delay={2.9} colors={["#60a5fa", "#fbbf24", "#ffffff"]} zIndex={1} /></div>
+            {isWorld && (<div style={{ position: "absolute", left: "15%", top: "40%" }}><Sparks count={30} spread={180} delay={3.4} colors={["#86efac", "#fbbf24", "#ffffff"]} zIndex={1} /></div>)}
+            {isWorld && (<div style={{ position: "absolute", right: "15%", top: "36%" }}><Sparks count={30} spread={180} delay={3.7} colors={["#c084fc", "#fbbf24", "#ffffff"]} zIndex={1} /></div>)}
+            {/* World Final: a crown floats above the trophy */}
+            {isWorld && (
+              <motion.div initial={{ y: -40, opacity: 0, scale: 0.7 }} animate={{ y: 0, opacity: 1, scale: 1 }} transition={{ delay: 0.3, duration: 1.2 }}
+                style={{ position: "absolute", top: "10%", fontSize: 54, lineHeight: 1, filter: "drop-shadow(0 0 20px rgba(251,191,36,0.95))", zIndex: 2 }}>👑</motion.div>
+            )}
             <motion.div initial={{ y: 120, opacity: 0, scale: 0.6 }} animate={{ y: 0, opacity: 1, scale: 1 }} transition={{ duration: 1.6, ease: [0.2, 0.8, 0.3, 1] }}
-              style={{ fontSize: 96, lineHeight: 1, filter: "drop-shadow(0 0 24px rgba(251,191,36,0.85))", position: "relative" }}>🏆</motion.div>
+              style={{ fontSize: isWorld ? 130 : isSlam ? 110 : 96, lineHeight: 1, filter: isWorld ? "drop-shadow(0 0 36px rgba(251,191,36,1))" : isSlam ? "drop-shadow(0 0 30px rgba(251,191,36,0.9))" : "drop-shadow(0 0 24px rgba(251,191,36,0.85))", position: "relative" }}>🏆</motion.div>
             <motion.div initial={{ opacity: 0, letterSpacing: "18px" }} animate={{ opacity: 1, letterSpacing: "6px" }} transition={{ delay: 1.1, duration: 1.1 }}
-              style={{ marginTop: 18, fontSize: 13, fontWeight: 900, color: "#fde68a", textTransform: "uppercase", position: "relative" }}>{props.tierName}</motion.div>
+              style={{ marginTop: 18, fontSize: isWorld ? 15 : 13, fontWeight: 900, color: superColor, textTransform: "uppercase", position: "relative" }}>{props.tierName}</motion.div>
             <motion.div initial={{ opacity: 0, scale: 2.2 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 1.6, type: "spring", stiffness: 220, damping: 14 }}
-              style={{ fontSize: 54, fontWeight: 900, fontStyle: "italic", lineHeight: 1.05, position: "relative", textShadow: "0 2px 0 #fde68a, 0 4px 0 #f59e0b, 0 7px 0 #b45309, 0 10px 22px rgba(0,0,0,0.6)" }}>THE FINAL</motion.div>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 0.85 }} transition={{ delay: 2.4 }} style={{ marginTop: 10, fontSize: 14, fontWeight: 700, position: "relative" }}>{props.you.name}, you made it.</motion.div>
+              style={{ fontSize: isWorld ? 68 : isSlam ? 60 : 54, fontWeight: 900, fontStyle: "italic", lineHeight: 1.05, position: "relative",
+                color: isWorld ? "#fffbeb" : "#fffbeb",
+                textShadow: isWorld
+                  ? "0 2px 0 #fef08a, 0 4px 0 #facc15, 0 7px 0 #a16207, 0 10px 0 #713f12, 0 14px 30px rgba(0,0,0,0.75)"
+                  : isSlam
+                    ? "0 2px 0 #fde68a, 0 4px 0 #f59e0b, 0 7px 0 #92400e, 0 10px 24px rgba(0,0,0,0.65)"
+                    : "0 2px 0 #fde68a, 0 4px 0 #f59e0b, 0 7px 0 #b45309, 0 10px 22px rgba(0,0,0,0.6)" }}>{superTitle}</motion.div>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 0.85 }} transition={{ delay: 2.4 }} style={{ marginTop: 10, fontSize: isWorld ? 16 : 14, fontWeight: 700, position: "relative" }}>{props.you.name}, you made it.</motion.div>
+            {isWorld && (<motion.div initial={{ opacity: 0 }} animate={{ opacity: 0.7 }} transition={{ delay: 3.2 }} style={{ marginTop: 6, fontSize: 11, fontWeight: 900, color: "#fde68a", letterSpacing: 3, textTransform: "uppercase", position: "relative" }}>The end of the season</motion.div>)}
           </motion.div>
         )}
 
