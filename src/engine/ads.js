@@ -70,45 +70,34 @@ export function nextAd() {
   return ad || ADS[0];
 }
 
-/* Should an ad fire on this tab entry? Cooldown + 1-in-N throttle. The caller (ArenaGame.goTab) passes the
-   tab name; we only act on tabs we're configured to interrupt. */
-var LAST_SHOWN_KEY = "adsLastShown";
-var VISITS_KEY_PREFIX = "adsVisits_";
+/* Should an ad fire on this tab entry? Deterministic counter: every Nth click on a watched tab shows one ad,
+   then the counter resets. The caller (ArenaGame.goTab) passes the tab name; we only count clicks on tabs
+   we're configured to interrupt. */
+var COUNTER_KEY = "adsTabCounter";
 var WATCHED_TABS = { rankings: true, season: true };  /* season = Tournaments tab */
-var MIN_COOLDOWN_MS = 90 * 1000;
-var ONE_IN = 4;
+var EVERY_N_CLICKS = 5;
 
 export function shouldShowAdOnTab(tabName) {
   if (!isAdsOn()) return false;
   if (!WATCHED_TABS[tabName]) return false;
 
-  /* Dev override: ?adsdev=1 in the URL fires an ad on EVERY visit to a watched tab, with no cooldown and no
-     random throttle. Lets a tester cycle all twelve ads quickly without touching the console. */
+  /* Dev override: ?adsdev=1 in the URL fires an ad on EVERY visit to a watched tab. Lets a tester cycle all
+     twelve ads quickly without touching the console. */
   var devForce = false;
   try { devForce = typeof location !== "undefined" && /[?&]adsdev=1\b/.test(location.search); } catch (e) {}
-  if (devForce) {
-    try { localStorage.setItem(LAST_SHOWN_KEY, String(Date.now())); } catch (e) {}
+  if (devForce) return true;
+
+  /* Increment the global tab-switch counter. Every EVERY_N_CLICKS-th click on a watched tab fires an ad and
+     resets the counter. */
+  var count = 0;
+  try { count = parseInt(localStorage.getItem(COUNTER_KEY) || "0", 10) || 0; } catch (e) {}
+  count++;
+  if (count >= EVERY_N_CLICKS) {
+    try { localStorage.setItem(COUNTER_KEY, "0"); } catch (e) {}
     return true;
   }
-
-  /* Count this visit. First visit to a watched tab never shows an ad — the player gets a clean look first. */
-  var visitKey = VISITS_KEY_PREFIX + tabName;
-  var visits = 0;
-  try { visits = parseInt(localStorage.getItem(visitKey) || "0", 10) || 0; } catch (e) {}
-  visits++;
-  try { localStorage.setItem(visitKey, String(visits)); } catch (e) {}
-  if (visits < 2) return false;
-
-  /* Global cooldown — no two ads within 90 seconds, across all tabs. */
-  var last = 0;
-  try { last = parseInt(localStorage.getItem(LAST_SHOWN_KEY) || "0", 10) || 0; } catch (e) {}
-  if (Date.now() - last < MIN_COOLDOWN_MS) return false;
-
-  /* 1-in-N random. */
-  if (Math.random() * ONE_IN >= 1) return false;
-
-  try { localStorage.setItem(LAST_SHOWN_KEY, String(Date.now())); } catch (e) {}
-  return true;
+  try { localStorage.setItem(COUNTER_KEY, String(count)); } catch (e) {}
+  return false;
 }
 
 /* Pre-generation enumeration — one line per ad, Nigel voice. Called by the warm-cache script. */
