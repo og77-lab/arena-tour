@@ -74,6 +74,7 @@ export function nextAd() {
    then the counter resets. The caller (ArenaGame.goTab) passes the tab name; we only count clicks on tabs
    we're configured to interrupt. */
 var COUNTER_KEY = "adsTabCounter";
+var LAST_TAB_KEY = "adsLastTab";
 var WATCHED_TABS = { rankings: true, season: true };  /* season = Tournaments tab */
 var EVERY_N_CLICKS = 5;
 
@@ -87,7 +88,14 @@ export function shouldShowAdOnTab(tabName) {
   try { devForce = typeof location !== "undefined" && /[?&]adsdev=1\b/.test(location.search); } catch (e) {}
   if (devForce) return true;
 
-  /* Increment the global tab-switch counter. Every EVERY_N_CLICKS-th click on a watched tab fires an ad and
+  /* Only count this click if the user actually switched tab. Protects against React re-renders that call
+     goTab again with the same tab, and from a user mashing the same tab multiple times. */
+  var last = "";
+  try { last = localStorage.getItem(LAST_TAB_KEY) || ""; } catch (e) {}
+  if (last === tabName) return false;
+  try { localStorage.setItem(LAST_TAB_KEY, tabName); } catch (e) {}
+
+  /* Increment the global tab-switch counter. Every EVERY_N_CLICKS-th switch to a watched tab fires an ad and
      resets the counter. */
   var count = 0;
   try { count = parseInt(localStorage.getItem(COUNTER_KEY) || "0", 10) || 0; } catch (e) {}
