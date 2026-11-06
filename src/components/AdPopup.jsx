@@ -6,7 +6,10 @@ import * as React from "react";
 import { enterMatch, leaveMatch } from "../music";
 const { useState, useEffect, useRef } = React;
 
-var AUTO_DISMISS_MS = 10000;
+/* How long to wait if the audio never plays (network failure, Blob miss). On success we wait for the audio
+   to naturally end plus a short tail, so long Nigel takes play out in full. */
+var FALLBACK_DISMISS_MS = 15000;
+var POST_AUDIO_TAIL_MS = 600;
 
 export default function AdPopup(props) {
   var ad = props.ad;
@@ -24,23 +27,33 @@ export default function AdPopup(props) {
        already drive, so the music fades out smoothly here and back in 1.2 s after the ad dismisses. */
     enterMatch();
     var cancelled = false;
+    var tailTimer = null;
+    /* The fallback timer only fires if the audio never plays (no url, network error, muted browser). As soon
+       as the audio actually starts, we switch to waiting for its natural end instead. */
+    var fallback = setTimeout(function () { doneRef.current && doneRef.current(); }, FALLBACK_DISMISS_MS);
+
     fetch("/api/tts", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ text: ad.text, voice: "nigel" })
     }).then(function (r) { return r.json(); }).then(function (j) {
-      if (cancelled) return;
-      if (j && j.url) {
-        var a = new Audio(j.url); a.volume = 1;
-        audioRef.current = a;
-        a.play().catch(function () {});
+      if (cancelled || !j || !j.url) return;
+      var a = new Audio(j.url); a.volume = 1;
+      audioRef.current = a;
+      a.onended = function () {
+        if (cancelled) return;
+        tailTimer = setTimeout(function () { doneRef.current && doneRef.current(); }, POST_AUDIO_TAIL_MS);
+      };
+      var p = a.play();
+      if (p && p.then) {
+        p.then(function () { if (!cancelled) { clearTimeout(fallback); fallback = null; } }).catch(function () {});
       }
     }).catch(function () {});
 
-    var t = setTimeout(function () { doneRef.current && doneRef.current(); }, AUTO_DISMISS_MS);
     return function () {
       cancelled = true;
-      clearTimeout(t);
+      if (fallback) clearTimeout(fallback);
+      if (tailTimer) clearTimeout(tailTimer);
       var a = audioRef.current;
       if (a) { try { a.pause(); a.src = ""; } catch (e) {} }
       leaveMatch();
