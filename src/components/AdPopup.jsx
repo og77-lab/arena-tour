@@ -9,6 +9,11 @@ var AUTO_DISMISS_MS = 10000;
 
 export default function AdPopup(props) {
   var ad = props.ad;
+  /* The art file may have been uploaded as .png, .webp, or .jpg — try each in that order via onError fallback. */
+  var EXTS = ["png", "webp", "jpg"];
+  var _extIdx = useState(0), extIdx = _extIdx[0], setExtIdx = _extIdx[1];
+  var imgBase = ad.img.replace(/\.(png|webp|jpg|jpeg)$/i, "");
+  var imgSrc = imgBase + "." + EXTS[extIdx];
   var _loaded = useState(false), loaded = _loaded[0], setLoaded = _loaded[1];
   var audioRef = useRef(null);
   var doneRef = useRef(props.onDone); doneRef.current = props.onDone;
@@ -54,9 +59,9 @@ export default function AdPopup(props) {
         boxShadow: "0 20px 60px rgba(0,0,0,0.6)", borderRadius: 10, overflow: "hidden",
         animation: "adPulse 2.6s ease-in-out infinite"
       }}>
-        <img src={ad.img} alt="" onLoad={function () { setLoaded(true); }} style={{
-          display: "block", width: "100%", height: "auto", background: "#222"
-        }} />
+        <img src={imgSrc} alt="" onLoad={function () { setLoaded(true); }}
+          onError={function () { if (extIdx < EXTS.length - 1) setExtIdx(extIdx + 1); }}
+          style={{ display: "block", width: "100%", height: "auto", background: "#222" }} />
         {!loaded && (
           <div style={{
             position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center",

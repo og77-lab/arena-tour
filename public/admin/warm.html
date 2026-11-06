@@ -37,6 +37,12 @@
           <div class="stat"><div class="stat-num" id="chars">—</div><div class="stat-lbl">Characters</div></div>
           <div class="stat"><div class="stat-num" id="voices">—</div><div class="stat-lbl">Voices</div></div>
         </div>
+        <div style="margin-top:14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+          <label style="color:#94a3b8;font-size:13px">Scope:</label>
+          <label style="color:#fde68a;font-size:13px"><input type="radio" name="scope" value="all" checked> All (studio + ads)</label>
+          <label style="color:#fde68a;font-size:13px"><input type="radio" name="scope" value="ads"> Ads only (Nigel, 12 lines)</label>
+          <label style="color:#fde68a;font-size:13px"><input type="radio" name="scope" value="studio"> Studio only (Barry + Reggie)</label>
+        </div>
         <div style="margin-top:16px">
           <button id="start">Start warm-up</button>
           <button id="pause" style="display:none;background:#64748b;color:white">Pause</button>
@@ -137,6 +143,10 @@ async function init() {
 }
 
 document.getElementById("start").addEventListener("click", () => {
+  const scope = (document.querySelector("input[name=scope]:checked") || {value:"all"}).value;
+  if (scope === "ads") items = items.filter(x => x.voice === "nigel");
+  else if (scope === "studio") items = items.filter(x => x.voice !== "nigel");
+  document.getElementById("total").textContent = items.length;
   running = true; start = Date.now();
   document.getElementById("progressCard").style.display = "block";
   document.getElementById("start").textContent = "Running…";
