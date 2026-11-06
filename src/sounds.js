@@ -81,19 +81,33 @@ function noise(opts) {
   } catch (e) {}
 }
 
-/* The announcer's shout on FIGHT! — a recorded clip, loaded ahead of time so it lands exactly on the title */
+/* The announcer's shout on FIGHT! — fetched, decoded into a Web Audio buffer, and played via a BufferSource
+   so it fires with sub-millisecond latency the moment the title lands. The old <audio> element approach
+   had multi-second startup delays on mobile Safari (preload="auto" is ignored there, so the first play
+   fetched and decoded on demand). We fetch once at app start, keep the decoded buffer in memory, and
+   every subsequent trigger is a buffer source start() — no network, no decode, no lag. */
 var FIGHT_VOICE = "/sfx/fight.mp3";
-var fightVoice = null;
+var fightBuffer = null;
+var fightLoading = false;
 export function preloadFightVoice() {
-  if (fightVoice || typeof Audio === "undefined") return;
-  fightVoice = new Audio(FIGHT_VOICE); fightVoice.preload = "auto"; fightVoice.volume = 1;
-  try { fightVoice.load(); } catch (e) {}
+  if (fightBuffer || fightLoading) return;
+  if (typeof fetch === "undefined") return;
+  fightLoading = true;
+  fetch(FIGHT_VOICE).then(function (r) { return r.arrayBuffer(); }).then(function (buf) {
+    var ctx = getCtx(); if (!ctx) { fightLoading = false; return; }
+    return new Promise(function (resolve, reject) { ctx.decodeAudioData(buf, resolve, reject); });
+  }).then(function (decoded) { fightBuffer = decoded; fightLoading = false; }).catch(function () { fightLoading = false; });
 }
 export function playFightVoice() {
   if (muted) return;
   preloadFightVoice();
-  if (!fightVoice) return;
-  try { fightVoice.currentTime = 0; var p = fightVoice.play(); if (p && p.catch) p.catch(function () {}); } catch (e) {}
+  var ctx = getCtx(); if (!ctx || !fightBuffer) return;
+  try {
+    var src = ctx.createBufferSource(); src.buffer = fightBuffer;
+    var g = ctx.createGain(); g.gain.value = 1;
+    src.connect(g); g.connect(ctx.destination);
+    src.start(0);
+  } catch (e) {}
 }
 
 /* A stadium crowd swelling to a roar (big events) */
