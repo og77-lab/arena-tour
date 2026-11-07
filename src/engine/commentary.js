@@ -11,19 +11,104 @@
 
 /* Stat labels, matching models/constants.js. Reflexes = slower bar; Steady Stride = bigger gold;
    Aim = extra points on every strike; Stamina = less speed-up; Stubbornness = softer misses. */
-/* ── Studio on/off: default ON, remembered in localStorage. Settings panel toggles it; ?studio=0 or ?studio=1
-   remain as URL-param overrides from the opt-in days. */
-export function isStudioOn() {
+/* ── Studio mode: three levels, stored as a single string under localStorage.studioMode.
+     "off"    — never show the studio overlay, before or after any match.
+     "smart"  — only before/after matches that actually have a story: slam R16+, masters QF+, every final,
+                every Season Finals match, big upsets, rival match-ups. Smaller matches at tier 2+ get a short
+                post-match segment only. Everything else (routine early rounds, Futures/Challenger) gets
+                nothing. This is the default.
+     "always" — the old behaviour: full pre + post studio for every match from Tour 250 (tier 2) upwards.
+   The legacy studioOn boolean is migrated: "1" or missing → smart, "0" → off. */
+export function getStudioMode() {
   try {
     if (typeof location !== "undefined" && location.search) {
-      if (location.search.indexOf("studio=0") !== -1) { localStorage.setItem("studioOn", "0"); return false; }
-      if (location.search.indexOf("studio=1") !== -1) { localStorage.setItem("studioOn", "1"); return true; }
+      if (location.search.indexOf("studio=off") !== -1) { localStorage.setItem("studioMode", "off"); return "off"; }
+      if (location.search.indexOf("studio=smart") !== -1) { localStorage.setItem("studioMode", "smart"); return "smart"; }
+      if (location.search.indexOf("studio=always") !== -1) { localStorage.setItem("studioMode", "always"); return "always"; }
     }
-    var v = localStorage.getItem("studioOn");
-    return v !== "0";
-  } catch (e) { return true; }
+    var v = localStorage.getItem("studioMode");
+    if (v === "off" || v === "smart" || v === "always") return v;
+    /* Migrate legacy toggle. */
+    var old = localStorage.getItem("studioOn");
+    if (old === "0") return "off";
+    return "smart";
+  } catch (e) { return "smart"; }
 }
-export function setStudioOn(on) { try { localStorage.setItem("studioOn", on ? "1" : "0"); } catch (e) {} }
+export function setStudioMode(mode) {
+  if (mode !== "off" && mode !== "smart" && mode !== "always") return;
+  try { localStorage.setItem("studioMode", mode); } catch (e) {}
+}
+/* Kept for callers that still want a simple on/off read. */
+export function isStudioOn() { return getStudioMode() !== "off"; }
+export function setStudioOn(on) { setStudioMode(on ? "smart" : "off"); }
+
+/* Parse the round label into a numeric "players remaining" count — F=2, SF=4, QF=8, R16=16, R32=32, R64=64.
+   Returns 0 for anything unrecognised so unknown labels fall through to the default "small" bucket. */
+function roundSize(label) {
+  if (!label) return 0;
+  var s = String(label).toUpperCase();
+  if (s === "F" || s.indexOf("FINAL") !== -1) return 2;
+  if (s === "SF" || s.indexOf("SEMI") !== -1) return 4;
+  if (s === "QF" || s.indexOf("QUARTER") !== -1) return 8;
+  var m = s.match(/R\s*(\d+)/);
+  if (m) return parseInt(m[1], 10) || 0;
+  return 0;
+}
+
+/* Decide what studio segments to play around this match. Reads the current mode and the match context,
+   returns { pre, post, short }. `short` is honoured only on `post`; a short post plays two lines and closes.
+   studioDevOverride forces full pre+post regardless of context — used by the ?studiodev=1 URL flag.    */
+export function decideStudioShow(ctx, studioDevOverride) {
+  var mode = getStudioMode();
+  if (mode === "off") return { pre: false, post: false, short: false };
+
+  var tier = (ctx && ctx.tierIdx) || 0;
+  if (studioDevOverride) return { pre: true, post: true, short: false };
+
+  /* "always" matches the old behaviour — full pre + post for every Tour 250 or higher match. */
+  if (mode === "always") {
+    if (tier < 2) return { pre: false, post: false, short: false };
+    return { pre: true, post: true, short: false };
+  }
+
+  /* "smart": only matches with an actual story get the booth. */
+  if (tier < 2) return { pre: false, post: false, short: false };
+
+  var isFinal = !!ctx.isFinal;
+  var isSlam = tier >= 5;                         /* Slam = tier 5, Season Finals = tier 6 */
+  var isSeasonFinals = tier >= 6;
+  var isMasters = tier === 4;
+  var isTour500 = tier === 3;
+  var isTour250 = tier === 2;
+  var rSize = roundSize(ctx.roundLabel);         /* 2 = final, 4 = semi, 8 = quarter, 16 = R16, ... */
+
+  /* An upset threshold — if one side is a long way ahead of the other, there's a story. 40 rank places. */
+  var pRank = ctx.playerRank || 0, oRank = ctx.oppRank || 0;
+  var rankGap = Math.abs((pRank || 999) - (oRank || 999));
+  var isUpset = rankGap >= 40 && pRank > 0 && oRank > 0;
+
+  /* A rival — the two of you have faced off three or more times before. */
+  var h2hTotal = (ctx.h2hWins || 0) + (ctx.h2hLosses || 0);
+  var isRival = h2hTotal >= 3;
+
+  /* BIG matches: full pre + post. */
+  if (isFinal) return { pre: true, post: true, short: false };
+  if (isSeasonFinals) return { pre: true, post: true, short: false };
+  if (isSlam && rSize && rSize <= 16) return { pre: true, post: true, short: false };
+  if (isMasters && rSize && rSize <= 8)  return { pre: true, post: true, short: false };
+  if (isUpset) return { pre: true, post: true, short: false };
+
+  /* MEDIUM matches: short post-match only. Pre-match is skipped — before a middle-of-the-draw match there's
+     little to analyse. After the match, the booth gets to react to what actually happened. */
+  if (isRival) return { pre: false, post: true, short: true };
+  if (isSlam && rSize && rSize <= 64)  return { pre: false, post: true, short: true };   /* R32, R64 of slams */
+  if (isMasters && rSize && rSize <= 32) return { pre: false, post: true, short: true }; /* R16, R32 of masters */
+  if (isTour500 && rSize && rSize <= 8) return { pre: false, post: true, short: true };  /* QF+ at Tour 500 */
+  if (isTour250 && rSize && rSize <= 4) return { pre: false, post: true, short: true };  /* SF+ at Tour 250 */
+
+  /* Everything else — routine early rounds — gets nothing. */
+  return { pre: false, post: false, short: false };
+}
 
 var STAT_INFO = {
   r: { label: "Reflexes",      what: "slows the bar",         condName: "mud"  },

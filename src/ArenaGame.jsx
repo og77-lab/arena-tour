@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { syncAchievements, saveGameToCloud, loadGameFromCloud } from "./firebase";
 import { playTitle, playRankUp, isMuted, setMuted } from "./sounds";
 import { isMusicOn, setMusicOn } from "./music";
-import { isStudioOn, setStudioOn } from "./engine/commentary";
+import { getStudioMode, setStudioMode } from "./engine/commentary";
 import { isAdsOn, setAdsOn, shouldShowAdOnTab, nextAd } from "./engine/ads";
 import AdPopup from "./components/AdPopup";
 import { W, CSS, EMO, TIERS, RN5, RN6, HN, HC, HI, TOTAL_EVENTS, FINALS_BO, STATS, STAT_GROUPS, screenAnim, ptsLadder, champTotal } from "./models/constants";
@@ -280,8 +280,11 @@ export default function Arena(props) {
   function toggleMute() { var n = !mutedState; setMuted(n); setMutedState(n); }
   var _musicOn = useState(isMusicOn()), musicOn = _musicOn[0], setMusicOnState = _musicOn[1];
   function toggleMusic() { var n = !musicOn; setMusicOn(n); setMusicOnState(n); }
-  var _studioOn = useState(isStudioOn()), studioOn = _studioOn[0], setStudioOnState = _studioOn[1];
-  function toggleStudio() { var n = !studioOn; setStudioOn(n); setStudioOnState(n); }
+  var _studioMode = useState(getStudioMode()), studioMode = _studioMode[0], setStudioModeState = _studioMode[1];
+  function cycleStudioMode() {
+    var next = studioMode === "off" ? "smart" : (studioMode === "smart" ? "always" : "off");
+    setStudioMode(next); setStudioModeState(next);
+  }
   var _adsOn = useState(isAdsOn()), adsOn = _adsOn[0], setAdsOnState = _adsOn[1];
   function toggleAds() { var n = !adsOn; setAdsOn(n); setAdsOnState(n); }
   var _confetti = useState(false), confetti = _confetti[0], setConfetti = _confetti[1];
@@ -1401,9 +1404,9 @@ export default function Arena(props) {
                   <div style={{display:"flex",alignItems:"center",gap:12,minWidth:0}}><IconTile name={mutedState?"mute":"speaker"} tint="#fef3c7" size={40} /><div style={{minWidth:0}}><div style={labelStyle}>Sound Effects</div><div style={hintStyle}>Clucks, clangs, fanfares</div></div></div>
                   <span style={{color:mutedState?C.redInk:C.greenInk,fontSize:14,fontWeight:900,letterSpacing:0.5}}>{mutedState?"OFF":"ON"}</span>
                 </button>
-                <button onClick={toggleStudio} style={rowStyle}>
-                  <div style={{display:"flex",alignItems:"center",gap:12,minWidth:0}}><IconTile name="paper" tint="#fce7f3" size={40} /><div style={{minWidth:0}}><div style={labelStyle}>Studio commentary</div><div style={hintStyle}>Sir Barry and Reggie before and after each match — Skip is always on the overlay</div></div></div>
-                  <span style={{color:studioOn?C.greenInk:C.redInk,fontSize:14,fontWeight:900,letterSpacing:0.5}}>{studioOn?"ON":"OFF"}</span>
+                <button onClick={cycleStudioMode} style={rowStyle}>
+                  <div style={{display:"flex",alignItems:"center",gap:12,minWidth:0}}><IconTile name="paper" tint="#fce7f3" size={40} /><div style={{minWidth:0}}><div style={labelStyle}>Studio commentary</div><div style={hintStyle}>{studioMode==="off"?"Off — no booth at all":studioMode==="smart"?"Smart — only the matches with a real story (slam R16+, masters QF+, finals, upsets, rivalries). A short post-match on the medium ones. Skip always available.":"Always — full pre- and post-match booth for every Tour 250 (tier 2) match and up"}</div></div></div>
+                  <span style={{color:studioMode==="off"?C.redInk:C.greenInk,fontSize:12,fontWeight:900,letterSpacing:1,textTransform:"uppercase"}}>{studioMode==="off"?"OFF":studioMode==="smart"?"SMART":"ALWAYS"}</span>
                 </button>
                 <button onClick={toggleAds} style={rowStyle}>
                   <div style={{display:"flex",alignItems:"center",gap:12,minWidth:0}}><IconTile name="paper" tint="#fef3c7" size={40} /><div style={{minWidth:0}}><div style={labelStyle}>Sponsor pop-ups</div><div style={hintStyle}>Occasional parody ads when you open Rankings or Tournaments — tap anywhere to dismiss</div></div></div>

@@ -21,7 +21,7 @@ import { fatigueFx } from "../engine/fitness";
 import { riderBar, speedAt, landScore, npcMiss, dayForm, nerves, abilityRating, gapEdge, goldBase, handsSample, CTR } from "../engine/joust";
 import { enterMatch, leaveMatch, startBattle, stopBattle } from "../music";
 import StudioOverlay from "./StudioOverlay";
-import { buildPreMatch, buildPostMatch, isStudioOn } from "../engine/commentary";
+import { buildPreMatch, buildPostMatch, decideStudioShow } from "../engine/commentary";
 import { roosterName, trait } from "../models/persona";
 
 const { useState, useEffect, useRef } = React;
@@ -187,9 +187,15 @@ export default function PowerBar(props) {
       return localStorage.getItem("studioDev") === "1";
     } catch (e) { return false; }
   })();
-  var studioEnabled = isStudioOn() && ((props.tier != null && props.tier >= 2) || studioDevOverride);
+  /* Studio decision is computed once per mount from the match context. Pre/post/short are all derived
+     together — the Settings level + match tier + round + upset/rival signals decide which segments fire. */
+  var studioPlan = decideStudioShow({
+    tierIdx: props.tier, roundLabel: props.roundLabel, isFinal: !!props.isFinal,
+    playerRank: props.myRank, oppRank: props.oppRank,
+    h2hWins: (props.h2h && props.h2h.w) || 0, h2hLosses: (props.h2h && props.h2h.l) || 0
+  }, studioDevOverride);
   var fresh = !initRes && (init.sets || []).length === 0 && (init.my || []).length === 0;
-  var _p = useState(initRes ? "done" : (fresh && studioEnabled ? "studio" : "intro")), ph = _p[0], setPh = _p[1];
+  var _p = useState(initRes ? "done" : (fresh && studioPlan.pre ? "studio" : "intro")), ph = _p[0], setPh = _p[1];
   /* Which sets we've already covered on-air: index of the latest set that's had its between-sets commentary. */
   var _studioSet = useState(-1), studioCommentedSet = _studioSet[0], setStudioCommentedSet = _studioSet[1];
   var _postDone = useState(false), postStudioDone = _postDone[0], setPostStudioDone = _postDone[1];
@@ -493,7 +499,7 @@ export default function PowerBar(props) {
   var lastSet = sets[sets.length - 1];
 
   /* The context the commentary engine reads from — rebuilt per render so it reflects the latest sets. */
-  var studioCtx = studioEnabled ? {
+  var studioCtx = (studioPlan.pre || studioPlan.post) ? {
     playerName: props.playerName, oppName: props.oppName,
     playerRank: props.myRank, oppRank: props.oppRank,
     playerTr: tr, oppTr: otr,
@@ -521,7 +527,15 @@ export default function PowerBar(props) {
      booth (half a sentence) with no visible overlay. */
   var showBetweenStudio = false;
   /* Post-match studio: after done, before the MatchOutro. */
-  var showPostStudio = studioEnabled && ph === "done" && res && !postStudioDone;
+  var showPostStudio = studioPlan.post && ph === "done" && res && !postStudioDone;
+
+  /* For a "short" post-match segment (the medium-importance bucket), keep only the opener line and one
+     reaction line — about 8 seconds of audio. The full post-match reads 4–6 lines and runs 25 seconds. */
+  function trimForShort(commentary) {
+    if (!studioPlan.short || !commentary || !commentary.lines) return commentary;
+    var keep = commentary.lines.slice(0, 2);
+    return { lines: keep, totalMs: keep.reduce(function (a, l) { return a + (l.ms || 2500); }, 0) };
+  }
 
   return (
     <div style={{ position: "relative", padding: "4px 0" }}>
@@ -530,7 +544,7 @@ export default function PowerBar(props) {
       )}
       {showPostStudio && (
         <StudioOverlay phase="post" onDone={function () { setPostStudioDone(true); }}
-          commentary={buildPostMatch(studioCtx, res)} />
+          commentary={trimForShort(buildPostMatch(studioCtx, res))} />
       )}
       {ph === "intro" && (
         <MatchIntro
